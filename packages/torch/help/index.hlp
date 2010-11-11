@@ -1,0 +1,2398 @@
+Torch Package Reference Manual
+
+The =Torch= package contains basic classes used everywhere in =Torch5=.
+
+_Input-output management_ is provided with [[#File][=File=]] (abstract class), [[#DiskFile][=DiskFile=]] (file on disk),
+[[#MemoryFile][=MemoryFile=]] (file in =RAM=) and [[#PipeFile][=PipeFile=]] (file from a piped command). These
+classes also handle _serialization_.
+
+[[#Storage][=Storage=]] and [[#Tensor][=Tensor=]] are the basic bricks for
+_powerful numeric operations_.
+
+[[#Timer][=Timer=]] is provided for _measuring time_.
+
+Finally, =Torch= provides some [[#TorchUtilities][utility functions]] for creating and handling =Torch= _classes_.
+
+---+ =DiskFile=
+#DiskFile
+
+Parent classes: [[#File][=File=]]
+
+A =DiskFile= is a particular =File= which is able to perform basic read/write operations
+on a file stored on disk. It implements all methods described in [[#File][=File=]], and
+some additional methods relative to _endian_ encoding.
+
+By default, a =DiskFile= is in [[#FileAscii][=ASCII=]] mode. If changed to
+the [[#FileBinary][binary]] mode, the default endian encoding is the native
+computer one.
+
+The file might be open in read, write, or read-write mode, depending on the parameter
+=mode= (which can take the value ='r'=, ='w'= or ='rw'= respectively) 
+given to the [[#TorchDiskFile][=torch.DiskFile(fileName, mode)=]].
+
+---++ =torch.DiskFile(fileName, [mode], [quiet])=
+#TorchDiskFile
+
+_Constructor_ which opens =fileName= on disk, using the given =mode=. Valid =mode= are
+='r'= (read), ='w'= (write) or ='rw'= (read-write). Default is read mode.
+
+If read-write mode, the file _will be created_ if it does not exists. If it
+exists, it will be positionned at the beginning of the file after opening.
+
+If (and only if) =quiet= is =true=, no error will be raised in case of
+problem opening the file: instead =nil= will be returned.
+
+The file is opened in [[#FileAscii][=ASCII=]] mode by default.
+
+---++ =bigEndianEncoding()=
+#DiskFileBigEndianEncoding
+
+In [[#FileBinary][binary]] mode, force encoding in _big endian_. 
+(_big end first_: decreasing numeric significance with increasing memory
+addresses)
+
+---++ =[boolean] isBigEndianCPU()=
+#DiskFileIsBigEndianCPU
+
+Returns =true= if, and only if, the computer CPU operates in _big endian_.
+_Big end first_: decreasing numeric significance with increasing
+memory addresses.
+
+---++ =[boolean] isLittleEndianCPU()=
+#DiskFileIsLittleEndianCPU
+
+Returns =true= if, and only if, the computer CPU operates in _little endian_.
+_Little end first_: increasing numeric significance with increasing
+memory addresses.
+
+---++ =littleEndianEncoding()=
+#DiskFileLittleEndianEncoding
+
+In [[#FileBinary][binary]] mode, force encoding in _little endian_.
+(_little end first_: increasing numeric significance with increasing memory
+addresses)
+
+---++ =nativeEndianEncoding()=
+#DiskFileNativeEndianEncoding
+
+In [[#FileBinary][binary]] mode, force encoding in _native endian_.
+
+
+---+ =File=
+#File
+
+This is an _abstract_ class. It defines most methods implemented by its
+child classes, like [[#DiskFile][=DiskFile=]],
+[[#MemoryFile][=MemoryFile=]] and [[#PipeFile][=PipeFile=]].
+
+Methods defined here are intended for basic read/write functionalities.
+Read/write methods might write in [[#FileAscii][=ASCII=]] mode or
+[[#FileBinary][binary]] mode.
+
+In [[#FileAscii][=ASCII=]] mode, numbers are converted in human readable
+format (characters). Booleans are converted into =0= (false) or =1= (true).
+In [[#FileBinary][binary]] mode, numbers and boolean are directly encoded
+as represented in a register of the computer. While not being human
+readable and less portable, the binary mode is obviously faster.
+
+In [[#FileAscii][=ASCII=]] mode, if the default option
+[[#FileAutoSpacing][=autoSpacing()=]] is chosen, a space will be generated
+after each written number or boolean. A carriage return will also be added
+after each call to a write method. With this option, the spaces are
+supposed to exist while reading. This option can be deactivated with
+[[#FileNoAutoSpacing][=noAutoSpacing()=]].
+
+A =Lua= error might or might be not generated in case of read/write error
+or problem in the file. This depends on the choice made between
+[[#FileQuiet][=quiet()=]] and [[#FilePedantic][=pedantic()=]] options. It
+is possible to query if an error occured in the last operation by calling
+[[#FileHasError][=hasError()=]].
+
+---++ Read methods
+#FileReadMethods
+
+They are three types of reading methods:
+   1. =[number] readTYPE()=
+   1. =[TYPEStorage] readTYPE(n)=
+   1. =[number] readTYPE(TYPEStorage)=
+
+where =TYPE= can be either =Char=, =Short=, =Int=, =Long=, =Float= or =Double=.
+
+A convenience method also exist for boolean types: =[boolean] readBool()=. It reads
+a value on the file with =readInt()= and returns =true= if and only if this value is =1=. It is not possible
+to read storages of booleans.
+
+All these methods depends on the encoding choice: [[#FileAscii][=ASCII=]]
+or [[#FileBinary][binary]] mode.  In [[#FileAscii][=ASCII=]] mode, the
+option [[#FileAutoSpacing][=autoSpacing()=]] and
+[[#FileNoAutoSpacing][=noAutoSpacing()=]] have also an effect on these
+methods.
+
+If no parameter is given, one element is returned. This element is
+converted to a =Lua= number when reading.
+
+If =n= is given, =n= values of the specified type are read
+and returned in a new [[#Storage][=Storage=]] of that particular type.
+The storage size corresponds to the number of elements actually read.
+
+If a =Storage= is given, the method will attempt to read a number of elements
+equals to the size of the given storage, and fill up the storage with these elements.
+The number of elements actually read is returned.
+
+In case of read error, these methods will call the =Lua= error function using the default
+[[#FilePedantic][pedantic]] option, or stay quiet with the [[#FileQuiet][quiet]]
+option. In the latter case, one can check if an error occurred with
+[[#FileHasError][=hasError()=]].
+
+---++ Write methods
+#FileWriteMethods
+
+They are two types of reading methods:
+   1. =[number] writeTYPE(number)=
+   1. =[number] writeTYPE(TYPEStorage)=
+
+where =TYPE= can be either =Char=, =Short=, =Int=, =Long=, =Float= or =Double=.
+
+A convenience method also exist for boolean types: =writeBool(value)=. If =value= is =nil= or
+not =true= a it is equivalent to a =writeInt(0)= call, else to =writeInt(1)=. It is not possible
+to write storages of booleans.
+
+All these methods depends on the encoding choice: [[#FileAscii][=ASCII=]]
+or [[#FileBinary][binary]] mode.  In [[#FileAscii][=ASCII=]] mode, the
+option [[#FileAutoSpacing][=autoSpacing()=]] and
+[[#FileNoAutoSpacing][=noAutoSpacing()=]] have also an effect on these
+methods.
+
+If one =Lua= number is given, this number is converted according to the
+name of the method when writing (e.g. =writeInt(3.14)= will write =3=).
+
+If a =Storage= is given, the method will attempt to write all the elements contained
+in the storage.
+
+Thes methods return the number of elements actually written.
+
+In case of read error, these methods will call the =Lua= error function using the default
+[[#FilePedantic][pedantic]] option, or stay quiet with the [[#FileQuiet][quiet]]
+option. In the latter case, one can check if an error occurred with
+[[#FileHasError][=hasError()=]].
+
+---++ =Lua= style read/write methods
+
+Sometimes it is handy to have methods similar to the ones provided by the =Lua= =io= package.
+That is what these methods do.
+
+---++ Serialization methods
+#FileSerialization
+
+These methods allow the user to save any serializable objects on disk and
+reload it later in its original state. In other words, it can perform a
+_deep_ copy of an object into a given =File=.
+
+Serializable objects are =Torch= objects having a =read()= and =write()=
+method. =Lua= objects such as =table=, =number= or =string= are also
+serializable.
+
+If the object to save contains several other objects (let say it is a tree
+of objects), then objects appearing several times in this tree will be
+_saved only once_. This saves disk space, speedup loading/saving and
+respect the dependencies between objects.
+
+Interestingly, if the =File= is a [[#MemoryFile][=MemoryFile=]], it allows
+the user to easily make a _clone_ of any serializable object:
+<verbatim>
+file = torch.MemoryFile() -- creates a file in memory
+file:writeObject(object) -- writes the object into file
+file:seek(1) -- comes back at the beginning of the file
+objectClone = file:readObject() -- gets a clone of object
+</verbatim>
+
+---+++ =readObject()=
+#FileReadObject
+
+Returns the next [[#FileWriteObject][serializable]] object saved beforehand
+in the file with [[#FileWriteObject][=writeObject()=]].
+
+Note that objects which were [[#FileWriteObject][written]] with the same
+reference have still the same reference after loading.
+
+Example:
+<verbatim>
+-- creates an array which contains twice the same tensor  
+array = {}
+x = torch.Tensor(1)
+table.insert(array, x)
+table.insert(array, x)
+
+-- array[1] and array[2] refer to the same address
+-- x[1] == array[1][1] == array[2][1] == 3.14
+array[1][1] = 3.14
+
+-- write the array on disk
+file = torch.DiskFile('foo.asc', 'w')
+file:writeObject(array)
+file:close() -- make sure the data is written
+
+-- reload the array
+file = torch.DiskFile('foo.asc', 'r')
+arrayNew = file:readObject()
+
+-- arrayNew[1] and arrayNew[2] refer to the same address!
+-- arrayNew[1][1] == arrayNew[2][1] == 3.14
+-- so if we do now:
+arrayNew[1][1] = 2.72
+-- arrayNew[1][1] == arrayNew[2][1] == 2.72 !
+</verbatim>
+
+---+++ =writeObject(object)=
+#FileWriteObject
+
+Writes =object= into the file. This object can be read later using
+[[#FileReadObject][=readObject()=]]. Serializable objects are =Torch=
+objects having a =read()= and =write()= method. =Lua= objects such as
+=table=, =number= or =string= are also serializable.
+
+If the object has been already written in the file, only a _reference_ to
+this already saved object will be written: this saves space an speed-up
+writing; it also allows to keep the dependencies between objects intact.
+
+In returns, if one writes an object, modify its member, and write the
+object again in the same file, the modifications will not be recorded
+in the file, as only a reference to the original will be written. See
+[[#FileReadObject][=readObject()=]] for an example.
+
+---+++ =[string] readString([format])=
+
+If =format= starts with ='*l'= then returns the next line in the =File=. The end-of-line character is skipped.
+
+If =format= starts with ='*a'= then returns all the remaining contents of the =File=.
+
+If no data is available, then an error is raised, except if =File= is in [[#FileQuiet][=quiet()=]] mode where
+it then returns =nil=.
+
+Because Torch is more precised on number typing, the =Lua= format ='*n'= is not supported:
+instead use one of the [[#FileReadMethods][number read methods]].
+
+---+++ =[number] writeString(str)=
+
+Writes the string =str= in the =File=. If the string cannot be written completely an error is raised, except
+if =File= is in [[#FileQuiet][=quiet()=]] mode where it returns the number of character actually written.
+
+---++ =ascii()= [default]
+#FileAscii
+
+The data read or written will be in =ASCII= mode: all numbers are converted
+to characters (human readable format) and boolean are converted to =0=
+(false) or =1= (true). The input-output format in this mode depends on the
+options [[#FileAutoSpacing][=autoSpacing()=]] and
+[[#FileNoAutoSpacing][=noAutoSpacing()=]].
+
+---++ =autoSpacing()= [default]
+#FileAutoSpacing
+
+In [[#FileAscii][=ASCII=]] mode, write additional spaces around the elements
+written on disk: if writing a [[#Storage][=Storage=]], a space will be
+generated between each _element_ and a _return line_ after the last
+element. If only writing one element, a _return line_ will be generated
+after this element.
+
+Those spaces are supposed to exist while reading in this mode.
+
+This is the default behavior. You can de-activate this option with the
+[[#FileNoAutoSpacing][=noAutoSpacing()=]] method.
+
+---++ =binary()=
+#FileBinary
+
+The data read or written will be in binary mode: the representation in the
+=File= is the same that the one in the computer memory/register (not human
+readable).  This mode is faster than [[#FileAscii][=ASCII=]] but less
+portable.
+
+---++ =clearError()=
+#FileClearError
+
+Clear the error.flag returned by [[#FileHasError][=hasError()=]].
+
+---++ =close()=
+#FileClose
+
+Close the file. Any subsequent operation will generate a =Lua= error.
+
+---++ =[boolean] hasError()=
+#FileHasError
+
+Returns if an error occurred since the last [[#FileClearError][=clearError()=]] call, or since
+the opening of the file if =clearError()= has never been called.
+
+---++ =[boolean] isQuiet()=
+#FileIsQuiet
+
+Returns a boolean which tells if the file is in [[#FileQuiet][quiet]] mode or not.
+
+---++ =[boolean] isReadable()=
+#FileIsReadable
+
+Tells if one can read the file or not.
+
+---++ =[boolean] isWritable()=
+#FileIsWritable
+
+Tells if one can write in the file or not.
+
+---++ =noAutoSpacing()=
+#FileNoAutoSpacing
+
+In [[#FileAscii][Ascii]] mode, do not put extra spaces between element
+written on disk. This is the contrary of the option
+[[#FileAutoSpacing][=autoSpacing()=]].
+
+---++ =synchronize()=
+#FileSynchronize
+
+If the child class bufferize the data while writing, ensure that the data
+is actually written.
+
+
+---++ =pedantic()= [default]
+#FilePedantic
+
+If this mode is chosen (which is the default), a =Lua= error will be
+generated in case of error (which will cause the program to stop).
+
+It is possible to use [[#FileQuiet][=quiet()=]] to avoid =Lua= error generation
+and set a flag instead.
+
+---++ =[number] position()=
+#FilePosition
+
+Returns the current position (in bytes) in the file.
+
+---++ =quiet()=
+#FileQuiet
+
+If this mode is chosen instead of [[#FilePedantic][=pedantic()=]], no =Lua=
+error will be generated in case of read/write error. Instead, a flag will
+be raised, readable through [[#FileHasError][=hasError()=]]. This flag can
+be cleared with [[#FileClearError][=clearError()=]]
+
+Checking if a file is quiet can be performed using [[#FileIsQuiet][=isQuiet()=]].
+
+---++ =seek(position)=
+#FileSeek
+
+Jump into the file at the given =position= (in byte). Might generate/raise
+an error in case of problem. The first position is =1=.
+
+---++ =seekEnd()=
+#FileSeekEnd
+
+Jump at the end of the file. Might generate/raise an error in case of
+problem.
+
+---+ =MemoryFile=
+#MemoryFile
+
+Parent classes: [[#File][=File=]]
+
+A =MemoryFile= is a particular =File= which is able to perform basic
+read/write operations on a buffer in =RAM=. It implements all methods
+described in [[#File][=File=]].
+
+The data of the this =File= is contained into a =NULL= terminated
+[[#Storage][=CharStorage=]].
+
+---++ =torch.MemoryFile([mode])=
+#TorchMemoryFile
+
+_Constructor_ which returns a new =MemoryFile= object using =mode=. Valid
+=mode= are ='r'= (read), ='w'= (write) or ='rw'= (read-write). Default is ='rw'=.
+
+
+---++ =torch.MemoryFile(storage, mode)=
+#TorchMemoryFileStorage
+
+_Constructor_ which returns a new =MemoryFile= object, using the given
+[[#Storage][=storage=]] (which must be a =CharStorage=) and =mode=. Valid
+=mode= are ='r'= (read), ='w'= (write) or ='rw'= (read-write). The last character
+in this storage _must_ be =NULL= or an error will be generated. This allow
+to read existing memory. If used for writing, not that the =storage= might
+be resized by this class if needed. 
+
+---++ =[CharStorage] storage()=
+#MemoryFileStorage
+
+Returns the [[#Storage][=storage=]] which contains all the data of the
+=File= (note: this is _not_ a copy, but a _reference_ on this storage). The
+size of the storage is the size of the data in the =File=, plus one, the
+last character being =NULL=.
+
+---+ =PipeFile=
+#PipeFile
+
+Parent classes: [[#DiskFile][=DiskFile=]]
+
+A =PipeFile= is a particular =File= which is able to perform basic read/write operations
+on a command pipe. It implements all methods described in [[#DiskFile][=DiskFile=]] and [[#File][=File=]].
+
+The file might be open in read or write mode, depending on the parameter
+=mode= (which can take the value ='r'= or ='w'=) 
+given to the [[#TorchDiskFile][=torch.PipeFile(fileName, mode)=]]. Read-write mode is not allowed.
+
+---++ =torch.PipeFile(command, [mode], [quiet])=
+#TorchPipeFile
+
+_Constructor_ which execute =command= by opening a pipe in read or write
+=mode=. Valid =mode= are ='r'= (read) or ='w'= (write). Default is read
+mode.
+
+If (and only if) =quiet= is =true=, no error will be raised in case of
+problem opening the file: instead =nil= will be returned.
+
+---+ =Storage=
+#Storage
+
+_Storages_ are basically a way for =Lua= to access memory of a =C= pointer
+or array. _Storages_ can also [[#TorchStorageFile][map the contents of a file to memory]].
+A =Storage= is an array of _basic_ =C= types. For arrays of =Torch= objects,
+use the =Lua= tables.
+
+Several =Storage= classes for all the basic =C= types exist and have the
+following self-explanatory names: =CharStorage=, =ShortStorage=,
+=IntStorage=, =LongStorage=, =FloatStorage=, =DoubleStorage=.
+
+The most used one is =DoubleStorage=, which is where the data is really stored
+in a [[#Tensor][=Tensor=]].
+
+Conversions between two =Storage= type might be done using =copy=:
+<verbatim>
+x = torch.IntStorage(10):fill(1)
+y = torch.DoubleStorage(10):copy(x)
+</verbatim>
+
+[[#TorchStorageSize][Classical storages]] are [[#FileSerialization][serializable]].
+[[#TorchStorageFile][Storages mapping a file]] are also [[#FileSerialization][serializable]],
+but _will be saved as a normal storage_.
+
+
+---++ =torch.TYPEStorage([size])=
+#TorchStorageSize
+
+Returns a new =Storage= of type =TYPE=. Valid =TYPE= are =Char=, =Short=,
+=Int=, =Long=, =Float=, and =Double=. If =size= is given, resize the
+=Storage= accordingly, else create an empty =Storage=.
+
+Example:
+<verbatim>
+-- Creates a Storage of 10 double:
+x = torch.DoubleStorage(10)
+</verbatim>
+
+The data in the =Storage= is _uninitialized_.
+
+---++ =torch.TYPEStorage(filename [, shared])=
+#TorchStorageFile
+
+Returns a new kind of =Storage= which maps the contents of the given
+=filename= to memory. Valid =TYPE= are =Char=, =Short=, =Int=, =Long=,
+=Float=, and =Double=. If the optional boolean argument =shared= is =true=,
+the mapped memory is shared amongst all processes on the computer.
+
+When =shared= is =true=, the file must be accessible in read-write mode. Any
+changes on the storage will be written in the file. The changes might be written
+only after destruction of the storage.
+
+When =shared= is =false= (or not provided), the file must be at least
+readable. Any changes on the storage will not affect the file. Note:
+changes made on the file after creation of the storage have an unspecified
+effect on the storage contents.
+
+The [[#StorageSize][=size=]] of the returned =Storage= will be
+<verbatim>
+(size of file in byte)/(size of TYPE).
+</verbatim>
+
+Example:
+<verbatim>
+$ echo "Hello World" > hello.txt
+$ lua
+Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+> require 'torch'
+> x = torch.CharStorage('hello.txt')
+> = x
+  72
+ 101
+ 108
+ 108
+ 111
+  32
+  87
+ 111
+ 114
+ 108
+ 100
+  10
+[torch.CharStorage of size 12]
+
+> = x:string()
+Hello World
+
+> = x:fill(42):string()
+************
+> 
+$ cat hello.txt 
+Hello World
+$ lua
+Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+> require 'torch'
+> x = torch.CharStorage('hello.txt', true)
+> = x:string()
+Hello World
+
+> x:fill(42)
+>
+$ cat hello.txt 
+************
+</verbatim>
+
+---++ =[number] #self=
+#StorageSizeO
+
+Returns the number of elements in the storage. Equivalent to [[#StorageSize][=size()=]].
+
+---++ =[number] self[index]=
+
+Returns or set the element at position =index= in the storage. Valid range
+of =index= is 1 to [[#StorageSize][=size()=]].
+
+Example:
+<verbatim>
+x = torch.DoubleStorage(10)
+print(x[5])
+</verbatim>
+
+---++ =[self] copy(storage)=
+
+Copy another =storage=. The types of the two storages might be different: in that case
+a conversion of types occur (which might result, of course, in loss of precision or rounding).
+This method returns self, allowing things like:
+<verbatim>
+x = torch.IntStorage(10):fill(1)
+y = torch.DoubleStorage(10):copy(x) -- y won't be nil!
+</verbatim>
+
+---++ =[self] fill(value)=
+
+Fill the =Storage= with the given value. This method returns self, allowing things like:
+<verbatim>
+x = torch.IntStorage(10):fill(0) -- x won't be nil!
+</verbatim>
+
+---++ =[self] resize(size [, keepContent])=
+
+Resize the storage to the provide =size=. If =keepContent= is =true=, then the contents
+of the storage are kept. If not, _the new contents are undertermined_.
+
+This function returns self, allowing things like:
+<verbatim>
+x = torch.DoubleStorage(10):fill(1)
+y = torch.DoubleStorage():resize(x:size()):copy(x) -- y won't be nil!
+</verbatim>
+
+---++ =[number] size()=
+#StorageSize
+
+Returns the number of elements in the storage. Equivalent to [[#StorageSizeO][=#=]].
+
+---++ =[self] string(str)=
+
+This function is available only on =CharStorage=.
+
+This method resizes the storage to the length of the provided
+string =str=, and copy the contents of =str= into the storage. The =NULL= terminating character is not copied,
+but =str= might contain =NULL= characters. The method returns the =Storage=.
+<verbatim>
+> x = torch.CharStorage():string("blah blah")
+> print(x)
+  98
+ 108
+  97
+ 104
+  32
+  98
+ 108
+  97
+ 104
+[torch.CharStorage of size 9]
+</verbatim>
+
+---++ =[string] string()=
+
+This function is available only on =CharStorage=.
+
+The contents of the storage viewed as a string are returned. The string might contain
+=NULL= characters.
+<verbatim>
+> x = torch.CharStorage():string("blah blah")
+> print(x:string())
+blah blah
+</verbatim>
+
+---+ =Tensor=
+#Tensor
+
+The =Tensor= class is probably the most important class in =Torch=. Almost every package depends on this
+class. It is *the* class for handling numeric data. Tensors are [[#FileSerialization][serializable]].
+
+*Multi-dimensional matrix*
+
+A =Tensor= is a potentially multi-dimensional matrix. The number of
+dimensions is unlimited. Many methods have some convenience methods for for
+a number of dimensions inferior or equal to =4=, but can also be used using
+[[#Storage][=LongStorage=]] with more dimensions. Example:
+<verbatim>
+ --- creation of a 4D-tensor 4x5x6x2
+ z = torch.Tensor(4,5,6,2)
+ --- for more dimensions, (here a 6D tensor) one can do:
+ s = torch.LongStorage(6)
+ s[1] = 4; s[2] = 5; s[3] = 6; s[4] = 2; s[5] = 7; s[6] = 3;
+ x = torch.Tensor(s)
+</verbatim>
+
+The number of dimensions of a =Tensor= can be queried by
+[[#TensorNDimension][=nDimension()=]] or [[#TensorDim][=dim()=]]. Size of
+the =i-th= dimension is returned by [[#TensorSizeDim][=size(i)=]]. An
+[[#Storage][=LongStorage=]] containing all the dimensions can be returned by
+[[#TensorSize][=size()=]].
+<verbatim>
+> print(x:nDimension())
+6
+> print(x:size())
+ 4
+ 5
+ 6
+ 2
+ 7
+ 3
+[torch.LongStorage of size 6]
+</verbatim>
+
+*Internal data representation*
+
+The actual data of a =Tensor= is contained into a
+[[#Storage][=DoubleStorage=]]. It can be accessed using
+[[#TensorStorage][=storage()=]]. While the memory of a =Tensor= has to be
+contained in this unique =Storage=, it might not be contiguous:
+the first position used in the =Storage= is given by =storageOffset()=
+(starting at =1=). And the _jump_ needed to go from one element to another element
+in the =i-th= dimension is given by =stride(i)=. In other words, given a 3D tensor
+<verbatim>
+x = torch.Tensor(7,7,7)
+</verbatim>
+accessing the element =(3,4,5)= can be done by
+<verbatim>
+= x[3][4][5]
+</verbatim>
+or equivalently (but slowly!)
+<verbatim>
+= x:storage()[x:storageOffset()
+           +(3-1)*x:stride(1)+(4-1)*x:stride(2)+(5-1)*x:stride(3)]
+</verbatim>
+One could say that a =Tensor= is a particular way of _viewing_ a
+=Storage=: a =Storage= only represents a chunk of memory, while the
+=Tensor= interprets this chunk of memory as having dimensions:
+<verbatim>
+> x = torch.Tensor(4,5)
+> s = x:storage()
+> for i=1,s:size() do -- fill up the Storage
+>> s[i] = i
+>> end
+> print(x) -- s is interpreted by x as a 2D matrix
+
+  1   5   9  13  17
+  2   6  10  14  18
+  3   7  11  15  19
+  4   8  12  16  20
+[torch.Tensor of dimension 4x5]
+</verbatim>
+
+Note also that in =Torch= _elements in the same column_ [elements along the first dimension]
+are contiguous in memory for a matrix [tensor]:
+<verbatim>
+> x = torch.Tensor(4,5):zero()
+> print(x)
+
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+[torch.Tensor of dimension 4x5]
+
+> return  x:stride()
+ 1 -- element in the first dimension are contiguous!
+ 4
+[torch.LongStorage of size 2]
+</verbatim>
+This is like in Fortran (and not =C=), which allows us to efficiently
+interface =Torch= with standard numerical library packages.
+
+*Tensors of different types*
+
+Actually, several types of =Tensor= exists:
+<verbatim>
+CharTensor -- contains chars
+ShortTensor -- contains shorts
+IntTensor -- contains ints
+FloatTensor -- contains floats
+Tensor -- contains doubles
+</verbatim>
+
+It is recommended using only =Tensor=, as many of the numeric operations
+are not implemented for other classes.  However, in some cases, you might
+want to use another class, e.g. to save memory space.
+
+*Efficient memory managment*
+
+_All_ tensor operations in this class do _not_ make any memory copy. All
+these methods transform the existing tensor, or return a new tensor
+referencing _the same storage_. This magical behavior is internally
+obtained by good usage of the [[#TensorStride][=stride()=]] and
+[[#TensorStorageOffset][=storageOffset()=]]. Example:
+<verbatim>
+> x = torch.Tensor(5):zero()
+> print(x)
+0
+0
+0
+0
+0
+[torch.Tensor of dimension 5]
+> x:narrow(1, 2, 3):fill(1) -- narrow() returns a Tensor
+                            -- referencing the same Storage than x
+> print(x)
+ 0
+ 1
+ 1
+ 1
+ 0
+[torch.Tensor of dimension 5]
+</verbatim>
+
+If you really need to copy a =Tensor=, you can use the [[#TensorCopy][=copy()=]] method:
+<verbatim>
+> y = torch.Tensor():resizeAs(x):copy(x)
+</verbatim>
+
+We now describe all the methods for =Tensor=, but for the other variants,
+just replace =Tensor= by the name of the variant (like =CharTensor=).
+
+
+---++ Tensor constructors
+#TensorConstructors
+
+Here are several ways to construct a new =Tensor=.
+
+---+++ =torch.Tensor()=
+#TorchTensor
+
+Returns an empty tensor.
+
+---+++ =torch.Tensor(tensor)=
+#TorchTensorTensor
+
+Returns a new tensor which reference the same [[#TensorStorage][=Storage=]]
+than the given =tensor=. The [[#TensorSize][size]],
+[[#TensorStride][stride]], and [[#TensorStorageOffset][storage offset]] are
+the same than the given tensor.
+
+The new =Tensor= is now going to "view" the same
+[[#TensorStorage][=storage=]] than the given =tensor=. As the result, any
+modification in the elements of the =Tensor= will have a impact on the
+elements of the given =tensor=, and vice-versa. No memory copy!
+<verbatim>
+> x = torch.Tensor(2,5):fill(3.14)
+> print(x)
+
+ 3.1400  3.1400  3.1400  3.1400  3.1400
+ 3.1400  3.1400  3.1400  3.1400  3.1400
+[torch.Tensor of dimension 2x5]
+
+> y = torch.Tensor(x)
+> print(y)
+
+ 3.1400  3.1400  3.1400  3.1400  3.1400
+ 3.1400  3.1400  3.1400  3.1400  3.1400
+[torch.Tensor of dimension 2x5]
+
+> y:zero()
+> print(x) -- elements of x are the same than y!
+
+0 0 0 0 0
+0 0 0 0 0
+[torch.Tensor of dimension 2x5]
+</verbatim>
+
+
+---+++ =torch.Tensor(sz1 [,sz2 [,sz3 [,sz4]]]])=
+#TorchTensorSzx
+
+Create a tensor up to 4 dimensions. The tensor size will be =sz1 x sz2 x sx3 x sz4=.
+For more dimensions, see [[#TorchTensorSizesStrides][this more general method]].
+
+---+++ =torch.Tensor(sizes, [strides])=
+#TorchTensorSizesStrides
+
+Create a tensor of any number of dimensions. The [[#Storage][=LongStorage=]]
+=sizes= gives the size in each dimension of the tensor. The optional
+[[#Storage][=LongStorage=]] =strides= gives the jump necessary to go from
+one element to the next one in the each dimension. Of course, =sizes= and
+=strides= must have the same size. If not given, or if some elements of
+=strides= are negative, the [[#TensorStride][=stride()=]] will be computed
+such that the tensor is as contiguous as possible in memory.
+
+A [[#TorchTensorSzx][convenience method]] exists for a number of dimensions
+up to 4.
+
+Example, create a 4D 4x4x3x2 tensor:
+<verbatim>
+s = torch.LongStorage(4)
+s[1] = 4; s[2] = 4; s[3] = 3; s[4] = 2;
+x = torch.Tensor(s)
+</verbatim>
+
+Playing with the strides can give some interesting things:
+<verbatim>
+sz = torch.LongStorage(1); sz[1] = 4
+st = torch.LongStorage(1); st[1] = 0
+x = torch.Tensor(sz, st):zero() -- zeroes the tensor
+x[1] = 1 -- all elements point to the same address!
+print(x)
+
+ 1
+ 1
+ 1
+ 1
+[torch.Tensor of dimension 4]
+</verbatim>
+
+---+++ =torch.Tensor(storage, [storageOffset, sizes, [strides]])=
+#TorchTensorStorageStorageOffsetSizesStrides
+
+Returns a tensor which uses the existing [[#Storage][=DoubleStorage=]]
+=storage=, starting at position =storageOffset= (>=1).  The size of each
+dimension of the tensor is given by the [[#Storage][=LongStorage=]]
+=sizes=.
+
+If only =storage= is provided, it will create a 1D Tensor viewing the all Storage.
+
+The jump necessary to go from one element to the next one in each dimension
+is given by the optional argument [[#Storage][=LongStorage=]] =strides=.If
+not given, or if some elements of =strides= are negative, the
+[[#TensorStride][=stride()=]] will be computed such that the tensor is as
+contiguous as possible in memory.
+
+For a number of dimension up to 4, you can use a [[#TorchTensorSzxStx][convenience method]].
+
+Any modification in the elements of the =Storage= will have a impact on the
+elements of the new =Tensor=, and vice-versa. There is no memory copy!
+<verbatim>
+-- creates a storage with 10 elements
+> s = torch.DoubleStorage(10):fill(1)
+
+  -- we want to see it as a 2x5 tensor
+> sz = torch.LongStorage(2)
+> sz[1] = 2; sz[2] = 5;
+> x = torch.Tensor(s, 1, sz)
+> print(x)
+
+ 1  1  1  1  1
+ 1  1  1  1  1
+[torch.Tensor of dimension 2x5]
+> x:zero()
+> print(s) -- the storage contents have been modified
+> print(s)
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+[torch.DoubleStorage of size 10]
+</verbatim>
+
+---+++ =torch.Tensor(storage, [storageOffset, sz1 [, st1 ... [, sz4 [, st4]]]])=
+#TorchTensorSzxStx
+
+Same as [[#TorchTensorStorageStorageOffsetSizesStrides][this constructor]] for a number of
+dimensions up to 4. =szi= is the size in the =i-th= dimension, and =sti= it
+the stride in the =i-th= dimension.
+
+---++ Querying the size and structure
+
+---+++ =[number] nDimension()=
+#TensorNDimension
+
+Returns the number of dimensions in a =Tensor=.
+<verbatim>
+> x = torch.Tensor(4,5) -- a matrix
+> = x:nDimension()
+2
+</verbatim>
+
+---+++ =[number] dim()=
+#TensorDim
+
+Same as [[#TensorNDimension][=nDimension()=]].
+
+---+++ =[number] size(dim)=
+#TensorSizeDim
+
+Returns the size of the specified dimension =dim=. Example:
+<verbatim>
+> x = torch.Tensor(4,5):zero()
+> print(x)
+
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+[torch.Tensor of dimension 4x5]
+
+> return  x:size(2) -- gets the number of columns
+5
+</verbatim>
+
+---+++ =[LongStorage] size()=
+#TensorSize
+
+Returns an [[#Storage][=LongStorage=]] containing the size of each dimension
+of the tensor. Equivalent to [[#TensorSizeO][=#=]].
+<verbatim>
+> x = torch.Tensor(4,5):zero()
+> print(x)
+
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+[torch.Tensor of dimension 4x5]
+
+> return  x:size()
+ 4
+ 5
+[torch.LongStorage of size 2]
+</verbatim>
+
+---+++ =[LongStorage] #self=
+#TensorSizeO
+
+Equivalent to [[#TensorSize][=size()=]].
+
+
+---+++ =[number] stride(dim)=
+#TensorStrideDim
+
+Returns the jump necessary to go from one element to the next one in the
+specified dimension =dim=. Example:
+<verbatim>
+> x = torch.Tensor(4,5):zero()
+> print(x)
+
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+[torch.Tensor of dimension 4x5]
+
+  --- elements in a column are contiguous in memory
+> return  x:stride(1)
+1
+
+  --- to go from one element to the next one in a row
+  --- we need here to jump the size of the column
+> return  x:stride(2)
+4
+</verbatim>
+
+Note also that in =Torch= _elements in the same column_ [elements along the first dimension]
+are contiguous in memory for a matrix [tensor].
+
+---+++ =[LongStorage] stride()=
+#TensorStride
+
+Returns the jump necessary to go from one element to the next one in each dimension. Example:
+<verbatim>
+> x = torch.Tensor(4,5):zero()
+> print(x)
+
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+0 0 0 0 0
+[torch.Tensor of dimension 4x5]
+
+> return  x:stride()
+ 1 -- elements are contiguous in a column [first dimension]
+ 4
+[torch.LongStorage of size 2]
+</verbatim>
+
+Note also that in =Torch= _elements in the same column_ [elements along the first dimension]
+are contiguous in memory for a matrix [tensor].
+
+---+++ =[DoubleStorage] storage()=
+#TensorStorage
+
+Returns the [[#Storage][=DoubleStorage=]] used to store all the elements of the =Tensor=.
+Basically, a =Tensor= is a particular way of _viewing_ a =Storage=.
+<verbatim>
+> x = torch.Tensor(4,5)
+> s = x:storage()
+> for i=1,s:size() do -- fill up the Storage
+>> s[i] = i
+>> end
+> print(x) -- s is interpreted by x as a 2D matrix
+
+  1   5   9  13  17
+  2   6  10  14  18
+  3   7  11  15  19
+  4   8  12  16  20
+[torch.Tensor of dimension 4x5]
+</verbatim>
+
+---+++ =[boolean] isContiguous()=
+#TensorIsContiguous
+
+Returns =true= iff the elements of the =Tensor= are contiguous in memory.
+<verbatim>
+  -- normal tensors are contiguous in memory
+> x = torch.Tensor(4,5):zero()
+> = x:isContiguous()
+true
+  -- y now "views" the 3rd row of x
+  -- the storage of y is the same than x
+  -- so the memory cannot be contiguous
+> y = x:select(1, 3)
+> = y:isContiguous()
+false
+  -- indeed, to jump to one element to
+  -- the next one, the stride is 4
+> = y:stride()
+ 4
+[torch.LongStorage of size 1]
+</verbatim>
+
+---+++ =[number] nElement()=
+#TensorNElement
+
+Returns the number of elements of a tensor.
+<verbatim>
+> x = torch.Tensor(4,5)
+> = x:nElement() -- 4x5 = 20!
+20
+</verbatim>
+
+---+++ =[boolean] ownStorage()=
+#TensorOwnStorage
+
+Returns =true= if the =Tensor= "own" (that is, if it created itself) its
+[[#TensorStorage][=storage=]], =false= otherwise.
+
+---+++ =[number] storageOffset()=
+#TensorStorageOffset
+
+Return the first index (starting at 1) used in the tensor's [[#TensorStorage][=storage=]].
+
+---++ Querying elements
+
+Elements of a tensor can be retrieved with the =[index]= operator.
+
+The =[index]= operator is equivalent to a [[#TensorSelect][=select(1, index)=]] if the
+tensor has more than one dimension. If the tensor is a 1D tensor, it returns the value
+at =index= in this tensor.
+
+Example:
+<verbatim>
+> x = torch.Tensor(3,3)
+> i = 0; x:apply(function() i = i + 1; return i end)
+> = x
+
+ 1  4  7
+ 2  5  8
+ 3  6  9
+[torch.Tensor of dimension 3x3]
+
+> = x[2] -- returns row 2
+
+ 2
+ 5
+ 8
+[torch.Tensor of dimension 3]
+
+> = x[2][3] -- returns row 2, column 3
+8
+</verbatim>
+
+---++ Referencing a tensor to an existing tensor or chunk of memory
+#TensorReferencingMemory
+
+A =Tensor= being a way of _viewing_ a [[#TensorStorage][=Storage=]], it is
+possible to "set" a =Tensor= such that it views an existing [[#Storage][=Storage=]].
+
+Note that if you want to perform a set on an empty =Tensor= like
+<verbatim>
+y = torch.DoubleStorage(10)
+x = torch.Tensor()
+x:set(y, 1, 10)
+</verbatim>
+you might want in that case to use one of the [[#TensorConstructors][equivalent constructor]].
+<verbatim>
+y = torch.DoubleStorage(10)
+x = torch.Tensor(y, 1, 10)
+</verbatim>
+
+---+++ =[self] set(tensor)=
+#TensorSetTensor
+
+The =Tensor= is now going to "view" the same [[#TensorStorage][=storage=]]
+than the given =tensor=. As the result, any modification in the elements of
+the =Tensor= will have a impact on the elements of the given =tensor=, and
+vice-versa. This is an efficient method, as there is no memory copy!
+
+<verbatim>
+> x = torch.Tensor(2,5):fill(3.14)
+> print(x)
+
+ 3.1400  3.1400  3.1400  3.1400  3.1400
+ 3.1400  3.1400  3.1400  3.1400  3.1400
+[torch.Tensor of dimension 2x5]
+
+> y = torch.Tensor():set(x)
+> print(y)
+
+ 3.1400  3.1400  3.1400  3.1400  3.1400
+ 3.1400  3.1400  3.1400  3.1400  3.1400
+[torch.Tensor of dimension 2x5]
+
+> y:zero()
+> print(x) -- elements of x are the same than y!
+
+0 0 0 0 0
+0 0 0 0 0
+[torch.Tensor of dimension 2x5]
+</verbatim>
+
+---+++ =[self] set(storage, [storageOffset, sizes, [strides]])=
+#TensorSetStorageStorageOffsetSizesStrides
+
+The =Tensor= is now going to "view" the given
+[[#Storage][=DoubleStorage=]], starting at position =storageOffset= (>=1)
+with the given [[#TensorSize][dimension =sizes=]] and the optional given
+[[#TensorStride][=strides=]]. As the result, any modification in the
+elements of the =Storage= will have a impact on the elements of the
+=Tensor=, and vice-versa. This is an efficient method, as there is no
+memory copy!
+
+If only =storage= is provided, the whole storage will be viewed as a 1D Tensor.
+
+<verbatim>
+  -- creates a storage with 10 elements
+> s = torch.DoubleStorage(10):fill(1)
+
+  -- we want to see it as a 2x5 tensor
+> sz = torch.LongStorage(2)
+> sz[1] = 2; sz[2] = 5;
+> x = torch.Tensor()
+> x:set(s, 1, sz)
+> print(x)
+
+ 1  1  1  1  1
+ 1  1  1  1  1
+[torch.Tensor of dimension 2x5]
+> x:zero()
+> print(s) -- the storage contents have been modified
+> print(s)
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+[torch.DoubleStorage of size 10]
+</verbatim>
+
+A shorcut which works up to 4 dimensional tensors [[#TensorSetStorageStorageOffsetSzxStx][exists]].
+
+---+++ =[self] set(storage, [storageOffset, sz1 [, st1 ... [, sz4 [, st4]]]])=
+#TensorSetStorageStorageOffsetSzxStx
+
+This is a shorcut for [[#TensorSetStorageStorageOffsetSizesStrides][this]] method.
+It works up to 4 dimensions. =szi= is the size of the =i=-th dimension of the tensor.
+=sti= is the stride in the =i=-th dimension.
+
+---++ Copying and initializing
+---+++ =[self] copy(tensor)=
+#TensorCopy
+
+Copy the elements of the given =tensor=. The [[#TensorNElement][number of elements]] must match, but
+the sizes might be different.
+<verbatim>
+> x = torch.Tensor(4):fill(1)
+> y = torch.Tensor(2,2):copy(x)
+> print(x)
+
+ 1
+ 1
+ 1
+ 1
+[torch.Tensor of dimension 4]
+
+> print(y)
+
+ 1  1
+ 1  1
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+If a different type of =tensor= is given, then a type conversion occurs,
+which, of course, might result in lost of precision.
+
+---+++ =[self] fill(value)=
+#TensorFill
+
+Fill the tensor with the given =value=.
+<verbatim>
+> = torch.Tensor(4):fill(3.14)
+
+ 3.1400
+ 3.1400
+ 3.1400
+ 3.1400
+[torch.Tensor of dimension 4]
+</verbatim>
+
+---+++ =[self] zero()=
+#TensorZero
+
+Fill the tensor with zeros.
+<verbatim>
+> = torch.Tensor(4):zero()
+
+0
+0
+0
+0
+[torch.Tensor of dimension 4]
+</verbatim>
+
+---++ Resizing
+#TensorResizing
+
+*When resizing to a larger size*, the underlying [[#TensorStorage][=Storage=]] must be resized to fit
+all the elements of the =Tensor=. If the =Storage= is not [[#TensorOwnStorage][owned]] by the =Tensor=,
+then an error _"cannot resize a Storage which is not mine"_ will occur.
+
+*When resizing to a smaller size*, the underlying [[#TensorStorage][=Storage=]] is not resized.
+
+*Important note:* the content of a =Tensor= after resizing is _undertermined_ as [[#TensorStride][strides]]
+might have been completely changed. The elements of the resized tensor are contiguous in memory.
+
+---+++ =[self] resizeAs(tensor)=
+
+Resize the =tensor= as the given =tensor=. 
+
+---+++ =[self] resize(sizes)=
+#TensorResizeSizes
+
+Resize the =tensor= according to the given [[#Storage][=LongStorage=]] =size=. A [[#TensorResizeSzx][convenience method]] exists
+for a number of dimensions up to 4.
+
+---+++ =[self] resize(sz1 [,sz2 [,sz3 [,sz4]]]])=
+#TensorResizeSzx
+
+Convenience method of [[#TensorResizeSizes][this method]] working for a number of dimensions up to 4.
+
+---++ Extracting sub-tensors
+
+Each of these methods returns a =Tensor= which is a sub-tensor of the given
+tensor, _with the same =Storage=_. Hence, any modification in the memory of
+the sub-tensor will have an impact on the primary tensor, and vice-versa.
+
+These methods are very fast, and they do not involve any memory copy.
+
+---+++ =[Tensor] narrow(dim, index, size)=
+#TensorNarrow
+
+Returns a new =Tensor= which is a narrowed version of the current one: the dimension =dim= is narrowed
+from =index= to =index+size-1=.
+
+<verbatim>
+> x = torch.Tensor(5, 6):zero()
+> print(x)
+
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+[torch.Tensor of dimension 5x6]
+
+> y = x:narrow(1, 2, 3) -- narrow dimension 1 from index 2 to index 2+3-1
+> y:fill(1) -- fill with 1
+> print(y)
+
+ 1  1  1  1  1  1
+ 1  1  1  1  1  1
+ 1  1  1  1  1  1
+[torch.Tensor of dimension 3x6]
+
+> print(x) -- memory in x has been modified!
+
+ 0  0  0  0  0  0
+ 1  1  1  1  1  1
+ 1  1  1  1  1  1
+ 1  1  1  1  1  1
+ 0  0  0  0  0  0
+[torch.Tensor of dimension 5x6]
+</verbatim>
+
+---+++ =[Tensor] sub(dim1s, dim1e ... [, dim4s [, dim4e]])=
+#TensorSub
+
+This method is equivalent to do a serie of
+[[#TensorNarrow][=narrow=]] up to the first 4 dimensions.  It returns
+a new =Tensor= which is a sub-tensor going from index =dimis= to =dimie= in
+the =i=-th dimension. Negative values are interpreted index starting from the end:
+=-1= is the last index, =-2= is the index before the last index, ...
+
+<verbatim>
+> x = torch.Tensor(5, 6):zero()
+> print(x)
+
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+[torch.Tensor of dimension 5x6]
+
+> y = x:sub(2,4):fill(1) -- y is sub-tensor of x: 
+> print(y)               -- dimension 1 starts at index 2, ends at index 4
+
+ 1  1  1  1  1  1
+ 1  1  1  1  1  1
+ 1  1  1  1  1  1
+[torch.Tensor of dimension 3x6]
+
+> print(x)               -- x has been modified!
+
+ 0  0  0  0  0  0
+ 1  1  1  1  1  1
+ 1  1  1  1  1  1
+ 1  1  1  1  1  1
+ 0  0  0  0  0  0
+[torch.Tensor of dimension 5x6]
+
+> z = x:sub(2,4,3,4):fill(2) -- we now take a new sub-tensor
+> print(z)                   -- dimension 1 starts at index 2, ends at index 4
+                             -- dimension 2 starts at index 3, ends at index 4
+ 2  2
+ 2  2
+ 2  2
+[torch.Tensor of dimension 3x2]
+
+> print(x)                  -- x has been modified
+
+ 0  0  0  0  0  0
+ 1  1  2  2  1  1
+ 1  1  2  2  1  1
+ 1  1  2  2  1  1
+ 0  0  0  0  0  0
+[torch.Tensor of dimension 5x6]
+
+> print(y:sub(-1, -1, 3, 4)) -- negative values = bounds
+
+ 2  2
+[torch.Tensor of dimension 1x2]
+</verbatim>
+
+---+++ =[Tensor] select(dim, index)=
+#TensorSelect
+
+Returns a new =Tensor= which is a tensor slice at the given =index= in the
+dimension =dim=. The returned tensor has one less dimension: the dimension
+=dim= is removed.  As a result, it is not possible to =select()= on a 1D
+tensor.
+
+<verbatim>
+> x = torch.Tensor(5,6):zero()
+> print(x)
+
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+0 0 0 0 0 0
+[torch.Tensor of dimension 5x6]
+
+> y = x:select(1, 2):fill(2) -- select row 2 and fill up
+> print(y)
+
+ 2
+ 2
+ 2
+ 2
+ 2
+ 2
+[torch.Tensor of dimension 6]
+
+> print(x)
+
+ 0  0  0  0  0  0
+ 2  2  2  2  2  2
+ 0  0  0  0  0  0
+ 0  0  0  0  0  0
+ 0  0  0  0  0  0
+[torch.Tensor of dimension 5x6]
+
+> z = x:select(2,5):fill(5) -- select column 5 and fill up
+> print(z)
+
+ 5
+ 5
+ 5
+ 5
+ 5
+[torch.Tensor of dimension 5]
+
+> print(x)
+
+ 0  0  0  0  5  0
+ 2  2  2  2  5  2
+ 0  0  0  0  5  0
+ 0  0  0  0  5  0
+ 0  0  0  0  5  0
+[torch.Tensor of dimension 5x6]
+</verbatim>
+
+---++ Manipulating the tensor view
+
+Each of these methods returns a =Tensor= which is another way of viewing
+the =Storage= of the given tensor. Hence, any modification in the memory of
+the sub-tensor will have an impact on the primary tensor, and vice-versa.
+
+These methods are very fast, are they do not involve any memory copy.
+
+---+++ =[Tensor] transpose(dim1, dim2)=
+#TensorTranspose
+
+Returns a tensor where dimensions =dim1= and =dim2= have been swapped. For 2D tensors,
+the convenience method of [[#TensorT][=t()=]] is available.
+<verbatim>
+> x = torch.Tensor(3,4):zero()                  
+> x:select(2,3):fill(7) -- fill column 3 with 7
+> print(x)
+
+ 0  0  7  0
+ 0  0  7  0
+ 0  0  7  0
+[torch.Tensor of dimension 3x4]
+
+> y = x:transpose(1,2) -- swap dimension 1 and 2
+> print(y)
+
+ 0  0  0
+ 0  0  0
+ 7  7  7
+ 0  0  0
+[torch.Tensor of dimension 4x3]
+
+> y:select(2, 3):fill(8) -- fill column 3 with 8
+> print(y)
+
+ 0  0  8
+ 0  0  8
+ 7  7  8
+ 0  0  8
+[torch.Tensor of dimension 4x3]
+
+> print(x) -- contents of x have changed as well
+
+ 0  0  7  0
+ 0  0  7  0
+ 8  8  8  8
+[torch.Tensor of dimension 3x4]
+</verbatim>
+
+
+---+++ =[Tensor] t()=
+#TensorT
+
+Convenience method of [[#TensorTranspose][=transpose()=]] for 2D
+tensors. The given tensor must be 2 dimensional. Swap dimensions 1 and 2.
+<verbatim>
+> x = torch.Tensor(3,4):zero()
+> x:select(2,3):fill(7)
+> y = x:t()
+> print(y)
+
+ 0  0  0
+ 0  0  0
+ 7  7  7
+ 0  0  0
+[torch.Tensor of dimension 4x3]
+
+> print(x)
+
+ 0  0  7  0
+ 0  0  7  0
+ 0  0  7  0
+[torch.Tensor of dimension 3x4]
+</verbatim>
+
+---+++ =[Tensor] unfold(dim, size, step)=
+
+Returns a tensor which contains all slices of size =size= in the dimension =dim=. Step between
+two slices is given by =step=.
+
+If =sizedim= is the original size of dimension =dim=, the size of dimension
+=dim= in the returned tensor will be =(sizedim - size) / step + 1=
+
+An additional dimension of size =size= is appended in the returned tensor.
+
+<verbatim>
+> x = torch.Tensor(7)
+> for i=1,7 do x[i] = i end
+> print(x)
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+[torch.Tensor of dimension 7]
+
+> return  x:unfold(1, 2, 1)
+
+ 1  2
+ 2  3
+ 3  4
+ 4  5
+ 5  6
+ 6  7
+[torch.Tensor of dimension 6x2]
+
+> return  x:unfold(1, 2, 2)
+
+ 1  2
+ 3  4
+ 5  6
+[torch.Tensor of dimension 3x2]
+</verbatim>
+
+---++ Applying a function to a tensor
+#TensorApplyFunction
+
+These functions apply a function to each element of the tensor on which the
+method is called (self). These methods are much faster than using a =for=
+loop in =Lua=. The results is stored in =self= (if the function returns
+something). A similar function exists in the [[../lab/index.hlp#map][lab]]
+package, but where a new tensor containing the result is returned instead.
+
+---+++ =[self] apply(function(x))=
+
+Apply the given function to all elements of self.
+
+The function takes a number (the current element of the tensor) and might return
+a number, in which case it will be stored in self.
+
+Examples:
+<verbatim>
+> i = 0
+> z = torch.Tensor(3,3)
+> z:apply(function(x)
+>> i = i + 1
+>> return i
+>> end) -- fill up the tensor
+> = z
+
+ 1  4  7
+ 2  5  8
+ 3  6  9
+[torch.Tensor of dimension 3x3]
+
+> z:apply(math.sin) -- apply the sin function
+> = z
+
+ 0.8415 -0.7568  0.6570
+ 0.9093 -0.9589  0.9894
+ 0.1411 -0.2794  0.4121
+[torch.Tensor of dimension 3x3]
+
+> sum = 0
+> z:apply(function(x)
+>> sum = sum + x
+>> end) -- compute the sum of the elements
+> = sum
+1.9552094821074
+> = z:sum() -- it is indeed correct!
+1.9552094821074
+</verbatim>
+
+---+++ =[self] map(tensor, function(xs, xt))=
+
+Apply the given function to all elements of self and =tensor=. The number of elements of both tensors
+must match, but sizes do not matter.
+
+The function takes two numbers (the current element of self and =tensor=) and might return
+a number, in which case it will be stored in self.
+
+Example:
+<verbatim>
+> x = torch.Tensor(3,3)
+> y = torch.Tensor(9)
+> i = 0
+> x:apply(function() i = i + 1; return i end) -- fill-up x
+> i = 0
+> y:apply(function() i = i + 1; return i end) -- fill-up y
+> = x
+
+ 1  4  7
+ 2  5  8
+ 3  6  9
+[torch.Tensor of dimension 3x3]
+
+> = y
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+[torch.Tensor of dimension 9]
+
+> x:map(y, function(xx, yy) return xx*yy end) -- element-wise multiplication
+> = x
+
+  1  16  49
+  4  25  64
+  9  36  81
+[torch.Tensor of dimension 3x3]
+</verbatim>
+
+---+++ =[self] map2(tensor1, tensor2, function(x, xt1, xt2))=
+
+Apply the given function to all elements of self, =tensor1= and =tensor2=. The number of elements of all tensors
+must match, but sizes do not matter.
+
+The function takes three numbers (the current element of self, =tensor1= and =tensor2=) and might return
+a number, in which case it will be stored in self.
+
+Example:
+<verbatim>
+> x = torch.Tensor(3,3)
+> y = torch.Tensor(9)
+> z = torch.Tensor(3,3)
+> 
+> i = 0; x:apply(function() i = i + 1; return math.cos(i)*math.cos(i) end)
+> i = 0; y:apply(function() i = i + 1; return i end)
+> i = 0; z:apply(function() i = i + 1; return i end)
+> 
+> print(x)
+
+ 0.2919  0.4272  0.5684
+ 0.1732  0.0805  0.0212
+ 0.9801  0.9219  0.8302
+[torch.Tensor of dimension 3x3]
+
+> print(y)
+
+ 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+[torch.Tensor of dimension 9]
+
+> print(z)
+
+ 1  4  7
+ 2  5  8
+ 3  6  9
+[torch.Tensor of dimension 3x3]
+
+> 
+> x:map2(y, z, function(xx, yy, zz) return xx+yy*zz end)
+> 
+> print(x)
+
+  1.2919  16.4272  49.5684
+  4.1732  25.0805  64.0212
+  9.9801  36.9219  81.8302
+[torch.Tensor of dimension 3x3]
+</verbatim>
+
+---++ Math functions
+
+These functions apply a function to the tensor, and return self.
+
+---+++ =[self] log()=
+#TensorLog
+
+Computes the natural logarithm.
+
+---+++ =[self] log1p()=
+#TensorLog1p
+
+=log1p(x)= computes [[#TensorLog][=log(1+x)=]], with precision more
+accurate than standard =log()= function for small value of =x=.
+
+---+++ =[self] exp()=
+#TensorExp
+
+Computes the exponential function.
+
+---+++ =[self] cos()=
+
+Computes the cosine function.
+
+---+++ =[self] acos()=
+
+Computes the arc cosine function.
+
+---+++ =[self] cosh()=
+
+Computes the hyperbolic cosine function.
+
+---+++ =[self] sin()=
+
+Computes the sinusoid function.
+
+---+++ =[self] asin()=
+
+Computes the arc sinusoid function.
+
+---+++ =[self] sinh()=
+
+Computes the hyperbolic sinusoid function.
+
+---+++ =[self] tan()=
+
+Computes the tangent function.
+
+---+++ =[self] atan()=
+
+Computes the arc tangent function.
+
+---+++ =[self] tanh()=
+
+Computes the hyperbolic tangent function.
+
+---+++ =[self] pow(value)=
+
+Computes the power to the given =value=.
+
+---+++ =[self] sqrt()=
+
+Computes the square root. Values must be positive.
+
+---+++ =[self] ceil()=
+
+For each tensor value, computes the smallest integral value greater than or equal to this value.
+
+---+++ =[self] floor()=
+
+For each tensor value, computes the largest integral value less than or equal to this value.
+
+---+++ =[self] abs()=
+
+Computes the absolute value.
+
+---++ Basic statistics
+
+This functions return a statistic (scalar) on the full tensor. For more complex statistics
+see the [[../lab/index.hlp][=lab=]] package.
+
+---+++ =[number] sum()=
+
+Returns the sum of all the elements in the tensor.
+
+---+++ =[number] mean()=
+
+Returns the mean of all the elements in the tensor.
+
+---+++ =[number] max()=
+
+Returns the maximum value of the tensor.
+
+---+++ =[number] min()=
+
+Returns the minimum value of the tensor.
+
+---+++ =[number] std()=
+
+Returns the unbiased standard deviation estimator of the elements in the tensor. (The normalization
+factor is (n-1) and not n, where n is the number of elements in the tensor).
+
+---+++ =[number] var()=
+
+Returns the unbiased variance estimator of the elements in the tensor. (The normalization
+factor is (n-1) and not n, where n is the number of elements in the tensor).
+
+---+++ =[number] norm([p])= 
+
+Returns the p-norm of the elements of the tensor seen as a vector.
+Default value for =p= is =2=.
+
+---+++ =[number] dist(tensor, [value])=  
+
+Returns the p-norm of the difference between self and the given =tensor=.
+
+---++ Basic operations
+#TensorBasicOperations
+
+All this operation affect the tensor on which the method is called (self).
+No additional memory is created.
+
+---+++ =[self] add(value)=
+
+Add the given value to all elements in the tensor.
+
+---+++ =[self] add(tensor)=
+
+Add the given =tensor= to self. The number of elements must match, but sizes do not matter.
+<verbatim>
+> x = torch.Tensor(2,2):fill(2)
+> y = torch.Tensor(4):fill(3)
+> x:add(y)
+> = x
+
+ 5  5
+ 5  5
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+---+++ =[self] add(value, tensor)=
+
+Multiply elements of =tensor= by the scalar =value= and add it to self.
+The number of elements must match, but sizes do not matter.
+<verbatim>
+> x = torch.Tensor(2,2):fill(2)
+> y = torch.Tensor(4):fill(3)
+> x:add(2, y)
+> = x
+
+ 8  8
+ 8  8
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+---+++ =[self] mul(value)=
+
+Multiply all elements in the tensor by the given =value=.
+
+---+++ =[self] cmul(tensor)=
+
+Element-wise multiplication of =tensor= by self. The number of elements must match, but sizes do not matter.
+<verbatim>
+> x = torch.Tensor(2,2):fill(2)
+> y = torch.Tensor(4):fill(3)
+> x:cmul(y)
+> = x
+
+ 6  6
+ 6  6
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+---+++ =[self] addcmul(value, tensor1, tensor2)=
+
+Performs the element-wise multiplication of =tensor1= by =tensor1=, multiply the result by the scalar =value=
+and add it to self. The number of elements must match, but sizes do not matter.
+<verbatim>
+> x = torch.Tensor(2,2):fill(2)
+> y = torch.Tensor(4):fill(3)
+> z = torch.Tensor(2,2):fill(5)
+> x:addcmul(2, y, z)
+> = x
+
+ 32  32
+ 32  32
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+---+++ =[self] div(value)=
+
+Divide all elements in the tensor by the given =value=.
+
+---+++ =[self] cdiv(tensor)=
+
+Performs the element-wise division of self by =tensor=.
+The number of elements must match, but sizes do not matter.
+<verbatim>
+> x = torch.Tensor(2,2):fill(1)
+> y = torch.Tensor(4)        
+> for i=1,4 do y[i] = i end
+> x:cdiv(y)
+> = x
+
+ 1.0000  0.3333
+ 0.5000  0.2500
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+---+++ =[self] addcdiv(value, tensor1, tensor2)=
+
+Performs the element-wise division of =tensor1= by =tensor1=, multiply the result by the scalar =value=
+and add it to self. The number of elements must match, but sizes do not matter.
+<verbatim>
+> x = torch.Tensor(2,2):fill(1)
+> y = torch.Tensor(4)
+> z = torch.Tensor(2,2):fill(5)
+> for i=1,4 do y[i] = i end
+> x:addcdiv(2, y, z)
+> = x
+
+ 1.4000  2.2000
+ 1.8000  2.6000
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+---+++ =[number] dot(tensor)=
+
+Performs the dot product between =tensor= and self. The number of elements must match: both tensors are seen
+as a 1D vector.
+<verbatim>
+> x = torch.Tensor(2,2):fill(2)
+> y = torch.Tensor(4):fill(3)
+> = x:dot(y)
+24
+</verbatim>
+
+---+++ =addT2dotT1(value, mat, vec)=
+
+Performs a matrix-vector multiplication between =mat= (2D tensor) and =vec= (1D tensor), multiply by the scalar =value= and add
+it to self. In other words,
+<verbatim>
+self = self + value * mat*vec
+</verbatim>
+
+Sizes must respect the matrix-multiplication operation: if =mat= is a =n x m= matrix, =vec= must be
+vector of size =m=  and self must be a vector of size =n=.
+
+<verbatim>
+> x = torch.Tensor(3):fill(0)
+> M = torch.Tensor(3,2):fill(3)
+> y = torch.Tensor(2):fill(2)
+> x:addT2dotT1(1, M, y)
+> = x
+
+ 12
+ 12
+ 12
+[torch.Tensor of dimension 3]
+</verbatim>
+
+---+++ =addT1outT1(value, vec1, vec2)=
+
+Performs the outer-product between =vec1= (1D tensor) and =vec2= (1D tensor), multiply the resulting matrix
+by the scalar =value= and add the result to self (which must be a 2D tensor).
+In other words,
+<verbatim>
+self_ij = self_ij + value * vec1_i * vec2_j
+</verbatim>
+
+If =vec1= is a vector of size =n= and =vec2= is a vector of size =m=, then self must be a matrix of size
+=n x m=.
+<verbatim>
+> x = torch.Tensor(3)        
+> y = torch.Tensor(2)
+> for i=1,3 do x[i] = i end
+> for i=1,2 do y[i] = i end
+> M = torch.Tensor(3, 2):zero()
+> M:addT1outT1(1, x, y)
+> = M
+
+ 1  2
+ 2  4
+ 3  6
+[torch.Tensor of dimension 3x2]
+</verbatim>
+
+---+++ =addT2dotT2(value, mat1, mat2)=
+
+Performs a matrix-matrix multiplication between =mat1= (2D tensor) and =mat2= (2D tensor), multiply the resulting
+matrix by the scalar =value= and add the result to self (2D tensor).
+In other words,
+<verbatim>
+self = self + value * mat1*mat2
+</verbatim>
+
+If =mat1= is a =n x m= matrix, =mat2= a =m x p= matrix, self must be a =n x p= matrix.
+
+---+++ =addT4dotT2(value, t4, t2)=
+
+Performs a tensor multiplication between =t4= (4D tensor) and =t2= (2D tensor), multiply the resulting
+matrix by the scalar =value= and add the result to self (2D tensor).
+In other words,
+<verbatim>
+self = self + value * t4*t2
+</verbatim>
+
+If =t4= is a =n x m x p x q= tensor, =t2= a =p x q= matrix, self must be a =n x m= matrix.
+
+---+++ =addT2outT2(value, mat1, mat2)=
+
+Performs the outer product between =mat1= (2D tensor) and =mat2= (2D tensor), multiply the resulting
+matrix by the scalar =value= and add the result to self (4D tensor).
+In other words,
+<verbatim>
+self_ijkl = self_ijkl + value * mat1_ij * mat2_kl
+</verbatim>
+
+If =mat1= is a =n x m= matrix, =mat2= a =p x q= matrix, self must be a =n x m x p x q= tensor.
+
+---++ Overloaded operators
+
+It is possible to use basic mathematic operators like =+=, =-=, =/= and =*=
+with tensors.  These operators are provided as a convenience. While they
+might be handy, they create and return a new tensor containing the
+results. They are thus not as fast as the operations available in the
+[[#TensorBasicOperations][previous section]].
+
+---+++ Addition and substraction
+
+You can add a tensor to another one with the =+= operator. Substraction is done with =-=.
+The number of elements in the tensors must match, but the sizes do not matter. The size
+of the returned tensor will be the size of the first tensor.
+<verbatim>
+> x = torch.Tensor(2,2):fill(2)
+> y = torch.Tensor(4):fill(3)
+> = x+y
+
+ 5  5
+ 5  5
+[torch.Tensor of dimension 2x2]
+
+> = y-x
+
+ 1
+ 1
+ 1
+ 1
+[torch.Tensor of dimension 4]
+</verbatim>
+
+A scalar might also be added or substracted to a tensor. The scalar might be on the right or left of the operator.
+<verbatim>
+> x = torch.Tensor(2,2):fill(2)
+> = x+3
+
+ 5  5
+ 5  5
+[torch.Tensor of dimension 2x2]
+
+> = 3-x
+
+ 1  1
+ 1  1
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+---+++ Negation
+
+A tensor can be negated with the =-= operator placed in front:
+<verbatim>
+> x = torch.Tensor(2,2):fill(2)
+> = -x
+
+-2 -2
+-2 -2
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+---+++ Multiplication
+
+Multiplication between two tensors is supported with the =*= operators. The result of the multiplication
+depends on the sizes of the tensors.
+   $ 1D and 1D: Returns the dot product between the two tensors (scalar).
+   $ 2D and 1D: Returns the matrix-vector operation between the two tensors (1D tensor).
+   $ 2D and 2D: Returns the matrix-matrix operation between the two tensors (2D tensor).
+   $ 4D and 2D: Returns a tensor product (2D tensor).
+Sizes must be relevant for the corresponding operation.
+
+A tensor might also be multiplied by a scalar. The scalar might be on the right or left of the operator.
+
+Examples:
+<verbatim>
+> M = torch.Tensor(2,2):fill(2)
+> N = torch.Tensor(2,4):fill(3)
+> x = torch.Tensor(2):fill(4)
+> y = torch.Tensor(2):fill(5)
+> = x*y -- dot product
+40
+> = M*x --- matrix-vector
+
+ 16
+ 16
+[torch.Tensor of dimension 2]
+
+> = M*N -- matrix-matrix
+
+ 12  12  12  12
+ 12  12  12  12
+[torch.Tensor of dimension 2x4]
+</verbatim>
+
+
+---+++ Division
+
+Only the division of a tensor by a scalar is supported with the operator =/=.
+Example:
+<verbatim>
+> x = torch.Tensor(2,2):fill(2)
+> = x/3
+
+ 0.6667  0.6667
+ 0.6667  0.6667
+[torch.Tensor of dimension 2x2]
+</verbatim>
+
+
+---+ =Timer=
+#Timer
+
+This class is able to measure time (in seconds) elapsed in a particular period. Example:
+<verbatim>
+  timer = torch.Timer() -- the Timer starts to count now
+  x = 0
+  for i=1,1000000 do
+    x = x + math.sin(x)
+  end
+  print('Time elapsed for 1,000,000 sin: ' .. timer:time() .. ' seconds')
+</verbatim>
+
+---++ =torch.Timer()=
+
+Returns a new =Timer=. The timer starts to count the time now.
+
+---++ =[self] reset()=
+
+Reset the timer accumulated time to =0=. If the timer was running, the timer
+restarts to count the time now. If the timer was stopped, it stays stopped.
+
+---++ =[self] resume()=
+
+Resume a stopped timer. The timer restarts to count the time, and addition
+the accumulated time with the time already counted before being stopped.
+
+---++ =[self] stop()=
+
+Stop the timer. The accumulated time counted until now is stored.
+
+---++  =[number] time()=
+
+Returns the accumulated time counted until now.
+
+---+ Torch utility functions
+#TorchUtilities
+
+This functions are used in all Torch package for creating and handling classes.
+The most interesting function is probably [[#TorchClass][=torch.class()=]] which allows
+the user to create easily new classes. [[#TorchTypename][=torch.typename()=]] might
+also be interesting to check what is the class of a given Torch object.
+
+The other functions are more for advanced users.
+
+---++ =[metatable] torch.class(name, [parentName])=
+#TorchClass
+
+Creates a new =Torch= class called =name=. If =parentName= is provided, the class will inherit
+=parentName= methods. A class is a table which has a particular metatable.
+
+If =name= is of the form =package.className= then the class =className= will be added to the specified =package=.
+In that case, =package= has to be a valid (and already loaded) package. If =name= does not contain any ="."=,
+then the class will be defined in the global environment.
+
+One [or two] (meta)tables are returned. These tables contain all the method
+provided by the class [and its parent class if it has been provided]. After
+a call to =torch.class()= you have to fill-up properly the metatable.
+
+After the class definition is complete, constructing a new class =name= will be achieved by a call to =name()=.
+This call will first call the method =__init()= if it exists, passing all arguments of =name()= into
+=__init()=.
+
+<verbatim>
+ require "torch"
+
+ -- for naming convenience
+ do
+   --- creates a class "Foo"
+   local Foo = torch.class('Foo')
+ 
+   --- the initializer
+   function Foo:__init()
+     self.contents = "this is some text"
+   end
+
+   --- a method
+   function Foo:print()
+     print(self.contents)
+   end
+
+   --- another one
+   function Foo:bip()
+     print('bip')
+   end
+
+ end
+
+ --- now create an instance of Foo
+ foo = Foo()
+
+ --- try it out
+ foo:print()
+
+ --- create a class torch.Bar which
+ --- inherits from Foo
+ do
+   local Bar, parent = torch.class('torch.Bar', 'Foo')
+
+   --- the initializer
+   function Bar:__init(stuff)
+     --- call the parent initializer on ourself
+     parent.__init(self)
+ 
+     --- do some stuff
+     self.stuff = stuff
+   end
+
+   --- a new method
+   function Bar:boing()
+     print('boing!')
+   end
+
+   --- override parent's method
+   function Bar:print()
+     print(self.contents)
+     print(self.stuff)
+   end
+ end
+
+ --- create a new instance and use it
+ bar = torch.Bar("ha ha!")
+ bar:print() -- overrided method
+ bar:boing() -- child method
+ bar:bip()   -- parent's method
+
+</verbatim>
+
+For advanced users, it is worth mentionning that =torch.class()= actually calls [[#TorchNewmetatable][=torch.newmetatable()=]].
+with a particular constructor. The constructor creates a Lua table and set the right metatable on it, and then
+calls =__init()= if it exists in the metatable. It also sets a
+[[#TorchFactory][=__factory=]] field such that it is possible to create an empty object of this class.
+
+---++ =[string] torch.typename(object)=
+#TorchTypename
+
+Checks if =object= has a metatable. If it does, and if it corresponds to a
+=Torch= class, then returns a string containing the name of the
+class. Returns =nil= in any other cases.
+
+A Torch class is a class created with [[#TorchClass][=torch.class()=]] or
+[[#TorchNewmetatable][=torch.newmetatable()=]].
+
+---++ =[table] torch.newmetatable(name, parentName, constructor)=
+#TorchNewmetatable
+
+Register a new metatable as a Torch type with the given string =name=. The new metatable is returned.
+
+If the string =parentName= is not =nil= and is a valid Torch type (previously created
+by =torch.newmetatable()=) then set the corresponding metatable as a metatable to the returned new
+metatable. 
+
+If the given =constructor= function is not =nil=, then assign to the variable =name= the given constructor.
+The given =name= might be of the form =package.className=, in which case the =className= will be local to the
+specified =package=. In that case, =package= must be a valid and already loaded package.
+
+---++ =[function] torch.factory(name)=
+#TorchFactory
+
+Returns the factory function of the Torch class =name=. If the class name is invalid or if the class
+has no factory, then returns =nil=.
+
+A Torch class is a class created with [[#TorchClass][=torch.class()=]] or
+[[#TorchNewmetatable][=torch.newmetatable()=]].
+
+A factory function is able to return a new (empty) object of its corresponding class. This is helpful for
+[[#FileSerialization][object serialization]].
+
+---++ =[table] torch.getmetatable(string)=
+
+Given a =string=, returns a metatable corresponding to the Torch class described
+by =string=. Returns =nil= if the class does not exist.
+
+A Torch class is a class created with [[#TorchClass][=torch.class()=]] or
+[[#TorchNewmetatable][=torch.newmetatable()=]].
+
+Example:
+<verbatim>
+> for k,v in pairs(torch.getmetatable("torch.CharStorage")) do print(k,v) end
+__index__       function: 0x1a4ba80
+__typename      torch.CharStorage
+write   function: 0x1a49cc0
+__tostring__    function: 0x1a586e0
+__newindex__    function: 0x1a4ba40
+string  function: 0x1a4d860
+__version       1
+copy    function: 0x1a49c80
+read    function: 0x1a4d840
+__len__ function: 0x1a37440
+fill    function: 0x1a375c0
+resize  function: 0x1a37580
+__index table: 0x1a4a080
+size    function: 0x1a4ba20
+</verbatim>
+
+---++ =[boolean] torch.isequal(object1, object2)=
+
+If the two objects given as arguments are =Lua= tables (or Torch objects), then returns =true= if and only if the
+tables (or Torch objects) have the same address in memory. Returns =false= in any other cases.
+
+A Torch class is a class created with [[#TorchClass][=torch.class()=]] or
+[[#TorchNewmetatable][=torch.newmetatable()=]].
+
+---++ =torch.setenv(function or userdata, table)=
+
+Assign =table= as the Lua environment of the given =function= or the given
+=userdata=.  To know more about environments, please read the documentation
+of [[http://www.lua.org/manual/5.1/manual.html#lua_setfenv][=lua_setfenv()=]]
+and [[http://www.lua.org/manual/5.1/manual.html#lua_getfenv][=lua_getfenv()=]].
+
+---++ =[table] torch.getenv(function or userdata)=
+
+Returns the Lua =table= environment of the given =function= or the given
+=userdata=.  To know more about environments, please read the documentation
+of [[http://www.lua.org/manual/5.1/manual.html#lua_setfenv][=lua_setfenv()=]]
+and [[http://www.lua.org/manual/5.1/manual.html#lua_getfenv][=lua_getfenv()=]].
+
+---++ =[number] torch.pointer(object)=
+
+Returns a unique id (pointer) of the given =object=, which can be a Torch object, a table, a thread or a function.

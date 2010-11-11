@@ -1,0 +1,3 @@
+MESSAGE(STATUS "Configuring Lua")
+
+ADD_SUBDIRECTORY(src)

@@ -1,0 +1,5 @@
+make website
+mkdir -p htdocs/manual
+rsync -axl website/ htdocs
+rsync -axl html/ website/manual
+/usr/bin/rsync -e ssh -axl --stats --delete --progress htdocs/ andresy,torch5@web.sourceforge.net:/home/groups/t/to/torch5/htdocs

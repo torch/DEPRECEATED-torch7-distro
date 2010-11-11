@@ -1,0 +1,18 @@
+Help Package Reference Manual
+
+The =help= package provides inline help (available in an interactive manner
+under =Lua= interpreter) in =Torch5=. It is automatically required by the
+[[../torch/index.hlp][=torch=]] package, so you should not have to require
+it in general.
+
+It contains only one function:
+<verbatim>
+  help.help()
+</verbatim>
+
+Navigating through help is achieved with =help(i)= (=i= being a number) for
+jumping to the =i=-th available section, or =help('*i=') to jump to the
+=i=-th available link.
+
+=help(-1)= is a particular case, which jumps back to the previous page you
+were displaying.

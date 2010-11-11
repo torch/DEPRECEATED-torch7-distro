@@ -1,0 +1,13 @@
+<extended>Torch Manual
+
+=Torch5= provides a Matlab-like environment for state-of-the-art machine
+learning algorithms. It is _easy_ to use and provides a very _efficient_
+implementation, thanks to [[Lua.hlp][an easy and fast scripting language]]
+[[LuaManual.hlp][(=Lua=)]] and a underlying =C++= implementation. It is
+distributed under a [[License.hlp][=BSD= license]].
+
+---+ Introduction
+
+   * [[Install.hlp][Installation instructions]]
+   * [[newbieTutorial.hlp][Basic tutorial for Torch newbies]]
+

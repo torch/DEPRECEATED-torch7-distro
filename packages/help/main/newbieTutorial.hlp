@@ -1,0 +1,354 @@
+<extended>Torch Tutorial
+
+So you are wondering how to work with Torch?
+This is a little tutorial that should help get you started.
+
+By the end of this tutorial,  you should have managed to install
+ torch on your machine, and have a good understanding of how to manipulate 
+vectors, matrices and tensors and how to build and train a basic neural 
+network. For anything else, you should know how to access the html 
+help and read about how to do it.
+
+---+ What is Torch?
+
+Torch5 provides a Matlab-like environment for state-of-the-art machine learning algorithms. It is easy to use and provides a very efficient implementation, thanks to a easy and fast scripting language (Lua) 
+and a underlying C++ implementation.
+You can read more about Lua [[LuaManual.hlp][here]].
+
+---+ Installation
+
+First before you can do anything, you need to install Torch on your machine.
+That is not described in detail here, but is instead described in
+the [[Install.hlp][installation help]].
+
+
+---+ Checking your installation works and requiring packages
+
+If you have got this far, hopefully your Torch installation works. A simple
+way to make sure it does is to start Lua from the shell command line, 
+and then try to start Torch:
+<verbatim>
+$ lua 
+Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+> require "torch"
+> x = torch.Tensor()
+> print(x)
+
+[torch.Tensor with no dimension]
+
+> 
+</verbatim>
+You might have to specify the exact path of the =lua= executable, if you have several Lua installed
+on your system, or if you installed Torch in a non-standard path.
+
+The first command =require "torch"= imports the basic classes of Torch into 
+Lua, and after that they can be used.
+Instead of writing this on the command line in Lua you can also ask Lua on bootup to require this package from the shell:
+<verbatim>
+$ lua -ltorch
+Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+> x = torch.Tensor(); print(x)
+
+[torch.Tensor with no dimension]
+
+</verbatim>
+If you use Lua and Torch together all the time you might want to alias Lua
+to do that directly. 
+Whichever way you chose, in future examples I will assume that you have started Lua and required Torch.
+ 
+In this example, we checked Torch was working by creating an empty [[torch/index.hlp#Tensor][Tensor]] and printing it on the screen.
+The Tensor is the main tool in Torch, and is used to represent vector, 
+matrices or higher-dimensional objects (tensors).
+
+=require "torch"= only installs the basic parts of torch (including Tensors). 
+The list of all the basic Torch objects installed are described 
+[[torch/index.hlp][here]].
+However, there are several
+ other _external_ Torch packages that you might want to use,
+for example the [[lab/index.hlp][lab]] 
+package. 
+This package 
+provides Matlab-like functions for linear algebra.
+ We will use some of these functions in this tutorial.
+To require this package you simply have to type:
+<verbatim>
+require "lab"
+</verbatim>
+
+To see the list of Torch packages   
+click [[index.hlp][here]].
+
+---+ Torch basics: playing with Tensors
+
+Ok, now we are ready to actually do something in Torch.
+Lets start by constructing a vector, say a vector with 5 elements,
+and filling the i-th element with value i. Here's how:
+<verbatim>
+> x=torch.Tensor(5)
+> for i=1,5 do x[i]=i; end
+> print(x)
+
+ 1
+ 2
+ 3
+ 4
+ 5
+[torch.Tensor of dimension 5] 
+
+>
+</verbatim>
+
+To make a matrix (2-dimensional Tensor), one simply does something like
+=x=torch.Tensor(5,5)= instead:
+<verbatim>
+x=torch.Tensor(5,5)
+for i=1,5 do 
+ for j=1,5 do 
+   x[i][j]=math.random();
+ end
+end
+</verbatim>
+Another way to do the same thing as the code above is provided by the 
+ [[lab/index.hlp][lab]] package:
+<verbatim>
+require "lab"
+x=lab.rand(5,5)
+</verbatim>
+The [[lab/index.hlp][lab]] package contains a wide variety of commands 
+for manipulating Tensors that follow rather closely the equivalent
+Matlab commands. For example one can construct Tensors using the commands
+[[lab/index.hlp#ones][ones]], 
+[[lab/index.hlp#zeros][zeros]], 
+[[lab/index.hlp#rand][rand]],
+[[lab/index.hlp#randn][randn]] and
+[[lab/index.hlp#eye][eye]], amongst others.
+
+Similarly, row or column-wise operations such as 
+[[lab/index.hlp#sum][sum]] and 
+[[lab/index.hlp#max][max]] are called in the same way:
+<verbatim>
+> require "lab"
+> x1=lab.rand(5,5)
+> x2=lab.sum(x1); 
+> print(x2) 
+
+ 2.6443  1.8716  3.6316  1.5378  2.4324
+[torch.Tensor of dimension 1x5]
+
+>
+</verbatim>
+
+---+ Example: training a neural network
+
+We will show now how to train a neural network using the [[nn/index.hlp][nn]] package
+available in Torch.
+
+---++ Torch basics: building a dataset using Lua tables
+
+In general the user has the freedom to create any kind of structure he
+wants for dealing with data.
+
+For example, training a neural network in Torch is achieved easily by
+performing a loop over the data, and forwarding/backwarding tensors through
+the network. Then, the way the dataset is built is left to the user's creativity.
+
+
+However, if you want to use some convenience classes, like
+[[nn/index.hlp#StochasticGradient][StochasticGradient]], which basically
+does the training loop for you, one has to follow the dataset
+convention of these classes.
+(We will discuss manual training of a network, where one does not use
+these convenience classes, in a later section.)
+
+StochasticGradient expects 
+as a =dataset= an object which implements the operator
+=dataset[index]= and implements the method =dataset:size()=. The =size()= methods
+returns the number of examples and =dataset[i]= has to return the i-th example.
+
+An =example= has to be an object which implements the operator =example[field]=,
+where =field= often takes the value =1= (for input features) or =2= (for corresponding labels),
+i.e an example is a pair of input and output objects.
+The input is usually a Tensor (exception: if you use special kind of gradient modules,
+like [[nn/index.hlp#TableLayers][table layers]]). The label type depends on the criterion.
+For example, the [[nn/index.hlp#MSECriterion][=MSECriterion=]] expects a Tensor, but the
+[[nn/index.hlp#ClassNLLCriterion][=ClassNLLCriterion=]] expects an integer (the class).
+
+Such a dataset is easily constructed by using Lua tables, but it could any object
+as long as the required operators/methods are implemented.
+
+Here is an example of making a dataset for an XOR type problem:
+<verbatim>
+require "lab"
+dataset={};
+function dataset:size() return 100 end -- 100 examples
+for i=1,dataset:size() do 
+	local input= lab.randn(2);     --normally distributed example in 2d
+	local output= torch.Tensor(1);
+	if input[1]*input[2]>0 then    --calculate label for XOR function
+		output[1]=-1;
+	else
+		output[1]=1;
+	end
+	dataset[i] = {input, output};
+end
+</verbatim>
+
+---++ Torch basics: building a neural network
+
+To train a neural network we first need some data.  We can use the XOR data
+we just generated in the section before.  Now all that remains is to define
+our network architecture, and train it.
+
+To use Neural Networks in Torch you have to require the 
+[[nn/index.hlp][nn]] package. 
+A classical feed-forward network is created with the =Sequential= object:
+<verbatim>
+require "nn"
+mlp=nn.Sequential();  -- make a multi-layer perceptron
+</verbatim>
+
+To build the layers of the network, you simply add the Torch objects 
+corresponding to those layers to the _mlp_ variable created above.
+
+The two basic objects you might be interested in first are the 
+[[nn/index.hlp#Linear][Linear]] and 
+[[nn/index.hlp#Tanh][Tanh]] layers.
+The Linear layer is created with two parameters: the number of input
+dimensions, and the number of output dimensions. 
+So making a classical feed-forward neural network with one hidden layer with 
+ _HUs_ hidden units is as follows:
+<verbatim>
+require "nn"
+mlp=nn.Sequential();  -- make a multi-layer perceptron
+inputs=2; outputs=1; HUs=20;
+mlp:add(nn.Linear(inputs,HUs))
+mlp:add(nn.Tanh())
+mlp:add(nn.Linear(HUs,outputs))
+</verbatim>
+
+ 
+---++ Torch basics: training a neural network
+
+Now we're ready to train.
+This is done with the following code:
+<verbatim>
+criterion = nn.MSECriterion()  
+trainer = nn.StochasticGradient(mlp, criterion)
+trainer.learningRate = 0.01
+trainer:train(dataset)
+</verbatim>
+
+You should see printed on the screen something like this:
+<verbatim>
+# StochasticGradient: training
+# current error = 0.94550937745458
+# current error = 0.83996744568527
+# current error = 0.70880093908742
+# current error = 0.58663679932706
+# current error = 0.49190661630473
+[..snip..]
+# current error = 0.34533844015756
+# current error = 0.344305927029
+# current error = 0.34321901952818
+# current error = 0.34206793525954
+# StochasticGradient: you have reached the maximum number of iterations
+</verbatim>
+ 
+Some other options of the _trainer_ you might be interested in are for example:
+<verbatim>
+trainer.maxIteration = 10
+trainer.shuffleIndices = false
+</verbatim>
+See the nn package description of the
+ [[nn/index.hlp#StochasticGradient][StochasticGradient]] object
+ for more details.
+
+
+---++ Torch basics: testing your neural network
+
+To test your network on a single example you can do this:
+<verbatim>
+x=torch.Tensor(2);   -- create a test example Tensor
+x[1]=0.5; x[2]=-0.5; -- set its values
+pred=mlp:forward(x)  -- get the prediction of the mlp 
+print(pred)          -- print it 
+</verbatim>
+
+You should see that your network has learned XOR:
+<verbatim>
+> x=torch.Tensor(2); x[1]=0.5; x[2]=0.5; print(mlp:forward(x))
+-0.5886
+[torch.Tensor of dimension 1]
+
+> x=torch.Tensor(2); x[1]=-0.5; x[2]=0.5; print(mlp:forward(x))
+ 0.9261
+[torch.Tensor of dimension 1]
+
+> x=torch.Tensor(2); x[1]=0.5; x[2]=-0.5; print(mlp:forward(x))
+ 0.7913
+[torch.Tensor of dimension 1]
+
+> x=torch.Tensor(2); x[1]=-0.5; x[2]=-0.5; print(mlp:forward(x))
+-0.5576
+[torch.Tensor of dimension 1]
+</verbatim>
+
+---++ Manual Training of a Neural Network
+
+Instead of using the [[nn/index.hlp#StochasticGradient][StochasticGradient]] class
+you can directly make the forward and backward calls on the network yourself.
+This gives you greater flexibility.
+In the following code example we create the same XOR data on the fly
+and train each example online.
+
+<verbatim>
+require "lab"
+criterion = nn.MSECriterion()  
+mlp=nn.Sequential();  -- make a multi-layer perceptron
+inputs=2; outputs=1; HUs=20;
+mlp:add(nn.Linear(inputs,HUs))
+mlp:add(nn.Tanh())
+mlp:add(nn.Linear(HUs,outputs))
+
+for i = 1,2500 do
+  -- random sample
+  local input= lab.randn(2);     -- normally distributed example in 2d
+  local output= torch.Tensor(1);
+  if input[1]*input[2] > 0 then  -- calculate label for XOR function
+    output[1] = -1
+  else
+    output[1] = 1
+  end
+
+  -- feed it to the neural network and the criterion
+  prediction = mlp:forward(input)
+  criterion:forward(prediction, output)
+
+  -- train over this example in 3 steps
+
+  -- (1) zero the accumulation of the gradients
+  mlp:zeroGradParameters()
+
+  -- (2) accumulate gradients
+  criterion_gradient = criterion:backward(prediction, output)
+  mlp:backward(input, criterion_gradient)
+
+  -- (3) update parameters with a 0.01 learning rate
+  mlp:updateParameters(0.01)
+end
+</verbatim>
+
+Super!
+
+*Concluding remarks*
+
+That's the end of this tutorial, but not the end of what you have left 
+to discover of Torch! To explore more of Torch, you should take a look
+at the [[index.hlp][Torch package help]]
+ which has been linked to throughout this tutorial 
+every time we have mentioned one of the basic Torch object types.
+The Torch library reference manual is available [[torch/index.hlp][here]]
+ and the external torch packages installed on your system 
+can be viewed [[index.hlp][here]].
+ 
+Good luck and have fun!

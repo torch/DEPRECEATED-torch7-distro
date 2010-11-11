@@ -1,0 +1,873 @@
+-- IDEAS
+-- help(number) gets to the last viewed section number
+-- help(-1) goes up in the hierarchy (w.r.t last viewed)
+-- help(0) goes to root (or -1...) (lastviewed?) err... lasviewed: root c'est help()!!
+-- LUA HTML TXT RENDERING?? lynx w3m
+-- WHY TXT after all? why not all html? [sucky for table (cell size=good luck), gasp!]
+
+-- The help styles follows TWiki text formatting rules...
+-- See http://twiki.org/cgi-bin/view/TWiki/TextFormattingRules
+-- idealement, on devrait enlever les <verbatim> ... </verbatim> avant meme de bricoler
+-- les sections, mais bon, fait chier.
+
+-- help(torch.Timer)
+-- help('timer')
+-- help(timer)
+-- help(timer.time)
+-- help()
+
+help = {}
+help.__internal__ = {}
+local help = help.__internal__
+
+help.romanNumbering = {'i', 'ii', 'iii', 'iv', 'v', 'vi', 'vii', 'viii', 'ix', 'x', 'xi', 'xii', 'xiii', 'xiv', 'xv', 'xvi', 'xviii', 'xix', 'xx'}
+
+function help.reducePath(path)
+   if not string.match(path, '/$') then
+      path = path .. '/'
+   end
+   local components = {}
+   for component in string.gmatch(path, '[^/]+') do
+--      print(component)
+      if component == '..' then
+         table.remove(components)
+      elseif component ~= '.' then
+         table.insert(components, component)
+      end
+   end
+   
+   local out_path = ''
+   for i,component in ipairs(components) do
+      -- linux only : path = path .. '/' .. component
+
+      if i==1 and string.sub(path,1,1) ~= '/' then -- allow windows C: as first component.
+	  out_path = component 
+      else
+	  out_path = out_path .. '/' .. component    
+      end
+   end
+   return out_path
+end
+
+function help.splitPath(path)
+   if string.match(path, '^(.*)/(.*)') then
+      return string.match(path, '^(.*)/(.*)')
+   else
+      return '.', path
+   end
+end
+
+function help.buildTree(path, file)
+   local text = ''
+   local f = io.open(path .. '/' .. file, 'r')
+   if f then
+      text = f:read('*all')
+      f:close()
+   else
+      error('$ Help: unable to open file <' .. path .. '/' .. file .. '>')
+   end
+   -- we ignore the special extended tag
+   text = string.gsub(text, '^<extended>', '')
+
+   while string.match(text, '()%%INCLUDE{([^}\n]-)}%%()') do
+      local start, includeFile, stop = string.match(text, '()%%INCLUDE{([^}\n]-)}%%()')
+      local includeText = ''
+      local f = io.open(path .. '/' .. includeFile, 'r')
+      if f then
+         includeText = f:read('*all')
+         f:close()
+      else
+         print('! Help: unable to open file <' .. path .. '/' .. includeFile .. '>')
+      end
+      text = string.sub(text, 1, start-1) .. includeText .. string.sub(text, stop, -1) -- and not stop+1! careful!
+   end
+   local anchors = {}
+   local name
+   name, text = string.match(text, '([^\n]*)\n(.*)')
+   local sections =  help.parseSection(text, anchors, name)
+   return sections, anchors
+end
+
+function help.parseSection(text, anchors, name, currentIndent)
+--   print(text)
+   currentIndent = currentIndent or 0
+   name = name or ""
+
+--   print('---> entering parseSection with name=' .. name .. ' and currentIndent=' .. currentIndent)
+
+   -- set the name
+   local section = {}
+   section.name = name
+
+   -- find the contents
+   if not string.find(text, "^%-%-%-%++.-\n") then -- should match 'beginning of line' only
+      local posNextSection = string.find(text, "\n%-%-%-%++.-\n")
+      if posNextSection then
+--         print('next section in: ' .. posNextSection)
+         section.contents = string.sub(text, 1, posNextSection) -- we keep the '\n' in contents
+--         print('so the contents are: ')
+--         io.write('"')
+--         io.write(section.contents)
+--         io.write('"\n')
+         text = string.sub(text, posNextSection+1, -1) -- so here it starts by '---+...' now
+      else
+         section.contents = text
+         text = ""
+      end
+   else
+      section.contents = ""
+   end
+
+   -- find anchors
+   section.contents = string.gsub(section.contents, '^(#%S+)', function (anchor)
+                                                                   anchors[anchor] = section
+                                                                   return ''
+                                                                end)
+
+   section.contents = string.gsub(section.contents, '\n(#%S+)', function (anchor)
+                                                                   anchors[anchor] = section
+                                                                   return ''
+                                                                end)
+                  
+   -- find the sub-sections
+   while true do
+      local nextSectionIndent,nextSectionName,nextSectionText = string.match(text, "^%-%-%-(%++)(.-)\n(.*)")
+      if not nextSectionText then nextSectionText = "" end -- string.match is this kind of guy who returns nil
+      if not nextSectionIndent then 
+--         print('gasp: in indent=' .. currentIndent .. ' there is no section starting')
+         break 
+      end
+      nextSectionIndent = #nextSectionIndent
+--      print('indent: ' .. nextSectionIndent)
+--      print('name: ' .. nextSectionName)
+      if nextSectionIndent > currentIndent then
+--         print('job: parsing it')
+         local subSection
+         subSection, text = help.parseSection(nextSectionText, anchors, nextSectionName, nextSectionIndent)
+         if not section.sections then
+            section.sections = {}
+         end
+         table.insert(section.sections, subSection)
+      else
+--         print('job: we have another subsection, but not ours')
+         break
+      end
+   end
+--   print('----> at the end:')
+--   print(text)
+   return section, text
+end
+
+function help.printText(text, indent, maxLineSize)
+   local links
+   text, links = help.renderText(text)
+--   print(text)
+--   print('-----------------------')
+   help.printRenderedText(text, indent, maxLineSize)
+   return links
+--   print('-----------------------')
+end
+
+function help.printRenderedText(text, indent, maxLineSize)
+   if string.sub(text, -1, -1) ~= '\n' then
+      text = text .. '\n'
+   end
+--    print("----- TEXT to deal with: ")
+--    io.write('"')
+--    io.write(text)
+--    io.write('"\n----- GASP\n')
+   indent = indent or 0
+   maxLineSize = maxLineSize or 75
+   local newParagraph = false
+   local indentString = ''
+   for i=1,indent do
+      indentString = indentString .. ' '
+   end
+   local line = indentString
+   local lineSize = indent
+   local spaceBeforeWord = false
+   while true do
+      local subText, cmd, rest
+      subText, cmd, rest = string.match(text, '^(.-)%%<([^>]-)>%%(.*)')
+--      print('---')
+      if subText then
+         text = rest
+--         print('LINE: "' .. subText .. '"')
+--         print('COMMAND: "' .. cmd .. '"')
+      else
+         subText = text
+--         print('ONLY LINE: "' .. subText .. '"')
+      end
+
+      if #subText > 0 then
+         if string.find(subText, '^%s+') then
+            spaceBeforeWord = true
+         end
+      end
+--       if spaceBeforeWord then
+--          print('SPACE')
+--       else
+--          print('NOSPACE')
+--       end
+      for word in string.gmatch(subText, "%S+") do
+         newParagraph = false
+         local wordSize = #word
+         local spaceOut = 1
+         if lineSize == indent then
+            spaceOut = 0
+         end
+         if lineSize + spaceOut + wordSize > maxLineSize then -- do not forget the space ;)
+            print(line)
+            line = indentString
+            lineSize = indent
+         end
+         if lineSize == indent or not spaceBeforeWord then
+            line = line .. word
+            lineSize = lineSize + wordSize
+            spaceBeforeWord = true
+         else
+            line = line .. ' ' .. word
+            lineSize = lineSize + wordSize + 1
+         end
+      end
+
+      if #subText > 0 then
+         if string.find(subText, '%s+$') then
+            spaceBeforeWord = true
+         else
+            spaceBeforeWord = false
+         end
+      end
+
+      if cmd then
+         if cmd == 'br' then -- break line
+            if string.find(line, '%S') then -- there is ALWAYS one more word to print in line, EXCEPT if subText was empty...
+               print(line)
+            end
+            line = indentString
+            lineSize = indent
+         elseif cmd == 'hr' then -- rule
+            if string.find(line, '%S') then -- there is ALWAYS one more word to print in line, EXCEPT if subText was empty...
+               print(line)
+            end
+            line = indentString
+            lineSize = indent
+            print(string.rep(' ', math.ceil(maxLineSize/4)) .. string.rep('-', math.ceil(maxLineSize/2)))
+            newParagraph = false -- it is a bit like outputing a word here so we reset the <p> thing.
+         elseif string.find(cmd, '^indent%-') then -- indent -
+            indent = indent - tonumber(string.match(cmd, '^indent%-(.*)'))
+            indentString = ''
+            for i=1,indent do
+               indentString = indentString .. ' '
+            end
+         elseif string.find(cmd, '^indent%+') then -- indent +
+            indent = indent + tonumber(string.match(cmd, '^indent%+(.*)'))
+            indentString = ''
+            for i=1,indent do
+               indentString = indentString .. ' '
+            end
+         elseif cmd == 'p' then -- new paragraph
+            if not newParagraph then
+               newParagraph = true
+               if string.find(line, '%S') then
+                  print(line)
+               end
+               line = indentString
+               lineSize = indent
+               print()
+               line = line .. ' '
+               lineSize = indent+1
+            end
+         elseif cmd == 'verbatim' then -- verbatim mode my friend
+            newParagraph = false -- err, we definitively starts to write some new stuff here --> new paragraph indeed!!
+            if string.find(line, '%S') then
+               print(line)
+            end
+            line = indentString
+            lineSize = indent
+            local verbatimText, verbatimRest = string.match(text, '^(.-)%%</verbatim>%%(.*)')
+            if verbatimText then
+               text = verbatimRest
+               verbatimText = string.sub(verbatimText, 1, -2) -- suppress the first '\n' right before the </verbatim>
+            else                            -- the guy forgot </verbatim>, all is verbatim!
+--               print('FORGOT </verbatim>')
+               verbatimText = text
+               text = ''
+            end
+            verbatimText = string.sub(verbatimText, 2, -1) -- suppress the first '\n' right after the <verbatim>
+            print('\27[33m' .. verbatimText .. '\27[0m')
+         elseif cmd == 'link' then
+            line = line .. '\27[1;35m'
+         elseif cmd == '/link' or cmd == '/bold' or cmd == '/italic' or cmd == '/bolditalic' or cmd == '/fixed' or cmd == '/boldfixed' or cmd == '/header' or cmd == '/red' then
+            line = line .. '\27[0m'
+         elseif cmd == 'bold' then
+            line = line .. '\27[1m'
+         elseif cmd == 'italic' then
+            line = line .. '\27[32m'
+         elseif cmd == 'bolditalic' then
+            line = line .. '\27[1;32m'
+         elseif cmd == 'fixed' then
+            line = line .. '\27[34m'
+         elseif cmd == 'boldfixed' then
+            line = line .. '\27[1;34m'
+         elseif cmd == 'header' then
+            line = line .. '\27[1;31m'
+         elseif cmd == 'red' then
+            line = line .. '\27[31m'
+         end
+      else
+         break
+      end
+   end
+   if string.find(line, '%S') then
+      print(line)
+   end
+end
+
+function help.printt(z)
+   for k,v in pairs(z) do
+      if type(v) == "string" then
+         print(k)
+         io.write('"')
+         io.write(v)
+         io.write('"')
+         io.write('\n')
+      else
+         print(k, v)
+      end
+      print('------')
+   end
+end
+
+function help.endLists(lists)
+   local text = ''
+   if #lists > 0 then
+      while table.remove(lists) do
+         text = text .. '%<indent-6>%'
+      end
+      text = text .. '%<br>%\n'
+--      print('ENDLIST')
+   end
+   return text
+end
+
+function help.paddedBullet(type, index)
+   if type == '1' then
+      return index .. '.'
+   elseif type == 'a' then
+      return string.char(string.byte('a')+index-1) .. '.'
+   elseif type == 'A' then
+      return string.char(string.byte('A')+index-1) .. '.'
+   elseif type == 'i' then
+      return help.romanNumbering[index] .. '.'
+   elseif type == 'I' then
+      return string.upper(help.romanNumbering[index]) .. '.'
+   else
+      return 'o'
+   end
+end
+
+function help.addListItem(lists, depth, type, item, def)
+   local text = ''
+   if depth > #lists then
+      while depth > #lists do
+         local list = {number=0,type=''}
+         table.insert(lists, list)
+         text = text .. '%<indent+6>%'
+      end
+   else
+      while depth < #lists do
+         table.remove(lists)
+         text = text .. '%<indent-6>%'
+      end
+   end
+
+   local list = lists[depth]
+--   print('LIST: ' .. list.number)
+   if list.type == type then -- err, if it is the same type, we do add
+      list.number = list.number + 1
+   else
+      list.type = type
+      list.number = 1 -- new list in fact
+   end
+   if type == '$' then
+      text = text .. '%<indent-3>%%<br>%\n' .. def -- we add a line with the new thing to be defined
+      text = text .. '%<indent+3>%%<br>%' .. item -- and the new item
+   else
+      local str = help.paddedBullet(type, list.number)
+      text = text .. '%<indent-' .. #str+1 .. '>%%<br>%\n%<red>%' .. str .. '%</red>%' -- we add a line with the new index
+      text = text .. '%<indent+' .. #str+1 .. '>% ' .. item -- and the new item
+   end
+--   print('LISTITEM: ' .. text)
+   return text
+end
+
+function help.addListItemHTML(lists, depth, type, item, def)
+   local text = ''
+   if depth > #lists then
+      while depth > #lists do
+         local list = {number=0,type=''}
+         table.insert(lists, list)
+--         text = text .. '%<indent+6>%'
+      end
+   else
+      while depth < #lists do
+         local elem = table.remove(lists)
+         local _type = elem.type
+         if _type == '' then
+         elseif _type == '$' then
+            text = text .. '</dl>'
+         elseif _type == '1' or _type == 'a' or _type == 'A' or _type == 'i' or _type == 'I' then
+            text = text .. '</ol>'
+         else -- ok, that is a bullet
+            text = text .. '</ul>'
+         end
+         
+      end
+   end
+
+   local list = lists[depth]
+--   print('LIST: ' .. list.number)
+   if list.type == type then -- err, if it is the same type, we do add
+      list.number = list.number + 1
+      if type == '$' then
+         text = text .. '</dd>'
+      elseif type == '1' or type == 'a' or type == 'A' or type == 'i' or type == 'I' then
+         text = text .. '</li><li>'
+      else -- ok, that is a bullet
+         text = text .. '</li><li>'
+      end
+   else
+      list.type = type
+      list.number = 1 -- new list in fact
+      if type == '$' then
+         text = text .. '<dl>'
+      elseif type == '1' then
+         text = text .. '<ol><li>'
+      elseif type == 'a' then
+         text = text .. '<ol style="list-style-type: alpha"><li>'
+      elseif type == 'A' then
+         text = text .. '<ol style="list-style-type: upper-alpha"><li>'
+      elseif type == 'i' then
+         text = text .. '<ol style="list-style-type: roman"><li>'
+      elseif type == 'I' then
+         text = text .. '<ol style="list-style-type: upper-roman"><li>'
+      else -- ok, that is a bullet
+         text = text .. '<ul><li>'
+      end
+   end
+   if type == '$' then
+      text = text .. '<dt>' .. def .. '</dt><dd>' .. item
+   else
+      text = text .. item -- and the new item
+   end
+--   print('LISTITEM: ' .. text)
+   return text
+end
+
+function help.endListsHTML(lists)
+   local text = ''
+   if #lists > 0 then
+--      while table.remove(lists) do
+      while true do
+         local elem = table.remove(lists)
+         if not elem then
+            break
+         end
+         local _type = elem.type
+         if _type == '' then
+         elseif _type == '$' then
+            text = text .. '</dd></dl>'
+         elseif _type == '1' or _type == 'a' or _type == 'A' or _type == 'i' or _type == 'I' then
+            text = text .. '</li></ol>'
+         else -- ok, that is a bullet
+            text = text .. '</li></ul>'
+         end
+      end
+--      end
+--      print('ENDLIST')
+   end
+   return text
+end
+
+function help.renderText(text)
+   local links = {}
+
+   if string.sub(text, -1, -1) ~= '\n' then -- we look for lines, so we need to end by '\n'
+      text = text .. '\n'
+   end
+
+   -- horizontal line
+   text = string.gsub(text, '^%-%-%-+', '\n%%<red>%%%%<hr>%%%%</red>%%')
+   text = string.gsub(text, '\n%-%-%-+', '\n%%<red>%%%%<hr>%%%%</red>%%')
+
+   local isList = false
+   local isVerbatim = false
+   local result = ""
+   local lists = {}
+   for line in string.gmatch(text, "(.-)\n") do
+      local renderedLine
+
+      -- check for lists
+      local listLine = line
+      local spaceLine,restLine = string.match(line, '^(%s*)(.*)')
+      if spaceLine then
+         listLine = string.gsub(spaceLine, '   ', '\t') .. restLine
+      end
+      if isVerbatim then -- ok, we are in verbatim mode, the only thing we want is to escape!
+         if string.match(line, '^%s*</verbatim>%s*') then
+            isVerbatim = false
+            renderedLine = '%</verbatim>%'
+         end
+      elseif string.match(line, '^%s*<verbatim>%s*') then
+         isVerbatim = true
+         renderedLine = '%<verbatim>%'
+      elseif string.find(listLine, '^%s*$') then -- blank line, new paragraph
+         renderedLine = '%<p>%\n'
+         isList = false
+      elseif string.find(listLine, '^%S%S-') then -- no tab, no list
+         isList = false
+      elseif string.find(listLine, '^\t+%S') then -- oh, oh, might be a list!
+         local depth, item, type, def
+--         print('MIGHT BE A LIST: ' .. listLine)
+         depth, item = string.match(listLine, '^(\t+)%* (.*)$')
+         if depth then -- unnumbered
+            renderedLine = help.addListItem(lists, #depth, '*', item)
+            isList = true
+         else
+            depth, type, item = string.match(listLine, '^(\t+)([1AaIi])%. (.*)$') 
+            if depth then -- numbered
+               renderedLine = help.addListItem(lists, #depth, type, item)
+               isList = true
+            else
+               depth, def, item = string.match(listLine, '^(\t+)%$(.+):%s+(.*)$')
+               if depth then -- definition
+                  renderedLine = help.addListItem(lists, #depth, '$', item, def)
+                  isList = true
+               else
+                  item = string.match(listLine, '^\t+(.*)$')
+                  if isList and item then -- addon to previous item
+                     renderedLine = item
+                  else
+                     isList = false -- gasp
+                  end
+               end
+            end
+         end
+      else
+         local item = string.match(listLine, '^\t+%s*(.*)$')
+         if isList and item then -- addon to previous item
+            renderedLine = item
+         else
+            isList = false -- err, was not a list
+         end
+      end
+
+      if not renderedLine then -- we did not transform the line much
+         renderedLine = line
+      end
+
+--      print('line = "' .. line .. '"')
+      if not isList then
+         renderedLine = help.endLists(lists) .. renderedLine
+      end
+
+      -- font stuff
+      if not isVerbatim then
+         renderedLine = ' ' .. renderedLine .. ' '
+         renderedLine = string.gsub(renderedLine, '(%A)==(%S%S-)==(%A)', '%1%%<boldfixed>%%%2%%</boldfixed>%%%3')
+         renderedLine = string.gsub(renderedLine, '(%A)==(%S[^\n]-%S)==(%A)', '%1%%<boldfixed>%%%2%%</boldfixed>%%%3')
+         
+         renderedLine = string.gsub(renderedLine, '(%A)__(%S%S-)__(%A)', '%1%%<bolditalic>%%%2%%</bolditalic>%%%3')
+         renderedLine = string.gsub(renderedLine, '(%A)__(%S[^\n]-%S)__(%A)', '%1%%<bolditalic>%%%2%%</bolditalic>%%%3')
+         
+         renderedLine = string.gsub(renderedLine, '(%A)%*(%S%S-)%*(%A)', '%1%%<bold>%%%2%%</bold>%%%3')
+         renderedLine = string.gsub(renderedLine, '(%A)%*(%S[^\n]-%S)%*(%A)', '%1%%<bold>%%%2%%</bold>%%%3')
+         
+         renderedLine = string.gsub(renderedLine, '(%A)_(%S%S-)_(%A)', '%1%%<italic>%%%2%%</italic>%%%3')
+         renderedLine = string.gsub(renderedLine, '(%A)_(%S[^\n]-%S)_(%A)', '%1%%<italic>%%%2%%</italic>%%%3')
+         
+         renderedLine = string.gsub(renderedLine, '(%A)=(%S%S-)=(%A)', '%1%%<fixed>%%%2%%</fixed>%%%3')
+         renderedLine = string.gsub(renderedLine, '(%A)=(%S[^\n]-%S)=(%A)', '%1%%<fixed>%%%2%%</fixed>%%%3')
+
+         renderedLine = string.sub(renderedLine, 2, -2)
+      end
+
+      -- links
+      if not isVerbatim then
+--         renderedLine = string.gsub(renderedLine, '%[%[([^%]]+)%]%[([^%]]+)%]%]', function (link, linkText)
+         renderedLine = string.gsub(renderedLine, '%[%[(.-)%]%[(.-)%]%]', function (link, linkText)
+--                                                                                     print(link, linkText)
+                                                                                     table.insert(links, link)
+                                                                                     return '%<link>%' .. linkText .. '%</link>% %<link>%[*' .. #links .. ']%</link>%'
+--                                                                                     return '\27[1;35m' .. linkText .. '\27[0m \27[1;35m[*' .. #links .. ']\27[0m'
+                                                                                end)
+      end
+      
+      -- concatenate the stuff my friend...
+      result = result .. '\n' .. renderedLine
+   end
+   text = result
+   
+   return text, links
+end
+
+function help.renderTextHTML(text)
+   local links = {}
+   if string.sub(text, -1, -1) ~= '\n' then -- we look for lines, so we need to end by '\n'
+      text = text .. '\n'
+   end
+
+   -- horizontal line
+   text = string.gsub(text, '^%-%-%-+', '\n<hr>')
+   text = string.gsub(text, '\n%-%-%-+', '\n<hr>')
+
+   local isList = false
+   local isVerbatim = false
+   local result = ""
+   local lists = {}
+   for line in string.gmatch(text, "(.-)\n") do
+      local renderedLine
+
+      -- check for lists
+      local listLine = line
+      local spaceLine,restLine = string.match(line, '^(%s*)(.*)')
+      if spaceLine then
+         listLine = string.gsub(spaceLine, '   ', '\t') .. restLine
+      end
+      if isVerbatim then -- ok, we are in verbatim mode, the only thing we want is to escape!
+         if string.match(line, '^%s*</verbatim>%s*') then
+            isVerbatim = false
+            renderedLine = '</pre>'
+         end
+      elseif string.match(line, '^%s*<verbatim>%s*') then
+         isVerbatim = true
+         renderedLine = '<pre>'
+      elseif string.find(listLine, '^%s*$') then -- blank line, new paragraph
+         renderedLine = '<p>\n'
+         isList = false
+      elseif string.find(listLine, '^%S%S-') then -- no tab, no list
+         isList = false
+      elseif string.find(listLine, '^\t+%S') then -- oh, oh, might be a list!
+         local depth, item, type, def
+--         print('MIGHT BE A LIST: ' .. listLine)
+         depth, item = string.match(listLine, '^(\t+)%* (.*)$')
+         if depth then -- unnumbered
+            renderedLine = help.addListItemHTML(lists, #depth, '*', item)
+            isList = true
+         else
+            depth, type, item = string.match(listLine, '^(\t+)([1AaIi])%. (.*)$') 
+            if depth then -- numbered
+               renderedLine = help.addListItemHTML(lists, #depth, type, item)
+               isList = true
+            else
+               depth, def, item = string.match(listLine, '^(\t+)%$(.+):%s+(.*)$')
+               if depth then -- definition
+                  renderedLine = help.addListItemHTML(lists, #depth, '$', item, def)
+                  isList = true
+               else
+                  item = string.match(listLine, '^\t+(.*)$')
+                  if isList and item then -- addon to previous item
+                     renderedLine = item
+                  else
+                     isList = false -- gasp
+                  end
+               end
+            end
+         end
+      else
+         local item = string.match(listLine, '^\t+%s*(.*)$')
+         if isList and item then -- addon to previous item
+            renderedLine = item
+         else
+            isList = false -- err, was not a list
+         end
+      end
+
+      if not renderedLine then -- we did not transform the line much
+         renderedLine = line
+      end
+
+--      print('line = "' .. line .. '"')
+      if not isList then
+         renderedLine = help.endListsHTML(lists) .. renderedLine
+      end
+
+      -- font stuff
+      if not isVerbatim then
+         renderedLine = ' ' .. renderedLine .. ' '
+
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])==(%S%S-)==([%s%,%.%;%:%(%)%[%]%<%>])', '%1<b><code>%2</code></b>%3')
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])==(%S[^\n]-%S)==([%s%,%.%;%:%(%)%[%]%<%>])', '%1<b><code>%2</code></b>%3')
+         
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])__(%S%S-)__([%s%,%.%;%:%(%)%[%]%<%>])', '%1<b><i>%2</i></b>%3')
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])__(%S[^\n]-%S)__([%s%,%.%;%:%(%)%[%]%<%>])', '%1<b><i>%2</i></b>%3')
+         
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])%*(%S%S-)%*([%s%,%.%;%:%(%)%[%]%<%>])', '%1<b>%2</b>%3')
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])%*(%S[^\n]-%S)%*([%s%,%.%;%:%(%)%[%]%<%>])', '%1<b>%2</b>%3')
+         
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])_(%S%S-)_([%s%,%.%;%:%(%)%[%]%<%>])', '%1<i>%2</i>%3')
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])_(%S[^\n]-%S)_([%s%,%.%;%:%(%)%[%]%<%>])', '%1<i>%2</i>%3')
+         
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])=(%S%S-)=([%s%,%.%;%:%(%)%[%]%<%>])', '%1<code>%2</code>%3')
+         renderedLine = string.gsub(renderedLine, '([%s%,%.%;%:%(%)%[%]%<%>])=(%S[^\n]-%S)=([%s%,%.%;%:%(%)%[%]%<%>])', '%1<code>%2</code>%3')
+
+         renderedLine = string.sub(renderedLine, 2, -2)
+      end
+
+      -- links
+      if not isVerbatim then
+--         renderedLine = string.gsub(renderedLine, '%[%[([^%]]+)%]%[([^%]]+)%]%]', function (link, linkText)
+         if help.linkHTML then
+            renderedLine = string.gsub(renderedLine, '%[%[(.-)%]%[(.-)%]%]', function (link, linkText) --(...) aurait marche
+                                                                                table.insert(links, link)
+                                                                                return help.linkHTML(link, linkText)
+                                                                             end)
+         else
+            renderedLine = string.gsub(renderedLine, '%[%[(.-)%]%[(.-)%]%]', function (link, linkText)
+                                                                                table.insert(links, link)
+                                                                                return '<a href="' .. link .. '">' .. linkText .. '</a>'
+                                                                             end)
+         end
+      end
+      
+      -- concatenate the stuff my friend...
+      result = result .. '\n' .. renderedLine
+   end
+   text = result .. help.endListsHTML(lists) -- we quit properly the lists stuff
+   
+   return text, links
+end
+
+
+function help.printSection(section, indent, maxLineSize)
+   indent = indent or 0
+
+   local text = '%<header>%' .. section.name .. '%</header>%'
+   if section.contents then
+      text = text .. '\n%<indent+1>%%<p>%\n' .. section.contents
+   end
+
+--    printText(section.name, indent, maxLineSize)
+--    if section.contents then
+--       indent = indent + 3
+--       printText(section.contents, indent, maxLineSize)
+--    end
+   if section.sections then
+      text = text .. '%<indent+3>%\n\n%<header>%Sections%</header>%:\n'
+      for _,subSection in ipairs(section.sections) do
+         text = text .. '   1. ' .. subSection.name .. '\n'
+      end
+   end
+   return help.printText(text, indent, maxLineSize)
+end
+
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+
+-- local registeredModules = {}
+
+-- --bof: mieux lors de l'install, sinon on ne sait pas quels
+-- --modules il y a!!
+-- function help.registerModule(moduleName)
+--    if not registeredModules[moduleName] then
+--       registeredModules[moduleName] = false
+--    end
+-- end
+
+-- file contains {tree,anchors,path}
+-- section is a section in the tree
+-- so in track we have the list of {the current file, the current section} nodes
+
+function help.help(what)
+   if not help.loadedFiles then
+      local initPath = help.reducePath("@Torch_INSTALL_HLP@")
+      help.loadedFiles = {}
+      local tree, anchors = help.buildTree(initPath, 'index.hlp')
+      help.loadedFiles[initPath .. '/index.hlp'] = {tree=tree, anchors=anchors, path=initPath}
+      help.currentLinks = {}
+      help.track = { {loadedFile=help.loadedFiles[initPath .. '/index.hlp'], section=tree} }
+   end
+   if what then
+      if type(what) == 'number' then
+         local node = help.track[#help.track]
+         if what == 0 then
+            help.currentLinks = help.printSection(node.section)
+         elseif what > 0 then
+            if node.section.sections and node.section.sections[what] then
+               table.insert(help.track, {loadedFile=node.loadedFile, section=node.section.sections[what]})
+               help.currentLinks = help.printSection(node.section.sections[what])
+            else
+               print('$ Help: invalid section request')
+            end
+         else
+            for i=1,-what do
+               if #help.track > 1 then
+                  table.remove(help.track)
+               else
+                  break
+               end
+            end
+            node = help.track[#help.track]
+            help.currentLinks = help.printSection(node.section)
+         end
+      elseif type(what) == 'string' and string.match(what, '%*%d+') then
+         local node = help.track[#help.track]
+         local link = help.currentLinks[tonumber(string.match(what, '%*(%d+)'))]
+         if link then
+            local section = node.loadedFile.anchors[link]
+            if section then
+               table.insert(help.track, {loadedFile=node.loadedFile, section=section})
+               help.currentLinks = help.printSection(section)
+            else
+               -- on gere Zozo.hlp#toto
+               local fileLink = link
+               local anchor = string.match(link, '^.*(#.*)$')
+               if anchor then
+                  fileLink = string.match(link, '^(.*)#.*$')
+               end
+--               print('anchor and fileLink', anchor, fileLink, #fileLink)
+               local newFile = help.reducePath(node.loadedFile.path .. '/' .. fileLink)               
+               local f
+               if fileLink and #fileLink > 0 then
+                  f = io.open(newFile, 'r')
+               end
+               if f then
+                  f:close()
+                  local newPath, newLink = help.splitPath(newFile)
+--                  print('trying to open', newPath, newLink)
+                  if not help.loadedFiles[newFile] then
+                     local tree, anchors = help.buildTree(newPath, newLink)
+                     help.loadedFiles[newFile] = {tree=tree, anchors=anchors, path=newPath}
+                  end
+                  if anchor then
+                     local section = help.loadedFiles[newFile].anchors[anchor]
+                     if section then
+                        table.insert(help.track, {loadedFile=help.loadedFiles[newFile], section=section})
+                        help.currentLinks = help.printSection(section)
+                     else
+                        print('$ Help: invalid anchor <' .. anchor .. '> in file <' .. newFile .. '>')
+                     end
+                  else
+                     table.insert(help.track, {loadedFile=help.loadedFiles[newFile], section=help.loadedFiles[newFile].tree})
+                     help.currentLinks = help.printSection(help.loadedFiles[newFile].tree)
+                  end
+               else
+                  print('! Help: External link to <' .. link .. '>')
+               end
+            end
+         else
+            print('$ Help: invalid link request')
+         end
+      else
+         print('! Help: Sorry, your request is not supported yet...')
+      end
+   else
+      while #help.track ~= 1 do
+         table.remove(help.track)
+      end
+      help.currentLinks = help.printSection(help.track[1].section)
+   end
+end
+
+_G.help.help = help.help

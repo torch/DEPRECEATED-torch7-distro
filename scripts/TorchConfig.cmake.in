@@ -1,0 +1,52 @@
+# -*- cmake -*-
+
+IF(COMMAND CMAKE_POLICY)
+  CMAKE_POLICY(VERSION 2.6)
+ENDIF(COMMAND CMAKE_POLICY)
+
+IF (WIN32)
+  CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
+ELSEIF (APPLE)
+  CMAKE_MINIMUM_REQUIRED(VERSION 2.4.8 FATAL_ERROR)
+ELSE (WIN32)
+  CMAKE_MINIMUM_REQUIRED(VERSION 2.4.7 FATAL_ERROR)
+ENDIF(WIN32)
+
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${Torch_DIR})
+
+SET(Lua_DIR ${Torch_DIR} CACHE PATH "Where to find LuaConfig.cmake")
+SET(luaT_DIR ${Torch_DIR} CACHE PATH "Where to find luaTConfig.cmake")
+SET(TH_DIR ${Torch_DIR} CACHE PATH "Where to find THConfig.cmake")
+
+FIND_PACKAGE(Lua)
+FIND_PACKAGE(luaT)
+FIND_PACKAGE(TH)
+
+INCLUDE(CMakeImportBuildSettings)
+
+MESSAGE(STATUS "Import build settings from Torch...")
+
+# CMAKE_IMPORT_BUILD_SETTINGS REALLY SUX. REALLY.
+# Could have been a nice feature, but of course it is fucked up.
+# CMAKE_IMPORT_BUILD_SETTINGS(${Torch_DIR}/TorchBuildSettings.cmake)
+INCLUDE(${Torch_DIR}/TorchBuildSettings.cmake)
+SET(BUILD_SETTINGS "C_COMPILER" "C_FLAGS" "C_FLAGS_DEBUG" "C_FLAGS_RELEASE" "C_FLAGS_MINSIZEREL" "C_FLAGS_RELWITHDEBINFO"
+                   "CXX_COMPILER" "CXX_FLAGS" "CXX_FLAGS_DEBUG" "CXX_FLAGS_RELEASE" "CXX_FLAGS_MINSIZEREL" "CXX_FLAGS_RELWITHDEBINFO"
+                   "BUILD_TYPE" "BUILD_TOOL")
+
+FOREACH(_setting ${BUILD_SETTINGS})
+  SET(CMAKE_${_setting} ${CMAKE_BUILD_SETTING_${_setting}} CACHE STRING "Torch ${_setting} -- do not touch" FORCE)
+ENDFOREACH(_setting ${BUILD_SETTINGS})
+
+# We also force the install path
+INCLUDE(TorchPaths)
+SET(CMAKE_INSTALL_PREFIX "${Torch_INSTALL_PREFIX}" 
+    CACHE PATH "Torch install prefix -- do not touch" FORCE)
+
+##########
+
+# Help not supported
+MACRO(ADD_TORCH_HELP)
+ENDMACRO(ADD_TORCH_HELP)
+
+INCLUDE(TorchPackage)
