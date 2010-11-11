@@ -44,7 +44,7 @@ INSTALL(FILES
           THLogAdd.h
           THRandom.h
           THStorage.h
-          THStorageGen.h
+          generic/THStorage.h
           THTensor.h
           THTensorGen.h
           THTensorApply.h

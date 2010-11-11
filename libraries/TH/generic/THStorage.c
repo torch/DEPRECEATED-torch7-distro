@@ -1,33 +1,61 @@
-/* Storage type */
-#define STORAGE_T_(TYPE) TH##TYPE##Storage
-#define STORAGE_T(TYPE) STORAGE_T_(TYPE)
-#define STORAGE STORAGE_T(CAP_TYPE)
+#ifndef TH_GENERIC_FILE
+#define TH_GENERIC_FILE "generic/THStorage.c"
+#else
 
-/* Function name for a Storage */
-#define STORAGE_FUNC_TN_(TYPE,NAME) TH##TYPE##Storage_##NAME
-#define STORAGE_FUNC_TN(TYPE, NAME) STORAGE_FUNC_TN_(TYPE,NAME) 
-#define STORAGE_FUNC(NAME) STORAGE_FUNC_TN(CAP_TYPE, NAME)
-
-STORAGE* STORAGE_FUNC(new)(void)
+THStorage* THStorage_(new)(void)
 {
-  return STORAGE_FUNC(newWithSize)(0);
+  return THStorage_(newWithSize)(0);
 }
 
-STORAGE* STORAGE_FUNC(newWithSize)(long size)
+THStorage* THStorage_(newWithSize)(long size)
 {
-  STORAGE *storage = THAlloc(sizeof(STORAGE));
-  storage->data = THAlloc(sizeof(TYPE)*size);
+  THStorage *storage = THAlloc(sizeof(THStorage));
+  storage->data = THAlloc(sizeof(real)*size);
   storage->size = size;
   storage->refcount = 1;
   storage->isMapped = 0;
   return storage;
 }
 
+THStorage* THStorage_(newWithSize1)(real data0)
+{
+  THStorage *self = THStorage_(newWithSize)(1);
+  self->data[0] = data0;
+  return self;
+}
+
+THStorage* THStorage_(newWithSize2)(real data0, real data1)
+{
+  THStorage *self = THStorage_(newWithSize)(2);
+  self->data[0] = data0;
+  self->data[1] = data1;
+  return self;
+}
+
+THStorage* THStorage_(newWithSize3)(real data0, real data1, real data2)
+{
+  THStorage *self = THStorage_(newWithSize)(3);
+  self->data[0] = data0;
+  self->data[1] = data1;
+  self->data[2] = data2;
+  return self;
+}
+
+THStorage* THStorage_(newWithSize4)(real data0, real data1, real data2, real data3)
+{
+  THStorage *self = THStorage_(newWithSize)(4);
+  self->data[0] = data0;
+  self->data[1] = data1;
+  self->data[2] = data2;
+  self->data[3] = data3;
+  return self;
+}
+
 #if defined(_WIN32) || defined(HAVE_MMAP)
 
-STORAGE* STORAGE_FUNC(newWithMapping)(const char *fileName, int isShared)
+THStorage* THStorage_(newWithMapping)(const char *fileName, int isShared)
 {
-  STORAGE *storage = THAlloc(sizeof(STORAGE));
+  THStorage *storage = THAlloc(sizeof(THStorage));
   long size;
 
   /* check size */
@@ -37,7 +65,7 @@ STORAGE* STORAGE_FUNC(newWithMapping)(const char *fileName, int isShared)
   fseek(f, 0, SEEK_END);
   size = ftell(f);
   fclose(f);
-  size /= sizeof(TYPE);
+  size /= sizeof(real);
 
 #ifdef _WIN32
   {
@@ -60,11 +88,11 @@ STORAGE* STORAGE_FUNC(newWithMapping)(const char *fileName, int isShared)
     }
 
 #if SIZEOF_SIZE_T > 4
-    size_hi = (DWORD)((size*sizeof(TYPE)) >> 32);
-    size_lo = (DWORD)((size*sizeof(TYPE)) & 0xFFFFFFFF);
+    size_hi = (DWORD)((size*sizeof(real)) >> 32);
+    size_lo = (DWORD)((size*sizeof(real)) & 0xFFFFFFFF);
 #else
     size_hi = 0;
-    size_lo = (DWORD)(size*sizeof(TYPE));
+    size_lo = (DWORD)(size*sizeof(real));
 #endif
 
     /* get map handle */
@@ -80,7 +108,7 @@ STORAGE* STORAGE_FUNC(newWithMapping)(const char *fileName, int isShared)
     }
 
     /* map the stuff */
-    storage = STORAGE_FUNC(new)();
+    storage = THStorage_(new)();
     if(isShared)
       storage->data = MapViewOfFile(hmfile, FILE_MAP_ALL_ACCESS, 0, 0, 0);
     else
@@ -89,7 +117,7 @@ STORAGE* STORAGE_FUNC(newWithMapping)(const char *fileName, int isShared)
     storage->size = size;
     if(storage->data == NULL)
     {
-      STORAGE_FUNC(free)(storage);
+      THStorage_(free)(storage);
       THError("memory map failed on file <%s>", fileName);
     }
     CloseHandle(hfile); 
@@ -113,17 +141,17 @@ STORAGE* STORAGE_FUNC(newWithMapping)(const char *fileName, int isShared)
     }
     
     /* map it */
-    storage = STORAGE_FUNC(new)();
+    storage = THStorage_(new)();
     if(isShared)
-      storage->data = mmap(NULL, size*sizeof(TYPE), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+      storage->data = mmap(NULL, size*sizeof(real), PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
     else
-      storage->data = mmap(NULL, size*sizeof(TYPE), PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+      storage->data = mmap(NULL, size*sizeof(real), PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
 
     storage->size = size;
     if(storage->data == MAP_FAILED)
     {
       storage->data = NULL; /* let's be sure it is NULL before calling free() */
-      STORAGE_FUNC(free)(storage);
+      THStorage_(free)(storage);
       THError("memory map failed on file <%s>", fileName);
     }
     close (fd);
@@ -137,20 +165,20 @@ STORAGE* STORAGE_FUNC(newWithMapping)(const char *fileName, int isShared)
 
 #else
 
-STORAGE* STORAGE_FUNC(newWithMapping)(const char *fileName, int isShared)
+THStorage* THStorage_(newWithMapping)(const char *fileName, int isShared)
 {
   THError("Mapped file Storages are not supported on your system");
 }
 
 #endif
 
-void STORAGE_FUNC(retain)(STORAGE *storage)
+void THStorage_(retain)(THStorage *storage)
 {
   if(storage)
     ++storage->refcount;
 }
 
-void STORAGE_FUNC(free)(STORAGE *storage)
+void THStorage_(free)(THStorage *storage)
 {
   if(!storage)
     return;
@@ -165,7 +193,7 @@ void STORAGE_FUNC(free)(STORAGE *storage)
 #ifdef _WIN32
         if(!UnmapViewOfFile((LPINT)storage->data))
 #else
-        if (munmap(storage->data, storage->size*sizeof(TYPE)))
+        if (munmap(storage->data, storage->size*sizeof(real)))
 #endif
           THError("could not unmap the shared memory file");
       }
@@ -177,22 +205,22 @@ void STORAGE_FUNC(free)(STORAGE *storage)
   }
 }
 
-void STORAGE_FUNC(resize)(STORAGE *storage, long size, int keepContent)
+void THStorage_(resize)(THStorage *storage, long size, int keepContent)
 {
   if(keepContent)
   {
-    storage->data = THRealloc(storage->data, sizeof(TYPE)*size);
+    storage->data = THRealloc(storage->data, sizeof(real)*size);
     storage->size = size;
   }
   else
   {
     THFree(storage->data);
-    storage->data = THAlloc(sizeof(TYPE)*size);
+    storage->data = THAlloc(sizeof(real)*size);
     storage->size = size;
   }
 }
 
-void STORAGE_FUNC(copy) (STORAGE *storage, STORAGE *src)
+void THStorage_(copy)(THStorage *storage, THStorage *src)
 {
   long i;
   THArgCheck(storage->size == src->size, 2, "size mismatch");
@@ -200,26 +228,28 @@ void STORAGE_FUNC(copy) (STORAGE *storage, STORAGE *src)
     storage->data[i] = src->data[i];
 }
 
-void STORAGE_FUNC(fill)(STORAGE *storage, TYPE value)
+void THStorage_(fill)(THStorage *storage, real value)
 {
   long i;
   for(i = 0; i < storage->size; i++)
     storage->data[i] = value;
 }
 
-#define IMPLEMENT_STORAGE_COPY(TYPENAMESRC) \
-void STORAGE_FUNC(copy##TYPENAMESRC)(STORAGE *storage, TH##TYPENAMESRC##Storage *src) \
+#define IMPLEMENT_THStorage_COPY(TYPENAMESRC) \
+void THStorage_(copy##TYPENAMESRC)(THStorage *storage, TH##TYPENAMESRC##Storage *src) \
 { \
   long i; \
   THArgCheck(storage->size == src->size, 2, "size mismatch"); \
   for(i = 0; i < storage->size; i++) \
-    storage->data[i] = (TYPE)src->data[i]; \
+    storage->data[i] = (real)src->data[i]; \
 }
 
-IMPLEMENT_STORAGE_COPY(Byte)
-IMPLEMENT_STORAGE_COPY(Char)
-IMPLEMENT_STORAGE_COPY(Short)
-IMPLEMENT_STORAGE_COPY(Int)
-IMPLEMENT_STORAGE_COPY(Long)
-IMPLEMENT_STORAGE_COPY(Float)
-IMPLEMENT_STORAGE_COPY(Double)
+IMPLEMENT_THStorage_COPY(Byte)
+IMPLEMENT_THStorage_COPY(Char)
+IMPLEMENT_THStorage_COPY(Short)
+IMPLEMENT_THStorage_COPY(Int)
+IMPLEMENT_THStorage_COPY(Long)
+IMPLEMENT_THStorage_COPY(Float)
+IMPLEMENT_THStorage_COPY(Double)
+
+#endif

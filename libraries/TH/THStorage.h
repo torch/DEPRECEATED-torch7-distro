@@ -3,46 +3,24 @@
 
 #include "THGeneral.h"
 
-#define TYPE unsigned char
-#define CAP_TYPE Byte
-#include "THStorageGen.h"
-#undef TYPE
-#undef CAP_TYPE
+/* stuff for mapped files */
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
-#define TYPE char
-#define CAP_TYPE Char
-#include "THStorageGen.h"
-#undef TYPE
-#undef CAP_TYPE
+#if HAVE_MMAP
+#include <sys/types.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#endif
+/* end of stuff for mapped files */
 
-#define TYPE short
-#define CAP_TYPE Short
-#include "THStorageGen.h"
-#undef TYPE
-#undef CAP_TYPE
+#define THStorage        TH_CONCAT_3(TH,Real,Storage)
+#define THStorage_(NAME) TH_CONCAT_4(TH,Real,Storage_,NAME)
 
-#define TYPE int
-#define CAP_TYPE Int
-#include "THStorageGen.h"
-#undef TYPE
-#undef CAP_TYPE
-
-#define TYPE long
-#define CAP_TYPE Long
-#include "THStorageGen.h"
-#undef TYPE
-#undef CAP_TYPE
-
-#define TYPE float
-#define CAP_TYPE Float
-#include "THStorageGen.h"
-#undef TYPE
-#undef CAP_TYPE
-
-#define TYPE double
-#define CAP_TYPE Double
-#include "THStorageGen.h"
-#undef TYPE
-#undef CAP_TYPE
+#include "generic/THStorage.h"
+#include "THGenerateAllTypes.h"
 
 #endif
