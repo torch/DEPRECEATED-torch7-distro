@@ -5,7 +5,9 @@ SET(hdr
   THBlas.h THTensorMath.h THLogAdd.h THRandom.h)
 SET(src 
   THGeneral.c THStorage.c THTensor.c THBlas.c 
-  THTensorMath.c THLogAdd.c THRandom.c)
+  THTensorMath.c THLogAdd.c THRandom.c
+  THTensorRandom.c
+  THLab.c)
 SET(src ${src} ${hdr})
 
 IF(UNIX)

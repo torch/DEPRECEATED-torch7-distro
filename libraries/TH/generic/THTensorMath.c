@@ -4,17 +4,17 @@
 
 void THTensor_(fill)(THTensor *tensor, real value)
 {
-  TH_TENSOR_APPLY(real, tensor, *tensor_p = value;);
+  TH_TENSOR_APPLY(real, tensor, *tensor_data = value;);
 }
 
 void THTensor_(zero)(THTensor *tensor)
 {
-  TH_TENSOR_APPLY(real, tensor, *tensor_p = 0;);
+  TH_TENSOR_APPLY(real, tensor, *tensor_data = 0;);
 }
 
 void THTensor_(add)(THTensor *tensor, real value)
 {
-  TH_TENSOR_APPLY(real, tensor, *tensor_p += value;);
+  TH_TENSOR_APPLY(real, tensor, *tensor_data += value;);
 }
 
 void THTensor_(addTensor)(THTensor *tensor, real value, THTensor *src)
@@ -22,11 +22,11 @@ void THTensor_(addTensor)(THTensor *tensor, real value, THTensor *src)
   /* we use a trick here. careful with that. */
   TH_TENSOR_APPLY2(real, tensor, real, src,
                    long sz = (tensor_size-tensor_i < src_size-src_i ? tensor_size-tensor_i : src_size-src_i);
-                   THBlas_(axpy)(sz, value, src_p, src_stride, tensor_p, tensor_stride);
+                   THBlas_(axpy)(sz, value, src_data, src_stride, tensor_data, tensor_stride);
                    tensor_i += sz;
                    src_i += sz;
-                   tensor_p += sz*tensor_stride;
-                   src_p += sz*src_stride; 
+                   tensor_data += sz*tensor_stride;
+                   src_data += sz*src_stride; 
                    break;);
 }
 
@@ -34,17 +34,17 @@ void THTensor_(mul)(THTensor *tensor, real value)
 {
   /* we use a trick here. careful with that. */
   /* we do not have to increment stuff with this version (contrary to APPLY2 and APPLY3) */
-  TH_TENSOR_APPLY(real, tensor, THBlas_(scal)(tensor_size, value, tensor_p, tensor_stride); break;);
+  TH_TENSOR_APPLY(real, tensor, THBlas_(scal)(tensor_size, value, tensor_data, tensor_stride); break;);
 }
 
 void THTensor_(cmul)(THTensor *tensor, THTensor *src)
 {
-  TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_p *= *src_p;);
+  TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data *= *src_data;);
 }
 
 void THTensor_(addcmul)(THTensor *tensor, real value, THTensor *src1, THTensor *src2)
 {
-  TH_TENSOR_APPLY3(real, tensor, real, src1, real, src2, *tensor_p += value * *src1_p * *src2_p;);
+  TH_TENSOR_APPLY3(real, tensor, real, src1, real, src2, *tensor_data += value * *src1_data * *src2_data;);
 }
 
 void THTensor_(div)(THTensor *tensor, real value)
@@ -52,17 +52,17 @@ void THTensor_(div)(THTensor *tensor, real value)
   THArgCheck(value != 0, 2, "division by 0");
   /* we use a trick here. careful with that. */
   /* we do not have to increment stuff with this version (contrary to APPLY2 and APPLY3) */
-  TH_TENSOR_APPLY(real, tensor, THBlas_(scal)(tensor_size, 1/value, tensor_p, tensor_stride); break;);
+  TH_TENSOR_APPLY(real, tensor, THBlas_(scal)(tensor_size, 1/value, tensor_data, tensor_stride); break;);
 }
 
 void THTensor_(cdiv)(THTensor *tensor, THTensor *src)
 {
-  TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_p /= *src_p;);
+  TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data /= *src_data;);
 }
 
 void THTensor_(addcdiv)(THTensor *tensor, real value, THTensor *src1, THTensor *src2)
 {
-  TH_TENSOR_APPLY3(real, tensor, real, src1, real, src2, *tensor_p += value * *src1_p / *src2_p;);
+  TH_TENSOR_APPLY3(real, tensor, real, src1, real, src2, *tensor_data += value * *src1_data / *src2_data;);
 }
 
 real THTensor_(dot)(THTensor *tensor, THTensor *src)
@@ -71,11 +71,11 @@ real THTensor_(dot)(THTensor *tensor, THTensor *src)
   /* we use a trick here. careful with that. */
   TH_TENSOR_APPLY2(real, tensor, real, src,
                    long sz = (tensor_size-tensor_i < src_size-src_i ? tensor_size-tensor_i : src_size-src_i);
-                   sum += THBlas_(dot)(sz, src_p, src_stride, tensor_p, tensor_stride);
+                   sum += THBlas_(dot)(sz, src_data, src_stride, tensor_data, tensor_stride);
                    tensor_i += sz;
                    src_i += sz;
-                   tensor_p += sz*tensor_stride;
-                   src_p += sz*src_stride; 
+                   tensor_data += sz*tensor_stride;
+                   src_data += sz*src_stride; 
                    break;);
   return sum; 
 }
@@ -83,34 +83,34 @@ real THTensor_(dot)(THTensor *tensor, THTensor *src)
 real THTensor_(min)(THTensor *tensor)
 {
   real theMin = THTensor_(get1d)(tensor, 0);
-  TH_TENSOR_APPLY(real, tensor, if(*tensor_p < theMin) theMin = *tensor_p;);
+  TH_TENSOR_APPLY(real, tensor, if(*tensor_data < theMin) theMin = *tensor_data;);
   return theMin; 
 }
 
 real THTensor_(max)(THTensor *tensor)
 {
   real theMax = THTensor_(get1d)(tensor, 0);
-  TH_TENSOR_APPLY(real, tensor, if(*tensor_p > theMax) theMax = *tensor_p;);
+  TH_TENSOR_APPLY(real, tensor, if(*tensor_data > theMax) theMax = *tensor_data;);
   return theMax; 
 }
 
 real THTensor_(sum)(THTensor *tensor)
 {
   real sum = 0;
-  TH_TENSOR_APPLY(real, tensor, sum += *tensor_p;);
+  TH_TENSOR_APPLY(real, tensor, sum += *tensor_data;);
   return sum;
 }
 
 #define TENSOR_IMPLEMENT_BASIC_FUNCTION(NAME, CFUNC)              \
   void THTensor_(NAME)(THTensor *tensor)                          \
   {                                                               \
-    TH_TENSOR_APPLY(real, tensor, *tensor_p = CFUNC(*tensor_p);); \
+    TH_TENSOR_APPLY(real, tensor, *tensor_data = CFUNC(*tensor_data);); \
   }
 
 #define TENSOR_IMPLEMENT_BASIC_FUNCTION_VALUE(NAME, CFUNC)              \
   void THTensor_(NAME)(THTensor *tensor, real value)                    \
   {                                                                     \
-    TH_TENSOR_APPLY(real, tensor, *tensor_p = CFUNC(*tensor_p, value);); \
+    TH_TENSOR_APPLY(real, tensor, *tensor_data = CFUNC(*tensor_data, value);); \
   }
 
 TENSOR_IMPLEMENT_BASIC_FUNCTION(log, log)
@@ -143,7 +143,7 @@ real THTensor_(var)(THTensor *tensor)
 { 
   real mean = THTensor_(mean)(tensor);
   real sum = 0;
-  TH_TENSOR_APPLY(real, tensor, sum += (*tensor_p - mean)*(*tensor_p - mean););
+  TH_TENSOR_APPLY(real, tensor, sum += (*tensor_data - mean)*(*tensor_data - mean););
   sum /= (THTensor_(nElement)(tensor)-1);
   return sum;
 }
@@ -156,7 +156,7 @@ real THTensor_(std)(THTensor *tensor)
 real THTensor_(norm)(THTensor *tensor, real value)
 { 
   real sum = 0;
-  TH_TENSOR_APPLY(real, tensor, sum += pow(fabs(*tensor_p), value););
+  TH_TENSOR_APPLY(real, tensor, sum += pow(fabs(*tensor_data), value););
   return pow(sum, 1.0/value);
 }
 
@@ -164,7 +164,7 @@ real THTensor_(dist)(THTensor *tensor, THTensor *src, real value)
 { 
   real sum = 0;
   TH_TENSOR_APPLY2(real, tensor, real, src, 
-	sum += pow(fabs(*tensor_p - *src_p), value);)
+	sum += pow(fabs(*tensor_data - *src_data), value);)
   return pow(sum, 1.0/value);
 }
 
@@ -266,7 +266,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
     THError("size mismatch"); 
 
   /* tensor */
-  if(tensor->stride[0] == 0)
+  if(tensor->stride[0] == 1)
   {
     transpose = 'n';
     tensor_ = tensor;
