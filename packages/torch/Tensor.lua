@@ -10,7 +10,7 @@ local function Storage__printformat(self)
          end
       end
    end
-   local tensor = torch.Tensor(torch.DoubleStorage(self:size()):copy(self), 1, self:size()):abs()
+   local tensor = torch.DoubleTensor(torch.DoubleStorage(self:size()):copy(self), 1, self:size()):abs()
    local expMin = tensor:min()
    if expMin ~= 0 then
       expMin = math.floor(math.log10(expMin)) + 1
@@ -176,7 +176,7 @@ local function Tensor__tostring(self)
    if self:nDimension() == 0 then
       str = str .. '[' .. torch.typename(self) .. ' with no dimension]\n'
    else
-      local tensor = torch.Tensor():resize(self:size()):copy(self)
+      local tensor = torch.DoubleTensor():resize(self:size()):copy(self)
       if tensor:nDimension() == 1 then
          local format,scale,sz = Storage__printformat(tensor:storage())
          if scale then
@@ -213,4 +213,4 @@ rawset(torch.getmetatable('torch.ShortTensor'), '__tostring__', Tensor__tostring
 rawset(torch.getmetatable('torch.IntTensor'), '__tostring__', Tensor__tostring)
 rawset(torch.getmetatable('torch.LongTensor'), '__tostring__', Tensor__tostring)
 rawset(torch.getmetatable('torch.FloatTensor'), '__tostring__', Tensor__tostring)
-rawset(torch.getmetatable('torch.Tensor'), '__tostring__', Tensor__tostring)
+rawset(torch.getmetatable('torch.DoubleTensor'), '__tostring__', Tensor__tostring)

@@ -440,7 +440,7 @@ int luaT_lua_newmetatable(lua_State *L)
   else
     lua_pushvalue(L, LUA_GLOBALSINDEX);
   if(!lua_istable(L, 6))
-    luaL_error(L, "while creating metatable %s: bad ardument #1 (%s is an invalid module name)", tname, luaT_classmodulename(tname));
+    luaL_error(L, "while creating metatable %s: bad argument #1 (%s is an invalid module name)", tname, luaT_classmodulename(tname));
 
   /* we first create the new metaclass if we have to */
   if(!luaT_typename2id(L, tname))

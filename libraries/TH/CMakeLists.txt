@@ -48,10 +48,9 @@ INSTALL(FILES
           THStorage.h
           generic/THStorage.h
           THTensor.h
-          THTensorGen.h
+          generic/THTensor.h
           THTensorApply.h
           THTensorDimApply.h
-          THTensorMath.h
         DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}/TH")
 
 # Create THConfig.cmake

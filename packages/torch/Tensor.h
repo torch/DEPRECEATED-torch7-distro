@@ -10,6 +10,6 @@ void torch_ShortTensor_init(lua_State *L);
 void torch_IntTensor_init(lua_State *L);
 void torch_LongTensor_init(lua_State *L);
 void torch_FloatTensor_init(lua_State *L);
-void torch_Tensor_init(lua_State *L);
+void torch_DoubleTensor_init(lua_State *L);
 
 #endif

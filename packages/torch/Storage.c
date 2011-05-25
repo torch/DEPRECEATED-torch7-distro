@@ -9,46 +9,11 @@ static const void *torch_LongStorage_id = NULL;
 static const void *torch_FloatStorage_id = NULL;
 static const void *torch_DoubleStorage_id = NULL;
 
-#define TYPE unsigned char
-#define CAP_TYPE Byte
-#include "StorageGen.c"
-#undef TYPE
-#undef CAP_TYPE
+#define torch_Storage_(NAME) TH_CONCAT_4(torch_,Real,Storage_,NAME)
+#define torch_Storage_id TH_CONCAT_3(torch_,Real,Storage_id)
+#define torch_File_readReal TH_CONCAT_2(torch_File_read, Real)
+#define torch_File_writeReal TH_CONCAT_2(torch_File_write, Real)
+#define STRING_torchStorage TH_CONCAT_STRING_3(torch.,Real,Storage)
 
-#define TYPE char
-#define CAP_TYPE Char
-#define CHAR_STORAGE_STRING
-#include "StorageGen.c"
-#undef TYPE
-#undef CAP_TYPE
-#undef CHAR_STORAGE_STRING
-
-#define TYPE short
-#define CAP_TYPE Short
-#include "StorageGen.c"
-#undef TYPE
-#undef CAP_TYPE
-
-#define TYPE int
-#define CAP_TYPE Int
-#include "StorageGen.c"
-#undef TYPE
-#undef CAP_TYPE
-
-#define TYPE long
-#define CAP_TYPE Long
-#include "StorageGen.c"
-#undef TYPE
-#undef CAP_TYPE
-
-#define TYPE float
-#define CAP_TYPE Float
-#include "StorageGen.c"
-#undef TYPE
-#undef CAP_TYPE
-
-#define TYPE double
-#define CAP_TYPE Double
-#include "StorageGen.c"
-#undef TYPE
-#undef CAP_TYPE
+#include "generic/Storage.c"
+#include "THGenerateAllTypes.h"

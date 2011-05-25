@@ -68,7 +68,7 @@ static int torch_DiskFile_read##TYPEC(lua_State *L) \
     if(file->flags.isQuiet) \
     { \
       if(storage && !luaT_toudata(L, 2, torch_##TYPEC##Storage_id)) /* resize if it is mine */ \
-        TH##TYPEC##Storage_resize(storage, (result > 0 ? result : 0), 1); \
+        TH##TYPEC##Storage_resize(storage, (result > 0 ? result : 0)); \
     } \
     else \
     { \

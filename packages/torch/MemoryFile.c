@@ -53,8 +53,7 @@ static void torch_MemoryFile_c_grow(MemoryFile *file, long size)
   missingSpace = size-file->storage->size+1; /* +1 for the '\0' */
   THCharStorage_resize(file->storage, (file->storage->size/2 > missingSpace ?
                                        file->storage->size + (file->storage->size/2)
-                                       : file->storage->size + missingSpace),
-                       1);
+                                       : file->storage->size + missingSpace));
 }
 
 static int torch_MemoryFile_c_mode(const char *mode, int *isReadable, int *isWritable)
@@ -160,7 +159,7 @@ static int torch_MemoryFile_read##TYPEC(lua_State *L) \
     if(file->flags.isQuiet) \
     { \
       if(storage && !luaT_toudata(L, 2, torch_##TYPEC##Storage_id)) /* resize if it is mine */ \
-        TH##TYPEC##Storage_resize(storage, (result > 0 ? result : 0), 1); \
+        TH##TYPEC##Storage_resize(storage, (result > 0 ? result : 0)); \
     } \
     else \
     { \
@@ -302,7 +301,7 @@ static int torch_MemoryFile_storage(lua_State *L)
   MemoryFile *file = luaT_checkudata(L, 1, torch_MemoryFile_id);
   if(!file->storage)
     luaL_error(L, "attempt to use a closed file");
-  THCharStorage_resize(file->storage, file->size+1, 1);
+  THCharStorage_resize(file->storage, file->size+1);
   file->storage->refcount++;
   luaT_pushudata(L, file->storage, torch_CharStorage_id);
   return 1;

@@ -225,7 +225,6 @@ void THTensor_(narrow)(THTensor *self, int dimension, long firstIndex, long size
   self->size[dimension] = size;
 }
 
-
 void THTensor_(select)(THTensor *self, int dimension, long sliceIndex)
 {
   int d;
@@ -242,7 +241,6 @@ void THTensor_(select)(THTensor *self, int dimension, long sliceIndex)
   }
   self->nDimension--;
 }
-
 
 void THTensor_(transpose)(THTensor *self, int dimension1, int dimension2)
 {
