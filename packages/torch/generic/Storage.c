@@ -130,20 +130,20 @@ static int torch_Storage_(__index__)(lua_State *L)
   }
 }
 
-#ifdef TH_REAL_IS_CHAR
+#if defined(TH_REAL_IS_CHAR) || defined(TH_REAL_IS_BYTE)
 static int torch_Storage_(string)(lua_State *L)
 {
-  THCharStorage *storage = luaT_checkudata(L, 1, torch_CharStorage_id);
+  THStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
   if(lua_isstring(L, -1))
   {
     size_t len = 0;
     const char *str = lua_tolstring(L, -1, &len);
-    THCharStorage_resize(storage, len);
+    THStorage_(resize)(storage, len);
     memmove(storage->data, str, len);
     lua_settop(L, 1);
   }
   else
-    lua_pushlstring(L, storage->data, storage->size);
+    lua_pushlstring(L, (char*)storage->data, storage->size);
 
   return 1; /* either storage or string */
 }
@@ -193,7 +193,7 @@ static const struct luaL_Reg torch_Storage_(_) [] = {
   {"copy", torch_Storage_(copy)},
   {"write", torch_Storage_(write)},
   {"read", torch_Storage_(read)},
-#ifdef TH_REAL_IS_CHAR
+#if defined(TH_REAL_IS_CHAR) || defined(TH_REAL_IS_BYTE)
   {"string", torch_Storage_(string)},
 #endif
   {NULL, NULL}

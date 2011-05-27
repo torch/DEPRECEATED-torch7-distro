@@ -120,7 +120,7 @@ static int torch_Tensor_(narrow)(lua_State *L)
   THArgCheck( (firstIndex >= 0) && (firstIndex < tensor->size[dimension]), 3, "out of range");
   THArgCheck( (size > 0) && (firstIndex+size <= tensor->size[dimension]), 4, "out of range");
 */
-  tensor = THTensor_(new)();
+  tensor = THTensor_(newWithTensor)(tensor);
   THTensor_(narrow)(tensor, dimension, firstIndex, size);
   luaT_pushudata(L, tensor, torch_Tensor_id);
   return 1;

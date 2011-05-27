@@ -301,12 +301,15 @@ int THTensor_(isContiguous)(THTensor *self)
 {
   long z = 1;
   int d;
-  for(d = 0; d < self->nDimension; d++)
+  for(d = self->nDimension-1; d >= 0; d--)
   {
-    if(self->stride[d] == z)
-      z *= self->size[d];
-    else
-      return 0;
+    if(self->size[d] != 1)
+    {
+      if(self->stride[d] == z)
+        z *= self->size[d];
+      else
+        return 0;
+    }
   }
   return 1;
 }
@@ -356,13 +359,12 @@ static void THTensor_(rawInit)(THTensor *self, THStorage *storage, long storageO
     THStorage_(retain)(self->storage);
   }
   else
-    self->storage = THStorage_(new)();
+    self->storage = NULL;
 
   /* storageOffset */
   if(storageOffset < 0)
     THError("Tensor: invalid storage offset");
   self->storageOffset = storageOffset;
-
 
   /* nDimension, size and stride */
   self->size = NULL;
@@ -398,23 +400,28 @@ static void THTensor_(rawResize)(THTensor *self, int nDimension, long *size, lon
     }
   
     totalSize = 1;
-    for(d = 0; d < self->nDimension; d++)
+    for(d = self->nDimension-1; d >= 0; d--)
     {
       self->size[d] = size[d];
       if(stride && (stride[d] >= 0) )
         self->stride[d] = stride[d];
       else
       {
-        if(d == 0)
+        if(d == self->nDimension-1)
           self->stride[d] = 1;
         else
-          self->stride[d] = self->size[d-1]*self->stride[d-1];
+          self->stride[d] = self->size[d+1]*self->stride[d+1];
       }
-      totalSize += (self->size[d]-1)*self->stride[d];
+      totalSize += (self->size[d]-1)*self->stride[d];      
     }
-    
-    if(totalSize+self->storageOffset > self->storage->size)
-      THStorage_(resize)(self->storage, totalSize+self->storageOffset);
+
+    if(totalSize+self->storageOffset > 0)
+    {
+      if(!self->storage)
+        self->storage = THStorage_(new)();    
+      if(totalSize+self->storageOffset > self->storage->size)
+        THStorage_(resize)(self->storage, totalSize+self->storageOffset);
+    }
   }
   else
     self->nDimension = 0;

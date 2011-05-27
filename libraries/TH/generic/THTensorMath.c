@@ -82,14 +82,18 @@ real THTensor_(dot)(THTensor *tensor, THTensor *src)
 
 real THTensor_(min)(THTensor *tensor)
 {
-  real theMin = THTensor_(get1d)(tensor, 0);
+  real theMin;
+  THArgCheck(tensor->nDimension > 0, 1, "tensor must have one dimension");
+  theMin = THTensor_(data)(tensor)[0];
   TH_TENSOR_APPLY(real, tensor, if(*tensor_data < theMin) theMin = *tensor_data;);
   return theMin; 
 }
 
 real THTensor_(max)(THTensor *tensor)
 {
-  real theMax = THTensor_(get1d)(tensor, 0);
+  real theMax;
+  THArgCheck(tensor->nDimension > 0, 1, "tensor must have one dimension");
+  theMax = THTensor_(data)(tensor)[0];
   TH_TENSOR_APPLY(real, tensor, if(*tensor_data > theMax) theMax = *tensor_data;);
   return theMax; 
 }
@@ -196,17 +200,13 @@ void THTensor_(addmv)(THTensor *tensor, real alpha, THTensor *mat, THTensor *vec
 
   else
   {
-    THTensor *cmat;
-
-    THTensor_(transpose)(mat, 0, 1);
-    cmat = THTensor_(newContiguous)(mat);
-    THTensor_(transpose)(mat, 0, 1);
+    THTensor *cmat = THTensor_(newContiguous)(mat);
 
     THBlas_(gemv)('t',  mat->size[1], mat->size[0],
-                  alpha, THTensor_(data)(cmat), cmat->stride[1],
+                  alpha, THTensor_(data)(cmat), cmat->stride[0],
                   THTensor_(data)(vec), vec->stride[0],
                   1, THTensor_(data)(tensor), tensor->stride[0]);
-    
+
     THTensor_(free)(cmat);
   }
 }
@@ -285,7 +285,10 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   else
   {
     transpose = 'n';
+    THTensor_(transpose)(tensor, 0, 1);
     tensor_ = THTensor_(newContiguous)(tensor);
+    THTensor_(transpose)(tensor, 0, 1);
+    THTensor_(transpose)(tensor_, 0, 1);
   }
 
   /* m1 */
@@ -301,7 +304,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   }
   else
   {
-    transpose_m1 = 'n';
+    transpose_m1 = 't';
     m1_ = THTensor_(newContiguous)(m1);
   }
 
@@ -318,15 +321,24 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   }
   else
   {
-    transpose_m2 = 'n';
+    transpose_m2 = 't';
     m2_ = THTensor_(newContiguous)(m2);
   }
 
   /* do the operation */
-  THBlas_(gemm)(transpose_m1, transpose_m2, tensor_->size[0], tensor_->size[1], m1_->size[1], alpha,
-                THTensor_(data)(m1_), m1_->stride[1],
-                THTensor_(data)(m2_), m2_->stride[1],
-                1, THTensor_(data)(tensor_), tensor_->stride[1]);
+  THBlas_(gemm)(transpose_m1,
+                transpose_m2,
+                tensor_->size[0],
+                tensor_->size[1],
+                m1_->size[1],
+                alpha,
+                THTensor_(data)(m1_),
+                (transpose_m1 == 'n' ? m1_->stride[1] : m1_->stride[0]),
+                THTensor_(data)(m2_),
+                (transpose_m2 == 'n' ? m2_->stride[1] : m2_->stride[0]),
+                1,
+                THTensor_(data)(tensor_),
+                tensor_->stride[1]);
 
   /* free intermediate variables */
   if(m1_ != m1)
@@ -336,7 +348,10 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
     THTensor_(free)(m2_);
 
   if(tensor_ != tensor)
+  {
+    THTensor_(copy)(tensor, tensor_);
     THTensor_(free)(tensor_);
+  }
 
   if(transpose == 't')
   {
