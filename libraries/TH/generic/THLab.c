@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/THLab.c"
 #else
 
-void THLab_(numel)(int *n_, THTensor *t)
+void THLab_(numel)(long *n_, THTensor *t)
 {
   *n_ = THTensor_(nElement)(t);
 }

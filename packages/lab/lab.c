@@ -107,6 +107,7 @@ static int lab_getdefaulttensortype(lua_State *L)
     return lua_gettop(L);                                               \
   }
 
+LUAT_DYNT_FUNCTION_WRAPPER(lab, numel)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, max_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, max)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, min_)
@@ -198,6 +199,7 @@ static const struct luaL_Reg lab_stuff__ [] = {
   {"setdefaulttensortype", lab_setdefaulttensortype},
   {"getdefaulttensortype", lab_getdefaulttensortype},
 
+  {"numel", lab_numel},
   {"max_", lab_max_},
   {"max", lab_max},
   {"min_", lab_min_},

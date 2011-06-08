@@ -2,6 +2,17 @@
 #define TH_GENERIC_FILE "generic/lab.c"
 #else
 
+static int lab_(numel)(lua_State *L)
+{
+  THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
+  long n;
+
+  THLab_(numel)(&n, tensor);
+  lua_pushnumber(L, n);
+
+  return 1;
+}
+
 static int lab_(max_)(lua_State *L)
 {
   THTensor *values_ = luaT_checkudata(L, 1, torch_(Tensor_id));
@@ -572,6 +583,7 @@ static int lab_(pow)(lua_State *L)
 #endif
 
 static const struct luaL_Reg lab_(stuff__) [] = {
+  {"numel", lab_(numel)},
   {"max_", lab_(max_)},
   {"max", lab_(max)},
   {"min_", lab_(min_)},

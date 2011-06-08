@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/THLab.h"
 #else
 
-void THLab_(numel)(int *n_, THTensor *t);
+void THLab_(numel)(long *n_, THTensor *t);
 void THLab_(max)(THTensor *values_, THLongTensor *indices_, THTensor *t, int dimension);
 void THLab_(min)(THTensor *values_, THLongTensor *indices_, THTensor *t, int dimension);
 void THLab_(sum)(THTensor *r_, THTensor *t, int dimension);
