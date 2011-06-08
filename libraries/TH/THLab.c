@@ -5,4 +5,4 @@
 #include "THRandom.h"
 
 #include "generic/THLab.c"
-#include "THGenerateFloatTypes.h"
+#include "THGenerateAllTypes.h"

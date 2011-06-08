@@ -423,6 +423,29 @@ const char *luaT_classmodulename(const char *tname)
   return NULL;
 }
 
+void luaT_registeratid(lua_State *L, const struct luaL_Reg *methods, const void *id)
+{
+  int idx = lua_gettop(L);
+
+  luaL_checktype(L, idx, LUA_TTABLE);
+  lua_pushlightuserdata(L, (void*)id);
+  lua_rawget(L, idx);
+
+  if(lua_isnil(L, -1))
+  {
+    lua_pop(L, 1);
+    lua_pushlightuserdata(L, (void*)id);
+    lua_newtable(L);
+    lua_rawset(L, idx);
+
+    lua_pushlightuserdata(L, (void*)id);
+    lua_rawget(L, idx);
+  }
+
+  luaL_register(L, NULL, methods);
+  lua_pop(L, 1);
+}
+
 /* Lua only functions */
 int luaT_lua_newmetatable(lua_State *L)
 {
@@ -703,6 +726,31 @@ int luaT_lua_typename(lua_State *L)
   return 0;
 }
 
+int luaT_lua_id(lua_State *L)
+{
+  const void *id;
+
+  luaL_checkany(L, 1);
+  id = luaT_id(L, 1);
+  if(id)
+    lua_pushlightuserdata(L, (void*)id);
+  else
+    lua_pushnil(L);
+
+  return 1;
+}
+
+int luaT_lua_typename2id(lua_State *L)
+{
+  const char* typename = luaL_checkstring(L, 1);
+  const void* id = luaT_typename2id(L, typename);
+  if(id)
+    lua_pushlightuserdata(L, (void*)id);
+  else
+    lua_pushnil(L);
+  return 1;
+}
+
 int luaT_lua_isequal(lua_State *L)
 {
   if(lua_isuserdata(L, 1) && lua_isuserdata(L, 2))
@@ -957,4 +1005,3 @@ int luaT_cmt__newindex(lua_State *L)
   luaL_error(L, "constructor tables are read-only");
   return 0;
 }
-

@@ -35,6 +35,8 @@ LUAT_API void* luaT_realloc(lua_State *L, void *ptr, long size);
 LUAT_API void luaT_free(lua_State *L, void *ptr);
 LUAT_API void luaT_stackdump(lua_State *L);
 
+LUAT_API void luaT_registeratid(lua_State *L, const struct luaL_Reg *methods, const void *id);
+
 LUAT_API const void* luaT_newmetatable(lua_State *L, const char *tname, const char *parenttname,
                                        lua_CFunction constructor, lua_CFunction destructor, lua_CFunction factory);
 
@@ -75,6 +77,7 @@ LUAT_API void luaT_stackdump(lua_State *L);
 
 LUAT_API int luaT_lua_newmetatable(lua_State *L);
 LUAT_API int luaT_lua_factory(lua_State *L);
+LUAT_API int luaT_lua_id(lua_State *L);
 LUAT_API int luaT_lua_typename(lua_State *L);
 LUAT_API int luaT_lua_isequal(lua_State *L);
 LUAT_API int luaT_lua_pointer(lua_State *L);
@@ -83,5 +86,6 @@ LUAT_API int luaT_lua_getenv(lua_State *L);
 LUAT_API int luaT_lua_getmetatable(lua_State *L);
 LUAT_API int luaT_lua_version(lua_State *L);
 LUAT_API int luaT_lua_setmetatable(lua_State *L);
+LUAT_API int luaT_lua_typename2id(lua_State *L);
 
 #endif

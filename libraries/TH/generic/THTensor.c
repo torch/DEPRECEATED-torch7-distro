@@ -352,6 +352,9 @@ void THTensor_(free)(THTensor *self)
 /* This one does everything except coffee */
 static void THTensor_(rawInit)(THTensor *self, THStorage *storage, long storageOffset, int nDimension, long *size, long *stride)
 {
+  /* refcount */
+  self->refcount = 1;
+
   /* storage */
   if(storage)
   {

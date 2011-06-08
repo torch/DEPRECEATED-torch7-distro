@@ -5,8 +5,12 @@ void torch_utils_init(lua_State *L)
   /* utility functions */
   lua_pushcfunction(L, luaT_lua_factory);
   lua_setfield(L, -2, "factory");
+  lua_pushcfunction(L, luaT_lua_id);
+  lua_setfield(L, -2, "id");
   lua_pushcfunction(L, luaT_lua_typename);
   lua_setfield(L, -2, "typename");
+  lua_pushcfunction(L, luaT_lua_typename2id);
+  lua_setfield(L, -2, "typename2id");
   lua_pushcfunction(L, luaT_lua_isequal);
   lua_setfield(L, -2, "isequal");
   lua_pushcfunction(L, luaT_lua_getenv);
