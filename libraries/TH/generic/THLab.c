@@ -214,27 +214,32 @@ void THLab_(diag)(THTensor *r_, THTensor *t, int k)
   if(THTensor_(nDimension)(t) == 1)
   {
     real *t_data = THTensor_(data)(t);
+    long t_stride_0 = THTensor_(stride)(t, 0);
     long t_size = THTensor_(size)(t, 0);
     long sz = t_size + (k >= 0 ? k : -k);
     real *r__data;
-    long r__stride;
+    long r__stride_0;
+    long r__stride_1;
     long i;
 
     THTensor_(resize2d)(r_, sz, sz);    
     THTensor_(zero)(r_);
     r__data = THTensor_(data)(r_);
-    r__stride = THTensor_(stride)(r_, 0);
-    r__data += (k >= 0 ? k : -k*r__stride);
+    r__stride_0 = THTensor_(stride)(r_, 0);
+    r__stride_1 = THTensor_(stride)(r_, 1);
+    r__data += (k >= 0 ? k*r__stride_1 : -k*r__stride_0);
 
     for(i = 0; i < t_size; i++)
-      r__data[i*(r__stride+1)] = *t_data;
+      r__data[i*(r__stride_0+r__stride_1)] = t_data[i*t_stride_0];
   }
   else
   {
     real *t_data = THTensor_(data)(t);
-    long t_stride = THTensor_(stride)(t, 0);
+    long t_stride_0 = THTensor_(stride)(t, 0);
+    long t_stride_1 = THTensor_(stride)(t, 1);
     long sz;
     real *r__data;
+    long r__stride_0;
     long i;
 
     if(k >= 0)
@@ -243,10 +248,11 @@ void THLab_(diag)(THTensor *r_, THTensor *t, int k)
       sz = THMin(THTensor_(size)(t, 0)+k, THTensor_(size)(t, 1));
     THTensor_(resize1d)(r_, sz);
     r__data = THTensor_(data)(r_);
+    r__stride_0 = THTensor_(stride)(r_, 0);
 
-    t_data += (k >= 0 ? k : -k*t_stride);
+    t_data += (k >= 0 ? k*t_stride_1 : -k*t_stride_0);
     for(i = 0; i < sz; i++)
-      *r__data = t_data[i*(t_stride+1)];
+      r__data[i*r__stride_0] = t_data[i*(t_stride_0+t_stride_1)];
   }
 }
 
@@ -289,22 +295,24 @@ void THLab_(range)(THTensor *r_, real xmin, real xmax, real step)
 void THLab_(randperm)(THTensor *r_, long n)
 {
   real *r__data;
+  long r__stride_0;
   long i;
 
   THArgCheck(n > 0, 1, "must be strictly positive");
 
   THTensor_(resize1d)(r_, n);
   r__data = THTensor_(data)(r_);
+  r__stride_0 = THTensor_(stride)(r_,0);
 
   for(i = 0; i < n; i++)
-      *r__data = (real)(i);
+    r__data[i*r__stride_0] = (real)(i);
 
   for(i = 0; i < n-1; i++)
   {
     long z = THRandom_random() % (n-i);
-    real sav = *r__data;
-    *r__data = r__data[z];
-    r__data[z] = sav;
+    real sav = r__data[i*r__stride_0];
+    r__data[i*r__stride_0] = r__data[z];
+    r__data[z*r__stride_0] = sav;
   }
 }
 
