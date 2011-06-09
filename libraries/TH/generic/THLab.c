@@ -142,15 +142,16 @@ void THLab_(trace)(real *trace_, THTensor *t)
   real *t_data = THTensor_(data)(t);
   real sum = 0;
   long i = 0;
-  long t_stride, t_diag_size;
+  long t_stride_0, t_stride_1, t_diag_size;
 
   THArgCheck(THTensor_(nDimension)(t) == 2, 1, "not a matrix");
 
-  t_stride = THTensor_(stride)(t, 0);
+  t_stride_0 = THTensor_(stride)(t, 0);
+  t_stride_1 = THTensor_(stride)(t, 1);
   t_diag_size = THMin(THTensor_(size)(t, 0), THTensor_(size)(t, 1));
   while(i < t_diag_size)
   {
-    sum += t_data[i*(t_stride+1)];
+    sum += t_data[i*(t_stride_0+t_stride_1)];
     i++;
   }
 
@@ -403,7 +404,9 @@ void THLab_(sort)(THTensor *rt_, THLongTensor *ri_, THTensor *t, int dimension, 
 
 void THLab_(tril)(THTensor *r_, THTensor *t, long k)
 {
-  long stride, t_size_r, t_size_c;
+  long t_size_0, t_size_1;
+  long t_stride_0, t_stride_1;
+  long r__stride_0, r__stride_1;
   real *t_data, *r__data;
   long r, c;
 
@@ -411,25 +414,30 @@ void THLab_(tril)(THTensor *r_, THTensor *t, long k)
 
   THTensor_(resizeAs)(r_, t);
 
-  stride = THTensor_(stride)(t, 0);
-  t_size_r = THTensor_(size)(t, 0);
-  t_size_c = THTensor_(size)(t, 1);
+  t_size_0 = THTensor_(size)(t, 0);
+  t_size_1 = THTensor_(size)(t, 1);
+  t_stride_0 = THTensor_(stride)(t, 0);
+  t_stride_1 = THTensor_(stride)(t, 1);
+  r__stride_0 = THTensor_(stride)(r_, 0);
+  r__stride_1 = THTensor_(stride)(r_, 1);
   r__data = THTensor_(data)(r_);
   t_data = THTensor_(data)(t);
 
-  for(r = 0; r < t_size_r; r++)
+  for(r = 0; r < t_size_0; r++)
   {
-    long sz = THMin(r+k+1, t_size_c);
-    for(c = THMax(0, r+k); c < t_size_c; c++)
-      r__data[r*stride+c] = 0;
+    long sz = THMin(r+k+1, t_size_1);
+    for(c = THMax(0, r+k); c < t_size_1; c++)
+      r__data[r*r__stride_0+c*r__stride_1] = 0;
     for(c = 0; c < sz; c++)
-      r__data[r*stride+c] = t_data[r*stride+c];
+      r__data[r*r__stride_0+c*r__stride_1] = t_data[r*t_stride_0+c*t_stride_1];
   }
 }
 
 void THLab_(triu)(THTensor *r_, THTensor *t, long k)
 {
-  long stride, t_size_r, t_size_c;
+  long t_size_0, t_size_1;
+  long t_stride_0, t_stride_1;
+  long r__stride_0, r__stride_1;
   real *t_data, *r__data;
   long r, c;
 
@@ -437,19 +445,22 @@ void THLab_(triu)(THTensor *r_, THTensor *t, long k)
 
   THTensor_(resizeAs)(r_, t);
 
-  stride = THTensor_(stride)(t, 0);
-  t_size_r = THTensor_(size)(t, 0);
-  t_size_c = THTensor_(size)(t, 1);
+  t_size_0 = THTensor_(size)(t, 0);
+  t_size_1 = THTensor_(size)(t, 1);
+  t_stride_0 = THTensor_(stride)(t, 0);
+  t_stride_1 = THTensor_(stride)(t, 1);
+  r__stride_0 = THTensor_(stride)(r_, 0);
+  r__stride_1 = THTensor_(stride)(r_, 1);
   r__data = THTensor_(data)(r_);
   t_data = THTensor_(data)(t);
 
-  for(r = 0; r < t_size_r; r++)
+  for(r = 0; r < t_size_0; r++)
   {
-    long sz = THMin(r+k, t_size_c);
-    for(c = THMax(0, r+k); c < t_size_c; c++)
-      r__data[r*stride+c] = t_data[r*stride+c];
+    long sz = THMin(r+k, t_size_1);
+    for(c = THMax(0, r+k); c < t_size_1; c++)
+      r__data[r*r__stride_0+c*r__stride_1] = t_data[r*t_stride_0+c*t_stride_1];
     for(c = 0; c < sz; c++)
-      r__data[r*stride+c] = 0;
+      r__data[r*r__stride_0+c*r__stride_1] = 0;
   }
 }
 
