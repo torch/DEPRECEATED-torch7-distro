@@ -274,7 +274,7 @@ void THLab_(eye)(THTensor *r_, long n, long m)
   r__data = THTensor_(data)(r_);
   sz = THMin(THTensor_(size)(r_, 0), THTensor_(size)(r_, 1));
   for(i = 0; i < sz; i++)
-    r__data[i*(1+m)] = 1;
+    r__data[i*(r_->stride[0]+r_->stride[1])] = 1;
 }
 
 
