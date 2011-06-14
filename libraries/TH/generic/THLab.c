@@ -464,6 +464,52 @@ void THLab_(triu)(THTensor *r_, THTensor *t, long k)
   }
 }
 
+void THLab_(cat)(THTensor *r_, THTensor *ta, THTensor *tb, int dimension)
+{
+  THLongStorage *size;
+  int i;
+  int ndim = THMax(ta->nDimension, tb->nDimension);
+  ndim = THMax(ndim, dimension+1);
+
+  THArgCheck(dimension >= 0, 4, "invalid dimension");
+
+  size = THLongStorage_newWithSize(ndim);
+  for(i = 0; i < ndim; i++)
+  {
+    int tadi = (i < ta->nDimension ? ta->size[i] : 1);
+    int tbdi = (i < tb->nDimension ? tb->size[i] : 1);
+
+    if(i == dimension)
+      size->data[i] = tadi+tbdi;
+    else
+    {
+      if(tadi != tbdi)
+      {
+        THLongStorage_free(size);
+        THError("inconsistent tensor sizes");
+      }
+      size->data[i] = tadi;
+    }
+  }
+
+  THTensor_(resize)(r_, size, NULL);
+  THLongStorage_free(size);
+
+  {
+    THTensor *nta = THTensor_(newWithTensor)(r_);
+    THTensor_(narrow)(nta, dimension, 0, (dimension < ta->nDimension ? ta->size[dimension] : 1));
+    THTensor_(copy)(nta, ta);
+    THTensor_(free)(nta);
+  }
+
+  {
+    THTensor *ntb = THTensor_(newWithTensor)(r_);
+    THTensor_(narrow)(ntb, dimension, (dimension < ta->nDimension ? ta->size[dimension] : 1), (dimension < tb->nDimension ? tb->size[dimension] : 1));
+    THTensor_(copy)(ntb, tb);
+    THTensor_(free)(ntb);
+  }
+}
+
 /* floating point only now */
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)

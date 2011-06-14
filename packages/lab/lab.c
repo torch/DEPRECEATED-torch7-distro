@@ -143,6 +143,8 @@ LUAT_DYNT_FUNCTION_WRAPPER(lab, tril_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, tril)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, triu_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, triu)
+LUAT_DYNT_FUNCTION_WRAPPER(lab, cat_)
+LUAT_DYNT_FUNCTION_WRAPPER(lab, cat)
 
 LUAT_DYNT_FUNCTION_WRAPPER(lab, log_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, log)
@@ -235,6 +237,8 @@ static const struct luaL_Reg lab_stuff__ [] = {
   {"tril", lab_tril},
   {"triu_", lab_triu_},
   {"triu", lab_triu},
+  {"cat_", lab_cat_},
+  {"cat", lab_cat},
 
   {"log_", lab_log_},
   {"log", lab_log},

@@ -23,6 +23,7 @@ void THLab_(reshape)(THTensor *r_, THTensor *t, THLongStorage *size);
 void THLab_(sort)(THTensor *rt_, THLongTensor *ri_, THTensor *t, int dimension, int descendingOrder);
 void THLab_(tril)(THTensor *r_, THTensor *t, long k);
 void THLab_(triu)(THTensor *r_, THTensor *t, long k);
+void THLab_(cat)(THTensor *r_, THTensor *ta, THTensor *tb, int dimension);
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 

@@ -363,6 +363,27 @@ static int lab_(triu)(lua_State *L)
   return lab_(triu_)(L);
 }
 
+static int lab_(cat_)(lua_State *L)
+{
+  THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+  THTensor *ta = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *tb = luaT_checkudata(L, 3, torch_(Tensor_id));
+  int dimension = (int)(luaL_optnumber(L, 4, 1))-1;
+
+  THLab_(cat)(r_, ta, tb, dimension);
+
+  lua_settop(L, 1);  
+  return 1;
+}
+
+static int lab_(cat)(lua_State *L)
+{
+  luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
+  lua_insert(L, 1);
+  return lab_(cat_)(L);
+}
+
+
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 
 static int lab_(mean_)(lua_State *L)
@@ -619,6 +640,8 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"tril", lab_(tril)},
   {"triu_", lab_(triu_)},
   {"triu", lab_(triu)},
+  {"cat_", lab_(cat_)},
+  {"cat", lab_(cat)},
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
   {"log_", lab_(log_)},
   {"log", lab_(log)},
