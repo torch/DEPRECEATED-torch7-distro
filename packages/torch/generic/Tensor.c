@@ -435,15 +435,40 @@ static int torch_Tensor_(__newindex__)(lua_State *L)
     real value = (real)luaL_checknumber(L,3);
     int dim;
 
-    luaL_argcheck(L, 2, idx->size == tensor->nDimension, "invalid size");
+    luaL_argcheck(L, idx->size == tensor->nDimension, 2, "invalid size");
     
     for(dim = 0; dim < idx->size; dim++)
     {
       long z = idx->data[dim]-1;
-      luaL_argcheck(L, 2, (z >= 0) && (z < tensor->size[dim]), "index out of bound");
+      luaL_argcheck(L, (z >= 0) && (z < tensor->size[dim]), 2, "index out of bound");
       data += z*tensor->stride[dim];
     }
 
+    *data = value;
+    lua_pushboolean(L, 1);
+  }
+  else if(lua_istable(L, 2))
+  {
+    real *data = THTensor_(data)(tensor);
+    real value = (real)luaL_checknumber(L,3);
+    int dim;
+
+    luaL_argcheck(L, lua_objlen(L,2) == tensor->nDimension, 2, "invalid size");
+    
+    for(dim = 0; dim < tensor->nDimension; dim++)
+    {
+      long z;
+
+      lua_rawgeti(L, 2, dim+1);
+      if(!lua_isnumber(L, -1))
+        luaL_error(L, "number expected for each dimension");
+
+      z = lua_tonumber(L, -1)-1;
+      lua_pop(L, 1);
+
+      luaL_argcheck(L, (z >= 0) && (z < tensor->size[dim]), 2, "index out of bound");
+      data += z*tensor->stride[dim];
+    }
     *data = value;
     lua_pushboolean(L, 1);
   }
@@ -483,12 +508,37 @@ static int torch_Tensor_(__index__)(lua_State *L)
     real *data = THTensor_(data)(tensor);
     int dim;
 
-    luaL_argcheck(L, 2, idx->size == tensor->nDimension, "invalid size");
+    luaL_argcheck(L, idx->size == tensor->nDimension, 2, "invalid size");
     
     for(dim = 0; dim < idx->size; dim++)
     {
       long z = idx->data[dim]-1;
-      luaL_argcheck(L, 2, (z >= 0) && (z < tensor->size[dim]), "index out of bound");
+      luaL_argcheck(L, (z >= 0) && (z < tensor->size[dim]), 2, "index out of bound");
+      data += z*tensor->stride[dim];
+    }
+    lua_pushnumber(L, *data);
+    lua_pushboolean(L, 1);
+    return 2;
+  }
+  else if(lua_istable(L, 2))
+  {
+    real *data = THTensor_(data)(tensor);
+    int dim;
+
+    luaL_argcheck(L, lua_objlen(L,2) == tensor->nDimension, 2, "invalid size");
+    
+    for(dim = 0; dim < tensor->nDimension; dim++)
+    {
+      long z;
+
+      lua_rawgeti(L, 2, dim+1);
+      if(!lua_isnumber(L, -1))
+        luaL_error(L, "number expected for each dimension");
+
+      z = lua_tonumber(L, -1)-1;
+      lua_pop(L, 1);
+
+      luaL_argcheck(L, (z >= 0) && (z < tensor->size[dim]), 2, "index out of bound");
       data += z*tensor->stride[dim];
     }
     lua_pushnumber(L, *data);
