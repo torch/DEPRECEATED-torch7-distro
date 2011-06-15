@@ -446,6 +446,29 @@ void luaT_registeratid(lua_State *L, const struct luaL_Reg *methods, const void 
   lua_pop(L, 1);
 }
 
+void luaT_registeratname(lua_State *L, const struct luaL_Reg *methods, const char *name)
+{
+  int idx = lua_gettop(L);
+
+  luaL_checktype(L, idx, LUA_TTABLE);
+  lua_pushstring(L, name);
+  lua_rawget(L, idx);
+
+  if(lua_isnil(L, -1))
+  {
+    lua_pop(L, 1);
+    lua_pushstring(L, name);
+    lua_newtable(L);
+    lua_rawset(L, idx);
+
+    lua_pushstring(L, name);
+    lua_rawget(L, idx);
+  }
+
+  luaL_register(L, NULL, methods);
+  lua_pop(L, 1);
+}
+
 /* Lua only functions */
 int luaT_lua_newmetatable(lua_State *L)
 {

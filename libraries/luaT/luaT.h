@@ -36,6 +36,7 @@ LUAT_API void luaT_free(lua_State *L, void *ptr);
 LUAT_API void luaT_stackdump(lua_State *L);
 
 LUAT_API void luaT_registeratid(lua_State *L, const struct luaL_Reg *methods, const void *id);
+LUAT_API void luaT_registeratname(lua_State *L, const struct luaL_Reg *methods, const char *name);
 
 LUAT_API const void* luaT_newmetatable(lua_State *L, const char *tname, const char *parenttname,
                                        lua_CFunction constructor, lua_CFunction destructor, lua_CFunction factory);

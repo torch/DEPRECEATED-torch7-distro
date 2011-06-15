@@ -5,6 +5,14 @@ function LogSigmoid:__init()
    self.buffer = torch.Tensor()
 end
 
+function LogSigmoid:forward(input)
+   return input.nn.LogSigmoid_forward(self, input)
+end
+
+function LogSigmoid:backward(input, gradOutput)
+   return input.nn.LogSigmoid_backward(self, input, gradOutput)
+end
+
 function LogSigmoid:write(file)
    parent.write(self, file)
    file:writeObject(self.buffer)

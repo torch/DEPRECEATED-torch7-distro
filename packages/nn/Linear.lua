@@ -37,12 +37,12 @@ end
 
 function Linear:forward(input)
    self.output:copy(self.bias)
-   self.output:addT2dotT1(1, self.weight:t(), input)
+   self.output:addmv(1, self.weight:t(), input)
    return self.output
 end
 
 function Linear:backward(input, gradOutput)
-   self.gradWeight:addT1outT1(1, input, gradOutput)
+   self.gradWeight:addr(1, input, gradOutput)
    self.gradBias:add(gradOutput)
   
    if self.weightDecay ~= 0 then
@@ -50,7 +50,7 @@ function Linear:backward(input, gradOutput)
    end
    
    self.gradInput:zero()
-   self.gradInput:addT2dotT1(1, self.weight, gradOutput)
+   self.gradInput:addmv(1, self.weight, gradOutput)
    return self.gradInput
 end
 

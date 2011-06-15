@@ -5,6 +5,14 @@ function MSECriterion:__init()
    self.sizeAverage = true
 end
 
+function MSECriterion:forward(input, target)
+   return input.nn.MSECriterion_forward(self, input, target)
+end
+
+function MSECriterion:backward(input, gradOutput)
+   return input.nn.MSECriterion_backward(self, input, target)
+end
+
 function MSECriterion:write(file)
    parent.write(self, file)
    file:writeBool(self.sizeAverage)

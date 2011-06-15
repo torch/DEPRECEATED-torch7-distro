@@ -34,6 +34,14 @@ function SparseLinear:reset(stdv)
    end
 end
 
+function SparseLinear:forward(input)
+   return input.nn.SparseLinear_forward(self, input)
+end
+
+function SparseLinear:backward(input, gradOutput)
+   return input.nn.SparseLinear_backward(self, input, gradOutput)
+end
+
 function SparseLinear:zeroGradParameters()
    --self.gradWeight:zero()
    self.gradBias:zero()

@@ -6,6 +6,14 @@ function SoftMax:__init()
    self.computeShift = true
 end
 
+function SoftMax:forward(input)
+   return input.nn.SoftMax_forward(self, input)
+end
+
+function SoftMax:backward(input, gradOutput)
+   return input.nn.SoftMax_backward(self, input, gradOutput)
+end
+
 function SoftMax:write(file)
    parent.write(self, file)
    file:writeDouble(self.shift)
