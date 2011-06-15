@@ -122,7 +122,7 @@ THTensor *THTensor_(newWithStorage4d)(THStorage *storage, long storageOffset,
   return self;
 }
 
-THTensor *THTensor_(newWithSize)(int nDimension, THLongStorage *size, THLongStorage *stride)
+THTensor *THTensor_(newWithSize)(THLongStorage *size, THLongStorage *stride)
 {
   return THTensor_(newWithStorage)(NULL, 0, size, stride);
 }
@@ -145,7 +145,7 @@ THTensor *THTensor_(newWithSize3d)(long size0, long size1, long size2)
 THTensor *THTensor_(newWithSize4d)(long size0, long size1, long size2, long size3)
 {
   THLongStorage *size = THLongStorage_newWithSize4(size0, size1, size2, size3);
-  THTensor *self = THTensor_(newWithSize)(4, size, NULL);
+  THTensor *self = THTensor_(newWithSize)(size, NULL);
   THLongStorage_free(size);
   return self;
 }

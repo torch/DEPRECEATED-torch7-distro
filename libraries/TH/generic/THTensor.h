@@ -49,7 +49,7 @@ TH_API THTensor *THTensor_(newWithStorage4d)(THStorage *storage_, long storageOf
                                 long size3_, long stride3_);
 
 /* stride might be NULL */
-TH_API THTensor *THTensor_(newWithSize)(int nDimension, THLongStorage *size_, THLongStorage *stride_);
+TH_API THTensor *THTensor_(newWithSize)(THLongStorage *size_, THLongStorage *stride_);
 TH_API THTensor *THTensor_(newWithSize1d)(long size0_);
 TH_API THTensor *THTensor_(newWithSize2d)(long size0_, long size1_);
 TH_API THTensor *THTensor_(newWithSize3d)(long size0_, long size1_, long size2_);
