@@ -32,16 +32,16 @@ static const void* torch_DoubleTensor_id = NULL;
 #include "generic/SoftMax.c"
 #include "THGenerateFloatTypes.h"
 
-#include "generic/Mean.c"
-#include "THGenerateFloatTypes.h"
-
 #include "generic/Max.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/Min.c"
 #include "THGenerateFloatTypes.h"
 
-#include "generic/Sum.c"
+#include "generic/MSECriterion.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/AbsCriterion.c"
 #include "THGenerateFloatTypes.h"
 
 DLL_EXPORT int luaopen_libnn(lua_State *L)
@@ -53,36 +53,39 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   lua_pushvalue(L, -1);
   lua_setfield(L, LUA_GLOBALSINDEX, "nn");
 
-  nn_FloatMean_init(L);
   nn_FloatMin_init(L);
   nn_FloatMax_init(L);
-  nn_FloatSum_init(L);
   nn_FloatExp_init(L);
   nn_FloatHardTanh_init(L);
   nn_FloatLogSoftMax_init(L);
+  nn_FloatMSECriterion_init(L);
+  nn_FloatAbsCriterion_init(L);
+  nn_FloatLogSigmoid_init(L);
+  nn_FloatSigmoid_init(L);
+  nn_FloatSoftMax_init(L);
+  nn_FloatSoftPlus_init(L);
+  nn_FloatTanh_init(L);
 
-  nn_DoubleMean_init(L);
   nn_DoubleMin_init(L);
   nn_DoubleMax_init(L);
-  nn_DoubleSum_init(L);
   nn_DoubleExp_init(L);
   nn_DoubleHardTanh_init(L);
   nn_DoubleLogSoftMax_init(L);
+  nn_DoubleMSECriterion_init(L);
+  nn_DoubleAbsCriterion_init(L);
+  nn_DoubleLogSigmoid_init(L);
+  nn_DoubleSigmoid_init(L);
+  nn_DoubleSoftMax_init(L);
+  nn_DoubleSoftPlus_init(L);
+  nn_DoubleTanh_init(L);
 
 /*  
-  nn_FloatLogSigmoid_init(L);
-  nn_Sigmoid_init(L);
-  nn_SoftMax_init(L);
-  nn_SoftPlus_init(L);
-  nn_Tanh_init(L);
 
   nn_SpatialConvolution_init(L);
   nn_SpatialSubSampling_init(L);
   nn_TemporalConvolution_init(L);
   nn_TemporalSubSampling_init(L);
   nn_SparseLinear_init(L);
-  nn_MSECriterion_init(L);
-  nn_AbsCriterion_init(L);
 */
 
   return 1;
