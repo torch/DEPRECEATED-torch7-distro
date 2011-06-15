@@ -5,6 +5,8 @@ void torch_utils_init(lua_State *L)
   /* utility functions */
   lua_pushcfunction(L, luaT_lua_factory);
   lua_setfield(L, -2, "factory");
+  lua_pushcfunction(L, luaT_lua_getconstructortable);
+  lua_setfield(L, -2, "getconstructortable");
   lua_pushcfunction(L, luaT_lua_id);
   lua_setfield(L, -2, "id");
   lua_pushcfunction(L, luaT_lua_typename);

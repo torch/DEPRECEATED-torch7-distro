@@ -732,6 +732,18 @@ int luaT_lua_factory(lua_State *L)
   return 1;
 }
 
+int luaT_lua_getconstructortable(lua_State *L)
+{ 
+  const char* tname = luaL_checkstring(L, 1);
+  luaT_pushmetatable(L, luaT_typename2id(L, tname));
+  if(!lua_isnil(L, -1))
+  {
+    lua_pushstring(L, "__constructor");
+    lua_rawget(L, -2);
+  }
+  return 1;
+}
+
 
 int luaT_lua_typename(lua_State *L)
 {

@@ -29,7 +29,7 @@ static int lab_setdefaulttensortype(lua_State *L)
   luaL_checkstring(L, 1);
   
   if(!(id = luaT_typename2id(L, lua_tostring(L, 1))))                  \
-    return luaL_error(L, "<%s> is not string describing a torch object", lua_tostring(L, 1)); \
+    return luaL_error(L, "<%s> is not a string describing a torch object", lua_tostring(L, 1)); \
 
   lab_default_tensor_id = id;
 

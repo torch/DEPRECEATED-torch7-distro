@@ -5,9 +5,9 @@ function Linear:__init(inputSize, outputSize)
 
    self.weightDecay = 0
   
-   self.weight = torch.Tensor(inputSize, outputSize)
+   self.weight = torch.Tensor(outputSize, inputSize)
    self.bias = torch.Tensor(outputSize)
-   self.gradWeight = torch.Tensor(inputSize, outputSize)
+   self.gradWeight = torch.Tensor(outputSize, inputSize)
    self.gradBias = torch.Tensor(outputSize)
    
    -- state
@@ -22,13 +22,13 @@ function Linear:reset(stdv)
    if stdv then
       stdv = stdv * math.sqrt(3)
    else
-      stdv = 1./math.sqrt(self.weight:size(1))
+      stdv = 1./math.sqrt(self.weight:size(2))
    end
 
    -- we do this so the initialization is exactly
    -- the same than in previous torch versions
-   for i=1,self.weight:size(2) do
-      self.weight:select(2, i):apply(function()
+   for i=1,self.weight:size(1) do
+      self.weight:select(1, i):apply(function()
                                         return random.uniform(-stdv, stdv)
                                      end)
       self.bias[i] = random.uniform(-stdv, stdv)
@@ -37,12 +37,12 @@ end
 
 function Linear:forward(input)
    self.output:copy(self.bias)
-   self.output:addmv(1, self.weight:t(), input)
+   self.output:addmv(1, self.weight, input)
    return self.output
 end
 
 function Linear:backward(input, gradOutput)
-   self.gradWeight:addr(1, input, gradOutput)
+   self.gradWeight:addr(1, gradOutput, input)
    self.gradBias:add(gradOutput)
   
    if self.weightDecay ~= 0 then
@@ -50,7 +50,7 @@ function Linear:backward(input, gradOutput)
    end
    
    self.gradInput:zero()
-   self.gradInput:addmv(1, self.weight, gradOutput)
+   self.gradInput:addmv(1, self.weight:t(), gradOutput)
    return self.gradInput
 end
 

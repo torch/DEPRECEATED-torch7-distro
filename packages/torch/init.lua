@@ -63,4 +63,19 @@ if not package.loaded.help then
    require('help')
 end
 
+function torch.setdefaulttensortype(typename)
+   assert(type(typename) == 'string', 'string expected')
+   if torch.getconstructortable(typename) then
+      torch.Tensor = torch.getconstructortable(typename)
+   else
+      error(string.format("<%s> is not a string describing a torch object", typename))
+   end
+end
+
+function torch.getdefaulttensortype(typename)
+   return torch.Tensor.__typename
+end
+
+torch.setdefaulttensortype('torch.DoubleTensor')
+
 return torch
