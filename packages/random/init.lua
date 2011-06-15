@@ -1,0 +1,2 @@
+require "torch"
+require "librandom"
