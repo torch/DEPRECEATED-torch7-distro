@@ -55,7 +55,11 @@ TH_API THTensor *THTensor_(newWithSize2d)(long size0_, long size1_);
 TH_API THTensor *THTensor_(newWithSize3d)(long size0_, long size1_, long size2_);
 TH_API THTensor *THTensor_(newWithSize4d)(long size0_, long size1_, long size2_, long size3_);
 
-TH_API THTensor *THTensor_(newContiguous)(THTensor *tensor);
+TH_API THTensor *THTensor_(newContiguous)(THTensor *tensor, int forcecopy);
+TH_API THTensor *THTensor_(newSelect)(THTensor *tensor, int dimension_, long sliceIndex_);
+TH_API THTensor *THTensor_(newNarrow)(THTensor *tensor, int dimension_, long firstIndex_, long size_);
+TH_API THTensor *THTensor_(newTranspose)(THTensor *tensor, int dimension1_, int dimension2_);
+TH_API THTensor *THTensor_(newUnfold)(THTensor *tensor, int dimension_, long size_, long step_);
   
 TH_API void THTensor_(resize)(THTensor *tensor, THLongStorage *size, THLongStorage *stride);
 TH_API void THTensor_(resizeAs)(THTensor *tensor, THTensor *src);

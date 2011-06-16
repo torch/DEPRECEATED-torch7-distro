@@ -200,7 +200,7 @@ void THTensor_(addmv)(THTensor *tensor, real alpha, THTensor *mat, THTensor *vec
 
   else
   {
-    THTensor *cmat = THTensor_(newContiguous)(mat);
+    THTensor *cmat = THTensor_(newContiguous)(mat, 0);
 
     THBlas_(gemv)('t',  mat->size[1], mat->size[0],
                   alpha, THTensor_(data)(cmat), cmat->stride[0],
@@ -238,7 +238,7 @@ void THTensor_(addr)(THTensor *tensor, real alpha, THTensor *vec1, THTensor *vec
   }
   else
   {
-    THTensor *ctensor = THTensor_(newContiguous)(tensor);
+    THTensor *ctensor = THTensor_(newContiguous)(tensor, 1);
 
     THBlas_(ger)(vec2->size[0], vec1->size[0],
                  alpha, THTensor_(data)(vec2), vec2->stride[0],
@@ -286,7 +286,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   {
     transpose = 'n';
     THTensor_(transpose)(tensor, 0, 1);
-    tensor_ = THTensor_(newContiguous)(tensor);
+    tensor_ = THTensor_(newContiguous)(tensor, 1);
     THTensor_(transpose)(tensor, 0, 1);
     THTensor_(transpose)(tensor_, 0, 1);
   }
@@ -305,7 +305,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   else
   {
     transpose_m1 = 't';
-    m1_ = THTensor_(newContiguous)(m1);
+    m1_ = THTensor_(newContiguous)(m1, 0);
   }
 
   /* m2 */
@@ -322,7 +322,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   else
   {
     transpose_m2 = 't';
-    m2_ = THTensor_(newContiguous)(m2);
+    m2_ = THTensor_(newContiguous)(m2, 0);
   }
 
   /* do the operation */

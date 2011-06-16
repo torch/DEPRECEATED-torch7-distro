@@ -150,15 +150,49 @@ THTensor *THTensor_(newWithSize4d)(long size0, long size1, long size2, long size
   return self;
 }
 
-THTensor *THTensor_(newContiguous)(THTensor *self)
+THTensor *THTensor_(newContiguous)(THTensor *self, int forcecopy)
 {
-  THTensor *tensor = THTensor_(new)();
-  THTensor_(resizeAs)(tensor, self);
-  THTensor_(copy)(tensor, self);
-  return tensor;
+  if(forcecopy || (!THTensor_(isContiguous)(self)))
+  {
+    THTensor *tensor = THTensor_(new)();
+    THTensor_(resizeAs)(tensor, self);
+    THTensor_(copy)(tensor, self);
+    return tensor;
+  }
+  else
+  {
+    THTensor_(retain)(self);
+    return self;
+  }
 }
 
+THTensor *THTensor_(newSelect)(THTensor *tensor, int dimension_, long sliceIndex_)
+{
+  THTensor *self = THTensor_(newWithTensor)(tensor);
+  THTensor_(select)(self, dimension_, sliceIndex_);
+  return self;
+}
 
+THTensor *THTensor_(newNarrow)(THTensor *tensor, int dimension_, long firstIndex_, long size_)
+{
+  THTensor *self = THTensor_(newWithTensor)(tensor);
+  THTensor_(narrow)(self, dimension_, firstIndex_, size_);
+  return self;
+}
+
+THTensor *THTensor_(newTranspose)(THTensor *tensor, int dimension1_, int dimension2_)
+{
+  THTensor *self = THTensor_(newWithTensor)(tensor);
+  THTensor_(transpose)(self, dimension1_, dimension2_);
+  return self;
+}
+
+THTensor *THTensor_(newUnfold)(THTensor *tensor, int dimension_, long size_, long step_)
+{
+  THTensor *self = THTensor_(newWithTensor)(tensor);
+  THTensor_(unfold)(self, dimension_, size_, step_);
+  return self;
+}
 
 /* Resize */
 void THTensor_(resize)(THTensor *self, THLongStorage *size, THLongStorage *stride)
