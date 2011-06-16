@@ -10,9 +10,9 @@ function TemporalConvolution:__init(inputFrameSize, outputFrameSize, kW, dW)
    self.kW = kW
    self.dW = dW
 
-   self.weight = torch.Tensor(inputFrameSize, kW, outputFrameSize)
+   self.weight = torch.Tensor(outputFrameSize, inputFrameSize*kW)
    self.bias = torch.Tensor(outputFrameSize)
-   self.gradWeight = torch.Tensor(inputFrameSize, kW, outputFrameSize)
+   self.gradWeight = torch.Tensor(outputFrameSize, inputFrameSize*kW)
    self.gradBias = torch.Tensor(outputFrameSize)
    
    self:reset()
@@ -30,6 +30,14 @@ function TemporalConvolution:reset(stdv)
    self.bias:apply(function()
                       return random.uniform(-stdv, stdv)
                    end)   
+end
+
+function TemporalConvolution:forward(input)
+   return input.nn.TemporalConvolution_forward(self, input)
+end
+
+function TemporalConvolution:backward(input, gradOutput)
+   return input.nn.TemporalConvolution_backward(self, input, gradOutput)
 end
 
 function TemporalConvolution:zeroGradParameters()

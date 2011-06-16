@@ -17,7 +17,7 @@ static const void* torch_DoubleTensor_id = NULL;
 #include "generic/LogSigmoid.c"
 #include "THGenerateFloatTypes.h"
 
-#include "generic/LogSoftmax.c"
+#include "generic/LogSoftMax.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/Sigmoid.c"
@@ -44,6 +44,12 @@ static const void* torch_DoubleTensor_id = NULL;
 #include "generic/AbsCriterion.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SparseLinear.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/TemporalConvolution.c"
+#include "THGenerateFloatTypes.h"
+
 DLL_EXPORT int luaopen_libnn(lua_State *L)
 {
   torch_FloatTensor_id = luaT_checktypename2id(L, "torch.FloatTensor");
@@ -65,6 +71,8 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_FloatSoftMax_init(L);
   nn_FloatSoftPlus_init(L);
   nn_FloatTanh_init(L);
+  nn_FloatSparseLinear_init(L);
+  nn_FloatTemporalConvolution_init(L);
 
   nn_DoubleMin_init(L);
   nn_DoubleMax_init(L);
@@ -78,14 +86,13 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_DoubleSoftMax_init(L);
   nn_DoubleSoftPlus_init(L);
   nn_DoubleTanh_init(L);
+  nn_DoubleSparseLinear_init(L);
+  nn_DoubleTemporalConvolution_init(L);
 
-/*  
-
+/*
   nn_SpatialConvolution_init(L);
   nn_SpatialSubSampling_init(L);
-  nn_TemporalConvolution_init(L);
   nn_TemporalSubSampling_init(L);
-  nn_SparseLinear_init(L);
 */
 
   return 1;
