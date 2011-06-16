@@ -54,7 +54,8 @@ real *THTensor_(data)(THTensor *self)
 
 /**** creation methods ****/
 
-static void THTensor_(rawInit)(THTensor *self, THStorage *storage, long storageOffset, int nDimension, long *size, long *stride);
+static void THTensor_(rawInit)(THTensor *self);
+static void THTensor_(rawSet)(THTensor *self, THStorage *storage, long storageOffset, int nDimension, long *size, long *stride);
 static void THTensor_(rawResize)(THTensor *self, int nDimension, long *size, long *stride);
 
 
@@ -62,7 +63,7 @@ static void THTensor_(rawResize)(THTensor *self, int nDimension, long *size, lon
 THTensor *THTensor_(new)(void)
 {
   THTensor *self = THAlloc(sizeof(THTensor));
-  THTensor_(rawInit)(self, NULL, 0, 0, NULL, NULL);
+  THTensor_(rawInit)(self);
   return self;
 }
 
@@ -70,7 +71,8 @@ THTensor *THTensor_(new)(void)
 THTensor *THTensor_(newWithTensor)(THTensor *tensor)
 {
   THTensor *self = THAlloc(sizeof(THTensor));
-  THTensor_(rawInit)(self, tensor->storage, tensor->storageOffset, tensor->nDimension, tensor->size, tensor->stride);
+  THTensor_(rawInit)(self);
+  THTensor_(rawSet)(self, tensor->storage, tensor->storageOffset, tensor->nDimension, tensor->size, tensor->stride);
   return self;
 }
 
@@ -80,11 +82,13 @@ THTensor *THTensor_(newWithStorage)(THStorage *storage, long storageOffset, THLo
   THTensor *self = THAlloc(sizeof(THTensor));
   if(size && stride)
     THArgCheck(size->size == stride->size, 4, "inconsistent size");
-  
-  THTensor_(rawInit)(self, storage, storageOffset,
-                  (size ? size->size : 0),
-                  (size ? size->data : NULL),
-                  (stride ? stride->data : NULL));
+
+  THTensor_(rawInit)(self);  
+  THTensor_(rawSet)(self, storage, storageOffset,
+                    (size ? size->size : 0),
+                    (size ? size->data : NULL),
+                    (stride ? stride->data : NULL));
+
   return self;
 }
 THTensor *THTensor_(newWithStorage1d)(THStorage *storage, long storageOffset,
@@ -169,28 +173,28 @@ THTensor *THTensor_(newContiguous)(THTensor *self, int forcecopy)
 THTensor *THTensor_(newSelect)(THTensor *tensor, int dimension_, long sliceIndex_)
 {
   THTensor *self = THTensor_(newWithTensor)(tensor);
-  THTensor_(select)(self, dimension_, sliceIndex_);
+  THTensor_(select)(self, NULL, dimension_, sliceIndex_);
   return self;
 }
 
 THTensor *THTensor_(newNarrow)(THTensor *tensor, int dimension_, long firstIndex_, long size_)
 {
   THTensor *self = THTensor_(newWithTensor)(tensor);
-  THTensor_(narrow)(self, dimension_, firstIndex_, size_);
+  THTensor_(narrow)(self, NULL, dimension_, firstIndex_, size_);
   return self;
 }
 
 THTensor *THTensor_(newTranspose)(THTensor *tensor, int dimension1_, int dimension2_)
 {
   THTensor *self = THTensor_(newWithTensor)(tensor);
-  THTensor_(transpose)(self, dimension1_, dimension2_);
+  THTensor_(transpose)(self, NULL, dimension1_, dimension2_);
   return self;
 }
 
 THTensor *THTensor_(newUnfold)(THTensor *tensor, int dimension_, long size_, long step_)
 {
   THTensor *self = THTensor_(newWithTensor)(tensor);
-  THTensor_(unfold)(self, dimension_, size_, step_);
+  THTensor_(unfold)(self, NULL, dimension_, size_, step_);
   return self;
 }
 
@@ -247,27 +251,96 @@ void THTensor_(resize4d)(THTensor *self, long size0, long size1, long size2, lon
   THLongStorage_free(size);
 }
 
-void THTensor_(narrow)(THTensor *self, int dimension, long firstIndex, long size)
+void THTensor_(set)(THTensor *self, THTensor *src)
 {
-  THArgCheck( (dimension >= 0) && (dimension < self->nDimension), 2, "out of range");
-  THArgCheck( (firstIndex >= 0) && (firstIndex < self->size[dimension]), 3, "out of range");
-  THArgCheck( (size > 0) && (firstIndex+size <= self->size[dimension]), 4, "out of range");
+  if(self != src)
+    THTensor_(rawSet)(self, src->storage, src->storageOffset, src->nDimension, src->size, src->stride);
+}
+
+void THTensor_(setStorage)(THTensor *self, THStorage *storage_, long storageOffset_, THLongStorage *size_, THLongStorage *stride_)
+{
+  THArgCheck(size_->size == stride_->size, 5, "inconsistent size/stride sizes");
+  
+  THTensor_(rawSet)(self, storage_, storageOffset_, size_->size, size_->data, stride_->data);  
+}
+
+void THTensor_(setStorage1d)(THTensor *self, THStorage *storage_, long storageOffset_,
+                             long size0_, long stride0_)
+{
+  THTensor_(setStorage4d)(self, storage_, storageOffset_,
+                          size0_, stride0_,
+                          -1, -1,
+                          -1, -1,
+                          -1, -1);
+}
+
+void THTensor_(setStorage2d)(THTensor *self, THStorage *storage_, long storageOffset_,
+                             long size0_, long stride0_,
+                             long size1_, long stride1_)
+{
+  THTensor_(setStorage4d)(self, storage_, storageOffset_,
+                          size0_, stride0_,
+                          size1_, stride1_,
+                          -1, -1,
+                          -1, -1);
+}
+
+void THTensor_(setStorage3d)(THTensor *self, THStorage *storage_, long storageOffset_,
+                             long size0_, long stride0_,
+                             long size1_, long stride1_,
+                             long size2_, long stride2_)
+{
+  THTensor_(setStorage4d)(self, storage_, storageOffset_,
+                          size0_, stride0_,
+                          size1_, stride1_,
+                          size2_, stride2_,
+                          -1, -1);
+}
+
+void THTensor_(setStorage4d)(THTensor *self, THStorage *storage_, long storageOffset_,
+                             long size0_, long stride0_,
+                             long size1_, long stride1_,
+                             long size2_, long stride2_,
+                             long size3_, long stride3_)
+{
+  THLongStorage *size = THLongStorage_newWithSize4(size0_, size1_, size2_, size3_);
+  THLongStorage *stride = THLongStorage_newWithSize4(stride0_, stride1_, stride2_, stride3_);
+  THTensor_(setStorage)(self, storage_, storageOffset_, size, stride);
+  THLongStorage_free(size);
+  THLongStorage_free(stride);
+}
+
+
+void THTensor_(narrow)(THTensor *self, THTensor *src, int dimension, long firstIndex, long size)
+{
+  if(!src)
+    src = self;
+
+  THArgCheck( (dimension >= 0) && (dimension < src->nDimension), 3, "out of range");
+  THArgCheck( (firstIndex >= 0) && (firstIndex < src->size[dimension]), 4, "out of range");
+  THArgCheck( (size > 0) && (firstIndex+size <= src->size[dimension]), 5, "out of range");
+  
+  THTensor_(set)(self, src);
 
   if(firstIndex > 0)
     self->storageOffset += firstIndex*self->stride[dimension];
-
+  
   self->size[dimension] = size;
 }
 
-void THTensor_(select)(THTensor *self, int dimension, long sliceIndex)
+void THTensor_(select)(THTensor *self, THTensor *src, int dimension, long sliceIndex)
 {
   int d;
 
-  THArgCheck(self->nDimension > 1, 1, "cannot select on a vector");
-  THArgCheck((dimension >= 0) && (dimension < self->nDimension), 2, "out of range");
-  THArgCheck((sliceIndex >= 0) && (sliceIndex < self->size[dimension]), 3, "out of range");
+  if(!src)
+    src = self;
 
-  THTensor_(narrow)(self, dimension, sliceIndex, 1);
+  THArgCheck(src->nDimension > 1, 1, "cannot select on a vector");
+  THArgCheck((dimension >= 0) && (dimension < src->nDimension), 3, "out of range");
+  THArgCheck((sliceIndex >= 0) && (sliceIndex < src->size[dimension]), 4, "out of range");
+
+  THTensor_(set)(self, src);
+  THTensor_(narrow)(self, NULL, dimension, sliceIndex, 1);
   for(d = dimension; d < self->nDimension-1; d++)
   {
     self->size[d] = self->size[d+1];
@@ -276,12 +349,17 @@ void THTensor_(select)(THTensor *self, int dimension, long sliceIndex)
   self->nDimension--;
 }
 
-void THTensor_(transpose)(THTensor *self, int dimension1, int dimension2)
+void THTensor_(transpose)(THTensor *self, THTensor *src, int dimension1, int dimension2)
 {
   long z;
 
-  THArgCheck( (dimension1 >= 0) && (dimension1 < self->nDimension), 1, "out of range");
-  THArgCheck( (dimension2 >= 0) && (dimension2 < self->nDimension), 2, "out of range");
+  if(!src)
+    src = self;
+
+  THArgCheck( (dimension1 >= 0) && (dimension1 < src->nDimension), 1, "out of range");
+  THArgCheck( (dimension2 >= 0) && (dimension2 < src->nDimension), 2, "out of range");
+
+  THTensor_(set)(self, src);
 
   if(dimension1 == dimension2)
 	  return;
@@ -294,16 +372,21 @@ void THTensor_(transpose)(THTensor *self, int dimension1, int dimension2)
   self->size[dimension2] = z;
 }
 
-void THTensor_(unfold)(THTensor *self, int dimension, long size, long step)
+void THTensor_(unfold)(THTensor *self, THTensor *src, int dimension, long size, long step)
 {
   long *newSize;
   long *newStride;
   int d;
 
-  THArgCheck( (self->nDimension > 0), 1, "cannot unfold an empty tensor");
-  THArgCheck(dimension < self->nDimension, 2, "out of range");
-  THArgCheck(size <= self->size[dimension], 3, "out of range");
+  if(!src)
+    src = self;
+
+  THArgCheck( (src->nDimension > 0), 1, "cannot unfold an empty tensor");
+  THArgCheck(dimension < src->nDimension, 2, "out of range");
+  THArgCheck(size <= src->size[dimension], 3, "out of range");
   THArgCheck(step > 0, 4, "invalid step");
+
+  THTensor_(set)(self, src);
 
   newSize = THAlloc(sizeof(long)*(self->nDimension+1));
   newStride = THAlloc(sizeof(long)*(self->nDimension+1));
@@ -383,31 +466,39 @@ void THTensor_(free)(THTensor *self)
 
 /*******************************************************************************/
 
-/* This one does everything except coffee */
-static void THTensor_(rawInit)(THTensor *self, THStorage *storage, long storageOffset, int nDimension, long *size, long *stride)
+static void THTensor_(rawInit)(THTensor *self)
 {
-  /* refcount */
   self->refcount = 1;
+  self->storage = NULL;
+  self->storageOffset = 0;
+  self->size = NULL;
+  self->stride = NULL;
+  self->nDimension = 0;    
+}
 
+static void THTensor_(rawSet)(THTensor *self, THStorage *storage, long storageOffset, int nDimension, long *size, long *stride)
+{
   /* storage */
-  if(storage)
+  if(self->storage != storage)
   {
-    self->storage = storage;
-    THStorage_(retain)(self->storage);
+    if(self->storage)
+      THStorage_(free)(self->storage);
+
+    if(storage)
+    {
+      self->storage = storage;
+      THStorage_(retain)(self->storage);
+    }
+    else
+      self->storage = NULL;
   }
-  else
-    self->storage = NULL;
 
   /* storageOffset */
   if(storageOffset < 0)
     THError("Tensor: invalid storage offset");
   self->storageOffset = storageOffset;
 
-  /* nDimension, size and stride */
-  self->size = NULL;
-  self->stride = NULL;
-  self->nDimension = 0;    
-
+  /* size and stride */
   THTensor_(rawResize)(self, nDimension, size, stride);
 }
 

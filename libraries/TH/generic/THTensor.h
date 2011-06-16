@@ -68,10 +68,27 @@ TH_API void THTensor_(resize2d)(THTensor *tensor, long size0_, long size1_);
 TH_API void THTensor_(resize3d)(THTensor *tensor, long size0_, long size1_, long size2_);
 TH_API void THTensor_(resize4d)(THTensor *tensor, long size0_, long size1_, long size2_, long size3_);
 
-TH_API void THTensor_(narrow)(THTensor *self, int dimension_, long firstIndex_, long size_);
-TH_API void THTensor_(select)(THTensor *self, int dimension_, long sliceIndex_);
-TH_API void THTensor_(transpose)(THTensor *self, int dimension1_, int dimension2_);
-TH_API void THTensor_(unfold)(THTensor *self, int dimension_, long size_, long step_);
+TH_API void THTensor_(set)(THTensor *self, THTensor *src);
+TH_API void THTensor_(setStorage)(THTensor *self, THStorage *storage_, long storageOffset_, THLongStorage *size_, THLongStorage *stride_);
+TH_API void THTensor_(setStorage1d)(THTensor *self, THStorage *storage_, long storageOffset_,
+                                    long size0_, long stride0_);
+TH_API void THTensor_(setStorage2d)(THTensor *self, THStorage *storage_, long storageOffset_,
+                                    long size0_, long stride0_,
+                                    long size1_, long stride1_);
+TH_API void THTensor_(setStorage3d)(THTensor *self, THStorage *storage_, long storageOffset_,
+                                    long size0_, long stride0_,
+                                    long size1_, long stride1_,
+                                    long size2_, long stride2_);
+TH_API void THTensor_(setStorage4d)(THTensor *self, THStorage *storage_, long storageOffset_,
+                                    long size0_, long stride0_,
+                                    long size1_, long stride1_,
+                                    long size2_, long stride2_,
+                                    long size3_, long stride3_);
+
+TH_API void THTensor_(narrow)(THTensor *self, THTensor *src, int dimension_, long firstIndex_, long size_);
+TH_API void THTensor_(select)(THTensor *self, THTensor *src, int dimension_, long sliceIndex_);
+TH_API void THTensor_(transpose)(THTensor *self, THTensor *src, int dimension1_, int dimension2_);
+TH_API void THTensor_(unfold)(THTensor *self, THTensor *src, int dimension_, long size_, long step_);
     
 TH_API int THTensor_(isContiguous)(THTensor *self);
 TH_API long THTensor_(nElement)(THTensor *self);

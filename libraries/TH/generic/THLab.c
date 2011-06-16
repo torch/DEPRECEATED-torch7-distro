@@ -497,14 +497,14 @@ void THLab_(cat)(THTensor *r_, THTensor *ta, THTensor *tb, int dimension)
 
   {
     THTensor *nta = THTensor_(newWithTensor)(r_);
-    THTensor_(narrow)(nta, dimension, 0, (dimension < ta->nDimension ? ta->size[dimension] : 1));
+    THTensor_(narrow)(nta, NULL, dimension, 0, (dimension < ta->nDimension ? ta->size[dimension] : 1));
     THTensor_(copy)(nta, ta);
     THTensor_(free)(nta);
   }
 
   {
     THTensor *ntb = THTensor_(newWithTensor)(r_);
-    THTensor_(narrow)(ntb, dimension, (dimension < ta->nDimension ? ta->size[dimension] : 1), (dimension < tb->nDimension ? tb->size[dimension] : 1));
+    THTensor_(narrow)(ntb, NULL, dimension, (dimension < ta->nDimension ? ta->size[dimension] : 1), (dimension < tb->nDimension ? tb->size[dimension] : 1));
     THTensor_(copy)(ntb, tb);
     THTensor_(free)(ntb);
   }

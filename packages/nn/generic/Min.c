@@ -36,7 +36,7 @@ static int nn_(Min_forward)(lua_State *L)
                        *indices_data = theIndex+1;
                        *output_data = theMin;)
 
-  THTensor_(select)(output, dimension, 0);
+  THTensor_(select)(output, NULL, dimension, 0);
 
   return 1;
 }

@@ -233,7 +233,7 @@ static int torch_Tensor_(narrow)(lua_State *L)
   THArgCheck( (size > 0) && (firstIndex+size <= tensor->size[dimension]), 4, "out of range");
 */
   tensor = THTensor_(newWithTensor)(tensor);
-  THTensor_(narrow)(tensor, dimension, firstIndex, size);
+  THTensor_(narrow)(tensor, NULL, dimension, firstIndex, size);
   luaT_pushudata(L, tensor, torch_Tensor_id);
   return 1;
 }
@@ -297,13 +297,13 @@ static int torch_Tensor_(sub)(lua_State *L)
   }
 
   tensor = THTensor_(newWithTensor)(tensor);
-  THTensor_(narrow)(tensor, 0, d0s, d0e-d0s+1);
+  THTensor_(narrow)(tensor, NULL, 0, d0s, d0e-d0s+1);
   if(d1s >= 0)
-    THTensor_(narrow)(tensor, 1, d1s, d1e-d1s+1);
+    THTensor_(narrow)(tensor, NULL, 1, d1s, d1e-d1s+1);
   if(d2s >= 0)
-    THTensor_(narrow)(tensor, 2, d2s, d2e-d2s+1);
+    THTensor_(narrow)(tensor, NULL, 2, d2s, d2e-d2s+1);
   if(d3s >= 0)
-    THTensor_(narrow)(tensor, 3, d3s, d3e-d3s+1);
+    THTensor_(narrow)(tensor, NULL, 3, d3s, d3e-d3s+1);
   luaT_pushudata(L, tensor, torch_Tensor_id);
   return 1;
 }
@@ -320,7 +320,7 @@ static int torch_Tensor_(select)(lua_State *L)
 */
 
   tensor = THTensor_(newWithTensor)(tensor);
-  THTensor_(select)(tensor, dimension, sliceIndex);
+  THTensor_(select)(tensor, NULL, dimension, sliceIndex);
   luaT_pushudata(L, tensor, torch_Tensor_id);
   return 1;
 }
@@ -338,7 +338,7 @@ static int torch_Tensor_(transpose)(lua_State *L)
 */
 
   tensor = THTensor_(newWithTensor)(tensor);
-  THTensor_(transpose)(tensor, dimension1, dimension2);
+  THTensor_(transpose)(tensor, NULL, dimension1, dimension2);
   luaT_pushudata(L, tensor, torch_Tensor_id);
   return 1;
 }
@@ -350,7 +350,7 @@ static int torch_Tensor_(t)(lua_State *L)
   luaL_argcheck(L, tensor->nDimension == 2, 1, "Tensor must have 2 dimensions");
 
   tensor = THTensor_(newWithTensor)(tensor);
-  THTensor_(transpose)(tensor, 0, 1);
+  THTensor_(transpose)(tensor, NULL, 0, 1);
   luaT_pushudata(L, tensor, torch_Tensor_id);
   return 1;
 }
@@ -369,7 +369,7 @@ int torch_Tensor_(unfold)(lua_State *L)
 */
 
   tensor = THTensor_(newWithTensor)(tensor);
-  THTensor_(unfold)(tensor, dimension, size, step);
+  THTensor_(unfold)(tensor, NULL, dimension, size, step);
   luaT_pushudata(L, tensor, torch_Tensor_id);
   return 1;
 }
@@ -497,7 +497,7 @@ static int torch_Tensor_(__index__)(lua_State *L)
     else
     {
       tensor = THTensor_(newWithTensor)(tensor);
-      THTensor_(select)(tensor, 0, index);
+      THTensor_(select)(tensor, NULL, 0, index);
       luaT_pushudata(L, tensor, torch_Tensor_id);
     }
     lua_pushboolean(L, 1);

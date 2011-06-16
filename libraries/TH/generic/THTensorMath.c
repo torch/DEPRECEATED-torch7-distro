@@ -276,19 +276,19 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
     THTensor *swap = m2;
     m2 = m1;
     m1 = swap;
-    THTensor_(transpose)(tensor, 0, 1);
-    THTensor_(transpose)(m1, 0, 1);
-    THTensor_(transpose)(m2, 0, 1);
+    THTensor_(transpose)(tensor, NULL, 0, 1);
+    THTensor_(transpose)(m1, NULL, 0, 1);
+    THTensor_(transpose)(m2, NULL, 0, 1);
     transpose = 't';
     tensor_ = tensor;
   }
   else
   {
     transpose = 'n';
-    THTensor_(transpose)(tensor, 0, 1);
+    THTensor_(transpose)(tensor, NULL, 0, 1);
     tensor_ = THTensor_(newContiguous)(tensor, 1);
-    THTensor_(transpose)(tensor, 0, 1);
-    THTensor_(transpose)(tensor_, 0, 1);
+    THTensor_(transpose)(tensor, NULL, 0, 1);
+    THTensor_(transpose)(tensor_, NULL, 0, 1);
   }
 
   /* m1 */
@@ -355,9 +355,9 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
 
   if(transpose == 't')
   {
-    THTensor_(transpose)(tensor, 0, 1);
-    THTensor_(transpose)(m1, 0, 1);
-    THTensor_(transpose)(m2, 0, 1);
+    THTensor_(transpose)(tensor, NULL, 0, 1);
+    THTensor_(transpose)(m1, NULL, 0, 1);
+    THTensor_(transpose)(m2, NULL, 0, 1);
   }
 } 
 

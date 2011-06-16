@@ -23,6 +23,8 @@ static int nn_(TemporalConvolution_forward)(lua_State *L)
   luaL_argcheck(L, input->size[0] >= kW, 2, "input sequence smaller than kernel size");
 
   input = THTensor_(newContiguous)(input, 0);
+  outputFrame = THTensor_(new)();
+  inputWindow = THTensor_(new)();
 
   nInputFrame = input->size[0];
   nOutputFrame = (nInputFrame - kW) / dW + 1;
@@ -33,14 +35,14 @@ static int nn_(TemporalConvolution_forward)(lua_State *L)
   
   for(k = 0; k < nOutputFrame; k++)
   {
-    inputWindow = THTensor_(newWithStorage1d)(input->storage, input->storageOffset+k*dW*input->size[1], kW*input->size[1], 1);
-    outputFrame = THTensor_(newSelect)(output, 0, k);
+    THTensor_(setStorage1d)(inputWindow, input->storage, input->storageOffset+k*dW*input->size[1], kW*input->size[1], 1);
+    THTensor_(select)(outputFrame, output, 0, k);
     THTensor_(copy)(outputFrame, bias);
     THTensor_(addmv)(outputFrame, 1, weight, inputWindow);
-    THTensor_(free)(outputFrame);
-    THTensor_(free)(inputWindow);
   }
 
+  THTensor_(free)(outputFrame);
+  THTensor_(free)(inputWindow);
   THTensor_(free)(input);
 
   return 1;
@@ -65,28 +67,31 @@ static int nn_(TemporalConvolution_backward)(lua_State *L)
 
   /* Not necessary with partial backprop: */
   input = THTensor_(newContiguous)(input, 0);
+  gradOutputFrame = THTensor_(new)();
+  inputWindow = THTensor_(new)();
+  gradInputWindow = THTensor_(new)();
+
   THTensor_(resizeAs)(gradInput, input);
   THTensor_(zero)(gradInput);
 
   for(k = 0; k < gradOutput->size[0]; k++)
   {
     /* ------------------------- gradWeight ------------------------------------- */
-    inputWindow = THTensor_(newWithStorage1d)(input->storage, input->storageOffset+k*dW*input->size[1], kW*input->size[1], 1);
-    gradOutputFrame = THTensor_(newSelect)(gradOutput, 0, k);
+    THTensor_(setStorage1d)(inputWindow, input->storage, input->storageOffset+k*dW*input->size[1], kW*input->size[1], 1);
+    THTensor_(select)(gradOutputFrame, gradOutput, 0, k);
     THTensor_(addTensor)(gradBias, 1, gradOutputFrame);
     THTensor_(addr)(gradWeight, 1, gradOutputFrame, inputWindow);
 
     /* -------------------------- gradInput ------------------------------------- */
-    gradInputWindow = THTensor_(newWithStorage1d)(gradInput->storage, gradInput->storageOffset+k*dW*gradInput->size[1], kW*gradInput->size[1], 1);
-    THTensor_(transpose)(weight, 0, 1);
+    THTensor_(setStorage1d)(gradInputWindow, gradInput->storage, gradInput->storageOffset+k*dW*gradInput->size[1], kW*gradInput->size[1], 1);
+    THTensor_(transpose)(weight, NULL, 0, 1);
     THTensor_(addmv)(gradInputWindow, 1, weight, gradOutputFrame);
-    THTensor_(transpose)(weight, 0, 1);
-
-    THTensor_(free)(gradOutputFrame);
-    THTensor_(free)(inputWindow);
-    THTensor_(free)(gradInputWindow);
+    THTensor_(transpose)(weight, NULL, 0, 1);
   }
 
+  THTensor_(free)(gradOutputFrame);
+  THTensor_(free)(inputWindow);
+  THTensor_(free)(gradInputWindow);
   THTensor_(free)(input);
 
   return 1;
