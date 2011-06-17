@@ -2,6 +2,42 @@
 #define TH_GENERIC_FILE "generic/THLab.c"
 #else
 
+void THLab_(add)(THTensor *r_, THTensor *t, real value)
+{
+  THTensor_(resizeAs)(r_, t);
+  TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data + value;);
+}
+
+void THLab_(mul)(THTensor *r_, THTensor *t, real value)
+{
+  THTensor_(resizeAs)(r_, t);
+  TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data * value;);
+}
+
+void THLab_(div)(THTensor *r_, THTensor *t, real value)
+{
+  THTensor_(resizeAs)(r_, t);
+  TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data / value;);
+}
+
+void THLab_(cadd)(THTensor *r_, THTensor *t, real value, THTensor *src)
+{
+  THTensor_(resizeAs)(r_, t);
+  TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data + value * *src_data;);
+}
+
+void THLab_(cmul)(THTensor *r_, THTensor *t, THTensor *src)
+{
+  THTensor_(resizeAs)(r_, t);
+  TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data * *src_data;);
+}
+
+void THLab_(cdiv)(THTensor *r_, THTensor *t, THTensor *src)
+{
+  THTensor_(resizeAs)(r_, t);
+  TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data / *src_data;);
+}
+
 void THLab_(numel)(long *n_, THTensor *t)
 {
   *n_ = THTensor_(nElement)(t);

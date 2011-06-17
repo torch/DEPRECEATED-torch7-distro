@@ -4,15 +4,18 @@
 
 void THTensor_(fill)(THTensor *self, real value);
 void THTensor_(zero)(THTensor *self);
+
 void THTensor_(add)(THTensor *self, real value);
-void THTensor_(addTensor)(THTensor *self, real value, THTensor *src);
-  
 void THTensor_(mul)(THTensor *self, real value);
-void THTensor_(cmul)(THTensor *self, THTensor *src);
-void THTensor_(addcmul)(THTensor *self, real value, THTensor *src1, THTensor *src2);
 void THTensor_(div)(THTensor *self, real value);
+
+void THTensor_(cadd)(THTensor *self, real value, THTensor *src);  
+void THTensor_(cmul)(THTensor *self, THTensor *src);
 void THTensor_(cdiv)(THTensor *self, THTensor *src);
+
+void THTensor_(addcmul)(THTensor *self, real value, THTensor *src1, THTensor *src2);
 void THTensor_(addcdiv)(THTensor *self, real value, THTensor *src1, THTensor *src2);
+
 real THTensor_(dot)(THTensor *self, THTensor *src);
   
 real THTensor_(min)(THTensor *self);

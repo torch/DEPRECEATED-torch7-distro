@@ -169,7 +169,10 @@ void THBlas_(gemv)(char trans, long m, long n, real alpha, real *a, long lda, re
     lda = m;
   
 #if defined(USE_LAPACK) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
-  if( (m <= INT_MAX) && (n <= INT_MAX) && (lda <= INT_MAX)  && (incx <= INT_MAX) && (incy <= INT_MAX) )
+  if( (m <= INT_MAX) && (n <= INT_MAX) && 
+      (lda > 0) && (lda <= INT_MAX) &&
+      (incx > 0) && (incx <= INT_MAX) &&
+      (incy > 0) && (incy <= INT_MAX) )
   {
     int i_m = (int)m;
     int i_n = (int)n;

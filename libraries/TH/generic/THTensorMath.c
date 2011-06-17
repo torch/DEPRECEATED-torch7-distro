@@ -17,7 +17,22 @@ void THTensor_(add)(THTensor *tensor, real value)
   TH_TENSOR_APPLY(real, tensor, *tensor_data += value;);
 }
 
-void THTensor_(addTensor)(THTensor *tensor, real value, THTensor *src)
+void THTensor_(mul)(THTensor *tensor, real value)
+{
+  /* we use a trick here. careful with that. */
+  /* we do not have to increment stuff with this version (contrary to APPLY2 and APPLY3) */
+  TH_TENSOR_APPLY(real, tensor, THBlas_(scal)(tensor_size, value, tensor_data, tensor_stride); break;);
+}
+
+void THTensor_(div)(THTensor *tensor, real value)
+{
+  THArgCheck(value != 0, 2, "division by 0");
+  /* we use a trick here. careful with that. */
+  /* we do not have to increment stuff with this version (contrary to APPLY2 and APPLY3) */
+  TH_TENSOR_APPLY(real, tensor, THBlas_(scal)(tensor_size, 1/value, tensor_data, tensor_stride); break;);
+}
+
+void THTensor_(cadd)(THTensor *tensor, real value, THTensor *src)
 {
   /* we use a trick here. careful with that. */
   TH_TENSOR_APPLY2(real, tensor, real, src,
@@ -30,16 +45,14 @@ void THTensor_(addTensor)(THTensor *tensor, real value, THTensor *src)
                    break;);
 }
 
-void THTensor_(mul)(THTensor *tensor, real value)
-{
-  /* we use a trick here. careful with that. */
-  /* we do not have to increment stuff with this version (contrary to APPLY2 and APPLY3) */
-  TH_TENSOR_APPLY(real, tensor, THBlas_(scal)(tensor_size, value, tensor_data, tensor_stride); break;);
-}
-
 void THTensor_(cmul)(THTensor *tensor, THTensor *src)
 {
   TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data *= *src_data;);
+}
+
+void THTensor_(cdiv)(THTensor *tensor, THTensor *src)
+{
+  TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data /= *src_data;);
 }
 
 void THTensor_(addcmul)(THTensor *tensor, real value, THTensor *src1, THTensor *src2)
@@ -47,18 +60,6 @@ void THTensor_(addcmul)(THTensor *tensor, real value, THTensor *src1, THTensor *
   TH_TENSOR_APPLY3(real, tensor, real, src1, real, src2, *tensor_data += value * *src1_data * *src2_data;);
 }
 
-void THTensor_(div)(THTensor *tensor, real value)
-{
-  THArgCheck(value != 0, 2, "division by 0");
-  /* we use a trick here. careful with that. */
-  /* we do not have to increment stuff with this version (contrary to APPLY2 and APPLY3) */
-  TH_TENSOR_APPLY(real, tensor, THBlas_(scal)(tensor_size, 1/value, tensor_data, tensor_stride); break;);
-}
-
-void THTensor_(cdiv)(THTensor *tensor, THTensor *src)
-{
-  TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data /= *src_data;);
-}
 
 void THTensor_(addcdiv)(THTensor *tensor, real value, THTensor *src1, THTensor *src2)
 {
@@ -187,17 +188,19 @@ void THTensor_(addmv)(THTensor *tensor, real alpha, THTensor *mat, THTensor *vec
     THError("size mismatch");
 
   if(mat->stride[0] == 1)
+  {
     THBlas_(gemv)('n', mat->size[0], mat->size[1],
                   alpha, THTensor_(data)(mat), mat->stride[1],
                   THTensor_(data)(vec), vec->stride[0],
                   1, THTensor_(data)(tensor), tensor->stride[0]);
-
+  }
   else if(mat->stride[1] == 1)
+  {
     THBlas_(gemv)('t',  mat->size[1], mat->size[0],
                   alpha, THTensor_(data)(mat), mat->stride[0],
                   THTensor_(data)(vec), vec->stride[0],
                   1, THTensor_(data)(tensor), tensor->stride[0]);
-
+  }
   else
   {
     THTensor *cmat = THTensor_(newContiguous)(mat, 0);
