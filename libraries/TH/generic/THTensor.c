@@ -118,11 +118,13 @@ THTensor *THTensor_(newWithStorage4d)(THStorage *storage, long storageOffset,
                                long size2, long stride2,
                                long size3, long stride3)
 {
-  THLongStorage *size = THLongStorage_newWithSize4(size0, size1, size2, size3);
-  THLongStorage *stride = THLongStorage_newWithSize4(stride0, stride1, stride2, stride3);
-  THTensor *self = THTensor_(newWithStorage)(storage, storageOffset, size, stride);
-  THLongStorage_free(size);
-  THLongStorage_free(stride);
+  long size[4] = {size0, size1, size2, size3};
+  long stride[4] = {stride0, stride1, stride2, stride3};
+
+  THTensor *self = THAlloc(sizeof(THTensor));
+  THTensor_(rawInit)(self);  
+  THTensor_(rawSet)(self, storage, storageOffset, 4, size, stride);
+
   return self;
 }
 
@@ -148,9 +150,12 @@ THTensor *THTensor_(newWithSize3d)(long size0, long size1, long size2)
 
 THTensor *THTensor_(newWithSize4d)(long size0, long size1, long size2, long size3)
 {
-  THLongStorage *size = THLongStorage_newWithSize4(size0, size1, size2, size3);
-  THTensor *self = THTensor_(newWithSize)(size, NULL);
-  THLongStorage_free(size);
+  long size[4] = {size0, size1, size2, size3};
+
+  THTensor *self = THAlloc(sizeof(THTensor));
+  THTensor_(rawInit)(self);  
+  THTensor_(rawResize)(self, 4, size, NULL);
+
   return self;
 }
 
@@ -246,9 +251,9 @@ void THTensor_(resize3d)(THTensor *tensor, long size0, long size1, long size2)
 
 void THTensor_(resize4d)(THTensor *self, long size0, long size1, long size2, long size3)
 {
-  THLongStorage *size = THLongStorage_newWithSize4(size0, size1, size2, size3);
-  THTensor_(resize)(self, size, NULL);
-  THLongStorage_free(size);
+  long size[4] = {size0, size1, size2, size3};
+
+  THTensor_(rawResize)(self, 4, size, NULL);
 }
 
 void THTensor_(set)(THTensor *self, THTensor *src)
@@ -303,11 +308,11 @@ void THTensor_(setStorage4d)(THTensor *self, THStorage *storage_, long storageOf
                              long size2_, long stride2_,
                              long size3_, long stride3_)
 {
-  THLongStorage *size = THLongStorage_newWithSize4(size0_, size1_, size2_, size3_);
-  THLongStorage *stride = THLongStorage_newWithSize4(stride0_, stride1_, stride2_, stride3_);
-  THTensor_(setStorage)(self, storage_, storageOffset_, size, stride);
-  THLongStorage_free(size);
-  THLongStorage_free(stride);
+
+  long size[4] = {size0_, size1_, size2_, size3_};
+  long stride[4] = {stride0_, stride1_, stride2_, stride3_};
+
+  THTensor_(rawSet)(self, storage_, storageOffset_, 4, size, stride);  
 }
 
 
