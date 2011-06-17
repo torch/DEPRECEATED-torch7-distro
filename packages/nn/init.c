@@ -56,6 +56,9 @@ static const void* torch_DoubleTensor_id = NULL;
 #include "generic/SpatialConvolution.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SpatialSubSampling.c"
+#include "THGenerateFloatTypes.h"
+
 DLL_EXPORT int luaopen_libnn(lua_State *L)
 {
   torch_FloatTensor_id = luaT_checktypename2id(L, "torch.FloatTensor");
@@ -81,6 +84,7 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_FloatTemporalConvolution_init(L);
   nn_FloatTemporalSubSampling_init(L);
   nn_FloatSpatialConvolution_init(L);
+  nn_FloatSpatialSubSampling_init(L);
 
   nn_DoubleMin_init(L);
   nn_DoubleMax_init(L);
@@ -98,6 +102,7 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_DoubleTemporalConvolution_init(L);
   nn_DoubleTemporalSubSampling_init(L);
   nn_DoubleSpatialConvolution_init(L);
+  nn_DoubleSpatialSubSampling_init(L);
 
 /*
   nn_SpatialConvolution_init(L);
