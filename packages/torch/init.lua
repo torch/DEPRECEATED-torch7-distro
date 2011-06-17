@@ -58,6 +58,7 @@ end
 
 torch.include('torch', 'Tensor.lua')
 torch.include('torch', 'File.lua')
+torch.include('torch', 'CmdLine.lua')
 
 if not package.loaded.help then
    require('help')
