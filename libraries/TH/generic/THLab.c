@@ -345,11 +345,11 @@ void THLab_(randperm)(THTensor *r_, long n)
     r__data[i*r__stride_0] = (real)(i);
 
   for(i = 0; i < n-1; i++)
-  {
+  {    
     long z = THRandom_random() % (n-i);
     real sav = r__data[i*r__stride_0];
-    r__data[i*r__stride_0] = r__data[z];
-    r__data[z*r__stride_0] = sav;
+    r__data[i*r__stride_0] = r__data[(z+i)*r__stride_0];
+    r__data[(z+i)*r__stride_0] = sav;
   }
 }
 
