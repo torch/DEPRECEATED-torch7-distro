@@ -44,11 +44,11 @@ static int torch_TensorMath_(add)(lua_State *L)
     THTensor_(add)(tensor, value);
   }
   else if( (n == 2) && (src = luaT_toudata(L, 2, torch_Tensor_id)) )
-    THTensor_(addTensor)(tensor, 1, src);
+    THTensor_(cadd)(tensor, 1, src);
   else if( (n == 3) && lua_isnumber(L, 2) && (src = luaT_toudata(L, 3, torch_Tensor_id)) )
   {
     double value = luaL_checknumber(L, 2);
-    THTensor_(addTensor)(tensor, value, src);
+    THTensor_(cadd)(tensor, value, src);
   }
   else
     luaL_error(L, "bad arguments: number, torch.Tensor, or number and torch.Tensor expected");
@@ -226,7 +226,7 @@ static int torch_TensorMath_(__add__)(lua_State *L)
     {
       THTensor_(resizeAs)(r, tensor1);
       THTensor_(copy)(r, tensor1);
-      THTensor_(addTensor)(r, 1, tensor2);
+      THTensor_(cadd)(r, 1, tensor2);
     }
   }
   return 1;
@@ -249,7 +249,7 @@ static int torch_TensorMath_(__sub__)(lua_State *L)
     {
       THTensor_(resizeAs)(r, tensor2);
       THTensor_(fill)(r, luaL_checknumber(L, 1));
-      THTensor_(addTensor)(r, -1, tensor2);
+      THTensor_(cadd)(r, -1, tensor2);
     }
     else if(tensor1 && !tensor2)
     {
@@ -261,7 +261,7 @@ static int torch_TensorMath_(__sub__)(lua_State *L)
     {
       THTensor_(resizeAs)(r, tensor1);
       THTensor_(copy)(r, tensor1);
-      THTensor_(addTensor)(r, -1, tensor2);
+      THTensor_(cadd)(r, -1, tensor2);
     }
   }
   return 1;

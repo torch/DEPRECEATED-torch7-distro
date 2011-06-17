@@ -79,7 +79,7 @@ static int nn_(TemporalConvolution_backward)(lua_State *L)
     /* ------------------------- gradWeight ------------------------------------- */
     THTensor_(setStorage1d)(inputWindow, input->storage, input->storageOffset+k*dW*input->size[1], kW*input->size[1], 1);
     THTensor_(select)(gradOutputFrame, gradOutput, 0, k);
-    THTensor_(addTensor)(gradBias, 1, gradOutputFrame);
+    THTensor_(cadd)(gradBias, 1, gradOutputFrame);
     THTensor_(addr)(gradWeight, 1, gradOutputFrame, inputWindow);
 
     /* -------------------------- gradInput ------------------------------------- */
