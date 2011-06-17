@@ -23,12 +23,22 @@ function TemporalSubSampling:reset(stdv)
    else
       stdv = 1/math.sqrt(self.kW)
    end
+
    self.weight:apply(function()
                         return random.uniform(-stdv, stdv)
                      end)
+
    self.bias:apply(function()
                       return random.uniform(-stdv, stdv)
                    end)   
+end
+
+function TemporalSubSampling:forward(input)
+   return input.nn.TemporalSubSampling_forward(self, input)
+end
+
+function TemporalSubSampling:backward(input, gradOutput)
+   return input.nn.TemporalSubSampling_backward(self, input, gradOutput)
 end
 
 function TemporalSubSampling:zeroGradParameters()
