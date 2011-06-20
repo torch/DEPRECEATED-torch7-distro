@@ -26,6 +26,9 @@ void THTensor_(addmv)(THTensor *self, real alpha, THTensor *mat, THTensor *vec);
 void THTensor_(addmm)(THTensor *self, real alpha, THTensor *mat1, THTensor *mat2);
 void THTensor_(addr)(THTensor *self, real alpha, THTensor *vec1, THTensor *vec2);
 
+THTensor *THTensor_(newconv2_valid)(THTensor *image, THTensor *kernel, long srow, long scol);
+void THTensor_(conv2_valid)(THTensor *self, THTensor *image, THTensor *kernel, long srow, long scol);
+
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 void THTensor_(log)(THTensor *self);
 void THTensor_(log1p)(THTensor *self);
