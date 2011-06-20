@@ -9,16 +9,16 @@ function LookupTable:__init(nIndex, ...)
       local size = select(1, ...)
       self.size = torch.LongStorage(#size + 1)
       for i=1,#size do
-         self.size[i] = size[i]
+         self.size[i+1] = size[i]
       end
    else
       self.size = torch.LongStorage(select('#', ...)+1)
       for i=1,select('#',...) do
-         self.size[i] = select(i, ...)
+         self.size[i+1] = select(i, ...)
       end
    end
 
-   self.size[self.size:size()] = nIndex
+   self.size[1] = nIndex
    self.weight = torch.Tensor(self.size)
    self.currentGradWeights = {}
    self.currentInputs = {}
@@ -35,12 +35,11 @@ end
 
 function LookupTable:forward(input)
    local nIndex = input:size(1)
-   local dim = self.size:size()
-   self.size[dim] = nIndex
+   self.size[1] = nIndex
    self.output:resize(self.size)
 
-   for i=1,input:size(1) do
-      self.output:select(dim, i):copy(self.weight:select(dim, input[i]))
+   for i=1,nIndex do
+      self.output:select(1, i):copy(self.weight:select(1, input[i]))
    end
 
    return self.output
@@ -62,9 +61,8 @@ function LookupTable:updateParameters(learningRate)
    for i=1,#self.currentInputs do
       local currentInput = self.currentInputs[i]
       local currentGradWeight = self.currentGradWeights[i]
-      local dim = self.size:size()
       for i=1,currentInput:size(1) do
-         self.weight:select(dim, currentInput[i]):add(-learningRate, currentGradWeight:select(dim, i))
+         self.weight:select(1, currentInput[i]):add(-learningRate, currentGradWeight:select(1, i))
       end
    end
 end
