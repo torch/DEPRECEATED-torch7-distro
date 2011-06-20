@@ -227,12 +227,17 @@ const char* luaT_typename(lua_State *L, int ud)
 
 void luaT_pushudata(lua_State *L, void *udata, const void *id)
 {
-  void **udata_p = lua_newuserdata(L, sizeof(void*));  
-  *udata_p = udata;
-  luaT_pushmetatable(L, id);
-  if(lua_isnil(L, -1))
-    luaL_error(L, "Torch internal problem: cannot find a metatable");
-  lua_setmetatable(L, -2);
+  if(udata)
+  {
+    void **udata_p = lua_newuserdata(L, sizeof(void*));  
+    *udata_p = udata;
+    luaT_pushmetatable(L, id);
+    if(lua_isnil(L, -1))
+      luaL_error(L, "Torch internal problem: cannot find a metatable");
+    lua_setmetatable(L, -2);
+  }
+  else
+    lua_pushnil(L);
 }
 
 void *luaT_toudata (lua_State *L, int ud, const void *id)
