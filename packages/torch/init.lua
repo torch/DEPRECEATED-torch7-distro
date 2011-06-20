@@ -68,6 +68,7 @@ function torch.setdefaulttensortype(typename)
    assert(type(typename) == 'string', 'string expected')
    if torch.getconstructortable(typename) then
       torch.Tensor = torch.getconstructortable(typename)
+      torch.Storage = torch.getconstructortable(torch.typename(torch.Tensor(1):storage()))
    else
       error(string.format("<%s> is not a string describing a torch object", typename))
    end
