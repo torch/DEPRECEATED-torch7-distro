@@ -389,11 +389,12 @@ void THTensor_(conv2_valid)(THTensor *output, THTensor *image, THTensor *filter,
   /*
     2D Input, 2D kernel  : convolve given image with the given kernel.
     2D Input, 3D kernels : convolve given image with all kernels.
+    2D Input, 4D kernels : Only OK, if kernel->size[1] == 1
     3D Input, 2D kernel  : convolve each input image with the given kernel.
     3D Input, 3D kernels : convolve each given image with all kernels.
     3D Input, 4D kernels : regular full connected kernel assumed (out,in,kx,ky)
-    2D Input, 4D kernels : Only OK, if kernel->size[1] == 1
    */
+
   if (input->nDimension == 3) {
     nInputPlane = input->size[0];
     istride0    = input->stride[0];
@@ -413,8 +414,8 @@ void THTensor_(conv2_valid)(THTensor *output, THTensor *image, THTensor *filter,
     nKernelCols = kernel->size[1];
     nOutputPlane = nInputPlane;
   } else if (kernel->nDimension == 3) {
-    kstride0 = 0;
-    kstride1 = kernel->stride[0];
+    kstride0 = kernel->stride[0];
+    kstride1 = 0;
     nKernelRows = kernel->size[1];
     nKernelCols = kernel->size[2];
     nOutputPlane = nInputPlane * kernel->size[0];
@@ -437,6 +438,23 @@ void THTensor_(conv2_valid)(THTensor *output, THTensor *image, THTensor *filter,
     THTensor_(resize2d)(output, nOutputRows, nOutputCols);
   else
     THTensor_(resize3d)(output, nOutputPlane, nOutputRows, nOutputCols);
+
+  if (input->nDimension == 3 && kernel->nDimension <= 3) {
+    long nk = 1;
+    if (kernel->nDimension == 3)
+      nk = kernel->size[0];
+    THTensor *outn = THTensor_(new)();
+    THTensor *imn = THTensor_(new)();
+    long i;
+    for (i=0; i<nInputPlane; i++) {
+      THTensor_(narrow)(outn,output,0,i*nk,nk);
+      THTensor_(select)(imn,input,0,i);
+      THTensor_(conv2_valid)(outn,imn,kernel,srow,scol);
+    }
+    THTensor_(free)(outn);
+    THTensor_(free)(imn);
+    return;
+  }
 
 
   real *input_data = THTensor_(data)(input);
@@ -478,7 +496,6 @@ void THTensor_(conv2_valid)(THTensor *output, THTensor *image, THTensor *filter,
             ptr_input_ += nInputCols; /* next input line */
             ptr_weight_ += nKernelCols; /* next mask line */
           }
-          
           /* Update output */
           *ptr_output++ += sum;
         }
