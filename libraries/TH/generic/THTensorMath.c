@@ -425,8 +425,7 @@ void THTensor_(conv2_valid)(THTensor *output, THTensor *image, THTensor *filter,
     nKernelRows = kernel->size[2];
     nKernelCols = kernel->size[3];
     nOutputPlane = kernel->size[0];
-    if (input->nDimension == 2)
-      THArgCheck(kernel->size[1] == 1, 3, "2D input requires 4D kernels with size[1]=1");
+    THArgCheck(kernel->size[1] == nInputPlane, 2, "invalid number of input planes");
   }
 
   THArgCheck(nInputRows >= nKernelRows && nInputCols >= nKernelCols , 2, "Input image is smaller than kernel");
