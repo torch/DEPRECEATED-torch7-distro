@@ -145,24 +145,6 @@ TENSOR_IMPLEMENT_BASIC_ADDMUL(addmv)
 TENSOR_IMPLEMENT_BASIC_ADDMUL(addmm)
 TENSOR_IMPLEMENT_BASIC_ADDMUL(addr)
 
-static int torch_TensorMath_(conv2)(lua_State *L)
-{
-  THTensor *tensor = luaT_checkudata(L,1,torch_Tensor_id);
-  THTensor *image = luaT_checkudata(L,2,torch_Tensor_id);
-  int n = lua_gettop(L);
-  if (n == 2) {
-    THTensor *r = THTensor_(newconv2_valid)(tensor,image,1,1);
-    luaT_pushudata(L, r, torch_Tensor_id);
-  } else if (n == 3) {
-    THTensor *kernel = luaT_checkudata(L,3,torch_Tensor_id);
-    THTensor_(conv2_valid)(tensor,image,kernel,1,1);
-    lua_settop(L, 1);
-  } else {
-    luaL_error(L, "bad arguments: 2 or 3 torch.Tensor expected");
-  }
-  return 1;
-}
-
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 
 TENSOR_IMPLEMENT_BASIC_WRAPPER(log)
@@ -384,7 +366,6 @@ static const struct luaL_Reg torch_TensorMath_(_) [] = {
   {"addmv", torch_TensorMath_(addmv)},
   {"addmm", torch_TensorMath_(addmm)},
   {"addr", torch_TensorMath_(addr)},
-  {"conv2", torch_TensorMath_(conv2)},
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
   {"log", torch_TensorMath_(log)},

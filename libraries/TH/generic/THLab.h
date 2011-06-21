@@ -33,6 +33,8 @@ void THLab_(tril)(THTensor *r_, THTensor *t, long k);
 void THLab_(triu)(THTensor *r_, THTensor *t, long k);
 void THLab_(cat)(THTensor *r_, THTensor *ta, THTensor *tb, int dimension);
 
+void THLab_(validConv2D)(THTensor *r_, THTensor *t_, THTensor *k_, long srow, long scol);
+
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 
 void THLab_(log)(THTensor *r_, THTensor *t);
