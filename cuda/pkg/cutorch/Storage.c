@@ -32,6 +32,15 @@ static int torch_CudaStorage_new(lua_State *L)
   return 1;
 }
 
+static int torch_CudaStorage_fill(lua_State *L)
+{
+  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
+  double value = luaL_checknumber(L, 2);
+  THCudaStorage_fill(storage, (real)value);
+  lua_settop(L, 1);
+  return 1;
+}
+
 static int torch_CudaStorage_free(lua_State *L)
 {
   THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
@@ -187,6 +196,7 @@ static int torch_CudaStorage_read(lua_State *L)
 
 static const struct luaL_Reg torch_CudaStorage__ [] = {
   {"size", torch_CudaStorage___len__},
+  {"fill", torch_CudaStorage_fill},
   {NULL, NULL}
 };
 
