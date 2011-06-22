@@ -388,17 +388,17 @@ static int lab_(conv2)(lua_State *L)
   THTensor *tensor = luaT_checkudata(L,1,torch_(Tensor_id));
   THTensor *image = luaT_checkudata(L,2,torch_(Tensor_id));
   int n = lua_gettop(L);
-  if (n == 2) {
-    THTensor *r_ = THTensor_(new)();
-    THLab_(validConv2D)(r_,tensor,image,1,1);
-    luaT_pushudata(L, r_, torch_(Tensor_id));
-  } else if (n == 3) {
-    THTensor *kernel = luaT_checkudata(L,3,torch_(Tensor_id));
-    THLab_(validConv2D)(tensor,image,kernel,1,1);
-    lua_settop(L, 1);
-  } else {
-    luaL_error(L, "bad arguments: 2 or 3 torch.Tensor expected");
-  }
+/*   if (n == 2) { */
+/*     THTensor *r_ = THTensor_(new)(); */
+/*     THLab_(validConv2D)(r_,tensor,image,1,1); */
+/*     luaT_pushudata(L, r_, torch_(Tensor_id)); */
+/*   } else if (n == 3) { */
+/*     THTensor *kernel = luaT_checkudata(L,3,torch_(Tensor_id)); */
+/*     THLab_(validConv2D)(tensor,image,kernel,1,1); */
+/*     lua_settop(L, 1); */
+/*   } else { */
+/*     luaL_error(L, "bad arguments: 2 or 3 torch.Tensor expected"); */
+/*   } */
   return 1;
 }
 
