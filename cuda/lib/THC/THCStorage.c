@@ -1,15 +1,15 @@
 #include "THCStorage.h"
-#include "cublas.h"
+#include "THCGeneral.h"
 
 THCudaStorage* THCudaStorage_new(void)
 {
-  return THStorage_(newWithSize)(0);  
+  return THStorage_(newWithSize)(0);
 }
 
 THCudaStorage* THCudaStorage_newWithSize(long size)
 {
   THStorage *storage = THAlloc(sizeof(THCudaStorage));
-  cudaMalloc((void**)&(storage->data), size * sizeof(float));
+  THCudaCheck(cudaMalloc((void**)&(storage->data), size * sizeof(float)));
   storage->size = size;
   storage->refcount = 1;
   storage->isMapped = 0;
@@ -43,11 +43,9 @@ THCudaStorage* THCudaStorage_newWithMapping(const char *fileName, int isShared)
 
 void THCudaStorage_free(THCudaStorage *self)
 {
-  if (--(storage->refcount) <= 0)
+  if (--(self->refcount) <= 0)
   {
-    cudaFree(storage->data);
-    THFree(storage);
+    THCudaCheck(cudaFree(self->data));
+    THFree(self);
   }
 }
-
-pouic
