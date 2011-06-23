@@ -417,6 +417,7 @@ void THTensor_(unfold)(THTensor *self, THTensor *src, int dimension, long size, 
 
   self->size = newSize;
   self->stride = newStride;
+  self->nDimension++;
 }
 
 int THTensor_(isContiguous)(THTensor *self)
