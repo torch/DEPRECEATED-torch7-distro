@@ -385,11 +385,11 @@ static int lab_(cat)(lua_State *L)
 
 static int lab_(conv2)(lua_State *L)
 {
-  THTensor *r_;
+  THTensor *r_ = NULL;
   THTensor *image = luaT_checkudata(L,1,torch_(Tensor_id));
   THTensor *kernel = luaT_checkudata(L,2,torch_(Tensor_id));
   int n = lua_gettop(L);
-  char* type = 'v';
+  const char* type = "v";
   if (n == 2)
   {
     r_ = THTensor_(new)();
@@ -404,11 +404,12 @@ static int lab_(conv2)(lua_State *L)
     }
     else if (lua_isstring(L,3))
     {
-      *type = luaL_checkstring(L,3);
+      r_ = THTensor_(new)();
+      type = luaL_checkstring(L,3);
     }
     else
     {
-      luaL_error(L, "bad arguments: [result,] source, kernel, [conv type]");
+      return luaL_error(L, "bad arguments: [result,] source, kernel [, conv type]");
     }
   }
   else if (n == 4)
@@ -416,8 +417,21 @@ static int lab_(conv2)(lua_State *L)
     r_ = image;
     image = kernel;
     kernel = luaT_checkudata(L,3,torch_(Tensor_id));
-    *type = luaL_checkstring(L,4);
+    type = luaL_checkstring(L,4);
   }
+  else
+  {
+    return luaL_error(L, "bad arguments: [result,] source, kernel [, conv type]");
+  }
+  if (!r_)
+  {
+    return luaL_error(L, "oops, bad arguments: [result,] source, kernel [, conv type]");
+  }
+  else
+  {
+    luaT_pushudata(L, r_, torch_(Tensor_id));
+  }
+
   if (image->nDimension == 2 && kernel->nDimension == 2)
   {
     THLab_(conv2Dmul)(r_,0.0,image,kernel,1,1,type);

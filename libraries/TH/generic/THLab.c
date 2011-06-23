@@ -623,7 +623,7 @@ static void THLab_(fullConv2Dptr)(real *r_,
    like rank1 update
    A <- xx' + beta*A
  */
-void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol, char *type)
+void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol, const char *type)
 {
   long nInputPlane, nInputRows, nInputCols;
   long nKernelPlane, nKernelRows, nKernelCols;
@@ -708,7 +708,7 @@ void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
    matrix vector product like
    y <- Ax + beta*y
  */
-void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol, char *type)
+void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol, const char *type)
 {
   long nInputPlane, nInputRows, nInputCols;
   long nKernelRows, nKernelCols;
@@ -798,7 +798,7 @@ void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long 
    scalar multiplication like
    y <- x*y + beta*y
  */
-void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol, char *type)
+void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol, const char *type)
 {
 					 
   THArgCheck(t_->nDimension == 2 , 3, "input: 2D Tensor expected");
@@ -810,10 +810,10 @@ void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   THTensor *input = THTensor_(newContiguous)(t_, 0);
   THTensor* kernel = THTensor_(newContiguous)(k_, 0);
 
-  long nInputRows  = input->size[1];
-  long nInputCols  = input->size[2];
-  long nKernelRows = kernel->size[2];
-  long nKernelCols = kernel->size[3];
+  long nInputRows  = input->size[0];
+  long nInputCols  = input->size[1];
+  long nKernelRows = kernel->size[0];
+  long nKernelCols = kernel->size[1];
   long nOutputRows, nOutputCols;
 
   THArgCheck(nInputRows >= nKernelRows && nInputCols >= nKernelCols , 2, "Input image is smaller than kernel");
@@ -834,8 +834,8 @@ void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   else if (beta != 1)
     THTensor_(mul)(r_, beta);
 
-  real *input_data = THTensor_(data)(input);
-  real *weight_data = THTensor_(data)(kernel);
+  real *ptr_input = THTensor_(data)(input);
+  real *ptr_weight = THTensor_(data)(kernel);
   real *output_data = THTensor_(data)(r_);  
   
   
