@@ -43,14 +43,6 @@ function SpatialConvolution:backward(input, gradOutput)
    return input.nn.SpatialConvolution_backward(self, input, gradOutput)
 end
 
-function SpatialConvolution:forward2(input)
-   return input.nn.SpatialConvolution_forward2(self, input)
-end
-
-function SpatialConvolution:backward2(input, gradOutput)
-   return input.nn.SpatialConvolution_backward2(self, input, gradOutput)
-end
-
 function SpatialConvolution:zeroGradParameters()
    self.gradWeight:zero()
    self.gradBias:zero()
