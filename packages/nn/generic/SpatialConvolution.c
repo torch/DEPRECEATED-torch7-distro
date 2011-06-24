@@ -31,7 +31,7 @@ static int nn_(SpatialConvolution_forward)(lua_State *L)
   real* bias_data = THTensor_(data)(bias);
   for (i=0; i<bias->size[0]; i++) {
     THTensor_(select)(outn,output,0,i);
-    THTensor_(add)(outn,bias_data[i]);
+    TH_TENSOR_APPLY(real,outn, *outn_data = bias_data[i];);
   }
   THTensor_(free)(outn);
 
@@ -70,7 +70,7 @@ static int nn_(SpatialConvolution_backward)(lua_State *L)
   THTensor_(free)(gradOutSlice);
 
   /* gradient to kernels */
-  THLab_(conv2Dger)(gradWeight, 1.0, input, gradOutput, dH, dW, "valid");
+  THLab_(conv2DRevger)(gradWeight, 1.0, input, gradOutput, dH, dW);
 
   /* gradient to input */
   THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
