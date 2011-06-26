@@ -3,6 +3,14 @@
 
 static const void *torch_Storage_id;
 
+static const void *torch_ByteStorage_id;
+static const void *torch_CharStorage_id;
+static const void *torch_ShortStorage_id;
+static const void *torch_IntStorage_id;
+static const void *torch_LongStorage_id;
+static const void *torch_FloatStorage_id;
+static const void *torch_DoubleStorage_id;
+
 static int torch_CudaStorage_new(lua_State *L)
 {
   THCudaStorage *storage;
@@ -19,7 +27,7 @@ static int torch_CudaStorage_new(lua_State *L)
         THCudaStorage_free(storage);
         luaL_error(L, "element at index %d is not a number", i);
       }
-      storage->data[i-1] = (real)lua_tonumber(L, -1);
+      storage->data[i-1] = (float)lua_tonumber(L, -1);
       lua_pop(L, 1);
     }
   }
@@ -32,15 +40,6 @@ static int torch_CudaStorage_new(lua_State *L)
   return 1;
 }
 
-static int torch_CudaStorage_fill(lua_State *L)
-{
-  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  double value = luaL_checknumber(L, 2);
-  THCudaStorage_fill(storage, (real)value);
-  lua_settop(L, 1);
-  return 1;
-}
-
 static int torch_CudaStorage_free(lua_State *L)
 {
   THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
@@ -48,7 +47,7 @@ static int torch_CudaStorage_free(lua_State *L)
   return 0;
 }
 
-/*
+
 static int torch_CudaStorage_resize(lua_State *L)
 {
   THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
@@ -88,12 +87,11 @@ static int torch_CudaStorage_fill(lua_State *L)
 {
   THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
   double value = luaL_checknumber(L, 2);
-  THCudaStorage_fill(storage, (real)value);
+  THCudaStorage_fill(storage, (float)value);
   lua_settop(L, 1);
   return 1;
 }
 
-*/
 static int torch_CudaStorage___len__(lua_State *L)
 {
   THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
@@ -101,7 +99,6 @@ static int torch_CudaStorage___len__(lua_State *L)
   return 1;
 }
 
-/*
 static int torch_CudaStorage___newindex__(lua_State *L)
 {
   if(lua_isnumber(L, 2))
@@ -109,8 +106,7 @@ static int torch_CudaStorage___newindex__(lua_State *L)
     THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
     long index = luaL_checklong(L, 2) - 1;
     double number = luaL_checknumber(L, 3);
-    luaL_argcheck(L, 0 <= index && index < storage->size, 2, "index out of range");
-    storage->data[index] = (real)number;
+    THCudaStorage_set(storage, index, (float)number);
     lua_pushboolean(L, 1);
   }
   else
@@ -125,8 +121,7 @@ static int torch_CudaStorage___index__(lua_State *L)
   {
     THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
     long index = luaL_checklong(L, 2) - 1;
-    luaL_argcheck(L, 0 <= index && index < storage->size, 2, "index out of range");
-    lua_pushnumber(L, storage->data[index]);
+    lua_pushnumber(L, THCudaStorage_get(storage, index));
     lua_pushboolean(L, 1);
     return 2;
   }
@@ -136,6 +131,8 @@ static int torch_CudaStorage___index__(lua_State *L)
     return 1;
   }
 }
+
+/*
 
 #if defined(TH_REAL_IS_CHAR) || defined(TH_REAL_IS_BYTE)
 static int torch_CudaStorage_string(lua_State *L)
@@ -197,11 +194,24 @@ static int torch_CudaStorage_read(lua_State *L)
 static const struct luaL_Reg torch_CudaStorage__ [] = {
   {"size", torch_CudaStorage___len__},
   {"fill", torch_CudaStorage_fill},
+  {"__newindex__", torch_CudaStorage___newindex__},
+  {"__index__", torch_CudaStorage___index__},
+  {"resize", torch_CudaStorage_resize},
+  {"fill", torch_CudaStorage_fill},
+  {"copy", torch_CudaStorage_copy},
   {NULL, NULL}
 };
 
 void torch_CudaStorage_init(lua_State *L)
 {
+  torch_ByteStorage_id = luaT_checktypename2id(L, "torch.ByteStorage");
+  torch_CharStorage_id = luaT_checktypename2id(L, "torch.CharStorage");
+  torch_ShortStorage_id = luaT_checktypename2id(L, "torch.ShortStorage");
+  torch_IntStorage_id = luaT_checktypename2id(L, "torch.IntStorage");
+  torch_LongStorage_id = luaT_checktypename2id(L, "torch.LongStorage");
+  torch_FloatStorage_id = luaT_checktypename2id(L, "torch.FloatStorage");
+  torch_DoubleStorage_id = luaT_checktypename2id(L, "torch.DoubleStorage");
+
   torch_Storage_id = luaT_newmetatable(L, "torch.CudaStorage", NULL,
                                        torch_CudaStorage_new, torch_CudaStorage_free, torch_CudaStorage_factory);
 

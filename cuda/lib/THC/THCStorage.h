@@ -10,5 +10,12 @@
 #define TH_GENERIC_FILE "generic/THStorage.h"
 #include "generic/THStorage.h"
 #undef TH_GENERIC_FILE
+#undef real
+#undef THStorage
+#undef THStorage_
+
+#include "THStorage.h"
+
+void THFloatStorage_copyCuda(THFloatStorage *self, struct THCudaStorage *src);
 
 #endif
