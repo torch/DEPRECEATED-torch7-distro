@@ -10,7 +10,7 @@ SET(src
   THTensorMath.c THLogAdd.c THRandom.c
   THTensorRandom.c
   THLab.c
-  THFile.c THDiskFile.c)
+  THFile.c THDiskFile.c THMemoryFile.c)
 
 SET(src ${src} ${hdr})
 

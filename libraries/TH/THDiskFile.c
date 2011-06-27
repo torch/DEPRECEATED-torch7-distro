@@ -109,7 +109,7 @@ const char *THDiskFile_name(THFile *self)
     return nwrite;                                                      \
 }
 
-static int THDiskFile_c_mode(const char *mode, int *isReadable, int *isWritable)
+static int THDiskFile_mode(const char *mode, int *isReadable, int *isWritable)
 {
   *isReadable = 0;
   *isWritable = 0;
@@ -299,6 +299,7 @@ static long THDiskFile_readString(THFile *self, const char *format, char **str_)
 {
   THDiskFile *dfself = (THDiskFile*)(self);
   THArgCheck(dfself->handle != NULL, 1, "attempt to use a closed file");
+  THArgCheck(dfself->file.isReadable, 1, "attempt to read in a write-only file");
   THArgCheck((strlen(format) >= 2 ? (format[0] == '*') && (format[1] == 'a' || format[1] == 'l') : 0), 2, "format must be '*a' or '*l'");
 
 /* note: the string won't survive long, as it is copied into lua */
@@ -327,6 +328,8 @@ static long THDiskFile_readString(THFile *self, const char *format, char **str_)
           dfself->file.hasError = 1;
           if(!dfself->file.isQuiet)
             THError("read error: read 0 blocks instead of 1");
+
+          *str_ = NULL;
           return 0;
         }
         *str_ = p;
@@ -356,6 +359,8 @@ static long THDiskFile_readString(THFile *self, const char *format, char **str_)
           dfself->file.hasError = 1;
           if(!dfself->file.isQuiet)
             THError("read error: read 0 blocks instead of 1");
+
+          *str_ = NULL;
           return 0;
         }
         *str_ = p;
@@ -374,6 +379,8 @@ static long THDiskFile_readString(THFile *self, const char *format, char **str_)
       }
     }
   }
+
+  *str_ = NULL;
   return 0;
 }
 
@@ -431,7 +438,7 @@ THFile *THDiskFile_new(const char *name, const char *mode, int isQuiet)
   FILE *handle;
   THDiskFile *self;
 
-  THArgCheck(THDiskFile_c_mode(mode, &isReadable, &isWritable), 2, "file mode should be 'r','w' or 'rw'");
+  THArgCheck(THDiskFile_mode(mode, &isReadable, &isWritable), 2, "file mode should be 'r','w' or 'rw'");
 
   if( isReadable && isWritable )
   {
@@ -477,7 +484,7 @@ THFile *THDiskFile_new(const char *name, const char *mode, int isQuiet)
 
 /* PipeFile */
 
-static int THPipeFile_c_mode(const char *mode, int *isReadable, int *isWritable)
+static int THPipeFile_mode(const char *mode, int *isReadable, int *isWritable)
 {
   *isReadable = 0;
   *isWritable = 0;
@@ -534,12 +541,13 @@ THFile *THPipeFile_new(const char *name, const char *mode, int isQuiet)
     THDiskFile_close,
     THPipeFile_free
   };
+
   int isReadable;
   int isWritable;
   FILE *handle;
   THDiskFile *self;
 
-  THArgCheck(THPipeFile_c_mode(mode, &isReadable, &isWritable), 2, "file mode should be 'r','w'");
+  THArgCheck(THPipeFile_mode(mode, &isReadable, &isWritable), 2, "file mode should be 'r','w'");
 
 #ifdef _WIN32
   handle = popen(name, (isReadable ? "rb" : "wb"));
