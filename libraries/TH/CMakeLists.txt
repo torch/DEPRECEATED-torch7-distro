@@ -9,7 +9,9 @@ SET(src
   THGeneral.c THStorage.c THTensor.c THBlas.c 
   THTensorMath.c THLogAdd.c THRandom.c
   THTensorRandom.c
-  THLab.c)
+  THLab.c
+  THFile.c THDiskFile.c)
+
 SET(src ${src} ${hdr})
 
 IF(UNIX)
