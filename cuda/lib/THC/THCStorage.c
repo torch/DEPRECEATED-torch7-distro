@@ -75,6 +75,12 @@ THCudaStorage* THCudaStorage_newWithMapping(const char *fileName, int isShared)
   return NULL;
 }
 
+void THCudaStorage_retain(THCudaStorage *self)
+{
+  if(self)
+    ++self->refcount;
+}
+
 void THCudaStorage_resize(THCudaStorage *self, long size)
 {
   THArgCheck(size >= 0, 2, "invalid size");
