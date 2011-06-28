@@ -5,6 +5,7 @@
 
 typedef struct THFile__ THFile;
 
+int THFile_isOpened(THFile *self);
 int THFile_isQuiet(THFile *self);
 int THFile_isReadable(THFile *self);
 int THFile_isWritable(THFile *self);

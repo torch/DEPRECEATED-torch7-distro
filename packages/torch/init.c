@@ -2,14 +2,14 @@
 #include "Tensor.h"
 #include "TensorMath.h"
 
-#include "File.h"
-#include "DiskFile.h"
-#include "MemoryFile.h"
-#include "PipeFile.h"
-
 #include "Timer.h"
 
 extern void torch_utils_init(lua_State *L);
+extern void torch_File_init(lua_State *L);
+extern void torch_File_init_storage_id(lua_State *L);
+extern void torch_DiskFile_init(lua_State *L);
+extern void torch_MemoryFile_init(lua_State *L);
+extern void torch_PipeFile_init(lua_State *L);
 
 static lua_State *globalL;
 static void luaTorchErrorHandlerFunction(const char *msg)
@@ -33,6 +33,7 @@ DLL_EXPORT int luaopen_libtorch(lua_State *L)
   lua_setfield(L, LUA_GLOBALSINDEX, "torch");
 
   torch_utils_init(L);
+  torch_File_init(L);
 
   torch_ByteStorage_init(L);
   torch_CharStorage_init(L);
@@ -50,6 +51,8 @@ DLL_EXPORT int luaopen_libtorch(lua_State *L)
   torch_FloatTensor_init(L);
   torch_DoubleTensor_init(L);
 
+  torch_File_init_storage_id(L);
+
   torch_ByteTensorMath_init(L);
   torch_CharTensorMath_init(L);
   torch_ShortTensorMath_init(L);
@@ -59,7 +62,6 @@ DLL_EXPORT int luaopen_libtorch(lua_State *L)
   torch_DoubleTensorMath_init(L);
 
   torch_Timer_init(L);
-  torch_File_init(L);
   torch_DiskFile_init(L);
   torch_PipeFile_init(L);
   torch_MemoryFile_init(L);

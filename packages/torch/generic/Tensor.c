@@ -767,13 +767,16 @@ static int torch_Tensor_(factory)(lua_State *L)
 static int torch_Tensor_(write)(lua_State *L)
 {  
   THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor_id);
-  long storageOffset = tensor->storageOffset+1; /* to respect Lua convention */
+  THFile *file = luaT_checkudata(L, 2, torch_File_id);
+ 
+  THFile_writeIntScalar(file, tensor->nDimension);
+  THFile_writeLongRaw(file, tensor->size, tensor->nDimension);
+  THFile_writeLongRaw(file, tensor->stride, tensor->nDimension);
+  THFile_writeLongScalar(file, tensor->storageOffset+1); /* to respect Lua convention */
 
-  lua_pushvalue(L, 2);
-  torch_File_writeInt(L, &tensor->nDimension, 1);
-  torch_File_writeLong(L, tensor->size, tensor->nDimension);
-  torch_File_writeLong(L, tensor->stride, tensor->nDimension);
-  torch_File_writeLong(L, &storageOffset, 1);
+  lua_getfield(L, 2, "writeObject"); /* the method */
+  lua_pushvalue(L, 2); /* the file */
+  /* the storage */
   if(tensor->storage)
   {
     THStorage_(retain)(tensor->storage);
@@ -781,50 +784,33 @@ static int torch_Tensor_(write)(lua_State *L)
   }
   else
     lua_pushnil(L);
-  torch_File_writeObject(L);
+
+  lua_call(L, 2, 0); /* call the method */
+
   return 0;
 }
 
 static int torch_Tensor_(read)(lua_State *L)
 {
   THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor_id);
-  int version = luaL_checkint(L, 3);
-  long storageOffset;
+  THFile *file = luaT_checkudata(L, 2, torch_File_id);
   
-  lua_pushvalue(L, 2);
-  torch_File_readInt(L, &tensor->nDimension, 1);
+  tensor->nDimension = THFile_readIntScalar(file);
   tensor->size = THAlloc(sizeof(long)*tensor->nDimension);
   tensor->stride = THAlloc(sizeof(long)*tensor->nDimension);
-  if(version > 0)
-  {
-    torch_File_readLong(L, tensor->size, tensor->nDimension);
-    torch_File_readLong(L, tensor->stride, tensor->nDimension);
-    torch_File_readLong(L, &storageOffset, 1);
-  }
-  else
-  {
-    int *buffer_ = THAlloc(sizeof(int)*tensor->nDimension);
-    int storageOffset_;
-    int i;
+  THFile_readLongRaw(file, tensor->size, tensor->nDimension);
+  THFile_readLongRaw(file, tensor->stride, tensor->nDimension);
+  tensor->storageOffset = THFile_readLongScalar(file);
+  tensor->storageOffset--;  /* to respect Lua convention */
 
-    torch_File_readInt(L, buffer_, tensor->nDimension);
-    for(i = 0; i < tensor->nDimension; i++)
-      tensor->size[i] = buffer_[i];
+  lua_getfield(L, 2, "readObject"); /* the method */
+  lua_pushvalue(L, 2); /* the file */
+  lua_call(L, 1, 1); /* call the method */
 
-    torch_File_readInt(L, buffer_, tensor->nDimension);
-    for(i = 0; i < tensor->nDimension; i++)
-      tensor->stride[i] = buffer_[i];
-
-    torch_File_readInt(L, &storageOffset_, 1);
-    storageOffset = storageOffset_;
-    THFree(buffer_);
-  }
-  tensor->storageOffset = storageOffset-1; /* to respect Lua convention */
-  torch_File_readObject(L);  
   tensor->storage = luaT_toudata(L, -1, torch_Storage_id);
   if(tensor->storage)
     THStorage_(retain)(tensor->storage);
-  lua_pop(L, 1);
+
   return 0;
 }
 
@@ -859,6 +845,8 @@ static const struct luaL_Reg torch_Tensor_(_) [] = {
 
 void torch_Tensor_(init)(lua_State *L)
 {
+  torch_File_id = luaT_checktypename2id(L, "torch.File");
+
   torch_ByteStorage_id = luaT_checktypename2id(L, "torch.ByteStorage");
   torch_CharStorage_id = luaT_checktypename2id(L, "torch.CharStorage");
   torch_ShortStorage_id = luaT_checktypename2id(L, "torch.ShortStorage");

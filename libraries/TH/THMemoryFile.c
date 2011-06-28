@@ -10,6 +10,12 @@ typedef struct THMemoryFile__
 
 } THMemoryFile;
 
+static int THMemoryFile_isOpened(THFile *self)
+{
+  THMemoryFile *mfself = (THMemoryFile*)self;
+  return (mfself->storage != NULL);
+}
+
 static char *THMemoryFile_strnextspace(char *str_, char *c_)
 {
   char c;
@@ -418,6 +424,8 @@ static long THMemoryFile_writeString(THFile *self, const char *str, long size)
 THFile *THMemoryFile_newWithStorage(THCharStorage *storage, const char *mode)
 {
   static struct THFileVTable vtable = {
+    THMemoryFile_isOpened,
+
     THMemoryFile_readByte,
     THMemoryFile_readChar,
     THMemoryFile_readShort,

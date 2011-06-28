@@ -1,4 +1,5 @@
-#include "File.h"
+#include "THFile.h"
+#include "luaT.h"
 
 static const void *torch_File_id = NULL;
 static const void *torch_ByteStorage_id = NULL;
@@ -9,106 +10,208 @@ static const void *torch_LongStorage_id = NULL;
 static const void *torch_FloatStorage_id = NULL;
 static const void *torch_DoubleStorage_id = NULL;
 
-static int torch_File_binary(lua_State *L)
+#define IMPLEMENT_TORCH_FILE_FLAG(NAME)                   \
+  static int torch_File_##NAME(lua_State *L)              \
+  {                                                       \
+    THFile *self = luaT_checkudata(L, 1, torch_File_id);  \
+    lua_pushboolean(L, THFile_##NAME(self));              \
+    return 1;                                             \
+  }
+
+IMPLEMENT_TORCH_FILE_FLAG(isQuiet)
+IMPLEMENT_TORCH_FILE_FLAG(isReadable)
+IMPLEMENT_TORCH_FILE_FLAG(isWritable)
+IMPLEMENT_TORCH_FILE_FLAG(isBinary)
+IMPLEMENT_TORCH_FILE_FLAG(isAutoSpacing)
+IMPLEMENT_TORCH_FILE_FLAG(hasError)
+
+#define IMPLEMENT_TORCH_FILE_FUNC(NAME)                   \
+  static int torch_File_##NAME(lua_State *L)              \
+  {                                                       \
+    THFile *self = luaT_checkudata(L, 1, torch_File_id);  \
+    THFile_##NAME(self);                                  \
+    return 0;                                             \
+  }
+
+IMPLEMENT_TORCH_FILE_FUNC(binary)
+IMPLEMENT_TORCH_FILE_FUNC(ascii)
+IMPLEMENT_TORCH_FILE_FUNC(autoSpacing)
+IMPLEMENT_TORCH_FILE_FUNC(noAutoSpacing)
+IMPLEMENT_TORCH_FILE_FUNC(quiet)
+IMPLEMENT_TORCH_FILE_FUNC(pedantic)
+IMPLEMENT_TORCH_FILE_FUNC(clearError)
+
+IMPLEMENT_TORCH_FILE_FUNC(synchronize)
+
+static int torch_File_seek(lua_State *L)
 {
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  file->isBinary = 1;
-  lua_settop(L, 1);
+  THFile *self = luaT_checkudata(L, 1, torch_File_id);
+  long position = luaL_checklong(L, 2)-1;
+  THFile_seek(self, position);
+  return 0;
+}
+
+IMPLEMENT_TORCH_FILE_FUNC(seekEnd)
+
+static int torch_File_position(lua_State *L)
+{
+  THFile *self = luaT_checkudata(L, 1, torch_File_id);
+  lua_pushnumber(L, THFile_position(self)+1);
   return 1;
 }
 
-static int torch_File_ascii(lua_State *L)
+IMPLEMENT_TORCH_FILE_FUNC(close)
+
+#define IMPLEMENT_TORCH_FILE_RW(TYPEC, TYPE)                            \
+  static int torch_File_read##TYPEC(lua_State *L)                       \
+  {                                                                     \
+    THFile *self = luaT_checkudata(L, 1, torch_File_id);                \
+    int narg = lua_gettop(L);                                           \
+                                                                        \
+    if(narg == 1)                                                       \
+    {                                                                   \
+      lua_pushnumber(L, THFile_read##TYPEC##Scalar(self));              \
+      return 1;                                                         \
+    }                                                                   \
+    else if(narg == 2)                                                  \
+    {                                                                   \
+      if(lua_isnumber(L, 2))                                            \
+      {                                                                 \
+        long size = lua_tonumber(L, 2);                                 \
+        long nread;                                                     \
+                                                                        \
+        TH##TYPEC##Storage *storage = TH##TYPEC##Storage_newWithSize(size); \
+        luaT_pushudata(L, storage, torch_##TYPEC##Storage_id);          \
+        nread = THFile_read##TYPEC(self, storage);                      \
+        if(nread != size)                                               \
+          TH##TYPEC##Storage_resize(storage, size);                     \
+        return 1;                                                       \
+      }                                                                 \
+      else if(luaT_toudata(L, 2, torch_##TYPEC##Storage_id))            \
+      {                                                                 \
+        TH##TYPEC##Storage *storage = luaT_toudata(L, 2, torch_##TYPEC##Storage_id); \
+        lua_pushnumber(L, THFile_read##TYPEC(self, storage));           \
+        return 1;                                                       \
+      }                                                                 \
+    }                                                                   \
+                                                                        \
+    luaL_error(L, "nothing, number, or Storage expected");              \
+    return 0;                                                           \
+  }                                                                     \
+                                                                        \
+  static int torch_File_write##TYPEC(lua_State *L)                      \
+  {                                                                     \
+    THFile *self = luaT_checkudata(L, 1, torch_File_id);                \
+    int narg = lua_gettop(L);                                           \
+                                                                        \
+    if(narg == 2)                                                       \
+    {                                                                   \
+      if(lua_isnumber(L, 2))                                            \
+      {                                                                 \
+        TYPE value = lua_tonumber(L, 2);                                \
+        THFile_write##TYPEC##Scalar(self, (TYPE)value);                 \
+        return 0;                                                       \
+      }                                                                 \
+      else if(luaT_toudata(L, 2, torch_##TYPEC##Storage_id))            \
+      {                                                                 \
+        TH##TYPEC##Storage *storage = luaT_toudata(L, 2, torch_##TYPEC##Storage_id); \
+        lua_pushnumber(L, THFile_write##TYPEC(self, storage));          \
+        return 1;                                                       \
+      }                                                                 \
+    }                                                                   \
+                                                                        \
+    luaL_error(L, "number, or Storage expected");                       \
+    return 0;                                                           \
+  }
+
+
+IMPLEMENT_TORCH_FILE_RW(Byte, unsigned char)
+IMPLEMENT_TORCH_FILE_RW(Char, char)
+IMPLEMENT_TORCH_FILE_RW(Short, short)
+IMPLEMENT_TORCH_FILE_RW(Int, int)
+IMPLEMENT_TORCH_FILE_RW(Long, long)
+IMPLEMENT_TORCH_FILE_RW(Float, float)
+IMPLEMENT_TORCH_FILE_RW(Double, double)
+
+static int torch_File_readString(lua_State *L)
 {
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  file->isBinary = 0;
-  lua_settop(L, 1);
+  THFile *self = luaT_checkudata(L, 1, torch_File_id);
+  const char *format = luaL_checkstring(L, 2);
+  char *str;
+  long size;
+
+  size = THFile_readStringRaw(self, format, &str);
+  lua_pushlstring(L, str, size);
+  THFree(str);
+
   return 1;
 }
 
-static int torch_File_autoSpacing(lua_State *L)
+static int torch_File_writeString(lua_State *L)
 {
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  file->isAutoSpacing = 1;
-  lua_settop(L, 1);
-  return 1;
-}
+  THFile *self = luaT_checkudata(L, 1, torch_File_id);
+  const char *str = NULL;
+  size_t size;
+  long nwrite;
 
-static int torch_File_noAutoSpacing(lua_State *L)
-{
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  file->isAutoSpacing = 0;
-  lua_settop(L, 1);
-  return 1;
-}
-
-static int torch_File_quiet(lua_State *L)
-{
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  file->isQuiet = 1;
-  lua_settop(L, 1);
-  return 1;
-}
-
-static int torch_File_isQuiet(lua_State *L)
-{
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  lua_pushboolean(L, file->isQuiet);
-  return 1;
-}
-
-static int torch_File_pedantic(lua_State *L)
-{
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  file->isQuiet = 0;
-  lua_settop(L, 1);
-  return 1;
-}
-
-static int torch_File_clearError(lua_State *L)
-{
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  file->hasError = 0;
-  lua_settop(L, 1);
-  return 1;
-}
-
-static int torch_File_hasError(lua_State *L)
-{
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  lua_pushboolean(L, file->hasError);
-  return 1;
-}
-
-static int torch_File_isReadable(lua_State *L)
-{
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  lua_pushboolean(L, file->isReadable);
-  return 1;
-}
-
-static int torch_File_isWritable(lua_State *L)
-{
-  File *file = luaT_checkudata(L, 1, torch_File_id);
-  lua_pushboolean(L, file->isWritable);
+  luaL_checktype(L, 2, LUA_TSTRING);
+  str = lua_tolstring(L, 2, &size);
+  lua_pushnumber(L, THFile_writeStringRaw(self, str, (long)size));
   return 1;
 }
 
 static const struct luaL_Reg torch_File__ [] = {
+  {"isQuiet", torch_File_isQuiet},
+  {"isReadable", torch_File_isReadable},
+  {"isWritable", torch_File_isWritable},
+  {"isBinary", torch_File_isBinary},
+  {"isAutoSpacing", torch_File_isAutoSpacing},
+  {"hasError", torch_File_hasError},
   {"binary", torch_File_binary},
   {"ascii", torch_File_ascii},
   {"autoSpacing", torch_File_autoSpacing},
   {"noAutoSpacing", torch_File_noAutoSpacing},
   {"quiet", torch_File_quiet},
-  {"isQuiet", torch_File_isQuiet},
   {"pedantic", torch_File_pedantic},
-  {"hasError", torch_File_hasError},
   {"clearError", torch_File_clearError},
-  {"isReadable", torch_File_isReadable},
-  {"isWritable", torch_File_isWritable},
+
+  /* DEBUG: CHECK DISK FREE & READ/WRITE STRING*/
+
+  {"readByte", torch_File_readByte},
+  {"readChar", torch_File_readChar},
+  {"readShort", torch_File_readShort},
+  {"readInt", torch_File_readInt},
+  {"readLong", torch_File_readLong},
+  {"readFloat", torch_File_readFloat},
+  {"readDouble", torch_File_readDouble},
+  {"readString", torch_File_readString},
+
+  {"writeByte", torch_File_writeByte},
+  {"writeChar", torch_File_writeChar},
+  {"writeShort", torch_File_writeShort},
+  {"writeInt", torch_File_writeInt},
+  {"writeLong", torch_File_writeLong},
+  {"writeFloat", torch_File_writeFloat},
+  {"writeDouble", torch_File_writeDouble},
+  {"writeString", torch_File_writeString},
+  
+  {"synchronize", torch_File_synchronize},
+  {"seek", torch_File_seek},
+  {"seekEnd", torch_File_seekEnd},
+  {"position", torch_File_position},
+  {"close", torch_File_close},
+
   {NULL, NULL}
 };
 
 void torch_File_init(lua_State *L)
+{
+  torch_File_id = luaT_newmetatable(L, "torch.File", NULL, NULL, NULL, NULL);
+  luaL_register(L, NULL, torch_File__);
+  lua_pop(L, 1);
+}
+
+void torch_File_init_storage_id(lua_State *L)
 {
   torch_ByteStorage_id = luaT_checktypename2id(L, "torch.ByteStorage");
   torch_CharStorage_id = luaT_checktypename2id(L, "torch.CharStorage");
@@ -117,98 +220,4 @@ void torch_File_init(lua_State *L)
   torch_LongStorage_id = luaT_checktypename2id(L, "torch.LongStorage");
   torch_FloatStorage_id = luaT_checktypename2id(L, "torch.FloatStorage");
   torch_DoubleStorage_id = luaT_checktypename2id(L, "torch.DoubleStorage");
-
-  torch_File_id = luaT_newmetatable(L, "torch.File", NULL, NULL, NULL, NULL);
-  luaL_register(L, NULL, torch_File__);
-  lua_pop(L, 1);
-}
-
-#define IMPLEMENT_TORCH_FILE_READ(TYPE, CTYPE) \
-long torch_File_read##CTYPE(lua_State *L, TYPE *data, long n) \
-{ \
-  static TH##CTYPE##Storage torch_File_##CTYPE##Storage; \
-  long ret; \
-\
-  int index = lua_gettop(L); \
-  if(!luaT_isudata(L, index, torch_File_id)) \
-    luaL_error(L, "Internal error in write" #CTYPE ": not a File at stack index %d", index); \
-  lua_getfield(L, index, "read" #CTYPE); \
-  lua_pushvalue(L, index); \
-  torch_File_##CTYPE##Storage.data = data; \
-  torch_File_##CTYPE##Storage.size = n; \
-  torch_File_##CTYPE##Storage.refcount = -1; /* makes sure nobody can free it */ \
-  luaT_pushudata(L, &torch_File_##CTYPE##Storage, torch_##CTYPE##Storage_id); \
-  lua_call(L, 2, 1); \
-  ret = (long)lua_tonumber(L, -1); \
-  lua_pop(L, 1); \
-  return ret; \
-}
-
-#define IMPLEMENT_TORCH_FILE_WRITE(TYPE, CTYPE) \
-long torch_File_write##CTYPE(lua_State *L, TYPE *data, long n) \
-{ \
-  static TH##CTYPE##Storage torch_File_##CTYPE##Storage; \
-  long ret; \
-\
-  int index = lua_gettop(L); \
-  if(!luaT_isudata(L, index, torch_File_id)) \
-    luaL_error(L, "Internal error in write" #CTYPE ": not a File at stack index %d", index); \
-  lua_getfield(L, index, "write" #CTYPE); \
-  lua_pushvalue(L, index); \
-  torch_File_##CTYPE##Storage.data = data; \
-  torch_File_##CTYPE##Storage.size = n; \
-  torch_File_##CTYPE##Storage.refcount = -1; /* makes sure nobody can free it */ \
-  luaT_pushudata(L, &torch_File_##CTYPE##Storage, torch_##CTYPE##Storage_id); \
-  lua_call(L, 2, 1); \
-  ret = (long)lua_tonumber(L, -1); \
-  lua_pop(L, 1); \
-  return ret; \
-}
-
-IMPLEMENT_TORCH_FILE_READ(unsigned char, Byte)
-IMPLEMENT_TORCH_FILE_READ(char, Char)
-IMPLEMENT_TORCH_FILE_READ(short, Short)
-IMPLEMENT_TORCH_FILE_READ(int, Int)
-IMPLEMENT_TORCH_FILE_READ(long, Long)
-IMPLEMENT_TORCH_FILE_READ(float, Float)
-IMPLEMENT_TORCH_FILE_READ(double, Double)
-
-IMPLEMENT_TORCH_FILE_WRITE(unsigned char, Byte)
-IMPLEMENT_TORCH_FILE_WRITE(char, Char)
-IMPLEMENT_TORCH_FILE_WRITE(short, Short)
-IMPLEMENT_TORCH_FILE_WRITE(int, Int)
-IMPLEMENT_TORCH_FILE_WRITE(long, Long)
-IMPLEMENT_TORCH_FILE_WRITE(float, Float)
-IMPLEMENT_TORCH_FILE_WRITE(double, Double)
-
-long torch_File_readObject(lua_State *L)
-{
-  int index = lua_gettop(L);
-
-  if(!luaT_isudata(L, index, torch_File_id))
-    luaL_error(L, "Internal error in readObject: not a File at stack index %d", index);
-  
-  lua_getfield(L, index, "readObject");
-  lua_pushvalue(L, index);
-  lua_call(L, 1, 1);
-  return 1;
-}
-
-long torch_File_writeObject(lua_State *L)
-{
-  int index = lua_gettop(L);
-
-  if(index < 2)
-    luaL_error(L, "File and object expected");
-
-  if(!luaT_isudata(L, index-1, torch_File_id))
-    luaL_error(L, "Internal error in writeObject: not a File at stack index %d", index-1);
-
-  lua_getfield(L, index-1, "writeObject");
-  lua_pushvalue(L, index-1);
-  lua_pushvalue(L, index);
-  lua_call(L, 2, 0);
-  lua_pop(L, 1); /* remove the object from the stack */
-
-  return 1;
 }

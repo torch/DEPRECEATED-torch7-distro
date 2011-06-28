@@ -12,6 +12,12 @@ typedef struct THDiskFile__
 
 } THDiskFile;
 
+static int THDiskFile_isOpened(THFile *self)
+{
+  THDiskFile *dfself = (THDiskFile*)self;
+  return (dfself->handle != NULL);
+}
+
 const char *THDiskFile_name(THFile *self)
 {
   THDiskFile *dfself = (THDiskFile*)self;
@@ -30,7 +36,7 @@ const char *THDiskFile_name(THFile *self)
                                                                         \
     if(dfself->file.isBinary)                                           \
     {                                                                   \
-      long nread = fread(data, sizeof(TYPE), n, dfself->handle);        \
+      nread = fread(data, sizeof(TYPE), n, dfself->handle);        \
       if(!dfself->isNativeEncoding && (sizeof(TYPE) > 1) && (nread > 0)) \
         THDiskFile_reverseMemory(data, data, sizeof(TYPE), nread);      \
     }                                                                   \
@@ -407,6 +413,8 @@ static long THDiskFile_writeString(THFile *self, const char *str, long size)
 THFile *THDiskFile_new(const char *name, const char *mode, int isQuiet)
 {
   static struct THFileVTable vtable = {
+    THDiskFile_isOpened,
+
     THDiskFile_readByte,
     THDiskFile_readChar,
     THDiskFile_readShort,
@@ -516,6 +524,8 @@ static void THPipeFile_free(THFile *self)
 THFile *THPipeFile_new(const char *name, const char *mode, int isQuiet)
 {
   static struct THFileVTable vtable = {
+    THDiskFile_isOpened,
+
     THDiskFile_readByte,
     THDiskFile_readChar,
     THDiskFile_readShort,

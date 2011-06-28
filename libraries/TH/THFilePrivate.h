@@ -14,6 +14,8 @@ struct THFile__
 
 struct THFileVTable
 {
+    int (*isOpened)(THFile *self);
+
     long (*readByte)(THFile *self, unsigned char *data, long n);
     long (*readChar)(THFile *self, char *data, long n);
     long (*readShort)(THFile *self, short *data, long n);

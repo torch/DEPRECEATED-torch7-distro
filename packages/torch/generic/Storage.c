@@ -159,27 +159,23 @@ static int torch_Storage_(factory)(lua_State *L)
 static int torch_Storage_(write)(lua_State *L)
 {
   THStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  lua_pushvalue(L, 2);
-  torch_File_writeLong(L, &storage->size, 1);
-  torch_File_writeReal(L, storage->data, storage->size);
+  THFile *file = luaT_checkudata(L, 2, torch_File_id);
+ 
+  THFile_writeLongScalar(file, storage->size);
+  THFile_writeRealRaw(file, storage->data, storage->size);
+
   return 0;
 }
 
 static int torch_Storage_(read)(lua_State *L)
 {
   THStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  int version = luaL_checkint(L, 3);
-  lua_pushvalue(L, 2);
-  if(version > 0)
-    torch_File_readLong(L, &storage->size, 1);
-  else
-  {
-    int size_;
-    torch_File_readInt(L, &size_, 1);
-    storage->size = size_;
-  }
-  THStorage_(resize)(storage, storage->size);
-  torch_File_readReal(L, storage->data, storage->size);
+  THFile *file = luaT_checkudata(L, 2, torch_File_id);
+  long size = THFile_readLongScalar(file);
+
+  THStorage_(resize)(storage, size);
+  THFile_readRealRaw(file, storage->data, storage->size);
+
   return 0;
 }
 
@@ -201,6 +197,8 @@ static const struct luaL_Reg torch_Storage_(_) [] = {
 
 void torch_Storage_(init)(lua_State *L)
 {
+  torch_File_id = luaT_checktypename2id(L, "torch.File");
+
   torch_Storage_id = luaT_newmetatable(L, STRING_torchStorage, NULL,
                                   torch_Storage_(new), torch_Storage_(free), torch_Storage_(factory));
   luaL_register(L, NULL, torch_Storage_(_));
