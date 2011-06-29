@@ -1,4 +1,5 @@
 Copyright (c) 2011      Idiap Research Institute (Ronan Collobert)
+Copyright (c) 2011      NEC Laboratories America (Koray Kavukcuoglu)
 Copyright (c) 2006-2010 NEC Laboratories America (Ronan Collobert, Leon Bottou, Iain Melvin, Jason Weston)
 Copyright (c) 2006      Idiap Research Institute (Samy Bengio)
 Copyright (c) 2001-2004 Idiap Research Institute (Ronan Collobert, Samy Bengio, Johnny Mariethoz)

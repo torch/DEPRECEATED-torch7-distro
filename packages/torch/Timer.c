@@ -1,4 +1,4 @@
-#include "Timer.h"
+#include "general.h"
 
 #ifdef _MSC_VER
 #include <time.h>
