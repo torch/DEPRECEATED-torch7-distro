@@ -30,7 +30,8 @@ IMPLEMENT_TORCH_FILE_FLAG(hasError)
   {                                                       \
     THFile *self = luaT_checkudata(L, 1, torch_File_id);  \
     THFile_##NAME(self);                                  \
-    return 0;                                             \
+    lua_settop(L, 1);                                     \
+    return 1;                                             \
   }
 
 IMPLEMENT_TORCH_FILE_FUNC(binary)
@@ -48,7 +49,8 @@ static int torch_File_seek(lua_State *L)
   THFile *self = luaT_checkudata(L, 1, torch_File_id);
   long position = luaL_checklong(L, 2)-1;
   THFile_seek(self, position);
-  return 0;
+  lua_settop(L, 1);
+  return 1;
 }
 
 IMPLEMENT_TORCH_FILE_FUNC(seekEnd)
