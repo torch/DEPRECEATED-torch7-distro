@@ -362,7 +362,7 @@ static int torch_Tensor_(t)(lua_State *L)
   return 1;
 }
 
-int torch_Tensor_(unfold)(lua_State *L)
+static int torch_Tensor_(unfold)(lua_State *L)
 {
   THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor_id);
   int dimension = luaL_checkint(L, 2)-1;
