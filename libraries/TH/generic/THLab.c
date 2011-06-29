@@ -619,7 +619,9 @@ static void THLab_(fullConv2Dptr)(real *r_,
 }
 
 /*
-  2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
+  2D Input, 2D kernel  : convolve given image with the given kernel, valid convolution.
+  for sr,sc=1 this is equivalent to validConv2Dptr, but otherwise it is useful for
+  calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
 */
 static void THLab_(validConv2DRevptr)(real *r_,
 				      real *t_, long ir, long ic, 
@@ -654,6 +656,8 @@ static void THLab_(validConv2DRevptr)(real *r_,
    3D input, 3D kernel, 4D output
    like rank1 update
    A <- xx' + beta*A
+   for sr,sc=1 this is equivalent to conv2Dger, but otherwise it is useful for
+   calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
  */
 void THLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol)
 {
@@ -687,10 +691,10 @@ void THLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
   nOutputCols = nInputCols - (nKernelCols - 1) * scol;
 
   long nelem = THTensor_(nElement)(r_);
+  THTensor_(resize4d)(r_,nKernelPlane, nInputPlane, nOutputRows, nOutputCols);
 
-  if (nelem == 0)
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(resize4d)(r_,nKernelPlane, nInputPlane, nOutputRows, nOutputCols);
     THTensor_(zero)(r_);
   }
   else if (beta != 1)
@@ -768,10 +772,10 @@ void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   }
 
   long nelem = THTensor_(nElement)(r_);
+  THTensor_(resize4d)(r_,nKernelPlane, nInputPlane, nOutputRows, nOutputCols);
 
-  if (nelem == 0)
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(resize4d)(r_,nKernelPlane, nInputPlane, nOutputRows, nOutputCols);
     THTensor_(zero)(r_);
   }
   else if (beta != 1)
@@ -861,9 +865,10 @@ void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long 
   }
 
   long nelem = THTensor_(nElement)(r_);
-  if (nelem == 0)
+  THTensor_(resize3d)(r_, nOutputPlane, nOutputRows, nOutputCols);
+
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(resize3d)(r_, nOutputPlane, nOutputRows, nOutputCols);
     THTensor_(zero)(r_);
   }
   else if (beta != 1)
@@ -937,8 +942,7 @@ void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
 
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize2d)(r_, nOutputRows, nOutputCols);
-
-  if (nelem != THTensor_(nElement)(r_) || beta == 0)
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
     THTensor_(zero)(r_);
   else if (beta != 1)
     THTensor_(mul)(r_, beta);
