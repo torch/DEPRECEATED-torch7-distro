@@ -1,8 +1,4 @@
-#include "Storage.h"
-#include "Tensor.h"
-#include "TensorMath.h"
-
-#include "Timer.h"
+#include "general.h"
 
 extern void torch_utils_init(lua_State *L);
 extern void torch_File_init(lua_State *L);
@@ -10,6 +6,31 @@ extern void torch_File_init_storage_id(lua_State *L);
 extern void torch_DiskFile_init(lua_State *L);
 extern void torch_MemoryFile_init(lua_State *L);
 extern void torch_PipeFile_init(lua_State *L);
+extern void torch_Timer_init(lua_State *L);
+
+extern void torch_ByteStorage_init(lua_State *L);
+extern void torch_CharStorage_init(lua_State *L);
+extern void torch_ShortStorage_init(lua_State *L);
+extern void torch_IntStorage_init(lua_State *L);
+extern void torch_LongStorage_init(lua_State *L);
+extern void torch_FloatStorage_init(lua_State *L);
+extern void torch_DoubleStorage_init(lua_State *L);
+
+extern void torch_ByteTensor_init(lua_State *L);
+extern void torch_CharTensor_init(lua_State *L);
+extern void torch_ShortTensor_init(lua_State *L);
+extern void torch_IntTensor_init(lua_State *L);
+extern void torch_LongTensor_init(lua_State *L);
+extern void torch_FloatTensor_init(lua_State *L);
+extern void torch_DoubleTensor_init(lua_State *L);
+
+extern void torch_ByteTensorMath_init(lua_State *L);
+extern void torch_CharTensorMath_init(lua_State *L);
+extern void torch_ShortTensorMath_init(lua_State *L);
+extern void torch_IntTensorMath_init(lua_State *L);
+extern void torch_LongTensorMath_init(lua_State *L);
+extern void torch_FloatTensorMath_init(lua_State *L);
+extern void torch_DoubleTensorMath_init(lua_State *L);
 
 static lua_State *globalL;
 static void luaTorchErrorHandlerFunction(const char *msg)

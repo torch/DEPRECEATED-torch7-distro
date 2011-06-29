@@ -1,5 +1,4 @@
-#include "Tensor.h"
-#include "THFile.h"
+#include "general.h"
 
 static const void *torch_File_id = NULL;
 
