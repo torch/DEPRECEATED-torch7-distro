@@ -8,7 +8,7 @@
 #include <limits.h>
 #include <float.h>
 #include <time.h>
-
+#include <string.h>
 
 #ifdef __cplusplus
 # define TH_EXTERNC extern "C"

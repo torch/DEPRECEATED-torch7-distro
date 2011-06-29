@@ -12,4 +12,8 @@
 #include "THTensorDimApply.h"
 #include "THTensorMath.h"
 
+#include "THFile.h"
+#include "THDiskFile.h"
+#include "THMemoryFile.h"
+
 #endif
