@@ -33,6 +33,10 @@ void THLab_(tril)(THTensor *r_, THTensor *t, long k);
 void THLab_(triu)(THTensor *r_, THTensor *t, long k);
 void THLab_(cat)(THTensor *r_, THTensor *ta, THTensor *tb, int dimension);
 
+void THLab_(fullConv2Dptr)(real *r_, real *t_, long ir, long ic, real *k_, long kr, long kc, long sr, long sc);
+void THLab_(validConv2Dptr)(real *r_, real *t_, long ir, long ic, real *k_, long kr, long kc, long sr, long sc);
+void THLab_(validConv2DRevptr)(real *r_, real *t_, long ir, long ic, real *k_, long kr, long kc, long sr, long sc);
+
 void THLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol);
 void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol, const char* type);
 void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol, const char *type);
