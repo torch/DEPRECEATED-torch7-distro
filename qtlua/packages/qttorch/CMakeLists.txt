@@ -2,6 +2,7 @@
 
 INCLUDE_DIRECTORIES("${Torch_SOURCE_DIR}/libraries/TH")
 INCLUDE_DIRECTORIES("${Torch_SOURCE_DIR}/libraries/luaT")
+INCLUDE_DIRECTORIES(".")
 INCLUDE(${QT_USE_FILE})		     
 
 SET(qttorch_SRC qttorch.h qttorch.cpp)

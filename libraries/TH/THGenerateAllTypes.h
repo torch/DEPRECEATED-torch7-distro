@@ -6,7 +6,7 @@
 #define Real Byte
 #define TH_REAL_IS_BYTE
 #line 1 TH_GENERIC_FILE
-#line 1 "THByteStorage.h"
+/*#line 1 "THByteStorage.h"*/
 #include TH_GENERIC_FILE
 #undef real
 #undef Real
