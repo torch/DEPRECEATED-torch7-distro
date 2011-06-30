@@ -60,9 +60,9 @@ static int qttorch_(qimage_fromtensor)(lua_State *L)
       for (int i=0; i<width; i++)
       {
         int a = (int)(tp[sd+sd+sd] * scale) & 0xff;
-        int r = (int)(tp[0] * a) & 0xff;
-        int g = (int)(tp[sd] * a) & 0xff;
-        int b = (int)(tp[sd+sd] * a) & 0xff;
+        int r = (int)(tp[0] * scale) & 0xff;
+        int g = (int)(tp[sd] * scale) & 0xff;
+        int b = (int)(tp[sd+sd] * scale) & 0xff;
         tp += sw;
         ip[i] = qRgba(r,g,b,a);
       }
@@ -139,7 +139,7 @@ static int qttorch_(qimage_totensor)(lua_State *L)
       for (int i=0; i<width; i++)
       {
         QRgb v = ip[i];
-        tp[0] = (qreal)qGray(v) / scale;
+        tp[0] = (real)qGray(v) / scale;
         tp += sw;
       }
     }
@@ -148,9 +148,9 @@ static int qttorch_(qimage_totensor)(lua_State *L)
       for (int i=0; i<width; i++)
       {
         QRgb v = ip[i];
-        tp[0] = (qreal)qRed(v) / scale;
-        tp[sd] = (qreal)qGreen(v) / scale;
-        tp[sd+sd] = (qreal)qBlue(v) / scale;
+        tp[0] = (real)qRed(v) / scale;
+        tp[sd] = (real)qGreen(v) / scale;
+        tp[sd+sd] = (real)qBlue(v) / scale;
         tp += sw;
       }
     }
@@ -159,10 +159,10 @@ static int qttorch_(qimage_totensor)(lua_State *L)
       for (int i=0; i<width; i++)
       {
         QRgb v = ip[i];
-        tp[0] = (qreal)qRed(v) / scale;
-        tp[sd] = (qreal)qGreen(v) / scale;
-        tp[sd+sd] = (qreal)qBlue(v) / scale;
-        tp[sd+sd+sd] = (qreal)qAlpha(v) / scale;
+        tp[0] = (real)qRed(v) / scale;
+        tp[sd] = (real)qGreen(v) / scale;
+        tp[sd+sd] = (real)qBlue(v) / scale;
+        tp[sd+sd+sd] = (real)qAlpha(v) / scale;
         tp += sw;
       }
     }
