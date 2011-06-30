@@ -1,0 +1,2042 @@
+QtWidget Package Reference Manual
+
+Package =qtwidget= provides convenient way
+to make drawings and capture user events.
+In particular, class [[#qtluapainter][=QtLuaPainter=]] gives 
+the ability draw simple graphics using well known 
+postscript-like operators. Graphic output can be sent to an 
+arbitrary widget, to a PS or PDF file, or to a printer.
+Class [[#qtlualistener][=QtLuaListener=]] gives the 
+ability to listen to events on arbitrary widgets
+
+For instance, the convenient 
+function [[#qtwidgetnewwindow][=qtwidget.newwindow=]]
+creates a main window and returns its descriptor.
+<verbatim>
+  require 'qtwidget'
+  w=qtwidget.newwindow(400,300,"Some QWidget")
+</verbatim>
+Drawing is easily achieved using Postscript-like operators.
+<verbatim>
+  w:moveto(0,0); w:curveto(0,300,400,0,400,300); w:closepath()
+  w:setcolor("red"); w:fill(false)
+  w:setcolor("blue"); w:setlinewidth(5); w:stroke()
+</verbatim>
+Text output is of course supported 
+using [[#paintershow][=show=]].
+<verbatim>
+  w:moveto(90,40)
+  w:setcolor("black")
+  w:setfont(qt.QFont{serif=true,italic=true,size=20})
+  w:show("The Quick Brown Fox...")
+</verbatim>
+Alpha-transparency works as well.
+<verbatim>
+  w:rectangle(50,50,300,200)
+  w:setcolor(1,1,0,.5)
+  w:fill()
+</verbatim>
+Finally you can capture Qt events using the 
+[[../qt/index.hlp#qtconnectf][=qt.connect=]] function
+on the predefined [[#qtlualistener][qt.QtLuaListener]] object,
+<verbatim>
+  qt.connect(w.listener,
+       'sigMousePress(int,int,QByteArray,QByteArray,QByteArray)',
+       function(...) print("MousePress",...) end );
+</verbatim>
+and you can erase everything with
+<verbatim>
+  w:showpage()
+</verbatim>
+
+
+---+++ High Level Interface
+#highlevel
+
+
+The following convenience functions 
+provide simple ways to perform graphic display 
+whose output is directed to a window on the screen,
+to an image in memory, to a PostScript file, to a PDF file, or to a printer.
+Each of these functions return a Lua table
+that defines a number of useful fields and methods.
+In particular, all the 
+[[#qtluapainterfunctions][painting functions]] 
+defined by class [[#qtluapainter][=qt.QtLuaPainter=]]
+can be called directly using the 
+[[../LuaManual.hlp#FunctionCalls][Lua method syntax]] 
+on these tables.
+
+
+
+---++++ qtwidget.newwindow(w,h,[title]) 
+#qtwidgetnewwindow
+
+Expression =qtwidget.newwindow(w,h,title)= creates a
+toplevel widget of class [[../qtgui/index.hlp/#qwidget][=qt.QWidget=]]
+and a [[#qtluapainter][=qt.QtLuaPainter=]] object 
+operating on that widget.  
+Numerical arguments =w= and =h= specify the size of the widget.
+String argument =title= specifies a window title.
+The expression returns a Lua table that 
+serves as a drawing port descriptor.
+
+
+
+
+---++++ qtwidget.newimage(...)
+#qtwidgetnewimage
+
+Function =qtwidget.newimage= creates an image in memory
+that can be the target of drawing operations.
+This function returns a Lua table that 
+serves as a drawing port descriptor.
+
+There are several ways to specify its arguments:
+
+   * =qtwidget.newimage(w,h,[monoflag])=
+
+     Creates an image of width =w= and height =h=.
+     When the optional argument =monoflag= is =true=, 
+     a bitonal image is created.
+     Otherwise the image can contain arbitrary RGBA colors.
+
+   * =qtwidget.newimage(filename,[format])=
+
+     Creates an image by loading the contents of file =filename=.
+     The file format is defined by the optional string argument =format= 
+     or derived from the file name extension.
+
+   * =qtwidget.newimage(torchtensor)=
+
+     Creates an image by extracting the contents of the specified
+     [[../torch/index.hlp#Tensor][=torch.Tensor=]].
+     The valid tensor formats are described in the documentation for function 
+     [[../qttorch/index.hlp#qimagefromtensor][=qt.QImage.fromTensor=]].
+     This only works when both packages [[../torch/index.hlp][=torch=]]
+     and [[../qttorch/index.hlp][=qttorch=]] have been loaded.
+
+
+---++++ qtwidget.newps(w,h,filename)
+#qtwidgetnewps
+
+
+Expression =qtwidget.newps(w,h,filename)= returns a Lua table that 
+serves as a drawing port descriptor.
+Drawing operations will be output 
+into the PostScript file =filename=.
+Arguments =w= and =h= represent the 
+initial size of the coordinate system.
+
+The output file contains incomplete data until
+you delete the painter object or call 
+method [[#qtwidgetclose][=close=]].
+
+
+---++++ qtwidget.newpdf(w,h,filename)
+#qtwidgetnewpdf
+
+Expression =qtwidget.newpdf(w,h,filename)= returns a Lua table that 
+serves as a drawing port descriptor.
+Drawing operations will be output 
+into the PDF file =filename=.
+Arguments =w= and =h= represent the 
+initial size of the coordinate system.
+
+The output file contains invalid data until
+you delete the painter object or call 
+method [[#qtwidgetclose][=close=]].
+
+
+---++++ qtwidget.newsvg(w,h,[filename])
+#qtwidgetnewsvg
+
+Expression =qtwidget.newsvg(w,h,filename)= returns a Lua table that 
+serves as a drawing port descriptor.
+The optional argument =filename= contains the 
+name of the destination file for the SVG data.
+Arguments =w= and =h= represent the 
+initial size of the coordinate system.
+
+The output contains invalid data until
+you delete the painter object or call 
+method [[#qtwidgetclose][=close=]].
+When argument =filename= is not specified, 
+the SVG data is written into an internal memory buffer 
+accessible using expression 
+[[../qtsvg/index.hlp#qtluasvggeneratordata][=desc.svg:data()=]].
+
+
+---++++ qtwidget.newprint(w,h,[printername])
+#qtwidgetnewprint
+
+Expression =qtwidget.newprint(w,h,printername)= 
+returns a Lua table that 
+serves as a drawing port descriptor.
+Drawing operations will be output to printer =printername=.
+When argument =printername= is omitted,
+this function pops a print dialog that allows the user
+to choose a printer and specify its settings.
+Arguments =w= and =h= represent the 
+initial size of the coordinate system.
+
+
+
+---++++ Painting Functions.
+
+All the [[#qtluapainterfunctions][painting functions]] 
+defined by class [[#qtluapainter][=qt.QtLuaPainter=]]
+can be called directly using the 
+[[../LuaManual.hlp#FunctionCalls][Lua method syntax]] 
+on the table returned by the functions 
+[[#qtwidgetnewwindow][=qtwidget.newwindow=]],
+[[#qtwidgetnewimage][=qtwidget.newimage=]],
+[[#qtwidgetnewps][=qtwidget.newps=]],
+[[#qtwidgetnewpdf][=qtwidget.newpdf=]],
+[[#qtwidgetnewsvg][=qtwidget.newsvg=]], and
+[[#qtwidgetnewprint][=qtwidget.newprint=]].
+
+These calls are simply forwarded to the underlying
+[[#qtluapainter][=qt.QtLuaPainter=]] object.
+
+   * [[#qtluapainterfunctions][Link to the painting functions]].
+
+
+---++++ Other Functions and Fields.
+
+The following fields and functions are defined
+on the descriptor tables returned by the functions 
+[[#qtwidgetnewwindow][=qtwidget.newwindow=]],
+[[#qtwidgetnewimage][=qtwidget.newimage=]],
+[[#qtwidgetnewps][=qtwidget.newps=]],
+[[#qtwidgetnewpdf][=qtwidget.newpdf=]], and
+[[#qtwidgetnewprint][=qtwidget.newprint=]].
+
+
+---+++++ desc.port
+#descport
+
+Field =desc.port= contains the
+[[#qtluapainter][=qt.QtLuaPainter=]] object
+that is used to perform the drawings.
+
+
+---+++++ desc.widget
+
+Field =desc.widget= contains the
+[[../qtgui/index.hlp/#qwidget][=qt.QWidget=]] object
+that underlies drawing port descriptors created with 
+[[#qtwidgetnewwindow][=qtwidget.newwindow=]].
+
+
+---+++++ desc.listener
+
+Field =desc.widget= contains a
+[[#qtlualistener][=qt.QtLuaListener=]] object.
+that can be used to capture events on the widget created by
+[[#qtwidgetnewwindow][=qtwidget.newwindow=]].
+
+---+++++ desc.printer
+
+Field =desc.printer= contains the
+[[#qtluaprinter][=qt.QtLuaPrinter=]] object
+that underlies drawing port descriptors created with 
+[[#qtwidgetnewps][=qtwidget.newps=]],
+[[#qtwidgetnewpdf][=qtwidget.newpdf=]], or
+[[#qtwidgetnewprint][=qtwidget.newprint=]].
+
+---+++++ desc.svg
+Field =desc.svg= contains the
+[[../qtsvg/index.hlp#qtluasvggenerator][=qt.QtLuaSvgGenerator=]] object
+associated with drawing ports created with
+[[#qtwidgetnewsvg][=qtwidget.newsvg=]].
+
+
+---+++++ desc.width
+
+Field =desc.width= contains the width of the drawing surface.
+
+---+++++ desc.height
+
+Field =desc.height= contains the height of the drawing surface.
+
+
+---+++++ desc:close()
+#qtwidgetclose
+
+Function =desc:close()= closes the [[#qtluapainter][=qt.QtLuaPainter=]].
+In the case of a drawing port descriptor returned by function
+[[#qtwidgetnewwindow][=qtwidget.newwindow=]], 
+this function also closes the [[../qtgui/index.hlp/#qwidget][=qt.QWidget=]] 
+and the windows disappears from the screen.
+
+---+++++ desc:resize(w,h)
+
+Function =desc:resize(w,h)= is only available for
+drawing port descriptor returned by function
+[[#qtwidgetnewwindow][=qtwidget.newwindow=]].
+It resizes the underlying widget.
+
+
+---+++++ desc:onResize(f)
+
+Function =desc:onResize(f)= is only available for
+drawing port descriptor returned by function
+[[#qtwidgetnewwindow][=qtwidget.newwindow=]].
+It ensures that 
+function =f(w,h)= gets called whenever the widget size changes. 
+The function argument indicate the new widget size.
+Each call of =desc:onResize= replaces the previous callback function by =f=.
+Calling it with argument =nil= removes the current callback.
+
+
+---+++++ desc:valid()
+
+Expression =desc:valid()= returns =false= if the 
+underlying drawing target is no longer valid,
+for instance because the window has been closed.
+Otherwise it returns =true=.
+
+
+---+++ Classes
+
+
+---++++ qt.QtLuaListener
+#qtlualistener
+
+Class =QtLuaListener= emits signals when its parent receives event messages.
+This is convenient because the Lua program can define event handling functions
+using the signal connection function [[../qt/index.hlp#qtconnectf][qt.connect]].
+
+---+++++ qt.QtLuaListener(qwidget)
+
+Expression =qt.QtLuaListener(qwidget)= returns a new =QtLuaListener= object
+that relays the event messages received by widget =qwidget=.
+This object is a child of =qwidget=.
+
+---+++++ [QtLuaListener signal] sigClose() 
+
+Signal =sigClose= is emitted when the underlying widget receives a 
+[[http://doc.trolltech.com/4.4/qcloseevent.html][=QCloseEvent=]].
+
+---+++++ [QtLuaListener signal] sigResize(int,int)
+
+Signal =sigResize= is emitted whenever the underlying widget receives a
+[[http://doc.trolltech.com/4.4/qresizeevent.html][=QResizeEvent=]]
+because it has changed size.  The two arguments are the new widget size.
+
+
+---+++++ [QtLuaListener signal] sigKeyPress(QString,QByteArray,QByteArray)
+
+Signal =sigKeyPress= is emitted whenever the underlying widget receives a
+[[http://doc.trolltech.com/4.4/qkeyevent.html][=QKeyEvent=]]
+of type =QEvent::KeyPress= because a key was pressed on the keyboard.
+The first argument is a string representing the text associated with the key.
+The second argument is the 
+[[http://doc.trolltech.com/4.4/qt.html#Key-enum][key name]].
+The third argument is a string containing the 
+[[http://doc.trolltech.com/4.4/qt.html#KeyboardModifier-enum][keyboard modifier names]]
+separated by a vertical bar.  
+
+
+---+++++ [QtLuaListener signal] sigKeyRelease(QString,QByteArray,QByteArray)
+
+Signal =sigKeyRelease= is emitted whenever the underlying widget receives a
+[[http://doc.trolltech.com/4.4/qkeyevent.html][=QKeyEvent=]]
+of type =QEvent::KeyRelease= because a key was released on the keyboard.
+The first argument is a string representing the text associated with the key.
+The second argument is the 
+[[http://doc.trolltech.com/4.4/qt.html#Key-enum][key name]].
+The third argument is a string containing the 
+[[http://doc.trolltech.com/4.4/qt.html#KeyboardModifier-enum][keyboard modifier names]]
+separated by a vertical bar.  
+
+
+
+---+++++ [QtLuaListener signal] sigMousePress(int,int,QByteArray,QByteArray,QByteArray)
+
+Signal =sigMousePress= is emitted whenever the underlying widget receives a
+[[http://doc.trolltech.com/4.4/qmouseevent.html][=QMouseEvent=]]
+of type =QEvent::MouseButtonPress= because a mouse button was pressed.
+The first two arguments are the 
+pixel coordinates of the mouse pointer when the button was clicked
+The third argument is a string containing the 
+[[http://doc.trolltech.com/4.4/qt.html#MouseButton-enum][button name]].
+The fourth argument is a string containing the 
+[[http://doc.trolltech.com/4.4/qt.html#KeyboardModifier-enum][keyboard modifier names]]
+separated by a vertical bar.  
+The fifth argument is a string containing the names of all depressed buttons
+separated by a vertical bar.  
+
+
+
+---+++++ [QtLuaListener signal] sigMouseRelease(int,int,QByteArray,QByteArray,QByteArray)
+
+Signal =sigMouseRelease= is emitted whenever the underlying widget receives a
+[[http://doc.trolltech.com/4.4/qmouseevent.html][=QMouseEvent=]]
+of type =QEvent::MouseButtonRelease= because a mouse button was released.
+The first two arguments are the 
+pixel coordinates of the mouse pointer when the button was released
+The third argument is a string containing the 
+[[http://doc.trolltech.com/4.4/qt.html#MouseButton-enum][button name]].
+The fourth argument is a string containing the 
+[[http://doc.trolltech.com/4.4/qt.html#KeyboardModifier-enum][keyboard modifier names]]
+separated by a vertical bar.  
+The fifth argument is a string containing the names of all depressed buttons
+separated by a vertical bar.  
+
+---+++++ [QtLuaListener signal] sigMouseDoubleClick(int,int,QByteArray,QByteArray,QByteArray)
+
+Signal =sigMouseRelease= is emitted whenever the underlying widget receives a
+[[http://doc.trolltech.com/4.4/qmouseevent.html][=QMouseEvent=]]
+of type =QEvent::MouseButtonDblClick= because a mouse button was double-clicked.
+The first two arguments are the 
+pixel coordinates of the mouse pointer when the button was clicked
+The third argument is a string containing the 
+[[http://doc.trolltech.com/4.4/qt.html#MouseButton-enum][button name]].
+The fourth argument is a string containing the 
+[[http://doc.trolltech.com/4.4/qt.html#KeyboardModifier-enum][keyboard modifier names]]
+separated by a vertical bar.  
+The fifth argument is a string containing the names of all depressed buttons
+separated by a vertical bar.  
+
+---+++++ [QtLuaListener signal] sigMouseMove(int,int,QByteArray,QByteArray)
+
+Signal =sigMouseRelease= is emitted whenever the underlying widget receives a
+[[http://doc.trolltech.com/4.4/qmouseevent.html][=QMouseEvent=]]
+of type =QEvent::MouseMove= because the mouse was moved.
+Such events occur only when a mouse button is pressed down, 
+unless the widget property =mouseTracking= has been set to =true=.
+The first two arguments are the 
+pixel coordinates of the mouse pointer when the button was released
+The third argument is a string containing the 
+[[http://doc.trolltech.com/4.4/qt.html#KeyboardModifier-enum][keyboard modifier names]]
+separated by a vertical bar.  
+The fourth argument is a string containing the names of all depressed buttons
+separated by a vertical bar.  
+
+
+
+---+++++ [QtLuaListener signal] sigEnter(bool)
+
+Signal =sigEnter= is emitted whenever the underlying widget receives an
+event of type 
+[[http://doc.trolltech.com/4.4/qevent.html][=QEvent::Enter=]]
+or 
+[[http://doc.trolltech.com/4.4/qevent.html][=QEvent::Leave=]].
+The boolean argument indicates whether the mouse pointer has just
+entered or left the widget area.
+
+---+++++ [QtLuaListener signal] sigFocus(bool)
+
+Signal =sigEnter= is emitted whenever the underlying widget receives 
+a [[http://doc.trolltech.com/4.4/qfocusevent.html][=QFocusEvent=]].
+The boolean argument indicates whether the widget has just gained
+or just lost the keyboard focus.
+
+---+++++ [QtLuaListener signal] sigShow(bool)
+
+Signal =sigEnter= is emitted whenever the underlying widget receives 
+a [[http://doc.trolltech.com/4.4/qshowevent.html][=QShowEvent=]] or a
+a [[http://doc.trolltech.com/4.4/qhideevent.html][=QHideEvent=]].
+The boolean argument indicates whether the widget has just been
+shown or just been hidden.
+
+
+---+++++ [QtLuaListener signal] sigPaint()
+
+Signal =sigEnter= is emitted whenever the underlying widget receives 
+a [[http://doc.trolltech.com/4.4/qpaintevent.html][=QPaintEvent=]].
+
+---++++ qt.QtLuaPainter
+#qtluapainter
+
+Painting in Qt is usually achieved using class
+[[http://doc.trolltech.com/4.4/qpainter.html][=QPainter=]].
+Since this class is neither a subclass of
+[[http://doc.trolltech.com/4.4/qobject.html][=QObject=]]
+nor a value class suitable for storing into a Qt variant,
+the QtLua class =QtLuaPainter= defines a Qt object that
+exposes the painting capabilities of Qt in a more flexible way.
+
+Instances of class =QtLuaPainter= can target:
+   * Any image stored in memory represented as a 
+     [[../qtgui/index.hlp/#qimage][=qt.QImage=]] 
+     or a [[../qtgui/index.hlp/#qpixmap][=qt.QPixmap=]].
+   * Any widget represented as 
+     a [[../qtgui/index.hlp/#qwidget][=qt.QWidget=]].
+   * Any =QPaintDevice= encapsulated in a Qt object class
+     such as class [[#qtluaprinter][=qt.QtLuaPrinter=]].
+
+Class =QtLuaPainter= provides an automatic buffering 
+capability when it targets a widget. Drawing functions 
+paint onto an offline image. The class logic ensures
+that the widget is automatically refreshed or updated
+when appropriate.
+
+Despite these differences, the Qt documentation for the 
+[[http://doc.trolltech.com/4.4/paintsystem.html][Qt paint system]]
+contains lots of useful information. In particular, the documentation for 
+class [[http://doc.trolltech.com/4.4/qpainter.html][=QPainter=]]
+accurately describes how the painter settings affects drawing operations.
+
+
+---+++++ qt.QtLuaPainter(...)
+
+Function =qt.QtLuaPainter= constructs a new =QtLuaPainter= instance.
+
+   * =qt.QtLuaPainter(qimage)=
+
+Constructs a painter instance that targets an offscreen image.
+The image is initialized with a copy of the 
+[[../qtgui/index.hlp/#qimage][=qt.QImage=]] 
+passed as argument. Painting operations do not modify the image 
+passed as argument. Instead a copy of the current image can be 
+accessed using expression [[#paintergrab][=painter:image()=]].
+
+   * =qt.QtLuaPainter(filename, [format])=
+
+ Constructs a painter instance that targets an offscreen image
+ initialized by reading the image file =filename=.  
+ The file format is determined by the optional string 
+ =format= or by the file name extension.
+ Use expression [[#paintergrab][=painter.image()=]] to 
+ obtain a copy of the offscreen image.
+
+   * =qt.QtLuaPainter(w,h,[monoflag])=
+
+ Constructs a painter instance that targets an offscreen image
+ of width =w= and height =h=. The image is bitonal when 
+ the optional boolean flag =monoflag= is =true=. Otherwise
+ the image is a 32 bits RGBA image.
+ Use expression [[#paintergrab][=painter.image()=]] to 
+ obtain a copy of the offscreen image.
+
+   * =qt.QtLuaPainter(qpixmap)=
+
+Constructs a painter instance that targets a 
+device-dependent pixmap in memory.
+The pixmap is initialized with a copy of 
+the [[../qtgui/index.hlp/#qpixmap][=qt.QPixmap=]] passed as argument.
+Use expression [[#painterpixmap][=painter:pixmap()=]].
+to obtain a copy of the target pixmap.
+Since Qt only supports painting a device-dependent =QPixmap= from 
+the main thread, one must use [[../qt/index.hlp#qtqcall][=qt.pcall=]]
+to ensure that painting operations are performed from the main thread.
+Otherwise Qt prints a lot of warnings and behaves erratically.
+
+   * =qt.QtLuaPainter(qwidget,[buffered])=
+
+ Constructs a painter instance that targets the 
+ specified [[../qtgui/index.hlp/#qwidget][=qt.QWidget=]].
+ The resulting painter is a child of =qwidget=.
+ The optional boolean argument =buffered= indicates
+ whether drawing should be performed in a offscreen buffer
+ or directly on the widget surface.  The default is to
+ create a buffered painter.
+
+ A buffered painter always draws onto an offscreen image
+ and ensures that the widget surface is automatically refreshed or 
+ updated when needed.  Since the painting functions target
+ a [[../qtgui/index.hlp/#qimage][=qt.QImage=]], 
+ they can be called from any thread at any time.  
+ This is the recommended mode of operation.
+
+ An unbuffered painter directly draws onto the widget surface. 
+ Unfortunately Qt4 only supports painting a widget from the paint event handler
+ [[http://doc.trolltech.com/4.4/qwidget.html#paintEvent][=QObject::paintEvent=]]. 
+ While this is happening in the main thread, 
+ the Lua interpreter might be unavailable for painting because
+ the Lua thread is busy running another program.
+ Unbuffered widget painters are therefore difficult to use for painting;
+ they are mostly useful for grabbing the on-screen representation 
+ of a widget using function [[#paintergrab][=painter.image()=]].
+ 
+   * =qt.QtLuaPainter(object)=
+  
+ Constructs a painter instance that target the output
+ device represented by the instance =object= of a suitable Qt object class.
+ The class must implement an invokable method =device()= that returns
+ a pointer of type =QPaintDevice*=.  
+ The class can also define an invokable method =printer()= 
+ that returns a pointer of type =QPrinter*= and a signal =closing(QObject*)=
+ that indicates that the object is being destroyed. 
+ Class [[#qtluaprinter][=qt.QtLuaPrinter=]] does all this.
+
+
+---+++++ QtLuaPainter Properties
+
+---++++++ painter.angleUnit
+#qtluapainterangleunit
+
+This property contains a string defining how arguments 
+representing angles are interpreted in painter functions
+such as [[#painterrotate][=painter:rotate(angle)=]].
+The acceptable values are the strings ="Degrees"= and ="Radians"=.
+The default unit is the degree.
+
+
+---++++++ painter.background
+#qtluapainterbackground
+
+This property contains the [[../qtgui/index.hlp/#qbrush][=qt.QBrush=]]
+used to draw the spaces in stippled lines, the text background, 
+and the zero color of bitonal images.
+The default background brush is an empty brush
+meaning that these pixels are not painted at all.
+
+---++++++ painter.brush
+#qtluapainterbrush
+
+Property =painter.brush= contains a Qt variant of class
+[[../qtgui/index.hlp/#qbrush][=qt.QBrush=]] representing the painter settings
+that determine how function [[#painterfill][=painter:fill=]]
+fills shapes and how function [[#painterfill][=painter:show=]] 
+draws text.
+
+---++++++ painter.clippath
+#qtluapainterclippath
+
+Property =painter.clippath= contient a Qt variant of class
+[[../qtgui/index.hlp/#qpainterpath][=qt.QPainterPath=]] 
+representing the boundary
+of the current clipping region. Drawing operations
+only modify pixels located within the clip region.
+An empty path means that no clipping is performed.
+
+---++++++ painter.compositionMode
+#qtluapaintercompositionmode
+
+
+The 
+[[http://doc.trolltech.com/4.4/qpainter.html#CompositionMode-enum][composition mode]]
+defines how new drawings are merged with previous drawings in the image.
+Composition modes are representing as a string containing the
+name of the composition mode without the prefix =QPainter::=.
+The default composition mode is ="SourceOver"=.
+
+Not all devices support complex alpha-blending composition modes.
+In particular printers often support only the default composition mode.
+When a composition mode is not supported, the Qt library prints a warning.
+
+
+---++++++ painter.depth
+#qtluapainterdepth
+
+Expression =painter.depth= returns the color depth
+of the target surface for drawings.
+A depth of =1= indicates a bitonal surface.  
+A depth of =24= or =32= indicates a true color surface.
+
+---++++++ painter.font
+#qtluapainterfont
+
+Property =painter.font= contient a Qt variant of class
+[[../qtgui/index.hlp/#qfont][=qt.QFont=]] representing the font settings
+used for drawing text.
+
+---++++++ painter.height
+#qtluapainterheight
+
+Expression =painter.height= returns the height of 
+the drawing surface expressed in pixels.
+The returned value
+is not affected by the current transformation matrix. 
+It corresponds to the default coordinate system
+set by [[#painterinitmatrix][=painter:initmatrix=]].
+
+---++++++ painter.matrix
+#qtluapaintermatrix
+
+Property =painter.font= contient a Qt variant of class
+[[../qtgui/index.hlp/#qtransform][=qt.QTransform=]] representing
+how coordinates passed to the path construction functions
+are transformed into device depending coordinates.
+
+---++++++ painter.path
+#qtluapainterpath
+
+Property =painter.path= contient a Qt variant of class
+[[../qtgui/index.hlp/#qpainterpath][=qt.QPainterPath=]] 
+representing the current path. 
+A path is a mathematical boundary delimiting regions in the plane.
+The current path is used implicitely by functions
+[[#painterfill][=painter:fill=]] 
+and [[#painterstroke][=painter:stroke=]].
+The current path is modified by a rich collection
+of path defining functions.
+
+---++++++ painter.pen
+#qtluapainterpen
+
+Property =painter.pen= contains a Qt variant of class
+[[../qtgui/index.hlp/#qpen][=qt.QPen=]] representing the painter settings
+that determine how function [[#painterfill][=painter:stroke=]]
+draws shapes.
+
+---++++++ painter.point
+#qtluapainterpoint
+
+Property =painter.point= contient a Qt variant of class
+[[../qtcore/index.hlp#qpoint][=qt.QPointF=]] representing the
+coordinates of the current point.  These coordinates
+are used and updated implicitely by the majority
+of the path construction functions.
+
+
+---++++++ painter.renderHints
+#qtluapainterrenderhints
+
+[[http://doc.trolltech.com/4.4/qpainter.html#RenderHint-enum][Rendering hints]]
+are flags controlling the quality of the drawing operations.
+They are represented by a string containing the concatenation of
+the names of the active rendering flags (without the prefix =QPainter::=)
+separated with a vertical bar "=|=" symbolizing a boolean =or= operator.
+
+
+---++++++ painter.styleSheet
+#qtluapainterstylesheet
+
+This property contains a string containing a CSS style sheet
+that is used when drawing rich text with 
+function [[#paintershow][=show=]].
+
+
+---++++++ painter.width
+#qtluapainterwidth
+
+Expression =painter.width= returns the width of 
+the drawing surface expressed in pixels.
+The returned value
+is not affected by the current transformation matrix. 
+It corresponds to the default coordinate system
+set by [[#painterinitmatrix][=painter:initmatrix=]].
+
+
+
+
+
+
+
+
+---+++++ QtLuaPainter Functions
+#qtluapainterfunctions
+
+Class =QtLuaPainter= provides a broad array of 
+painting functions that closely resemble
+the well-known PostScript operators.
+Additional functions provide capabilities
+that are unique to the Qt platform.
+
+
+---++++++ painter:arc(x,y,r,angle1,angle2)
+
+Expression =painter:arc(x,y,r,angle1,angle2)=
+appends an arc of a circle to the current path.
+The arc is centered at coordinates =(x,y)= 
+with radius =r= and extends from angle =angle1= 
+to angle =angle2= in the trigonometric direction.
+
+If there is a current point, a line segment joins 
+the current point to the first endpoint of the arc.
+The second endpoint becomes the new current point.
+
+Angles can be expressed in degrees or radians
+according to the [[#qtluapainterangleunit][current angle unit]].
+The default angle unit is the degree.
+
+
+See also: PostScript operator =arc=.
+
+---++++++ painter:arcn(x,y,r,angle1,angle2)
+
+Expression =painter:arcn(x,y,r,angle1,angle2)=
+appends an arc of a circle to the current path.
+The arc is centered at coordinates =(x,y)= 
+with radius =r= and extends from angle =angle1= 
+to angle =angle2= in the inverse trigonometric direction.
+
+If there is a current point, a line segment joins 
+the current point to the first endpoint of the arc.
+The second endpoint becomes the new current point.
+
+Angles can be expressed in degrees or radians
+according to the [[#qtluapainterangleunit][current angle unit]].
+The default angle unit is the degree.
+
+See also: PostScript operator =arcn=. 
+
+---++++++ painter:arcto(x1,y1,x2,y2,r)
+
+Expression =painter:arcto(x1,y1,x2,y2,r)=
+appends an arc of a circle to the current path
+defined by the radius =r= and two tangent lines 
+extending from the current point =(x0,y0)= to =(x1,y1)= 
+and from =(x1,y1)= to =(x2,y2)=. 
+
+When the current point is set, a line segment joins 
+the current point to the first endpoint of the arc. 
+The second endpoint becomes the new current point.
+
+See also: PostScript operators =arct= and =arcto=.
+
+
+---++++++ painter:charpath(string)
+
+Expression =painter:charpath(string)= 
+computes the path for the glyph outlines that would 
+result if string =string= was displayed 
+using [[#paintershow][=painter:show(string)=]].
+This path is appended to the current path
+and is therefore suitable for functions 
+[[#painterstroke][=painter:stroke=]]
+or [[#painterfill][=painter:fill=]].
+
+After calling this function, the current point is left unset.
+
+See also: PostScript operators =charpath=.
+
+
+---++++++ painter:clip(optnewpath)
+#painterclip
+
+Function =painter:clip= intersects the 
+[[#qtluapainterclippath][current clip region]]
+with the region described by the current path,
+that is the region that would be painted by
+[[#painterfill][=qtpainter.fill=]].
+This intersection becomes the new clip region.
+
+The optional boolean =optnewpath= specifies
+whether this function resets the current path 
+using [[#painternewpath][=painter:newpath()=]].
+The default is to leave the current path unchanged.
+The interior of the current path is determined using the 
+[[http://doc.trolltech.com/4.4/qpainterpath.html#setFillRule][winding rule]].
+See function [[#paintereoclip][=painter:eoclip=]] for an alternative.
+
+This function cannot enlarge the clipping path.
+The recommended approach is to call 
+[[#paintergsave][=painter:gsave()=]]
+before reducing the clip region and 
+[[#paintergrestore][=painter:grestore()=]]
+to restore the initial clip region.
+
+See also: PostScript operator =clip=.
+
+
+---++++++ painter:close()
+#painterclose
+
+Expression =painter:close()= detaches 
+the =QtLuaPainter= object from the underlying widget.
+After doing this, you cannot draw anything.
+Painters operating on a widget or a printer should
+be closed before the underlying widget
+or printer is destroyed.
+
+
+---++++++ painter:closepath()
+
+Expression =painter:closepath()= 
+closes the current subpath by appending a 
+straight line segment connecting the
+current point to the subpath to its starting point.
+This function does nothing if the current subpath
+is already closed.
+
+Using function =painter:closepath= is better than specifying
+the line segment using =painter:lineto= because it will
+ensure that the line segments are joined using the 
+current pen =capStyle= and =joinStyle= attributes.
+
+After calling this function, 
+the current point is left unset.
+
+See also: PostScript operator =closepath=.
+
+
+---++++++ painter:concat(qtransform)
+
+Expression =painter:concat(qtransform)= 
+replaces the [[#qtluapaintermatrix][current transformation matrix]]
+by the product of the current matrix
+by the =QTransform= object =qtransform=.
+
+It is much easier to use functions
+[[#paintertranslate][=painter:translate=]], 
+[[#painterscale][=painter:scale=]], or 
+[[#painterrotate][=painter:rotate=]].
+
+See also: PostScript operator =concat=.
+
+
+---++++++ painter:currentangleunit()
+
+Expression =painter:currentangleunit()= returns the 
+[[#qtluapainterangleunit][current angle unit]] 
+for angles in functions such as [[#painterrotate][=painter:rotate=]].
+Possible values are strings ="Degrees"= and ="Radians"=. 
+The default angle unit are degrees.
+
+
+---++++++ painter:currentbackground()
+
+Expression =painter:currentbackground()=
+returns a [[../qtgui/index.hlp/#qbrush][=qt.QBrush=]] 
+representing the [[#qtluapainterbackground][current background brush]]
+used for displaying the backgrounds when painting
+dashed line, text, or bitonal images.
+The default is an empty brush.
+
+
+---++++++ painter:currentbrush()
+
+Expression =painter:currentbrush()=
+returns a [[../qtgui/index.hlp/#qbrush][=qt.QBrush=]] 
+representing the [[#qtluapainterbrush][current brush]]
+used for filling path with [[#painterfill][=painter:fill()=]].
+The default is an empty brush.
+
+
+---++++++ painter:currentclip()
+
+Expression =painter:currentclip()=
+returns a [[../qtgui/index.hlp/#qpainterpath][=QPainterPath=]]
+representing the [[#qtluapainterclippath][current clip region]].
+
+---++++++ painter:currentcolor()
+
+Expression =painter:currentcolor()= 
+returns four numbers representing the 
+red, green, blue, and alpha components 
+of the color of the [[../qtgui/index.hlp/#qbrush][current brush]].
+This numbers range from zero to one.
+
+
+---++++++ painter:currentdash()
+
+Expression =painter:currentdash()=
+returns the dash pattern and the dash offset
+of the [[#qtluapainterpen][current pen]].
+
+
+---++++++ painter:currentfont()
+
+Expression =painter:currentfont()=
+returns a [[../qtgui/index.hlp/#qfont][=QFont=]]
+describing the [[#qtluapainterfont][current font]]
+for drawing text.
+
+---++++++ painter:currentfontsize()
+
+Expression =painter:currentfontsize()=
+returns the size in points of the 
+[[#qtluapainterfont][current font]].
+
+
+---++++++ painter:currenthints()
+
+Expression =painter:currenthints()= returns the 
+[[#qtluapainterrenderhints][current rendering hints]]
+controlling the quality of the drawings.
+
+
+---++++++ painter:currentlinewidth()
+
+Expression =painter:currentlinewidth()= returns
+the line width associated with the 
+[[#qtluapainterpen][current pen]].
+
+
+---++++++ painter:currentmatrix()
+
+Expression =painter:currentmatrix()= returns a Qt variant of class
+[[../qtgui/index.hlp/#qtransform][=qt.QTransform=]] representing the
+[[#qtluapaintermatrix][current transformation matrix]].
+
+---++++++ painter:currentmode()
+
+Expression =painter:currentmode()= returns a string representing the 
+[[#qtluapaintercompositionmode][current composition mode]].
+
+
+---++++++ painter:currentpath()
+
+Expression =painter:currentpath()= returns a Qt variant of class
+[[../qtgui/index.hlp/#qpainterpath][=qt.QPainterPath=]] representing the
+[[#qtluapainterpath][current path]].
+
+
+---++++++ painter:currentpen()
+
+Expression =painter:currentpath()= returns a Qt variant of class
+[[../qtgui/index.hlp/#qpen][=qt.QPen=]] representing the
+[[#qtluapainterpen][current pen]].
+
+
+---++++++ painter:currentpoint()
+
+Expression =painter:currentpoint()= returns two numbers
+representing the coordinates of the
+[[#qtluapainterpoint][current point]].
+
+
+---++++++ painter:currentsize()
+#paintercurrentsize
+
+Expression =painter:currentsize()= returns two numbers
+representing the width and height of the drawing are
+expressed in pixels. The returned values 
+are not affected by the current transformation matrix. 
+They correspond to the default coordinate system
+sets by [[#painterinitmatrix][=painter:initmatrix=]].
+
+
+---++++++ painter:currentstylesheet()
+#paintercurrentstylesheet
+
+Expression =painter:currentstylesheet()= returns the 
+the [[#qtluapainterstylesheet][current style sheet]]
+used by function [[#paintershow][=show=]] for
+displaying rich text.
+
+
+---++++++ painter:curveto(x1,y1,x2,y2,x3,y3)
+#paintercurveto
+
+Expression =painter:curveto(x1,y1,x2,y2,x3,y3)=
+appends a section of a cubic Bezier curve to the current path.
+The curve starts on the current point and ends in point =(x3,y3)=
+using =(x1,y1)= and =(x2,y2)= as the Bezier control points. 
+The endpoint =(x3,y3)= then becomes the new current point.
+
+The behavior of this function is undefined 
+when the current point is not set
+
+See also: PostScript operator =curveto=.
+
+
+---++++++ painter:device()
+#painterdevice
+
+Expression =painter:device()= returns a pointer to the Qt 
+paint device underlying the painter.
+Since the Qt class
+[[http://doc.trolltech.com/4.4/qpaintdevice.html][=QPaintDevice=]]
+is neither a Qt variant not a Qt object, this pointer
+is represented by a Qt variant of type =QPaintDevice*=.
+This is not very useful in Lua.
+
+
+---++++++ painter:eoclip(optnewpath)
+#paintereoclip
+
+Function =painter:eoclip= is similar to function 
+[[#painterclip][=painter:clip=]]. However the interior of the
+current path is interpreted using the 
+[[http://doc.trolltech.com/4.4/qpainterpath.html#setFillRule][odd-even rule]]
+instead of the winding rule.
+
+
+
+---++++++ painter:eofill(optnewpath)
+#paintereofill
+
+Function =painter:eofill= is similar to function 
+[[#painterfill][=painter:fill=]]. However the interior of the
+current path is determined using the 
+[[http://doc.trolltech.com/4.4/qpainterpath.html#setFillRule][odd-even rule]]
+instead of the winding rule.
+
+See also: PostScript operator =eofill=.
+
+---++++++ painter:fill(optnewpath)
+#painterfill
+
+Function =painter:fill= fills the interior of the 
+[[#qtluapainterpath][current path]] using
+the [[#qtluapainterbrush][current brush]].
+
+The optional boolean =optnewpath= specifies
+whether this function resets the current path
+using [[#painternewpath][=painter:newpath()=]].
+The default is to reset the current path.
+The interior of the current path is determined using the 
+[[http://doc.trolltech.com/4.4/qpainterpath.html#setFillRule][winding rule]].
+See function [[#paintereofill][=painter:eofill=]] for an alternative.
+
+See also: PostScript operator =fill=.
+
+
+---++++++ painter:gbegin()
+#paintergbegin
+
+Functions [[#paintergbegin][=painter:gbegin=]] and 
+[[#paintergend][=painter:gend=]] can be used
+to bracket code segments that perform drawings that
+are meaningful as a whole.  The actual display is
+usually postponed until the last call to =painter:gend=.
+This is useful for implementing smooth transitions
+between successive drawings.
+
+---++++++ painter:gend([invalidate])
+#paintergend
+
+Functions [[#paintergbegin][=painter:gbegin=]] and 
+[[#paintergend][=painter:gend=]] can be used
+to bracket code segments that perform drawings that
+are meaningful as a whole.  The actual display is
+usually postponed until the last call to =painter:gend=.
+This is useful for implementing smooth transitions
+between successive drawings.
+
+When the target device is a buffered widget,
+setting flag =invalidate= to true
+ensures that the whole widget will be refreshed.
+This is useful after drawing directly into
+the underlying =QPainter= object without
+using the =QtLuaPainter= functions.
+
+
+---++++++ painter:grestore()
+#paintergrestore
+
+Expression =painter:grestore()= restores the painter settings
+previously saved by a matching expression [[#paintergsave][=painter:gsave()=]].
+
+Functions [[#paintergsave][=painter:gsave=]] and 
+[[#paintergrestore][=painter:restore=]] should be used
+to bracket code segments that perform some rendering
+in order to ensure that the painter settings 
+remain unchanged.
+
+
+
+---++++++ painter:gsave()
+#paintergsave
+
+Expression =painter:gsave()= records the painter settings
+and pushes this information on top of a stack of painter settings.
+Subsequent calls to [[#paintergrestore][=painter:grestore()=]]
+can be used to restore the saved settings.
+
+Functions [[#paintergsave][=painter:gsave=]] and 
+[[#paintergrestore][=painter:restore=]] should be used
+to bracket code segments that perform some rendering
+in order to ensure that the painter settings 
+remain unchanged.
+
+
+
+---++++++ painter:image()
+#paintergrab
+
+Expression =painter:image()= returns a Qt variant of class
+[[../qtgui/index.hlp/#qimage][=qt.QImage=]] 
+representing the drawing surface.
+
+When the underlying surface is a widget without backing store,
+this function grabs the widget image from the display.
+When the painter operates on a device that cannot be represented
+as an image, for instance a printer, 
+this function returns an empty image for which method
+[[../qt/index.hlp#qttobool][=tobool=]] returns =false=.
+
+Note that this function must be invoked without arguments.
+Otherwise see the documentation for [[#painterblit][=painter:image(...)=]].
+
+
+---++++++ painter:image(x,y,[w,h],image,[sx,sy,[sw,sh]])
+#painterblit
+
+Function =painter:image= paints a segment of image =image=
+at position =(x,y)= in the current coordinate systems
+with with =w= and height =h=.  The source segment
+is defined by the rectangle of size =(sw,sh)=
+starting on point =(sx,sy)=.
+
+The default source width =sw= and height =sh= are the width and height of the
+source image. The default source origin =(sx,sy)= is the origin =(0,0)=.
+The default target width =w= and height =h= are 
+the source width =sw= and height =sh=.
+
+Argument =image= can be a Qt variant of 
+class [[../qtgui/index.hlp/#qimage][=qt.QImage=]]
+or [[../qtgui/index.hlp/#qpixmap][=qt.QPixmap=]] 
+or a Qt object of class [[#qtluapainter][=qt.QtLuaPainter=]].
+In the latter case, the function 
+[[#paintergrab][=painter:image()=]] without arguments
+is used to obtain the source surface.
+
+   * To blit an image =img= constructed 
+     with [[#qtwidgetnewimage][=qtwidget.newimage=]],
+     you must specify the associated painter [[#descport][=img.port=]].
+
+   * To blit a [[../torch/index.hlp#Tensor][=torch.Tensor=]], first create a 
+     [[../qtgui/index.hlp/#qimage][=qt.QImage=]] using the function 
+     [[../qttorch/index.hlp#qimagefromtensor][=qt.QImage.fromTensor=]]
+     from by package [[../qttorch/index.hlp][=qttorch=]].
+
+Blit is of course affected by 
+the [[#qtluapaintercompositionmode][current composition mode]].
+
+Note that this function must be invoked with arguments.
+Otherwise see the documentation for [[#paintergrab][=painter:image()=]].
+
+See also: PostScript operator =image=.
+
+
+---++++++ painter:initclip()
+#painterinitclip
+
+Expression =painter:initclip()= resets the
+[[#qtluapainterclippath][current clip region]]
+to the empty path. This effectively means
+that clipping is disabled and therefore
+that all surface pixels can be affected
+by a subsequent drawing operation.
+
+
+See also: PostScript operator =initclip=.
+
+
+---++++++ painter:initgraphics()
+#painterinitgraphics
+
+Expression =painter:initgraphics()= resets
+all painter settings to their default values.
+After calling this function:
+
+   * The [[#qtluapainterclippath][current clip region]] is set 
+     as with [[#painterinitclip][=painter:initclip()=]].
+   * The [[#qtluapaintermatrix][current transformation matrix]] is set
+     as with [[#painterinitmatrix][=painter:initmatrix()=]].
+   * The [[#qtluapainterbrush][current brush]] is a solid black 
+     brush with brush origin (0,0).
+   * The [[#qtluapainterpen][current pen]] is a solid black pen 
+     with line width =1=, flat caps, and miter joins.
+   * The [[#qtluapainterbackground][current background]] is
+     an empty brush meaning that background pixels are not painted at all.
+   * The [[#qtluapainterfont][current font]] is a 10 points sans serif font.
+   * The [[#qtluapainterpath][current path]] is empty and the
+     [[#qtluapainterpoint][current point]] is unset.
+   * The [[#qtluapainterrenderhints][current rendering hints]] 
+     are ="Antialiasing|TextAntialiasing"=.
+   * The [[#qtluapaintercompositionmode][current composition mode]] 
+     is ="SourceOver"=.
+   * The [[#qtluapainterangleunit][current angle unit]] is ="Degrees"=.
+
+See also: PostScript operator =initgraphics=.
+
+
+---++++++ painter:initmatrix()
+#painterinitmatrix
+
+Expression =painter:initmatrix()= resets the
+[[#qtluapaintermatrix][current transformation matrix]]
+to its default value.
+The coordinate system has then its origin
+in the upper left corner of the surface
+with X coordinates ordered from left to right
+and Y coordinates ordered from top to bottom.
+Coordinates are expressed in device pixels
+on most devices.
+
+See also: PostScript operator =initmatrix=.
+
+---++++++ painter:lineto(x,y)
+
+Expression =painter:lineto(x,y)= appends 
+a line segment to the current path,
+starting from the [[#qtluapainterpoint][current point]] 
+and ending at coordinates =(x,y)=.
+The segment end point then becomes 
+the new current point.
+
+The behavior of this function is undefined 
+when the current point is not set
+
+See also: PostScript operator =lineto=.
+
+
+---++++++ painter:moveto(x,y)
+
+Expression =painter:moveto(x,y)= terminates the 
+last subpath of the current path and moves
+the current point to coordinates =(x,y)=.
+
+See also: PostScript operator =moveto=.
+
+
+---++++++ painter:newpath()
+#painternewpath 
+
+Expression =painter:newpath()= terminates the last subpath.
+After calling this function, the current point is left unset.
+
+See also: PostScript operator =newpath=.
+
+---++++++ painter:object()
+#painterobject
+
+Expression =painter:object()= returns the Qt object
+that represents the paint device if such an object exists.
+Typical return values are instance of class 
+[[../qtgui/index.hlp/#qwidget][=qt.QWidget=]] or class 
+[[#qtluaprinter][=qt.QtLuaPrinter=]].
+
+
+---++++++ painter:painter()
+#painterpainter
+
+Expression =painter:painter()= returns a pointer 
+to the underlying Qt painter.
+Since the Qt class
+[[http://doc.trolltech.com/4.4/qpainter.html][=QPainter=]]
+is neither a Qt variant not a Qt object, this pointer
+is represented by a Qt variant of type =QPainter*=.
+
+
+---++++++ painter:pixmap()
+#painterpixmap
+
+Expression =painter:pixmap()= returns a Qt variant of class
+[[../qtgui/index.hlp/#qpixmap][=qt.QPixmap=]] representing the drawing surface.
+
+When the underlying surface is a widget without backing store,
+this function grabs the widget representation from the display.
+When the painter operates on a device that cannot be represented
+as a pixmap, for instance a printer, 
+this function returns an empty pixmap for which method 
+[[../qt/index.hlp#qttobool][=tobool=]] returns =false=.
+
+
+
+---++++++ painter:printer()
+
+Expression =painter:printer()= returns a pointer
+to the underlying Qt printer.
+Since the Qt class
+[[http://doc.trolltech.com/4.4/qpainter.html][=QPrinter=]]
+is neither a Qt variant not a Qt object, this pointer
+is represented by a Qt variant of type =QPrinter*=.
+
+
+
+---++++++ painter:rcurveto(x1,y1,x2,y2,x3,y3)
+
+This is similar to calling function 
+[[#paintercurveto][=painter:curveto=]]
+with the following arguments
+<verbatim>
+   painter:curveto(x0+x1,y0+y1,x0+x2,y0+y2,x0+x3,y0+y3)
+</verbatim>
+where =(x0,y0)= are the coordinates of the previous
+current point.
+
+The behavior of this function is undefined 
+when the current point is not set.
+
+See also: PostScript operator =rcurveto=.
+
+
+---++++++ painter:rect()
+
+Expression =painter:rect()= returns a Qt variant 
+of class [[../qtcore/index.hlp#qrect][=qt.QRect]]
+representing the pixel coordinates of the drawing surface.
+This does not depend on the transformation matrix
+but corresponds to the default coordinate system
+set by [[#painterinitmatrix][=painter:initmatrix()=]].
+
+The same information can be obtained more conveniently
+using function [[#paintercurrentsize][=painter:currentsize()=]]
+or properties [[#qtluapainterwidth][=painter.width=]]
+and [[#qtluapainterheight][=painter.height=]].
+
+
+---++++++ painter:rectangle(x,y,w,h)
+
+Expression =painter:rectangle(x,y,w,h)=
+appends a rectangle to the current path.
+The rectangle starts is defined by its origin =(x,y)=, 
+its width =w= and its height =h=.
+
+After calling this function, 
+the current point is left unset.
+
+
+
+---++++++ painter:refresh()
+
+Expression =painter:refresh()= immediately 
+repaints the displayed image, 
+regardless of the nesting count of functions
+[[#paintergbegin][=painter:gbegin()=]] and
+[[#paintergend][=painter:gend()=]].
+
+
+
+---++++++ painter:rlineto(rx,ry)
+
+Expression =painter:lineto(x,y)= appends a line segment 
+to the current path, starting from the current point =(x0,y0)=
+and ending at coordinates =(x0+x,y0+y)=.
+The segment end point then becomes 
+the new current point.
+
+The behavior of this function is undefined 
+when the current point is not set
+
+See also: PostScript operator =rlineto=.
+
+---++++++ painter:rmoveto(rx,ry)
+
+Expression =painter:moveto(x,y)= terminates the 
+last subpath of the current path and moves
+the current point to coordinates =(x0+x,y0+y)=
+where =(x0,y0)= are the coordinates of the previous
+current point.
+
+The behavior of this function is undefined 
+when the current point is not set
+
+See also: PostScript operator =rmoveto=.
+
+---++++++ painter:rotate(angle)
+#painterrotate
+
+Expression =painter:rotate(angle)= 
+rotates the axes of the coordinate system by =angle= angle units
+in the trigonometric direction around the coordinate origin.
+The position of the coordinate origin and the size of the coordinate units
+are unaffected.
+
+Argument =angle= can be expressed in degrees or radians
+according to the [[#qtluapainterangleunit][current angle unit]].
+The default angle unit is the degree.
+
+See also: PostScript operator =rotate=.
+
+---++++++ painter:scale(sx,sy)
+#painterscale
+
+Expression =scale(sx,sy)= scales the units of the 
+coordinate space by a factor of =sx= horizontally and
+=sy= vertically. The position of the coordinate origin and 
+the orientation of the axes are unaffected.
+
+See also: PostScript operator =scale=.
+
+
+---++++++ painter:setangleunit(unit)
+#paintersetangleunit
+
+Expression =painter:setangleunit(unit)= sets the 
+[[#qtluapainterangleunit][angle unit]]
+for functions such as [[#painterrotate][=painter:rotate=]]
+that require an angle as argument.
+
+Argument =unit= must be string ="Degrees"= 
+for expressing angles in degrees,
+or ="Radians"= for expressing angles in radians.
+The default angle unit is the degree.
+
+
+---++++++ painter:setbackground(brush)
+
+Expression =painter:setbackground(brush)= sets the
+[[#qtluapainterbackground][current background brush]].
+Argument =brush= must be a Qt variant of type
+[[../qtgui/index.hlp/#qbrush][=qt.QBrush=]].
+
+---++++++ painter:setbrush(brush)
+
+Expression =painter:setbrush(brush)= sets the
+[[#qtluapainterbrush][current brush]].
+Argument =brush= must be a Qt variant of type
+[[../qtgui/index.hlp/#qbrush][=qt.QBrush=]].
+
+---++++++ painter:setclip(qpainterpath)
+
+Expression =painter:setclip(qpainterpath)= sets the
+[[#qtluapainterclippath][current clipping region]]
+to be the interior of the specified path.
+Argument =brush= must be a Qt variant of type
+[[../qtgui/index.hlp/#qpainterpath][=qt.QPainterPath=]].
+
+
+---++++++ painter:setcolor(...)
+
+Function =painter:setcolor= sets the color of both the 
+[[#qtluapainterbrush][current brush]]
+and [[#qtluapainterpen][current pen]].
+
+There are several ways to specify a color:
+
+   * =painter:setcolor(qcolor)=
+
+     Argument =qcolor= is a Qt variant of 
+     class [[../qtgui/index.hlp/#qcolor][=qt.QColor=]].
+
+   * =painter:setcolor(string)= 
+
+     Argument =string= is a string representing a color name.
+     All [[http://www.w3.org/TR/SVG/types.html#ColorKeywords][SVG color names]]
+     are recognized.Color names can have also the format ="#RGB"=, 
+     ="#RRGGBB"=, ="#RRRGGGBBB"=, or ="#RRRRGGGGBBBB"
+     where letters =R=, =G=, or =B= represent hexadecimal 
+     digits for each of the color component.
+
+   * =painter:setcolor(r,g,b,[a])=
+
+     Arguments =r=, =g=, =b=, and =a= are numbers in range =[0,1]=
+     representing the intensities of the red, green, blue, and alpha channels.
+     The default value for argument =a= is =1= for a fully opaque color.
+
+
+---++++++ painter:setdash([sizes,[offset]])
+
+Function =painter:setdash= changes the 
+style of the [[#qtluapainterpen][current pen]].
+
+When this function is called without argument,
+or when argument =sizes= is =nil=,
+this function sets the current pen style 
+to ="SolidLine"=.
+
+Otherwise argument =sizes= can be a single number or 
+a table containing a list of numbers.
+The number or the list of numbers represent the length of successive 
+[[http://doc.trolltech.com/4.4/qpen.html#setDashPattern][dashes and blanks]] 
+along the drawn curve, expressed in units of the line width.  
+When the size of the sequence is odd, the last blank
+is assumed to have the same size as the last dash.
+The optional argument =offset= is a length 
+representing the starting position of the dash sequence.
+
+
+---++++++ painter:setfont(qfont)
+
+Expression =painter:setfont(qfont)= sets the
+[[#qtluapainterfont][current font]].
+Argument =font= must be a Qt variant of type
+[[../qtgui/index.hlp/#qfont][=qt.QFont=]].
+
+---++++++ painter:setfontsize(size)
+
+Expression =painter:setfontsize(size)= changes the size
+of the [[#qtluapainterfont][current font]].
+Argument =size= must be a positive number.
+
+
+---++++++ painter:sethints(hints)
+
+Expression =painter:sethints(hints)= sets the
+[[#qtluapainterrenderhints][current rendering hints]].
+Argument =hints= must be a string containing 
+a concatenation of the names of the active 
+[[http://doc.trolltech.com/4.4/qpainter.html#RenderHint-enum][rendering flags]] 
+separated with a vertical bar "=|=".
+
+
+---++++++ painter:setlinewidth(lw)
+
+Expression =painter:setlinewidth(lw)= changes the line width
+of the [[#qtluapainterpen][current pen]].
+Argument =lw= must be a positive number.
+
+---++++++ painter:setmatrix(qtransform)
+
+Expression =painter:setmatrix(qtransform)= sets the
+[[#qtluapaintermatrix][current transformation matrix]].
+Argument =qtransform= must be a Qt variant of type
+[[../qtgui/index.hlp/#qtransform][=qt.QTransform=]].
+
+
+---++++++ painter:setmode(compositionmode)
+
+Expression =painter:setmode(compositionmode)= sets the 
+[[#qtluapaintercompositionmode][current composition mode]] 
+for subsequent drawing operations.
+Argument =compositionmode= must be a string containing the name of a 
+[[http://doc.trolltech.com/4.4/qpainter.html#CompositionMode-enum][composition mode]].
+
+
+---++++++ painter:setpath(qpainterpath)
+
+Expression =painter:setpath(qpainterpath)= sets the
+[[#qtluapainterpath][current path]].
+Argument =qpainterpath= must be a Qt variant of type
+[[../qtgui/index.hlp/#qpainterpath][=qt.QPainterPath=]].
+
+
+---++++++ painter:setpattern(pattern,[x,y])
+
+Expression =painter:setpattern(pattern,[x,y])= 
+creates a textured pattern brush.
+This brush is used to set both the [[#qtluapainterbrush][current brush]] 
+and the brush of the [[#qtluapainterpen][current pen]].
+
+Argument =p= can be either a Qt variant 
+of type [[../qtgui/index.hlp/#qimage][=qt.QImage=]] or an object
+equipped with a method =image= returning a suitable image.
+Such objects include instances of [[#qtluapainter][=qt.QtLuaPainter=]]
+as well as the return values of functions 
+[[#qtwidgetnewwindow][=qtwidget.newwindow=]]
+or [[#qtwidgetnewimage][=qtwidget.newimage=]]
+
+The optional arguments =x= and =y= specify 
+the origin of the pattern in the source image.
+
+
+---++++++ painter:setpen(qpen)
+
+Expression =painter:setpen(qpen)= sets the
+[[#qtluapainterpen][current pen]].
+Argument =qpen= must be a Qt variant of type
+[[../qtgui/index.hlp/#qpen][=qt.QPen=]].
+
+
+---++++++ painter:setpoint(x,y)
+
+Expression =painter:setpoint(x,y)= sets the
+[[#qtluapainterpen][current point]] coordinates to =(x,y)=.
+Arguments =x= and =y= must be valid numbers.
+
+
+---++++++ painter:setstylesheet(s)
+
+Expression =painter:setstylesheet(s)= sets the 
+the [[#qtluapainterstylesheet][current style sheet]]
+used by function [[#paintershow][=show=]] for
+displaying rich text.
+
+
+
+---++++++ painter:show(string,[x,y,w,h,textflags])
+#paintershow
+
+Function =painter:show= draws string =string= using 
+the [[#qtluapainterfont][current font]].
+
+When called with a single string argument =string=,
+this function draws the specified text
+starting from the [[#qtluapainterpoint][current point]].
+After displaying each glyph, the current point is adjusted
+with a displacement computed from the font's glyph-spacing information.
+The behavior of this function is undefined 
+when the current point is not set.
+
+When called with more arguments, this function draws
+the text =string= within the rectangle specified by
+the origin =(x,y)=, the width =w=, and the heigth =h=.
+Argument =textflags= is then a string composed by concatenating
+a subset of the following keywords separated 
+by a vertical bar "=|=" symbolizing a =or= operator:
+[[http://doc.trolltech.com/4.4/qt.html#AlignmentFlag-enum][=AlignLeft=]],
+[[http://doc.trolltech.com/4.4/qt.html#AlignmentFlag-enum][=AlignRight=]], 
+[[http://doc.trolltech.com/4.4/qt.html#AlignmentFlag-enum][=AlignTop=]], 
+[[http://doc.trolltech.com/4.4/qt.html#AlignmentFlag-enum][=AlignBottom=]], 
+[[http://doc.trolltech.com/4.4/qt.html#AlignmentFlag-enum][=AlignHCenter=]], 
+[[http://doc.trolltech.com/4.4/qt.html#AlignmentFlag-enum][=AlignVCenter=]], 
+[[http://doc.trolltech.com/4.4/qt.html#AlignmentFlag-enum][=AlignCenter=]], 
+[[http://doc.trolltech.com/4.4/qt.html#AlignmentFlag-enum][=AlignJustify=]].
+[[http://doc.trolltech.com/4.4/qt.html#TextFlag-enum][=TextSingleLine=]], 
+[[http://doc.trolltech.com/4.4/qt.html#TextFlag-enum][=TextExpandTabs=]], 
+[[http://doc.trolltech.com/4.4/qt.html#TextFlag-enum][=TextShowMnemonic=]], 
+[[http://doc.trolltech.com/4.4/qt.html#TextFlag-enum][=TextWordWrap=]],
+[[http://doc.trolltech.com/4.4/richtext-html-subset.html][=RichText=]].
+
+The flag =RichText= is directly implemented by the =QtLuaPainter= class.
+It indicates that the text contains rich text data using the 
+[[http://doc.trolltech.com/4.4/richtext-html-subset.html][subset of HTML]]
+supported by Qt and can be used in conjunction with alignment flags only.
+Display is affected by 
+the [[#qtluapainterfont][current font]], 
+the [[#qtluapainterbrush][current brush color]], and 
+the [[#qtluapainterstylesheet][current style sheet]].
+You can use the css =style= attribute in HTML tags 
+to specify more complicated formats.
+
+See also: PostScript operator =show=.
+
+
+---++++++ painter:showpage()
+
+Expression =painter:showpage()= 
+clears the current drawing
+and paints the background all white.  
+
+Things are a bit different when the painting device is a printer.
+Function =painter:showpage= ensures that the next drawing operation
+will first print the current page and initialize a new page.
+Successive calls of =painter:showpage()= do not print multiple pages
+unless some drawing operation is performed on each page.
+
+See also: PostScript operator =showpage=.
+
+
+---++++++ painter:size()
+
+Expression =painter:size()= returns a Qt variant 
+of class [[../qtcore/index.hlp#qsize][=qt.QSize=]]
+representing the size in pixels of the drawing surface.
+This does not depend on the transformation matrix
+but corresponds to the default coordinate system
+set by [[#painterinitmatrix][=painter:initmatrix()=]].
+
+The same information can be obtained more conveniently
+using function [[#paintercurrentsize][=painter:currentsize()=]]
+or properties [[#qtluapainterwidth][=painter.width=]]
+and [[#qtluapainterheight][=painter.height=]].
+
+---++++++ painter:stringrect(string,[x,y,w,h,textflags])
+
+Function =painter:stringrect= returns a Qt variant of type
+[[../qtcore/index.hlp#qrect][=qt.QRectF=]] representing
+the bounding box of the text that would be displayed
+by calling function [[#paintershow][=painter:show=]]
+with the same arguments.
+
+
+---++++++ painter:stringwidth(string)
+
+Fonction =painter:stringwidth= returns 
+two numbers representing the total displacement =(dx,dy)= 
+that would be applied to the [[#qtluapainterpoint][current point]]
+by expression [[#paintershow][=show(string)=]].
+
+See also: PostScript operator =stringwidth=.
+
+
+---++++++ painter:stroke(optnewpath)
+#painterstroke
+
+Function =painter:stroke= draws the boundary of the 
+[[#qtluapainterpath][current path]] using
+the [[#qtluapainterpen][current pen]].
+
+The optional boolean =optnewpath= specifies
+whether this function resets the current path
+using [[#painternewpath][=painter:newpath()=]].
+The default is to reset the current path.
+
+See also: PostScript operator =stroke=.
+
+---++++++ painter:translate(dx,dy)
+#paintertranslate
+
+Expression =translate(dx,dy)= translates the coordinate
+origin by =dx= units along the X axis and =dy= units
+along the Y axis. The  the size of the coordinate units and 
+the orientation of the axes are unaffected.
+
+See also: PostScript operator =translate=.
+
+---++++++ painter:widget()
+
+Expression =painter:widget()= returns the Qt object of class
+[[../qtgui/index.hlp/#qwidget][=qt.QWidget=]] underlying the painter.
+When the painter is not associated with a widget,
+this expression returns =nil=.
+
+
+---++++++ painter:write(f,[format])
+
+Expression =painter:write(f)= saves the image 
+associated with the painter into the file named =f=.  
+Argument =f= can be a file name or a Lua file descriptor.
+
+The image data is obtained using 
+function [[#paintergrab][=painter:image()=]].
+The image format is determined by the
+optional string argument =format= or
+deduced from the file name extension.
+
+
+
+---++++ qt.QtLuaPrinter
+#qtluaprinter
+
+Printing in Qt is usually achieved using class
+[[http://doc.trolltech.com/4.4/qprinter.html][=QPrinter=]].
+Since this class is neither a subclass of
+[[http://doc.trolltech.com/4.4/qobject.html][=QObject=]]
+nor a value class suitable for storing into a Qt variant,
+the QtLua class =QtLuaPrinter= defines a Qt object that
+acts as a thin wrapper for class =QPrinter=.
+
+Most usual 
+[[http://doc.trolltech.com/4.4/qprinter.html][printer settings]] 
+are exposed by class =qt.QtLuaPrinter= as properties. 
+Property [[#printerpapersize][=printer.paperSize=]] 
+can be used to specify the size of the drawing in pixels.
+Printers can be selected using [[#printerprintername][=printer.printerName=]]
+and PostScript and PDF files can be produced with 
+properties [[#printeroutputfilename][=printer.outputFileName=]]
+and [[#printeroutputformat][=printer.outputFormat=]].
+Alternatively, function =printer:setup()= pops a print dialog
+that lets the user adjust these properties interactively.
+
+
+---+++++ qt.QtLuaPrinter([mode])
+#qtluaprinternew
+
+Expression =qt.QtLuaPrinter(mode)= returns a 
+new instance of class =qt.QtLuaPrinter=.
+
+The optional argument =mode= is a string specifying 
+the resolution of the initial coordinate system. 
+The default value =ScreenResolution= replicates the screen resolution.
+Value =HighResolution= initializes the coordinate 
+system with the resolution of the printer.
+
+Most printer properties should be set before
+creating the [[#qtluapainter][=qt.QtLuaPainter=]]
+that will peform the drawings.
+
+
+---+++++ printer:abort()
+
+Expression =printer:abort()= aborts the current print run. 
+Returns =true= if the print run was successfully aborted.
+Property [[#printerprinterstate][=printer.printerState=]] 
+will then be ="Aborted"=.
+It is not always possible to abort a print job.
+
+---+++++ printer.collateCopies
+
+Boolean property =printer.collateCopies= specifies 
+if collation is turned on when multiple copies is selected. 
+
+---+++++ printer.colorMode
+
+Boolean property =printer.colorMode= is =true=
+when one prints in color (the default) and =false=
+when one prints in gray scale.
+
+---+++++ printer.creator
+
+Property =printer.creator= is a string containing
+the name of the application producing the printout.
+This information is passed to the print spooling system.
+
+---+++++ printer.docName
+
+Property =printer.creator= is a string containing
+the name of the document being printed.
+This information is passed to the print spooling system
+
+---+++++ printer.doubleSidedPrinting
+
+Boolean property =printer.doubleSidedPrinting= 
+indicates whether double sided printing is requested.
+
+---+++++ printer.fontEmbeddingEnabled
+
+Boolean property =printer.fontEmbeddingEnabled= indicates
+whether the output data should embed a font description.
+This is =true= by default.
+
+
+---+++++ printer.fromPage
+
+Readonly numerical property =printer.fromPage=
+contains the index of the first page to print.
+Use function [[#printersetfromto][=printer:setFromTo=]] to change it.
+
+---+++++ printer.fullPage
+
+Setting boolean property =printer.fullPage= to =true=
+enables support for painting over the entire page.
+Otherwise painting is restricted to the printable area 
+reported by the device.
+
+---+++++ printer.landscape
+
+Setting boolean property =printer.landscape= to =true=
+sets the printout in landscape mode.
+Otherwise printing happens in portrait mode.
+
+
+---+++++ printer:newPage()
+
+Expression =printer:newPage()=
+tells the printer to eject the current page and 
+to continue printing on a new page. 
+Returns =true= if this was successful.
+
+---+++++ printer.numCopies
+
+Property =printer.numCopies= contains the number of copies to be printed. 
+The default value is 1.
+
+Qt handles the number of copies in a rather strange way:
+the value you obtain by reading property =printer.numCopies= is not 
+the value you have set but reports the number of times you should 
+draw the document in order to achieve the desired effect.
+On Windows, Mac OS X and X11 systems that support CUPS, 
+reading property =printer.numCopies= always return 1 because these systems
+internally handle the number of copies.
+
+
+
+---+++++ printer.outputFileName
+#printeroutputfilename
+
+Setting property =printer.outputFileName= to a nonempty
+string indicates that printing should be redirected
+to the specified file.  
+
+
+---+++++ printer.outputFormat
+#printeroutputformat
+
+Property =printer.outputFormat= contains a string describing
+the output format for this file or printer. 
+Recognized values are ="PdfFormat"=, ="PostScriptFormat"=, 
+and ="NativeFormat"=.
+
+
+---+++++ printer.pageRect
+#printerpagerect
+
+Read-only property =painter.pageRect= contains 
+a [[../qtcore/index.hlp#qrect][=qt.QRect=]]
+describing the coordinates of the printable 
+area of a page.
+
+This rectangle is expressed in coordinates
+starting from the top-left corner of the page
+and with units specified according to 
+[[#printerresolution][=printer.resolution]].
+This coordinate system is not related the
+the drawing coordinate system.
+
+
+---+++++ printer.pageSize
+#printerpagesize
+
+String property =printer.pageSize= contains the name of the paper format. 
+The recognized names are
+="A4"=, ="B5"=, ="Letter"=, ="Legal"=, ="Executive"=,
+="A0"=, ="A1"=, ="A2"=, ="A3"=, ="A5"=, ="A6"=, 
+="A7"=, ="A8"=, ="A9"=, ="B0"=, ="B1"=,
+="B10"=, ="B2"=, ="B3"=, ="B4"=, ="B6"=, 
+="B7"=, ="B8"=, ="B9"=, ="C5E"=, ="Comm10E"=,
+="DLE"=, ="Folio"=, ="Ledger"=, and ="Tabloid"=.
+
+When using Qt-4.4 or greater,
+this property can also contain the value ="Custom"=
+to indicate that the produced output must
+describe an image whose size matches 
+exactly the specified paper size.  
+When using an earlier version of Qt,
+setting this property to ="Custom"= does nothing.
+
+
+---+++++ printer.paperRect
+#printerpaperrect
+
+Read-only property =painter.paperRect= contains 
+a [[../qtcore/index.hlp#qrect][=qt.QRect=]]
+describing the full size of the paper.
+
+This rectangle is expressed in coordinates
+starting from the top-left corner of the page
+and with units specified according to 
+[[#printerresolution][=printer.resolution=]].
+This coordinate system is not related the
+the drawing coordinate system.
+
+
+
+---+++++ printer.paperSize
+#printerpapersize
+
+Property =printer.paperSize= contains a 
+[[../qtcore/index.hlp#qsize][=qt.QSizeF=]]
+describing the desired size of the drawable area.
+
+When this property contains a valid size,
+that is a size with positive width and height,
+the painter initial coordinate system 
+is adjusted to display the specified drawable area
+within the desired page size.
+
+Furthermore, with Qt-4.4. or greater, 
+when property [[#printerpagesize][=printer.pageSize=]] 
+is equal to ="Custom"=, property =printer.paperSize=
+also specifies the size of the image described
+by the output file.
+
+---+++++ printer:printer()
+#printerprinter
+
+Returns a pointer to the real =QPrinter= object
+which is a subclass of =QPaintDevice=.
+
+
+---+++++ printer.printProgram
+
+Setting string property =printer.printProgram= overrides
+the name of the program used to submit the printout
+to the spooling system.
+
+
+---+++++ printer.printerName
+#printerprintername
+
+String property =printer.printerName= 
+contains the name of the target printer. 
+This value is initially set to the name of the 
+default printer for your system.
+
+
+---+++++ printer.printerState
+#printerprinterstate
+
+Readonly string property =printer.printerState= 
+returs a string describing the state of the printer.
+Possible values are =Idle=, =Active=, =Aborted= and =Error=.
+That does not work on all systems.
+
+
+---+++++ printer.resolution
+#printerresolution
+
+Numerical property =printer.resolution= 
+contains the resolution of the printer. 
+This is initially set by the =mode= argument
+of the constructor [[#qtluaprinternew][=qt.QtLuaPrinter(mode)=]].
+The resolution affects the coordinate systems
+for properties [[#printerpaperrect][=printer.paperRect=]]
+and [[#printerpagerect][=printer.pageRect=]].
+It only affects the drawing coordinate systems
+when property [[#printerpapersize][=printer.papersize=]]
+does not contain a valid size.
+
+
+---+++++ printer:setFromTo(frompage,topage)
+#printersetfromto
+
+Function =printer:setFromTo= 
+specifies the indices of the page range to print.
+If both =frompage= and =topage= are zero (the default),
+the whole document is printed.
+
+---+++++ printer:setup([parentwidget])
+
+Expression =printer:setup()= displays a dialog
+allowing the user to choose a printer
+and select various print settings. 
+It returns =true= if the user presses the button "Print"
+and =false= if the user cancels.
+
+---+++++ printer.toPage
+
+Readonly numerical property =printer.toPage=
+contains the index of the last page to print.
+Use function [[#printersetfromto][=printer:setFromTo=]] to change it.

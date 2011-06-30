@@ -1,0 +1,96 @@
+QtUiLoader Package Reference Manual
+
+
+Package =qtuiloader= provides 
+functions for dynamically creating widgets
+from the user interface files created by program
+[[http://doc.trolltech.com/4.4/designer-manual.html][Qt Designer]].
+This is achieved by providing bindings for the Qt class
+[[http://doc.trolltech.com/4.4/quiloader.html][=QUiLoader=]].
+
+
+
+Directory =${=_TorchInstallDir=}/share/lua/5.1/qtuiloader=
+contains a small demonstration of this package.
+Use program
+[[http://doc.trolltech.com/4.4/designer-manual.html][Qt Designer]]
+to examine file =test.ui=.  
+Then load file =test.lua= into the
+[[../qt/index.hlp#qlua][=qlua=]] program.
+
+<verbatim>
+  $ cd /usr/local/share/lua/5.1/qtuiloader
+  $ /usr/local/bin/qlua
+  Lua 5.1  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+  > dofile('test.lua')
+</verbatim>
+
+
+---+++ Functions
+
+Package =qtuiloader= provides a few convenience functions. 
+Function [[#qtuiloaderloader][=qtuiloader.loader=]] returns a 
+preallocated instance of class [[#quiloader][=qt.QUiLoader=]]. 
+Function [[#qtuiloaderload][=qtuiloader.load=]] uses 
+this preallocated loader to construct a widget using a
+[[http://doc.trolltech.com/4.4/designer-manual.html][Qt Designer]]
+user interface description.
+
+
+---++++ qtuiloader.availableWidgets()
+#qtuiloaderavailablewidgets
+
+Expression =qtuiloader.availableWidgets()= returns a 
+[[../qtcore/index.hlp#qstringlist][=qt.QStringList=]]
+containing the names of the supported widget classes.
+
+
+---++++ qtuiloader.createWidget(classname,[parent,[objectname]])
+
+Creates a [[../qtgui/index.hlp#qwidget][widget]] of class =classname=.
+Argument =classname= can be any of the strings returned
+by [[#qtuiloaderavailablewidgets][=qtuiloader.availableWidgets()=].
+The optional argument =parent= specifies the parent widget
+and the optional argument =name= specifies the 
+[[../qtcore/index.hlp#qobjectobjectname][object name]].
+
+When argument =parent= is =nil= or not specified,
+the new widget is owned by the Lua interpreter 
+and is automatically destroyed when the garbage collector
+determines that it is no longer referenced.
+
+
+
+---++++ qtuiloader.load(filename,[parent])
+#qtuiloaderload
+
+Expression =qtuiloader.load(filename,parent)= dynamically
+constructs and returns the widget described by the 
+[[http://doc.trolltech.com/4.4/designer-manual.html][Qt Designer]]
+file =filename=.
+
+When argument =parent= is =nil= or not specified,
+the new widget is owned by the Lua interpreter 
+and is automatically destroyed when the garbage collector
+determines that it is no longer referenced.
+
+
+---++++ qtuiloader.loader()
+#qtuiloaderloader
+
+Expression =qtuiloader.loader()=
+returns a preallocated instance
+of class [[#quiloader][=qt.QUiLoader=]].
+
+
+---+++ Classes
+
+---++++ qt.QUiLoader
+#quiloader
+
+Class =qt.QUiLoader= provides bindings 
+for all the functions of the Qt class 
+[[http://doc.trolltech.com/4.4/quiloader.html][=QUiLoader=]].
+
+To be documented further...
+
