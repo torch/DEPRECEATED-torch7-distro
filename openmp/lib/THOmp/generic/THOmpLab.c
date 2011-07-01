@@ -5,10 +5,10 @@
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel.
 */
-static void THLab_(validConv2Dptr)(real *r_,
-				   real *t_, long ir, long ic, 
-				   real *k_, long kr, long kc, 
-				   long sr, long sc)
+static void THOmpLab_(validConv2Dptr)(real *r_,
+				      real *t_, long ir, long ic, 
+				      real *k_, long kr, long kc, 
+				      long sr, long sc)
 {
   long or = (ir - kr) / sr + 1;
   long oc = (ic - kc) / sc + 1;
@@ -42,10 +42,10 @@ static void THLab_(validConv2Dptr)(real *r_,
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
 */
-static void THLab_(fullConv2Dptr)(real *r_,
-				  real *t_, long ir, long ic, 
-				  real *k_, long kr, long kc, 
-				  long sr, long sc)
+static void THOmpLab_(fullConv2Dptr)(real *r_,
+				     real *t_, long ir, long ic, 
+				     real *k_, long kr, long kc, 
+				     long sr, long sc)
 {
   long or = (ir - 1) * sr + kr;
   long oc = (ic - 1) * sc + kc;
@@ -79,10 +79,10 @@ static void THLab_(fullConv2Dptr)(real *r_,
   for sr,sc=1 this is equivalent to validConv2Dptr, but otherwise it is useful for
   calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
 */
-static void THLab_(validConv2DRevptr)(real *r_,
-				      real *t_, long ir, long ic, 
-				      real *k_, long kr, long kc, 
-				      long sr, long sc)
+static void THOmpLab_(validConv2DRevptr)(real *r_,
+					 real *t_, long ir, long ic, 
+					 real *k_, long kr, long kc, 
+					 long sr, long sc)
 {
   long or = ir - (kr - 1) * sr;
   long oc = ic - (kc - 1) * sc;
@@ -177,10 +177,10 @@ void THOmpLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_
       real *ptr_input = input_data+i*istride0;
 
       /* do image, kernel convolution */
-      THLab_(validConv2DRevptr)(ptr_output,
-				ptr_input,  nInputRows,  nInputCols,
-				ptr_weight, nKernelRows, nKernelCols,
-				srow, scol);
+      THOmpLab_(validConv2DRevptr)(ptr_output,
+				   ptr_input,  nInputRows,  nInputCols,
+				   ptr_weight, nKernelRows, nKernelCols,
+				   srow, scol);
       /* Next output plane */
       /* output_data += nOutputCols*nOutputRows; */
     }
@@ -263,15 +263,15 @@ void THOmpLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
 
       /* do image, kernel convolution */
       if (*type == 'f')
-	THLab_(fullConv2Dptr)(ptr_output,
-			      ptr_input,  nInputRows,  nInputCols,
-			      ptr_weight, nKernelRows, nKernelCols,
-			      srow, scol);
+	THOmpLab_(fullConv2Dptr)(ptr_output,
+				 ptr_input,  nInputRows,  nInputCols,
+				 ptr_weight, nKernelRows, nKernelCols,
+				 srow, scol);
       else
-	THLab_(validConv2Dptr)(ptr_output,
-			       ptr_input,  nInputRows,  nInputCols,
-			       ptr_weight, nKernelRows, nKernelCols,
-			       srow, scol);
+	THOmpLab_(validConv2Dptr)(ptr_output,
+				  ptr_input,  nInputRows,  nInputCols,
+				  ptr_weight, nKernelRows, nKernelCols,
+				  srow, scol);
       /* Next output plane */
       /* output_data += nOutputCols*nOutputRows; */
     }
@@ -359,15 +359,15 @@ void THOmpLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, lo
 
       /* do image, kernel convolution */
       if (*type == 'f')
-	THLab_(fullConv2Dptr)(ptr_output,
-			      ptr_input,  nInputRows,  nInputCols,
-			      ptr_weight, nKernelRows, nKernelCols,
-			      srow, scol);
+	THOmpLab_(fullConv2Dptr)(ptr_output,
+				 ptr_input,  nInputRows,  nInputCols,
+				 ptr_weight, nKernelRows, nKernelCols,
+				 srow, scol);
       else
-	THLab_(validConv2Dptr)(ptr_output,
-			       ptr_input,  nInputRows,  nInputCols,
-			       ptr_weight, nKernelRows, nKernelCols,
-			       srow, scol);
+	THOmpLab_(validConv2Dptr)(ptr_output,
+				  ptr_input,  nInputRows,  nInputCols,
+				  ptr_weight, nKernelRows, nKernelCols,
+				  srow, scol);
     }
     /* Next output plane */
     /* output_data += nOutputCols*nOutputRows;*/
