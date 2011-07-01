@@ -2,6 +2,113 @@
 #define TH_GENERIC_FILE "generic/THOmpLab.c"
 #else
 
+/*
+  2D Input, 2D kernel  : convolve given image with the given kernel.
+*/
+static void THLab_(validConv2Dptr)(real *r_,
+				   real *t_, long ir, long ic, 
+				   real *k_, long kr, long kc, 
+				   long sr, long sc)
+{
+  long or = (ir - kr) / sr + 1;
+  long oc = (ic - kc) / sc + 1;
+
+  long xx, yy;  
+
+  for(yy = 0; yy < or; yy++)
+  {
+    for(xx = 0; xx < oc; xx++)
+    {
+      /* Dot product in two dimensions... (between input image and the mask) */
+      real *pi_ = t_ + yy*sr*ic + xx*sc;
+      real *pw_ = k_;
+      real sum = 0;
+      long kx, ky;
+      for(ky = 0; ky < kr; ky++)
+      {
+	for(kx = 0; kx < kc; kx++) {
+	  sum += pi_[kx]*pw_[kx];
+	}
+	pi_ += ic; /* next input line */
+	pw_ += kc; /* next mask line */
+      }
+      /* Update output */
+      *r_ += sum;
+      *r_++;
+    }
+  }
+}
+
+/*
+  2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
+*/
+static void THLab_(fullConv2Dptr)(real *r_,
+				  real *t_, long ir, long ic, 
+				  real *k_, long kr, long kc, 
+				  long sr, long sc)
+{
+  long or = (ir - 1) * sr + kr;
+  long oc = (ic - 1) * sc + kc;
+
+  long xx, yy;
+
+  for(yy = 0; yy < ir; yy++)
+  {
+    for(xx = 0; xx < ic; xx++)
+    {
+      /* Outer product in two dimensions... (between input image and the mask) */
+      real *po_ = r_ + yy*sr*oc + xx*sc;
+      real *pw_ = k_;
+      real sum = 0;
+      long kx, ky;
+      for(ky = 0; ky < kr; ky++)
+      {
+	for(kx = 0; kx < kc; kx++) {
+	  po_[kx] += *t_ * pw_[kx];
+	}
+	po_ += oc; /* next input line */
+	pw_ += kc; /* next mask line */
+      }
+      t_++;
+    }
+  }
+}
+
+/*
+  2D Input, 2D kernel  : convolve given image with the given kernel, valid convolution.
+  for sr,sc=1 this is equivalent to validConv2Dptr, but otherwise it is useful for
+  calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
+*/
+static void THLab_(validConv2DRevptr)(real *r_,
+				      real *t_, long ir, long ic, 
+				      real *k_, long kr, long kc, 
+				      long sr, long sc)
+{
+  long or = ir - (kr - 1) * sr;
+  long oc = ic - (kc - 1) * sc;
+
+  long xx, yy;
+  for(yy = 0; yy < kr; yy++)
+  {
+    for(xx = 0; xx < kc; xx++)
+    {
+      real *po_ = r_;
+      real *pi_ = t_ + yy*sr*ic + xx*sc;
+      real z = *k_++;
+      long kx, ky;
+      
+      for(ky = 0; ky < or; ky++)
+      {
+	for(kx = 0; kx < oc; kx++)
+	  po_[kx] += z * pi_[kx];
+	pi_ += ic;
+	po_ += oc;
+      }
+    }
+  }
+}
+
+
 /* 
    3D input, 3D kernel, 4D output
    like rank1 update
