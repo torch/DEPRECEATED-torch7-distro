@@ -5,7 +5,7 @@
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel.
 */
-static void THOmpLab_(validConv2Dptr)(real *r_,
+inline static void THOmpLab_(validConv2Dptr)(real *r_,
 				      real *t_, long ir, long ic, 
 				      real *k_, long kr, long kc, 
 				      long sr, long sc)
@@ -42,7 +42,7 @@ static void THOmpLab_(validConv2Dptr)(real *r_,
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
 */
-static void THOmpLab_(fullConv2Dptr)(real *r_,
+inline static void THOmpLab_(fullConv2Dptr)(real *r_,
 				     real *t_, long ir, long ic, 
 				     real *k_, long kr, long kc, 
 				     long sr, long sc)
@@ -79,7 +79,7 @@ static void THOmpLab_(fullConv2Dptr)(real *r_,
   for sr,sc=1 this is equivalent to validConv2Dptr, but otherwise it is useful for
   calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
 */
-static void THOmpLab_(validConv2DRevptr)(real *r_,
+inline static void THOmpLab_(validConv2DRevptr)(real *r_,
 					 real *t_, long ir, long ic, 
 					 real *k_, long kr, long kc, 
 					 long sr, long sc)
