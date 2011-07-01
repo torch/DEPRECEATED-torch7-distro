@@ -162,7 +162,7 @@ void THOmpLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_
   real *output_data = THTensor_(data)(r_);  
   
   long k;
-#pragma omp parallel for 
+#pragma omp parallel for private(k)
   for(k = 0; k < nKernelPlane; k++)
   {
     long i;
@@ -247,7 +247,7 @@ void THOmpLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
   real *output_data = THTensor_(data)(r_);  
   
   long k;
-#pragma omp parallel for
+#pragma omp parallel for private(k)
   for(k = 0; k < nKernelPlane; k++)
   {
     long i;
@@ -344,7 +344,7 @@ void THOmpLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, lo
   real *output_data = THTensor_(data)(r_);  
   
   long k;
-#pragma omp parallel for
+#pragma omp parallel for private(k)
   for(k = 0; k < nOutputPlane; k++)
   {
     long i;
