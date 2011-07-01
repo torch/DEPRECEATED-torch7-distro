@@ -1,0 +1,60 @@
+# -*- cmake -*-
+
+SET(QTLUA_DEFINITIONS)
+SET(QTLUA_INCLUDE_DIR 
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${CMAKE_CURRENT_BINARY_DIR}")
+
+ADD_DEFINITIONS( ${QTLUA_DEFINITIONS} ${LUA_DEFINITIONS})
+INCLUDE_DIRECTORIES(${QTLUA_INCLUDE_DIR} ${LUA_INCLUDE_DIR})
+SET(QT_DONT_USE_QTGUI 1) 
+INCLUDE(${QT_USE_FILE})		     
+
+CONFIGURE_FILE("qtluaconf.h.in" "${CMAKE_CURRENT_BINARY_DIR}/qtluaconf.h")
+
+# --- compile library
+
+SET(qtlua_SRC "qtluautils.h" "qtluautils.cpp" "qtluaengine.h" "qtluaengine.cpp")
+MACRO_QT4_AUTOGEN(qtlua_GEN ${qtlua_SRC})
+
+ADD_LIBRARY(libqtlua SHARED ${qtlua_SRC} ${qtlua_GEN})
+TARGET_LINK_LIBRARIES(libqtlua ${LUA_LIBRARIES} ${QT_LIBRARIES})
+SET_TARGET_PROPERTIES(libqtlua PROPERTIES 
+  LINKER_LANGUAGE CXX 
+  OUTPUT_NAME "qtlua" )
+
+# --- install library and include files
+
+INSTALL(TARGETS libqtlua
+  RUNTIME DESTINATION ${Torch_INSTALL_BIN_SUBDIR} 
+  LIBRARY DESTINATION ${Torch_INSTALL_LIB_SUBDIR} 
+  ARCHIVE DESTINATION ${Torch_INSTALL_LIB_SUBDIR} )
+
+INSTALL(FILES 
+  ${CMAKE_CURRENT_SOURCE_DIR}/qtluaengine.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/qtluautils.h
+  ${CMAKE_CURRENT_BINARY_DIR}/qtluaconf.h
+  DESTINATION ${Torch_INSTALL_INCLUDE_SUBDIR}/qtlua
+)
+
+# --- config for internal use
+
+SET(QTLUA_LIBRARIES "libqtlua")
+SET(QTLUA_DEFINITIONS)
+CONFIGURE_FILE(QtLuaConfig.cmake.in 
+  "${Torch_BINARY_DIR}/cmake/QtLuaConfig.cmake")
+SET(QtLua_DIR "${Torch_BINARY_DIR}/cmake" CACHE PATH 
+  "Directory containing QtLuaConfig.cmake")
+MARK_AS_ADVANCED(QtLua_DIR)
+
+# --- config for external use
+
+GET_TARGET_PROPERTY(QTLUA_OUTPUT_NAME libqtlua LOCATION)
+GET_FILENAME_COMPONENT(QTLUA_OUTPUT_NAME ${QTLUA_OUTPUT_NAME} NAME)
+SET(QTLUA_LIBRARIES "${Torch_INSTALL_LIB}/${QTLUA_OUTPUT_NAME}")
+SET(QTLUA_INCLUDE_DIR "${Torch_INSTALL_INCLUDE}/qtlua")
+CONFIGURE_FILE("QtLuaConfig.cmake.in" 
+  "${Torch_BINARY_DIR}/cmake-external/QtLuaConfig.cmake")
+INSTALL(FILES "${Torch_BINARY_DIR}/cmake-external/QtLuaConfig.cmake" 
+  DESTINATION "${Torch_INSTALL_CMAKE_SUBDIR}")
+

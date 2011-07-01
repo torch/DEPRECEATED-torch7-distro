@@ -57,8 +57,9 @@ IF(WEBSITE)
 ENDIF(WEBSITE)
 
 ADD_SUBDIRECTORY(libraries)
-#ADD_SUBDIRECTORY(qtlua)
 ADD_SUBDIRECTORY(packages)
+
+ADD_SUBDIRECTORY(qtlua)
 
 # For external packages...
 CONFIGURE_FILE(scripts/TorchPaths.cmake.in 

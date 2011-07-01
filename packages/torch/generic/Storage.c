@@ -23,7 +23,7 @@ static int torch_Storage_(new)(lua_State *L)
         THStorage_(free)(storage);
         luaL_error(L, "element at index %d is not a number", i);
       }
-      storage->data[i-1] = (real)lua_tonumber(L, -1);
+      THStorage_(set)(storage, i-1, (real)lua_tonumber(L, -1));
       lua_pop(L, 1);
     }
   }
@@ -102,8 +102,7 @@ static int torch_Storage_(__newindex__)(lua_State *L)
     THStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
     long index = luaL_checklong(L, 2) - 1;
     double number = luaL_checknumber(L, 3);
-    luaL_argcheck(L, 0 <= index && index < storage->size, 2, "index out of range");
-    storage->data[index] = (real)number;
+    THStorage_(set)(storage, index, (real)number);
     lua_pushboolean(L, 1);
   }
   else
@@ -118,8 +117,7 @@ static int torch_Storage_(__index__)(lua_State *L)
   {
     THStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
     long index = luaL_checklong(L, 2) - 1;
-    luaL_argcheck(L, 0 <= index && index < storage->size, 2, "index out of range");
-    lua_pushnumber(L, storage->data[index]);
+    lua_pushnumber(L, THStorage_(get)(storage, index));
     lua_pushboolean(L, 1);
     return 2;
   }

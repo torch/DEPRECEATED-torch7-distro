@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN"
+          "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleIconFile</key>
+    <string>torch.icns</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleName</key>
+    <string>MacQLua</string>
+    <key>CFBundleGetInfoString</key>
+    <string>MacQlua - A GUI for Lua, Torch, Milde.</string>
+    <key>CFBundleSignature</key>
+    <string>LUA</string>
+    <key>CFBundleExecutable</key>
+    <string>macqlua</string>
+    <key>CFBundleIdentifier</key>
+    <string>org.lua.qlua</string>
+    <key>CFBundleShortVersionString</key>
+    <string>@QLUA_VERSION@</string>
+    <key>CFBundleVersion</key>
+    <string>QLua-@QLUA_VERSION@ Lua-@LUA_VERSION@</string>
+    <key>CFBundleDocumentTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeExtensions</key>
+        <array>
+          <string>lua</string>
+        </array>
+        <key>CFBundleTypeMIMETypes</key>
+        <array>
+          <string>text/x-lua-code</string>
+          <string>application/x-lua-code</string>
+        </array>
+        <key>CFBundleTypeIconFile</key>
+        <string>luadoc.icns</string>
+        <key>CFBundleTypeName</key>
+        <string>Lua Program File</string>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>LSIsAppleDefaultForType</key>
+        <true/>
+	<key>LSItemContentTypes</key>
+	<array>
+	  <string>org.lua.lua-code</string>
+	</array>
+      </dict>
+    </array>
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+      <dict>
+	<key>UTTypeConformsTo</key>
+	<array>
+	  <string>public.data</string>
+	  <string>public.content</string>
+	</array>
+	<key>UTTypeDescription</key>
+	<string>Lua Program File</string>
+	<key>UTTypeIdentifier</key>
+	<string>org.lua.lua-code</string>
+        <key>UTTypeIconFile</key>
+        <string>luadoc.icns</string>
+	<key>UTTypeTagSpecification</key>
+	<dict>
+	  <key>public.filename-extension</key>
+	  <array>
+	    <string>lua</string>
+	  </array>
+          <key>public.mime-type</key>
+          <array>
+            <string>text/x-lua-code</string>
+            <string>application/x-lua-code</string>
+          </array>
+	</dict>
+      </dict>
+    </array>
+  </dict>
+</plist>
