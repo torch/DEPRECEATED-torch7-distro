@@ -383,7 +383,7 @@ static int lab_(cat)(lua_State *L)
   return lab_(cat_)(L);
 }
 
-static int lab_(conv2)(lua_State *L)
+static int lab_(convxcorr2)(lua_State *L,char* ktype)
 {
   THTensor *r_ = NULL;
   THTensor *image = luaT_checkudata(L,1,torch_(Tensor_id));
@@ -432,8 +432,9 @@ static int lab_(conv2)(lua_State *L)
     luaT_pushudata(L, r_, torch_(Tensor_id));
   }
 
-  char* type = "_c";
+  char type[2];
   type[0] = ctype[0];
+  type[1] = ktype[0];
 
   if (image->nDimension == 2 && kernel->nDimension == 2)
   {
@@ -472,7 +473,7 @@ static int lab_(conv2)(lua_State *L)
       }
 
       THTensor_(resize3d)(r_,kernel->size[0], nOutputRows, nOutputCols);
-      for (k=1; k<kernel->size[0]; k++)
+      for (k=0; k<kernel->size[0]; k++)
       {
         THTensor_(select)(ker,kernel,0,k);
         THTensor_(select)(ri,r_,0,k);
@@ -511,7 +512,7 @@ static int lab_(conv2)(lua_State *L)
 	nOutputCols = (nInputCols - nKernelCols) / 1 + 1;
       }
       THTensor_(resize3d)(r_,image->size[0], nOutputRows, nOutputCols);
-      for (k=1; k<image->size[0]; k++)
+      for (k=0; k<image->size[0]; k++)
       {
         THTensor_(select)(im, image, 0, k);
         THTensor_(select)(ri,r_,0,k);
@@ -527,6 +528,15 @@ static int lab_(conv2)(lua_State *L)
     }
   }
   return 1;
+}
+
+static int lab_(conv2)(lua_State *L)
+{
+  return lab_(convxcorr2)(L,"convolution");
+}
+static int lab_(xcorr2)(lua_State *L)
+{
+  return lab_(convxcorr2)(L,"xcorrelation");
 }
 
 
@@ -790,6 +800,7 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"cat_", lab_(cat_)},
   {"cat", lab_(cat)},
   {"conv2", lab_(conv2)},
+  {"xcorr2", lab_(xcorr2)},
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
   {"log_", lab_(log_)},
   {"log", lab_(log)},
