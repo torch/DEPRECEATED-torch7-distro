@@ -458,9 +458,9 @@ static int lab_(conv2)(lua_State *L)
       THTensor_(copy)(ker,ri);
       for (k=1; k<kernel->size[0]; k++)
       {
-	THTensor_(select)(ker,kernel,0,k);
-	THTensor_(select)(ri,r_,0,k);
-	THLab_(conv2Dmul)(ri,0.0,image,ker,1,1,type);
+        THTensor_(select)(ker,kernel,0,k);
+        THTensor_(select)(ri,r_,0,k);
+        THLab_(conv2Dmul)(ri,0.0,image,ker,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(ker);
@@ -484,9 +484,9 @@ static int lab_(conv2)(lua_State *L)
       THTensor_(copy)(im,ri);
       for (k=1; k<image->size[0]; k++)
       {
-	THTensor_(select)(im, image, 0, k);
-	THTensor_(select)(ri,r_,0,k);
-	THLab_(conv2Dmul)(ri,0.0,im,kernel,1,1,type);
+        THTensor_(select)(im, image, 0, k);
+        THTensor_(select)(ri,r_,0,k);
+        THLab_(conv2Dmul)(ri,0.0,im,kernel,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(im);
@@ -664,24 +664,25 @@ static int lab_(randn)(lua_State *L)
   return lab_(randn_)(L);
 }
 
-#define LAB_IMPLEMENT_MATH_FUNC(NAME)                        \
-  static int lab_(NAME##_)(lua_State *L)                     \
-  {                                                          \
-    THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id)); \
-    THTensor *t = luaT_checkudata(L, 2, torch_(Tensor_id));  \
-                                                             \
-    THLab_(NAME)(r_, t);                                     \
-                                                             \
-    lua_settop(L, 1);                                        \
-    return 1;                                                \
-}                                                            \
-                                                             \
-static int lab_(NAME)(lua_State *L)                          \
-{                                                            \
-  luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));    \
-  lua_insert(L, 1);                                          \
-  return lab_(NAME##_)(L);                                   \
-}                                                            \
+#define LAB_IMPLEMENT_MATH_FUNC(NAME)                         \
+  static int lab_(NAME##_)(lua_State *L)                      \
+  {                                                           \
+    THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));  \
+    THTensor *t = luaT_checkudata(L, 2, torch_(Tensor_id));   \
+                                                              \
+    THLab_(NAME)(r_, t);                                      \
+                                                              \
+    lua_settop(L, 1);                                         \
+    return 1;                                                 \
+  }                                                           \
+                                                              \
+  static int lab_(NAME)(lua_State *L)                         \
+  {                                                           \
+    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));   \
+    lua_insert(L, 1);                                         \
+    return lab_(NAME##_)(L);                                  \
+  }                                                           \
+                                                              \
 
 LAB_IMPLEMENT_MATH_FUNC(log)
 LAB_IMPLEMENT_MATH_FUNC(log1p)
