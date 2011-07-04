@@ -27,12 +27,19 @@ THCudaStorage* THCudaStorage_new(void)
 
 THCudaStorage* THCudaStorage_newWithSize(long size)
 {
-  THCudaStorage *storage = THAlloc(sizeof(THCudaStorage));
-  THCudaCheck(cudaMalloc((void**)&(storage->data), size * sizeof(float)));
-  storage->size = size;
-  storage->refcount = 1;
-  storage->isMapped = 0;
-  return storage;
+  if(size > 0)
+  {
+    THCudaStorage *storage = THAlloc(sizeof(THCudaStorage));
+    THCudaCheck(cudaMalloc((void**)&(storage->data), size * sizeof(float)));
+    storage->size = size;
+    storage->refcount = 1;
+    storage->isMapped = 0;
+    return storage;
+  }
+  else
+  {
+    return THCudaStorage_new();
+  }
 }
 
 THCudaStorage* THCudaStorage_newWithSize1(float data0)
