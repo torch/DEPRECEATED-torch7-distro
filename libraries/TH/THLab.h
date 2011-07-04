@@ -4,3 +4,6 @@
 
 #include "generic/THLab.h"
 #include "THGenerateAllTypes.h"
+
+#include "generic/THLabConv.h"
+#include "THGenerateAllTypes.h"

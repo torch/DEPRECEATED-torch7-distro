@@ -389,7 +389,7 @@ static int lab_(conv2)(lua_State *L)
   THTensor *image = luaT_checkudata(L,1,torch_(Tensor_id));
   THTensor *kernel = luaT_checkudata(L,2,torch_(Tensor_id));
   int n = lua_gettop(L);
-  const char* type = "v";
+  const char* ctype = "v";
   if (n == 2)
   {
     r_ = THTensor_(new)();
@@ -405,7 +405,7 @@ static int lab_(conv2)(lua_State *L)
     else if (lua_isstring(L,3))
     {
       r_ = THTensor_(new)();
-      type = luaL_checkstring(L,3);
+      ctype = luaL_checkstring(L,3);
     }
     else
     {
@@ -417,7 +417,7 @@ static int lab_(conv2)(lua_State *L)
     r_ = image;
     image = kernel;
     kernel = luaT_checkudata(L,3,torch_(Tensor_id));
-    type = luaL_checkstring(L,4);
+    ctype = luaL_checkstring(L,4);
   }
   else
   {
@@ -431,6 +431,9 @@ static int lab_(conv2)(lua_State *L)
   {
     luaT_pushudata(L, r_, torch_(Tensor_id));
   }
+
+  char* type = "_c";
+  type[0] = ctype[0];
 
   if (image->nDimension == 2 && kernel->nDimension == 2)
   {
@@ -451,11 +454,24 @@ static int lab_(conv2)(lua_State *L)
       long k;
       THTensor *ri = THTensor_(new)();
       THTensor *ker = THTensor_(new)();
-      THTensor_(select)(ker,kernel,0,0);
-      THLab_(conv2Dmul)(ri,0.0,image,ker,1,1,type);
-      THTensor_(resize3d)(r_,kernel->size[0], ri->size[0], ri->size[1]);
-      THTensor_(select)(ker,r_,0,0);
-      THTensor_(copy)(ker,ri);
+
+      long nInputRows  = image->size[0];
+      long nInputCols  = image->size[1];
+      long nKernelRows = kernel->size[1];
+      long nKernelCols = kernel->size[2];
+      long nOutputRows, nOutputCols;
+
+      THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "Input image is smaller than kernel");
+  
+      if (type[0] == 'f') {
+	nOutputRows = (nInputRows - 1) * 1 + nKernelRows;
+	nOutputCols = (nInputCols - 1) * 1 + nKernelCols;
+      } else { // valid
+	nOutputRows = (nInputRows - nKernelRows) / 1 + 1;
+	nOutputCols = (nInputCols - nKernelCols) / 1 + 1;
+      }
+
+      THTensor_(resize3d)(r_,kernel->size[0], nOutputRows, nOutputCols);
       for (k=1; k<kernel->size[0]; k++)
       {
         THTensor_(select)(ker,kernel,0,k);
@@ -468,6 +484,7 @@ static int lab_(conv2)(lua_State *L)
       THTensor *ker = THTensor_(new)();
       THTensor_(select)(ker,kernel,0,0);
       THLab_(conv2Dmul)(r_,0.0,image,ker,1,1,type);
+      THTensor_(free)(ker);
     }
   }
   else if (image->nDimension == 3 && kernel->nDimension == 2)
@@ -477,11 +494,23 @@ static int lab_(conv2)(lua_State *L)
       long k;
       THTensor *ri = THTensor_(new)();
       THTensor *im = THTensor_(new)();
-      THTensor_(select)(im,image,0,0);
-      THLab_(conv2Dmul)(ri,0.0,im,kernel,1,1,type);
-      THTensor_(resize3d)(r_,image->size[0], ri->size[0], ri->size[1]);
-      THTensor_(select)(im,r_,0,0);
-      THTensor_(copy)(im,ri);
+
+      long nInputRows  = image->size[1];
+      long nInputCols  = image->size[2];
+      long nKernelRows = kernel->size[0];
+      long nKernelCols = kernel->size[1];
+      long nOutputRows, nOutputCols;
+
+      THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "Input image is smaller than kernel");
+  
+      if (type[0] == 'f') {
+	nOutputRows = (nInputRows - 1) * 1 + nKernelRows;
+	nOutputCols = (nInputCols - 1) * 1 + nKernelCols;
+      } else { // valid
+	nOutputRows = (nInputRows - nKernelRows) / 1 + 1;
+	nOutputCols = (nInputCols - nKernelCols) / 1 + 1;
+      }
+      THTensor_(resize3d)(r_,image->size[0], nOutputRows, nOutputCols);
       for (k=1; k<image->size[0]; k++)
       {
         THTensor_(select)(im, image, 0, k);
@@ -494,6 +523,7 @@ static int lab_(conv2)(lua_State *L)
       THTensor *im = THTensor_(new)();
       THTensor_(select)(im,image,0,0);
       THLab_(conv2Dmul)(r_,0.0,im,kernel,1,1,type);
+      THTensor_(free)(im);
     }
   }
   return 1;
