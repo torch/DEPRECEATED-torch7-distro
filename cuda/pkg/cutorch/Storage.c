@@ -1,209 +1,94 @@
-#include "THCStorage.h"
+#include "THC.h"
+#include "THFile.h"
 #include "luaT.h"
 
-static const void *torch_Storage_id;
+static const void *torch_File_id = NULL;
+static const void *torch_ByteStorage_id = NULL;
+static const void *torch_CharStorage_id = NULL;
+static const void *torch_ShortStorage_id = NULL;
+static const void *torch_IntStorage_id = NULL;
+static const void *torch_LongStorage_id = NULL;
+static const void *torch_FloatStorage_id = NULL;
+static const void *torch_DoubleStorage_id = NULL;
+static const void *torch_CudaStorage_id = NULL;
 
-static const void *torch_ByteStorage_id;
-static const void *torch_CharStorage_id;
-static const void *torch_ShortStorage_id;
-static const void *torch_IntStorage_id;
-static const void *torch_LongStorage_id;
-static const void *torch_FloatStorage_id;
-static const void *torch_DoubleStorage_id;
+/* everything is as the generic Storage.c, except few things (see below) */
 
-static int torch_CudaStorage_new(lua_State *L)
-{
-  THCudaStorage *storage;
-  if(lua_type(L, 1) == LUA_TTABLE)
-  {
-    long size = lua_objlen(L, 1);
-    long i;
-    storage = THCudaStorage_newWithSize(size);
-    for(i = 1; i <= size; i++)
-    {
-      lua_rawgeti(L, 1, i);
-      if(!lua_isnumber(L, -1))
-      {
-        THCudaStorage_free(storage);
-        luaL_error(L, "element at index %d is not a number", i);
-      }
-      storage->data[i-1] = (float)lua_tonumber(L, -1);
-      lua_pop(L, 1);
-    }
+#define real float
+#define Real Cuda
+#define TH_GENERIC_FILE "generic/Storage.c"
+
+#define torch_Storage_(NAME) TH_CONCAT_4(torch_,Real,Storage_,NAME)
+#define torch_Storage_id TH_CONCAT_3(torch_,Real,Storage_id)
+#define THFile_readRealRaw(file, data, size)                            \
+  {                                                                     \
+    float *fdata = THAlloc(sizeof(float)*size);                         \
+    THFile_readFloatRaw(file, fdata, size);                             \
+    THCudaCheck(cudaMemcpy(data, fdata, size * sizeof(float), cudaMemcpyHostToDevice)); \
+    THFree(fdata);                                                      \
   }
-  else
-  {
-    long size = luaL_optlong(L, 1, 0);
-    storage = THCudaStorage_newWithSize(size);
+
+#define THFile_writeRealRaw(file, data, size)                           \
+  {                                                                     \
+    float *fdata = THAlloc(sizeof(float)*size);                         \
+    THCudaCheck(cudaMemcpy(fdata, data, size * sizeof(float), cudaMemcpyDeviceToHost)); \
+    THFile_writeFloatRaw(file, fdata, size);                            \
+    THFree(fdata);                                                      \
   }
-  luaT_pushudata(L, storage, torch_Storage_id);
-  return 1;
+
+#define STRING_torchStorage TH_CONCAT_STRING_3(torch.,Real,Storage)
+
+#include "generic/Storage.c"
+
+#undef real
+#undef Real
+#undef TH_GENERIC_FILE
+#undef torch_CudaStorage_init
+
+/* now we overwrite some methods specific to CudaStorage */
+
+#define CUDA_IMPLEMENT_STORAGE_COPY(TYPEC)                              \
+  static int cutorch_##TYPEC##Storage_copy(lua_State *L)                \
+  {                                                                     \
+    TH##TYPEC##Storage *storage = luaT_checkudata(L, 1, torch_##TYPEC##Storage_id); \
+    void *src;                                                          \
+    if( (src = luaT_toudata(L, 2, torch_##TYPEC##Storage_id)) )         \
+      TH##TYPEC##Storage_copy(storage, src);                            \
+    else if( (src = luaT_toudata(L, 2, torch_ByteStorage_id)) )         \
+      TH##TYPEC##Storage_copyByte(storage, src);                        \
+    else if( (src = luaT_toudata(L, 2, torch_CharStorage_id)) )         \
+      TH##TYPEC##Storage_copyChar(storage, src);                        \
+    else if( (src = luaT_toudata(L, 2, torch_ShortStorage_id)) )        \
+      TH##TYPEC##Storage_copyShort(storage, src);                       \
+    else if( (src = luaT_toudata(L, 2, torch_IntStorage_id)) )          \
+      TH##TYPEC##Storage_copyInt(storage, src);                         \
+    else if( (src = luaT_toudata(L, 2, torch_LongStorage_id)) )         \
+      TH##TYPEC##Storage_copyLong(storage, src);                        \
+    else if( (src = luaT_toudata(L, 2, torch_FloatStorage_id)) )        \
+      TH##TYPEC##Storage_copyFloat(storage, src);                       \
+    else if( (src = luaT_toudata(L, 2, torch_DoubleStorage_id)) )       \
+      TH##TYPEC##Storage_copyDouble(storage, src);                      \
+    else if( (src = luaT_toudata(L, 2, torch_CudaStorage_id)) )         \
+      TH##TYPEC##Storage_copyCuda(storage, src);                        \
+    else                                                                \
+      luaL_typerror(L, 2, "torch.*Storage");                            \
+                                                                        \
+    lua_settop(L, 1);                                                   \
+    return 1;                                                           \
 }
 
-static int torch_CudaStorage_free(lua_State *L)
+CUDA_IMPLEMENT_STORAGE_COPY(Byte)
+CUDA_IMPLEMENT_STORAGE_COPY(Char)
+CUDA_IMPLEMENT_STORAGE_COPY(Short)
+CUDA_IMPLEMENT_STORAGE_COPY(Int)
+CUDA_IMPLEMENT_STORAGE_COPY(Long)
+CUDA_IMPLEMENT_STORAGE_COPY(Float)
+CUDA_IMPLEMENT_STORAGE_COPY(Double)
+CUDA_IMPLEMENT_STORAGE_COPY(Cuda)
+
+void cutorch_CudaStorage_init(lua_State* L)
 {
-  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  THCudaStorage_free(storage);
-  return 0;
-}
-
-
-static int torch_CudaStorage_resize(lua_State *L)
-{
-  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  long size = luaL_checklong(L, 2);
-  THCudaStorage_resize(storage, size);
-  lua_settop(L, 1);
-  return 1;
-}
-
-static int torch_CudaStorage_copy(lua_State *L)
-{
-  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  void *src;
-  if( (src = luaT_toudata(L, 2, torch_Storage_id)) )
-    THCudaStorage_copy(storage, src);
-  else if( (src = luaT_toudata(L, 2, torch_ByteStorage_id)) )
-    THCudaStorage_copyByte(storage, src);
-  else if( (src = luaT_toudata(L, 2, torch_CharStorage_id)) )
-    THCudaStorage_copyChar(storage, src);
-  else if( (src = luaT_toudata(L, 2, torch_ShortStorage_id)) )
-    THCudaStorage_copyShort(storage, src);
-  else if( (src = luaT_toudata(L, 2, torch_IntStorage_id)) )
-    THCudaStorage_copyInt(storage, src);
-  else if( (src = luaT_toudata(L, 2, torch_LongStorage_id)) )
-    THCudaStorage_copyLong(storage, src);
-  else if( (src = luaT_toudata(L, 2, torch_FloatStorage_id)) )
-    THCudaStorage_copyFloat(storage, src);
-  else if( (src = luaT_toudata(L, 2, torch_DoubleStorage_id)) )
-    THCudaStorage_copyDouble(storage, src);
-  else
-    luaL_typerror(L, 2, "torch.*Storage");
-  lua_settop(L, 1);
-  return 1;
-}
-
-static int torch_CudaStorage_fill(lua_State *L)
-{
-  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  double value = luaL_checknumber(L, 2);
-  THCudaStorage_fill(storage, (float)value);
-  lua_settop(L, 1);
-  return 1;
-}
-
-static int torch_CudaStorage___len__(lua_State *L)
-{
-  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  lua_pushnumber(L, storage->size);
-  return 1;
-}
-
-static int torch_CudaStorage___newindex__(lua_State *L)
-{
-  if(lua_isnumber(L, 2))
-  {
-    THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-    long index = luaL_checklong(L, 2) - 1;
-    double number = luaL_checknumber(L, 3);
-    THCudaStorage_set(storage, index, (float)number);
-    lua_pushboolean(L, 1);
-  }
-  else
-    lua_pushboolean(L, 0);
-
-  return 1;
-}
-
-static int torch_CudaStorage___index__(lua_State *L)
-{
-  if(lua_isnumber(L, 2))
-  {
-    THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-    long index = luaL_checklong(L, 2) - 1;
-    lua_pushnumber(L, THCudaStorage_get(storage, index));
-    lua_pushboolean(L, 1);
-    return 2;
-  }
-  else
-  {
-    lua_pushboolean(L, 0);
-    return 1;
-  }
-}
-
-/*
-
-#if defined(TH_REAL_IS_CHAR) || defined(TH_REAL_IS_BYTE)
-static int torch_CudaStorage_string(lua_State *L)
-{
-  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  if(lua_isstring(L, -1))
-  {
-    size_t len = 0;
-    const char *str = lua_tolstring(L, -1, &len);
-    THCudaStorage_resize(storage, len);
-    memmove(storage->data, str, len);
-    lua_settop(L, 1);
-  }
-  else
-    lua_pushlstring(L, (char*)storage->data, storage->size);
-
-  return 1;
-}
-#endif
-
-*/
-
-static int torch_CudaStorage_factory(lua_State *L)
-{
-  THCudaStorage *storage = THCudaStorage_new();
-  luaT_pushudata(L, storage, torch_Storage_id);
-  return 1;
-}
-
-/*
-static int torch_CudaStorage_write(lua_State *L)
-{
-  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  lua_pushvalue(L, 2);
-  torch_File_writeLong(L, &storage->size, 1);
-  torch_File_writeReal(L, storage->data, storage->size);
-  return 0;
-}
-
-static int torch_CudaStorage_read(lua_State *L)
-{
-  THCudaStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
-  int version = luaL_checkint(L, 3);
-  lua_pushvalue(L, 2);
-  if(version > 0)
-    torch_File_readLong(L, &storage->size, 1);
-  else
-  {
-    int size_;
-    torch_File_readInt(L, &size_, 1);
-    storage->size = size_;
-  }
-  THCudaStorage_resize(storage, storage->size);
-  torch_File_readReal(L, storage->data, storage->size);
-  return 0;
-}
-*/
-
-static const struct luaL_Reg torch_CudaStorage__ [] = {
-  {"size", torch_CudaStorage___len__},
-  {"fill", torch_CudaStorage_fill},
-  {"__newindex__", torch_CudaStorage___newindex__},
-  {"__index__", torch_CudaStorage___index__},
-  {"resize", torch_CudaStorage_resize},
-  {"fill", torch_CudaStorage_fill},
-  {"copy", torch_CudaStorage_copy},
-  {NULL, NULL}
-};
-
-void torch_CudaStorage_init(lua_State *L)
-{
+  /* the ids */
   torch_ByteStorage_id = luaT_checktypename2id(L, "torch.ByteStorage");
   torch_CharStorage_id = luaT_checktypename2id(L, "torch.CharStorage");
   torch_ShortStorage_id = luaT_checktypename2id(L, "torch.ShortStorage");
@@ -211,10 +96,38 @@ void torch_CudaStorage_init(lua_State *L)
   torch_LongStorage_id = luaT_checktypename2id(L, "torch.LongStorage");
   torch_FloatStorage_id = luaT_checktypename2id(L, "torch.FloatStorage");
   torch_DoubleStorage_id = luaT_checktypename2id(L, "torch.DoubleStorage");
+  
+  /* the standard stuff */
+  torch_CudaStorage_init(L);
 
-  torch_Storage_id = luaT_newmetatable(L, "torch.CudaStorage", NULL,
-                                       torch_CudaStorage_new, torch_CudaStorage_free, torch_CudaStorage_factory);
+  /* the copy methods */
+  {
+    int i;
 
-  luaL_register(L, NULL, torch_CudaStorage__);
-  lua_pop(L, 1);
+    const void* ids[8] = {torch_ByteStorage_id,
+                          torch_CharStorage_id,
+                          torch_ShortStorage_id,
+                          torch_IntStorage_id,
+                          torch_LongStorage_id,
+                          torch_FloatStorage_id,
+                          torch_DoubleStorage_id,
+                          torch_CudaStorage_id};
+    
+    static int (*funcs[8])(lua_State*) = {cutorch_ByteStorage_copy,
+                                          cutorch_CharStorage_copy,
+                                          cutorch_ShortStorage_copy,
+                                          cutorch_IntStorage_copy,
+                                          cutorch_LongStorage_copy,
+                                          cutorch_FloatStorage_copy,
+                                          cutorch_DoubleStorage_copy,
+                                          cutorch_CudaStorage_copy};
+
+    for(i = 0; i < 8; i++)
+    {
+      luaT_pushmetaclass(L, ids[i]);
+      lua_pushcfunction(L, funcs[i]);
+      lua_setfield(L, -2, "copy");
+      lua_pop(L, 1);
+    }
+  }
 }

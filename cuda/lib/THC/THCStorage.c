@@ -121,6 +121,12 @@ void THCudaStorage_copy(THCudaStorage *self, THCudaStorage *src)
   THCudaCheck(cudaMemcpy(self->data, src->data, self->size * sizeof(float), cudaMemcpyDeviceToDevice));
 }
 
+void THCudaStorage_copyCuda(THCudaStorage *self, THCudaStorage *src)
+{
+  THArgCheck(self->size == src->size, 2, "size does not match");
+  THCudaCheck(cudaMemcpy(self->data, src->data, self->size * sizeof(float), cudaMemcpyDeviceToDevice));
+}
+
 void THCudaStorage_copyFloat(THCudaStorage *self, struct THFloatStorage *src)
 {
   THArgCheck(self->size == src->size, 2, "size does not match");

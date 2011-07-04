@@ -72,7 +72,7 @@ DLL_EXPORT int luaopen_libcutorch(lua_State *L)
   lua_newtable(L);
   luaL_register(L, NULL, cutorch_stuff__);
 
-  torch_CudaStorage_init(L);
+  cutorch_CudaStorage_init(L);
 
   return 1;
 }
