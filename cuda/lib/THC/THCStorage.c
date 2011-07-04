@@ -27,6 +27,8 @@ THCudaStorage* THCudaStorage_new(void)
 
 THCudaStorage* THCudaStorage_newWithSize(long size)
 {
+  THArgCheck(size >= 0, 2, "invalid size");
+
   if(size > 0)
   {
     THCudaStorage *storage = THAlloc(sizeof(THCudaStorage));
