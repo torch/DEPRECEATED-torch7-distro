@@ -28,10 +28,9 @@ static int nn_(SpatialConvolution_forward)(lua_State *L)
   /* add bias */
   long i;
   THTensor *outn = THTensor_(new)();
-  real* bias_data = THTensor_(data)(bias);
   for (i=0; i<bias->size[0]; i++) {
     THTensor_(select)(outn,output,0,i);
-    TH_TENSOR_APPLY(real,outn, *outn_data = bias_data[i];);
+    THTensor_(fill)(outn, THTensor_(get1d)(bias, i));
   }
   THTensor_(free)(outn);
 

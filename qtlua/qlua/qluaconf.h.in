@@ -1,0 +1,37 @@
+/* -*- C++ -*- */
+
+#ifndef QLUACONF_H
+#define QLUACONF_H
+
+#ifdef WIN32
+# ifdef libqlua_EXPORTS
+#  define QLUAAPI __declspec(dllexport)
+# else
+#  define QLUAAPI __declspec(dllimport)
+# endif
+#else
+# define QLUAAPI /**/
+#endif
+
+#cmakedefine QLUA_VERSION "@QLUA_VERSION@"
+
+#cmakedefine HAVE_IO_H 1
+#cmakedefine HAVE_CGETS_S 1
+
+#cmakedefine HAVE_FCNTL_H 1
+#cmakedefine HAVE_PTHREAD_H 1
+#cmakedefine HAVE_SIGNAL_H 1
+#cmakedefine HAVE_UNISTD_H 1
+#cmakedefine HAVE_ERRNO_H 1
+#cmakedefine HAVE_SYS_SELECT_H 1
+#cmakedefine HAVE_SYS_TIME_H 1
+#cmakedefine HAVE_SYS_TYPES_H 1
+#cmakedefine HAVE_ISATTY 1
+#cmakedefine HAVE_PTHREAD_SIGMASK 1
+#cmakedefine HAVE_RL_COMPLETION_MATCHES 1
+#cmakedefine HAVE_SIGACTION 1
+#cmakedefine HAVE_SIGPROCMASK 1
+#cmakedefine HAVE_READLINE 1
+#cmakedefine HAVE_XINITTHREADS 1
+
+#endif

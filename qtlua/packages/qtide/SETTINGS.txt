@@ -1,0 +1,84 @@
+
+
+Here is a collection of settings configurable via QSettings
+
+
+Customizable via a preference dialog
+------------------------------------
+
+
+editor/font                QFont       font for editor
+editor/size                QSize       default editor size in chars
+editor/tabSize             Int         tabulation size (default 8)
+editor/tabExpand           Boolean     expands all tabs as spaces
+
+console/font               QFont       font for console
+console/consoleLines       Int         max saved lines in console log
+console/consoleSize        QSize       default console size in chars
+console/editorSize         QSize       default console editor size in chars
+console/tabSize            Int         tabulation size in console
+console/tabExpand          Int         expand tabs when saving console log
+console/historySize        Int         maximum history size in console
+
+luaMode/basicIndent        Int         basic indentation in lua mode
+
+formats/userDefined        Boolean     preference editors should set this to true.
+
+formats/[m]/[k]/italic     Boolean     font spec for format [m]/[k]
+formats/[m]/[k]/weight     Boolean     font spec for format [m]/[k]
+formats/[m]/[k]/color      String      text color for format [m]/[k]
+formats/[m]/[k]/bgcolor    String      background color for format [m]/[k]
+
+
+The recognized [m]/[k] combinations are
+    
+    (console)/quote        user input in console
+    (console)/comment      comments in console (time, start date)
+    (matcher)/ok           highlight for correct syntactical matches
+    (matcher)/error        highlight for incorrect syntactical matches
+    Text/quote             quoted text in text mode
+    Lua/number             numbers in Lua mode
+    Lua/keyword            keywords in Lua mode
+    Lua/string             strings in Lua mode
+    Lua/comment            comments in Lua mode
+    Lua/function           function names in Lua mode
+    Help/string            verbatim text and strings in Help mode
+    Help/comment           section names in Help mode
+    Help/keyword           syntactical stuff in Help mode
+    Help/url               urls and links in Help mode
+
+
+
+Automatically remembered from last invocation
+---------------------------------------------
+
+ide/mode                   ByteArray   mdi or sdi  (see init.lua)
+ide/geometry               Blob        mdi window size and position
+ide/state                  Blob        mdi window configuration
+ide/dockedWindows          StringList  names of the docked windows
+
+mdi/[windowname]/state     Blob        subwindow configuration in mdi mode
+mdi/[windowname]/geometry  Blob        subwindow size and positon in mdi mode
+sdi/[windowname]/state     Blob        window configuration in sdi mode
+sdi/[windowname]/geometry  Blob        window size and positon in sdi mode
+
+console/autoComplete       Boolean     auto completion in console editor
+console/autoIndent         Boolean     auto indent in console editor
+console/autoMatch          Boolean     flash matches in console editor
+console/autoHighlight      Boolean     syntax highlight in console editor
+console/lineWrap           Boolean     line wrap in console
+console/splitter           Blob        splitter state in console
+
+editor/recentFiles         StringList  recently open files
+editor/lineWrap            Boolean     line wrap in editor
+editor/showLineNumbers     Boolean     line numbers in editor
+editor/autoComplete        Boolean     auto completion in editor
+editor/autoIndent          Boolean     auto indent in editor
+editor/autoMatch           Boolean     flash matches in editor
+editor/autoHighlight       Boolean     syntax highlight in editor
+editor/find/caseSensitive  Boolean     find dialog case sensitive box
+editor/find/wholeWords     Boolean     find dialog whole words box
+
+
+browser/find/caseSensitive  Boolean     find dialog case sensitive box
+browser/find/wholeWords     Boolean     find dialog whole words box
