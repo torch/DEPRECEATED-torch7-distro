@@ -364,4 +364,5 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   }
 } 
 
+
 #endif
