@@ -2,6 +2,14 @@
 
 #define NB_THREADS_PER_BLOCK 256
 
+__global__ void THCudaTensor_kernel_fillX(float *data, float value, long size)
+{
+  long k = blockDim.x * blockIdx.x + threadIdx.x;
+  
+  if(k < size)
+    data[k] = value;
+}
+
 __global__ void THCudaTensor_kernel_fill(float *data, float value, long size,
                                          long sz0, long sz1, long sz2, long sz3,
                                          long st0, long st1, long st2, long st3)
@@ -39,6 +47,14 @@ __global__ void THCudaTensor_kernel_fill(float *data, float value, long size,
 
     data[idx] = value;
   }
+}
+
+void THCudaTensor_fillX(THCudaTensor *self, float value)
+{
+  long size = THCudaTensor_nElement(self);
+
+  long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
+  THCudaTensor_kernel_fillX<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, size);
 }
 
 void THCudaTensor_fill(THCudaTensor *self, float value)
