@@ -43,7 +43,6 @@ static const void *torch_CudaStorage_id = NULL;
 #undef real
 #undef Real
 #undef TH_GENERIC_FILE
-#undef torch_CudaStorage_init
 
 /* now we overwrite some methods specific to CudaStorage */
 

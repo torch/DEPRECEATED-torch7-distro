@@ -21,6 +21,49 @@ static const void* torch_Tensor_id;
     return 1;                                                   \
   }
 
+static int torch_TensorMath_(fill2)(lua_State *L)
+{
+  THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor_id);
+  real value = (real)luaL_checknumber(L, 2);
+
+  long sz[5];
+  int dim;
+  long nElement;
+  long ndim = tensor->nDimension;
+  long k;
+  real *data = THTensor_(data)(tensor);
+
+  sz[tensor->nDimension-1] = 1;
+  for(dim = ndim-2; dim >= 0; dim--)
+    sz[dim] = sz[dim+1]*tensor->size[dim+1];
+  nElement = sz[0]*tensor->size[0];
+
+  for(k = 0; k < nElement; k++)
+  {
+    long idx = 0;
+    long rest = k;
+    for(dim = 0; dim < ndim; dim++)
+    {
+/*      long dimx = rest/sz[dim];
+      if(dimx > 0)
+      {
+        idx += dimx*tensor->stride[dim];
+        rest -= dimx*sz[dim];
+      }
+*/
+      idx += (rest/sz[dim])*tensor->stride[dim];
+      rest -= rest % sz[dim];
+    }
+    data[idx] = value;
+
+/*    printf("k=%ld idx=%ld\n", k, idx); */
+  }
+
+  lua_settop(L, 1);
+  return 1;
+
+}
+
 static int torch_TensorMath_(fill)(lua_State *L)
 {
   THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor_id);
@@ -350,6 +393,7 @@ static int torch_TensorMath_(__div__)(lua_State *L)
 }
 
 static const struct luaL_Reg torch_TensorMath_(_) [] = {
+  {"fill2", torch_TensorMath_(fill2)},
   {"fill", torch_TensorMath_(fill)},
   {"zero", torch_TensorMath_(zero)},
   {"add", torch_TensorMath_(add)},

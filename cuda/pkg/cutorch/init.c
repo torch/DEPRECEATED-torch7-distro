@@ -73,6 +73,7 @@ DLL_EXPORT int luaopen_libcutorch(lua_State *L)
   luaL_register(L, NULL, cutorch_stuff__);
 
   cutorch_CudaStorage_init(L);
+  cutorch_CudaTensor_init(L);
 
   return 1;
 }
