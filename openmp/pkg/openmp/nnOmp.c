@@ -12,7 +12,16 @@ static const void* torch_DoubleTensor_id = NULL;
 #include "generic/SpatialConvolutionOmp.c"
 #include "THGenerateFloatTypes.h"
 
-DLL_EXPORT int SpatialConvolutionOmp_init(lua_State *L)
+#include "generic/SpatialSubSamplingOmp.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/HardTanhOmp.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/TanhOmp.c"
+#include "THGenerateFloatTypes.h"
+
+DLL_EXPORT int nnOmp_init(lua_State *L)
 {
   torch_FloatTensor_id = luaT_checktypename2id(L, "torch.FloatTensor");
   torch_DoubleTensor_id = luaT_checktypename2id(L, "torch.DoubleTensor");
@@ -23,6 +32,15 @@ DLL_EXPORT int SpatialConvolutionOmp_init(lua_State *L)
 
   nnOmp_FloatSpatialConvolution_init(L);
   nnOmp_DoubleSpatialConvolution_init(L);
+
+  nnOmp_FloatSpatialSubSampling_init(L);
+  nnOmp_DoubleSpatialSubSampling_init(L);
+
+  nnOmp_FloatHardTanh_init(L);
+  nnOmp_DoubleHardTanh_init(L);
+
+  nnOmp_FloatTanh_init(L);
+  nnOmp_DoubleTanh_init(L);
 
   return 1;
 }

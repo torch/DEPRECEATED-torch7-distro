@@ -3,7 +3,7 @@ INCLUDE_DIRECTORIES("${Torch_SOURCE_DIR}/libraries/TH")
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../lib/THOmp")
 
 # List of C/C++ sources
-SET(src init.c openmp.c labOmp.c SpatialConvolutionOmp.c)
+SET(src init.c openmp.c labOmp.c nnOmp.c)
 
 # List of Lua sources
 SET(luasrc init.lua)
