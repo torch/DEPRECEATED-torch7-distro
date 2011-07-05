@@ -105,9 +105,11 @@ void cutorch_CudaTensor_init(lua_State* L)
   /* the standard stuff */
   torch_CudaTensor_init(L);
 
+  /* additional methods */
   luaT_pushmetaclass(L, torch_CudaTensor_id);
   lua_pushcfunction(L, cuda_CudaTensor_fill);
   lua_setfield(L, -2, "fill");
+  lua_pop(L, 1);
 
   /* the copy methods */
   {
