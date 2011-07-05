@@ -168,6 +168,7 @@ LUAT_DYNT_FUNCTION_WRAPPER(lab, triu)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, cat_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, cat)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, conv2)
+LUAT_DYNT_FUNCTION_WRAPPER(lab, xcorr2)
 
 LUAT_DYNT_FUNCTION_WRAPPER(lab, log_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, log)
@@ -265,6 +266,7 @@ static const struct luaL_Reg lab_stuff__ [] = {
   {"cat_", lab_cat_},
   {"cat", lab_cat},
   {"conv2", lab_conv2},
+  {"xcorr2", lab_xcorr2},
 
   {"log_", lab_log_},
   {"log", lab_log},
