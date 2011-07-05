@@ -1,4 +1,4 @@
-#include "THOmpLab.h"
+#include "THOmpLabConv.h"
 
-#include "generic/THOmpLab.c"
+#include "generic/THOmpLabConv.c"
 #include "THGenerateAllTypes.h"

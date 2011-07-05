@@ -1,6 +1,6 @@
 #include "TH.h"
 #include "luaT.h"
-#include "THOmpLab.h"
+#include "THOmpLabConv.h"
 
 #define torch_(NAME) TH_CONCAT_3(torch_, Real, NAME)
 #define torch_string_(NAME) TH_CONCAT_STRING_3(torch., Real, NAME)
@@ -53,9 +53,11 @@ static const void* lab_default_tensor_id;
 
 
 LUAT_DYNT_FUNCTION_WRAPPER(lab, conv2omp);
+LUAT_DYNT_FUNCTION_WRAPPER(lab, xcorr2omp);
 
 static const struct luaL_Reg labomp_stuff__ [] = {
   {"conv2omp", lab_conv2omp},
+  {"xcorr2omp", lab_conv2omp},
   {NULL,NULL}
 };
 

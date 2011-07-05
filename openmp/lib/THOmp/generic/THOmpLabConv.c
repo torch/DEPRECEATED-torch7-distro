@@ -1,14 +1,14 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/THOmpLab.c"
+#define TH_GENERIC_FILE "generic/THOmpLabConv.c"
 #else
 
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel.
 */
-void THOmpLab_(validConv2Dptr)(real *r_,
-			       real *t_, long ir, long ic, 
-			       real *k_, long kr, long kc, 
-			       long sr, long sc)
+void THOmpLab_(validXCorr2Dptr)(real *r_,
+				real *t_, long ir, long ic, 
+				real *k_, long kr, long kc, 
+				long sr, long sc)
 {
   long or = (ir - kr) / sr + 1;
   long oc = (ic - kc) / sc + 1;
@@ -38,14 +38,51 @@ void THOmpLab_(validConv2Dptr)(real *r_,
     }
   }
 }
+/*
+  2D Input, 2D kernel  : convolve given image with the given kernel.
+*/
+void THOmpLab_(validConv2Dptr)(real *r_,
+			       real *t_, long ir, long ic, 
+			       real *k_, long kr, long kc, 
+			       long sr, long sc)
+{
+  long or = (ir - kr) / sr + 1;
+  long oc = (ic - kc) / sc + 1;
+
+  long xx, yy;  
+
+  for(yy = 0; yy < or; yy++)
+  {
+    for(xx = 0; xx < oc; xx++)
+    {
+      /* Dot product in two dimensions... (between input image and the mask) */
+      real *pi_ = t_ + yy*sr*ic + xx*sc;
+      real *pw_ = k_ + kr*kc - 1;
+      real sum = 0;
+      long kx, ky;
+      for(ky = 0; ky < kr; ky++)
+      {
+        for(kx = 0; kx < kc; kx++) {
+          sum += pi_[kx]*pw_[-kx];
+        }
+        pi_ += ic; /* next input line */
+        pw_ -= kc; /* next mask line */
+      }
+      /* Update output */
+      *r_ += sum;
+      *r_++;
+    }
+  }
+}
+
 
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
 */
-void THOmpLab_(fullConv2Dptr)(real *r_,
-			      real *t_, long ir, long ic, 
-			      real *k_, long kr, long kc, 
-			      long sr, long sc)
+void THOmpLab_(fullXCorr2Dptr)(real *r_,
+			       real *t_, long ir, long ic, 
+			       real *k_, long kr, long kc, 
+			       long sr, long sc)
 {
   long or = (ir - 1) * sr + kr;
   long oc = (ic - 1) * sc + kc;
@@ -73,16 +110,50 @@ void THOmpLab_(fullConv2Dptr)(real *r_,
     }
   }
 }
+/*
+  2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
+*/
+void THOmpLab_(fullConv2Dptr)(real *r_,
+                                  real *t_, long ir, long ic, 
+                                  real *k_, long kr, long kc, 
+                                  long sr, long sc)
+{
+  long or = (ir - 1) * sr + kr;
+  long oc = (ic - 1) * sc + kc;
+
+  long xx, yy;
+
+  for(yy = 0; yy < ir; yy++)
+  {
+    for(xx = 0; xx < ic; xx++)
+    {
+      /* Outer product in two dimensions... (between input image and the mask) */
+      real *po_ = r_ + yy*sr*oc + xx*sc;
+      real *pw_ = k_ + kr*kc -1;
+      real sum = 0;
+      long kx, ky;
+      for(ky = 0; ky < kr; ky++)
+      {
+        for(kx = 0; kx < kc; kx++) {
+          po_[kx] += *t_ * pw_[-kx];
+        }
+        po_ += oc; /* next input line */
+        pw_ -= kc; /* next mask line */
+      }
+      t_++;
+    }
+  }
+}
 
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel, valid convolution.
   for sr,sc=1 this is equivalent to validConv2Dptr, but otherwise it is useful for
   calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
 */
-void THOmpLab_(validConv2DRevptr)(real *r_,
-				  real *t_, long ir, long ic, 
-				  real *k_, long kr, long kc, 
-				  long sr, long sc)
+void THOmpLab_(validXCorr2DRevptr)(real *r_,
+				   real *t_, long ir, long ic, 
+				   real *k_, long kr, long kc, 
+				   long sr, long sc)
 {
   long or = ir - (kr - 1) * sr;
   long oc = ic - (kc - 1) * sc;
@@ -150,17 +221,37 @@ void THOmpLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize4d)(r_,nKernelPlane, nInputPlane, nOutputRows, nOutputCols);
 
-  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
-  {
-    THTensor_(zero)(r_);
-  }
-  else if (beta != 1)
-    THTensor_(mul)(r_, beta);
-
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
   real *output_data = THTensor_(data)(r_);  
   
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
+  {
+    /*THTensor_(zero)(r_);*/
+    long k;
+#pragma omp parallel for private(k)
+    for (k = 0; k < r_->size[0]; k++)
+    {
+      real* ptr_output = output_data + k*nOutputCols*nOutputRows;
+      long l;
+      for (l = 0; l < nOutputRows*nOutputCols; l++)
+	ptr_output[l] = 0.0;
+    }
+  }
+  else if (beta != 1)
+  {
+    /*THTensor_(mul)(r_, beta);*/
+    long k;
+#pragma omp parallel for private(k)
+    for (k = 0; k < r_->size[0]; k++)
+    {
+      real* ptr_output = output_data + k*nOutputCols*nOutputRows;
+      long l;
+      for (l = 0; l < nOutputRows*nOutputCols; l++)
+	ptr_output[l] *= beta;
+    }
+  }
+
   long k;
 #pragma omp parallel for private(k)
   for(k = 0; k < nKernelPlane; k++)
@@ -177,10 +268,10 @@ void THOmpLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_
       real *ptr_input = input_data+i*istride0;
 
       /* do image, kernel convolution */
-      THOmpLab_(validConv2DRevptr)(ptr_output,
-				   ptr_input,  nInputRows,  nInputCols,
-				   ptr_weight, nKernelRows, nKernelCols,
-				   srow, scol);
+      THOmpLab_(validXCorr2DRevptr)(ptr_output,
+				    ptr_input,  nInputRows,  nInputCols,
+				    ptr_weight, nKernelRows, nKernelCols,
+				    srow, scol);
       /* Next output plane */
       /* output_data += nOutputCols*nOutputRows; */
     }
@@ -206,7 +297,8 @@ void THOmpLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
   THArgCheck(k_->nDimension == 3 , 4, "kernel: 3D Tensor expected");
   THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
-  THArgCheck(*type == 'v' || *type == 'f', 7, "type of convolution can 'v' or 'f'");
+  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
+  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
 
   THTensor *input = THTensor_(newContiguous)(t_, 0);
   THTensor *kernel = THTensor_(newContiguous)(k_, 0);
@@ -222,7 +314,7 @@ void THOmpLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
   nKernelCols = kernel->size[2];
   nOutputPlane = nInputPlane * kernel->size[0];
 
-  THArgCheck(nInputRows >= nKernelRows && nInputCols >= nKernelCols , 2, "conv2Dger : Input image is smaller than kernel");
+  THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv2Dger : Input image is smaller than kernel");
 
   if (*type == 'f') {
     nOutputRows = (nInputRows - 1) * srow + nKernelRows;
@@ -235,17 +327,37 @@ void THOmpLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize4d)(r_,nKernelPlane, nInputPlane, nOutputRows, nOutputCols);
 
-  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
-  {
-    THTensor_(zero)(r_);
-  }
-  else if (beta != 1)
-    THTensor_(mul)(r_, beta);
-
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
   real *output_data = THTensor_(data)(r_);  
   
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
+  {
+    /*THTensor_(zero)(r_);*/
+    long k;
+#pragma omp parallel for private(k)
+    for (k = 0; k < r_->size[0]; k++)
+    {
+      real* ptr_output = output_data + k*nOutputCols*nOutputRows;
+      long l;
+      for (l = 0; l < nOutputRows*nOutputCols; l++)
+	ptr_output[l] = 0.0;
+    }
+  }
+  else if (beta != 1)
+  {
+    /*THTensor_(mul)(r_, beta);*/
+    long k;
+#pragma omp parallel for private(k)
+    for (k = 0; k < r_->size[0]; k++)
+    {
+      real* ptr_output = output_data + k*nOutputCols*nOutputRows;
+      long l;
+      for (l = 0; l < nOutputRows*nOutputCols; l++)
+	ptr_output[l] *= beta;
+    }
+  }
+
   long k;
 #pragma omp parallel for private(k)
   for(k = 0; k < nKernelPlane; k++)
@@ -262,16 +374,28 @@ void THOmpLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
       real *ptr_input = input_data+i*istride0;
 
       /* do image, kernel convolution */
-      if (*type == 'f')
-	THOmpLab_(fullConv2Dptr)(ptr_output,
-				 ptr_input,  nInputRows,  nInputCols,
-				 ptr_weight, nKernelRows, nKernelCols,
-				 srow, scol);
+      if (type[0] == 'f')
+	if (type[1] == 'x')
+	  THOmpLab_(fullXCorr2Dptr)(ptr_output,
+				    ptr_input,  nInputRows,  nInputCols,
+				    ptr_weight, nKernelRows, nKernelCols,
+				    srow, scol);
+	else
+	  THOmpLab_(fullConv2Dptr)(ptr_output,
+				   ptr_input,  nInputRows,  nInputCols,
+				   ptr_weight, nKernelRows, nKernelCols,
+				   srow, scol);
       else
-	THOmpLab_(validConv2Dptr)(ptr_output,
-				  ptr_input,  nInputRows,  nInputCols,
-				  ptr_weight, nKernelRows, nKernelCols,
-				  srow, scol);
+	if (type[1] == 'x')
+	  THOmpLab_(validXCorr2Dptr)(ptr_output,
+				     ptr_input,  nInputRows,  nInputCols,
+				     ptr_weight, nKernelRows, nKernelCols,
+				     srow, scol);
+	else
+	  THOmpLab_(validConv2Dptr)(ptr_output,
+				    ptr_input,  nInputRows,  nInputCols,
+				    ptr_weight, nKernelRows, nKernelCols,
+				    srow, scol);
       /* Next output plane */
       /* output_data += nOutputCols*nOutputRows; */
     }
@@ -296,7 +420,8 @@ void THOmpLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, lo
   THArgCheck(k_->nDimension == 4 , 4, "kernel: 4D Tensor expected");
   THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
-  THArgCheck(*type == 'v' || *type == 'f', 7, "type of convolution can 'v' or 'f'");
+  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
+  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
 
   THTensor *input = THTensor_(newContiguous)(t_, 0);
   THTensor* kernel;
@@ -332,16 +457,37 @@ void THOmpLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, lo
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize3d)(r_, nOutputPlane, nOutputRows, nOutputCols);
 
-  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
-  {
-    THTensor_(zero)(r_);
-  }
-  else if (beta != 1)
-    THTensor_(mul)(r_, beta);
-
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
   real *output_data = THTensor_(data)(r_);  
+
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
+  {
+    /*THTensor_(zero)(r_);*/
+    long k;
+#pragma omp parallel for private(k)
+    for (k = 0; k < r_->size[0]; k++)
+    {
+      real* ptr_output = output_data + k*nOutputCols*nOutputRows;
+      long l;
+      for (l = 0; l < nOutputRows*nOutputCols; l++)
+	ptr_output[l] = 0.0;
+    }
+  }
+  else if (beta != 1)
+  {
+    /*THTensor_(mul)(r_, beta);*/
+    long k;
+#pragma omp parallel for private(k)
+    for (k = 0; k < r_->size[0]; k++)
+    {
+      real* ptr_output = output_data + k*nOutputCols*nOutputRows;
+      long l;
+      for (l = 0; l < nOutputRows*nOutputCols; l++)
+	ptr_output[l] *= beta;
+    }
+  }
+
   
   long k;
 #pragma omp parallel for private(k)
@@ -358,16 +504,28 @@ void THOmpLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, lo
       real *ptr_input = input_data + i*istride0;
 
       /* do image, kernel convolution */
-      if (*type == 'f')
-	THOmpLab_(fullConv2Dptr)(ptr_output,
-				 ptr_input,  nInputRows,  nInputCols,
-				 ptr_weight, nKernelRows, nKernelCols,
-				 srow, scol);
+      if (type[0] == 'f')
+	if (type[1] == 'x')
+	  THOmpLab_(fullXCorr2Dptr)(ptr_output,
+				    ptr_input,  nInputRows,  nInputCols,
+				    ptr_weight, nKernelRows, nKernelCols,
+				    srow, scol);
+	else
+	  THOmpLab_(fullConv2Dptr)(ptr_output,
+				   ptr_input,  nInputRows,  nInputCols,
+				   ptr_weight, nKernelRows, nKernelCols,
+				   srow, scol);
       else
-	THOmpLab_(validConv2Dptr)(ptr_output,
-				  ptr_input,  nInputRows,  nInputCols,
-				  ptr_weight, nKernelRows, nKernelCols,
-				  srow, scol);
+	if (type[1] == 'x')
+	  THOmpLab_(validXCorr2Dptr)(ptr_output,
+				     ptr_input,  nInputRows,  nInputCols,
+				     ptr_weight, nKernelRows, nKernelCols,
+				     srow, scol);
+	else
+	  THOmpLab_(validConv2Dptr)(ptr_output,
+				    ptr_input,  nInputRows,  nInputCols,
+				    ptr_weight, nKernelRows, nKernelCols,
+				    srow, scol);
     }
     /* Next output plane */
     /* output_data += nOutputCols*nOutputRows;*/

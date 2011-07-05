@@ -27,16 +27,23 @@ static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
 
   /* add bias */
   long i;
-  THTensor *outn = THTensor_(new)();
+  /*THTensor *outn = THTensor_(new)();*/
   real* bias_data = THTensor_(data)(bias);
-  for (i=0; i<bias->size[0]; i++) {
-    THTensor_(select)(outn,output,0,i);
-    TH_TENSOR_APPLY(real,outn, *outn_data = bias_data[i];);
+  real* output_data = THTensor_(data)(output);
+#pragma omp parallel for private(i)
+  for (i=0; i<bias->size[0]; i++)
+  {
+    /*THTensor_(select)(outn,output,0,i);*/
+    /*TH_TENSOR_APPLY(real,outn, *outn_data = bias_data[i];);*/
+    real *ptr_output = output_data + i*outputWidth*outputHeight;
+    long j;
+    for(j = 0; j < outputWidth*outputHeight; j++)
+      ptr_output[j] = bias_data[i];
   }
-  THTensor_(free)(outn);
+  /*THTensor_(free)(outn);*/
 
   /* do convolutions */
-  THOmpLab_(conv2Dmv)(output, 1.0, input, weight, dH, dW, "valid");
+  THOmpLab_(conv2Dmv)(output, 1.0, input, weight, dH, dW, "vx");
 
   return 1;
 }
@@ -61,20 +68,26 @@ static int nnOmp_(SpatialConvolution_backwardOmp)(lua_State *L)
 
   /* gradient to bias */
   real *gradBias_data = THTensor_(data)(gradBias);
-  THTensor* gradOutSlice = THTensor_(new)();
+  real *gradOutput_data = THTensor_(data)(gradOutput);
+  long noutSlice = gradOutput->size[1]*gradOutput->size[2];
+  /*THTensor* gradOutSlice = THTensor_(new)();*/
+#pragma omp parallel for private(k)
   for(k = 0; k < nOutputPlane; k++)
   {
-    THTensor_(select)(gradOutSlice, gradOutput, 0, k);
-    gradBias_data[k] += THTensor_(sum)(gradOutSlice);
+    /*THTensor_(select)(gradOutSlice, gradOutput, 0, k);*/
+    real *ptr_gradOutput = gradOutput_data + k*noutSlice;
+    long l;
+    for(l = 0; l < noutSlice; l++)
+      gradBias_data[k] += ptr_gradOutput[l];
   }
-  THTensor_(free)(gradOutSlice);
+  /*THTensor_(free)(gradOutSlice);*/
 
   /* gradient to kernels */
   THOmpLab_(conv2DRevger)(gradWeight, 1.0, input, gradOutput, dH, dW);
 
   /* gradient to input */
   THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
-  THOmpLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "full");
+  THOmpLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "fx");
   THTensor_(free)(tweight);
 
   return 1;
