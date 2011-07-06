@@ -206,7 +206,8 @@ static const struct luaL_Reg nnOmp_(SpatialSubSampling__) [] = {
 static void nnOmp_(SpatialSubSampling_init)(lua_State *L)
 {
   luaT_pushmetaclass(L, torch_(Tensor_id));
-  luaT_registeratname(L, nnOmp_(SpatialSubSampling__), "nn");
+  lua_getfield(L,-1,"nn");
+  luaL_register(L, NULL, nnOmp_(SpatialSubSampling__));
   lua_pop(L,1);
 }
 
