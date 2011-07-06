@@ -130,7 +130,7 @@ static int nnOmp_(SpatialSubSampling_backwardOmp)(lua_State *L)
 
     sum = 0;
     for(i = 0; i < outputWidth*outputHeight; i++)
-      sum += gradOutput_data[i];
+      sum += ptr_gradOutput[i];
     gradBias_data[k] += sum;
 
     sum = 0;
