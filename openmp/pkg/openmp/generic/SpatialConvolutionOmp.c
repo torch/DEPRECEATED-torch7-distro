@@ -16,8 +16,8 @@ static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
 
   long nOutputPlane = weight->size[0];
   long nInputPlane  = weight->size[1];
-  long kW           = weight->size[2];
-  long kH           = weight->size[3];
+  long kW           = weight->size[3];
+  long kH           = weight->size[2];
   long inputWidth   = input->size[2];
   long inputHeight  = input->size[1];
   long outputWidth  = (inputWidth - kW) / dW + 1;
