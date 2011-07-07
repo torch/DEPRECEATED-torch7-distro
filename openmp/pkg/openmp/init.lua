@@ -82,6 +82,8 @@ function openmp.enable ()
 
    nn_enable(torch.DoubleTensor)
    nn_enable(torch.FloatTensor)
+
+   openmp.enabled = true
 end
 
 function openmp.disable ()
@@ -90,6 +92,9 @@ function openmp.disable ()
 
    nn_disable(torch.DoubleTensor)
    nn_disable(torch.FloatTensor)
+
+   openmp.enabled = false
 end
 
+openmp.enabled = false
 openmp.enable()
