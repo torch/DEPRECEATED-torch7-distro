@@ -1,4 +1,4 @@
-SET(src Storage.c init.c)
+SET(src Storage.c init.c Tensor.c)
 SET(luasrc init.lua)
 
 SET(src ${src})
