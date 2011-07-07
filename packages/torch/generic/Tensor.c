@@ -430,10 +430,43 @@ static int torch_Tensor_(__newindex__)(lua_State *L)
   if(lua_isnumber(L, 2))
   {
     long index = luaL_checklong(L,2)-1;
-    real value = (real)luaL_checknumber(L,3);
-    luaL_argcheck(L, tensor->nDimension == 1, 1, "must be a one dimensional tensor");
-    luaL_argcheck(L, index >= 0 && index < tensor->size[0], 2, "out of range");
-    (tensor->storage->data+tensor->storageOffset)[index*tensor->stride[0]] = value;
+    void *src;
+    if (lua_isnumber(L,3)) {
+      real value = (real)luaL_checknumber(L,3);
+      luaL_argcheck(L, tensor->nDimension == 1, 1, "must be a one dimensional tensor");
+      luaL_argcheck(L, index >= 0 && index < tensor->size[0], 2, "out of range");
+      (tensor->storage->data+tensor->storageOffset)[index*tensor->stride[0]] = value;
+    } else if( (src = luaT_toudata(L, 3, torch_Tensor_id)) ) {      
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copy)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_ByteTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyByte)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_CharTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyChar)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_ShortTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyShort)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_IntTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyInt)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_LongTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyLong)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_FloatTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyFloat)(tensor, src);
+    } else {
+      luaL_typerror(L, 3, "torch.*Tensor"); 
+    }
     lua_pushboolean(L, 1);
   }
   else if((idx = luaT_toudata(L, 2, torch_LongStorage_id)))
