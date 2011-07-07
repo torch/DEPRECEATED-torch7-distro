@@ -6,11 +6,15 @@
 
 #define real float
 #define Real Cuda
+
 #define TH_GENERIC_FILE "generic/THTensor.h"
-
 #include "generic/THTensor.h"
-
 #undef TH_GENERIC_FILE
+
+#define TH_GENERIC_FILE "generic/THTensorCopy.h"
+#include "generic/THTensorCopy.h"
+#undef TH_GENERIC_FILE
+
 #undef real
 #undef Real
 

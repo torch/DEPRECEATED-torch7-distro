@@ -1,8 +1,35 @@
 #include "THCTensor.h"
+#include "THCGeneral.h"
+#include "THGeneral.h"
 
 #define NB_THREADS_PER_BLOCK 256
 
-__global__ void THCudaTensor_kernel_fillX(float *data, float value, long size)
+static void THCudaTensor_computesz(THCudaTensor *self, long **sz_, long **st_)
+{
+  long *sz, *st, *szh;
+  int i;
+  
+  THCudaCheck(cudaMalloc(&sz, sizeof(long)*self->nDimension));
+  THCudaCheck(cudaMalloc(&st, sizeof(long)*self->nDimension));
+  szh = (long*)THAlloc(sizeof(long)*self->nDimension);
+
+  for(i = self->nDimension-1; i >= 0; i--)
+  {
+    if(i == self->nDimension-1)
+      szh[i] = 1;
+    else
+      szh[i] = szh[i+1]*self->size[i+1];
+  }
+
+  THCudaCheck(cudaMemcpy(sz, szh, self->nDimension * sizeof(long), cudaMemcpyHostToDevice));
+  THCudaCheck(cudaMemcpy(st, self->stride, self->nDimension * sizeof(long), cudaMemcpyHostToDevice));
+  THFree(szh);
+
+  *sz_ = sz;
+  *st_ = st;
+}
+
+__global__ void THCudaTensor_kernel_fill(float *data, float value, long size)
 {
   long k = blockDim.x * blockIdx.x + threadIdx.x;
   
@@ -10,128 +37,68 @@ __global__ void THCudaTensor_kernel_fillX(float *data, float value, long size)
     data[k] = value;
 }
 
-__global__ void THCudaTensor_kernel_fill(float *data, float value, long size,
-                                         long sz0, long sz1, long sz2, long sz3,
-                                         long st0, long st1, long st2, long st3)
+__global__ void THCudaTensor_kernel_copy(float *dst, 
+                                         long *dst_sz, long *dst_st, int dst_dim,
+                                         float *src,
+                                         long *src_sz, long *src_st, int src_dim,
+                                         long n_elem)
 {
   long k = blockDim.x * blockIdx.x + threadIdx.x;
   
-  if(k < size)
-  { 
-    long idx = 0;
-    long rest = k;
-
-    if(sz0)
+  if(k < n_elem)
+  {
+    long dst_idx = 0;
+    long dst_rest = k;
+    for(int dim = 0; dim < dst_dim; dim++)
     {
-      idx += (rest/sz0)*st0;
-      rest -= rest % sz0;
+      dst_idx += (dst_rest/dst_sz[dim])*dst_st[dim];
+      dst_rest = dst_rest % dst_sz[dim];
     }
 
-    if(sz1)
+    long src_idx = 0;
+    long src_rest = k;
+    for(int dim = 0; dim < src_dim; dim++)
     {
-      idx += (rest/sz1)*st1;
-      rest -= rest % sz1;      
+      src_idx += (src_rest/src_sz[dim])*src_st[dim];
+      src_rest = src_rest % src_sz[dim];
     }
 
-    if(sz2)
-    {
-      idx += (rest/sz2)*st2;
-      rest -= rest % sz2;      
-    }
-
-    if(sz3)
-    {
-      idx += (rest/sz3)*st3;
-      rest -= rest % sz3;      
-    }
-
-    data[idx] = value;
+    dst[dst_idx] = src[src_idx];
   }
-}
-
-void THCudaTensor_fillX(THCudaTensor *self, float value)
-{
-  long size = THCudaTensor_nElement(self);
-
-  long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
-  THCudaTensor_kernel_fillX<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, size);
 }
 
 void THCudaTensor_fill(THCudaTensor *self, float value)
 {
   long size = THCudaTensor_nElement(self);
-  long sz0 = 0, sz1 = 0, sz2 = 0, sz3 = 0, st0 = 0, st1 = 0, st2 = 0, st3 = 0;
 
-  if(self->nDimension == 1)
-  {
-    sz0 = 1;
-
-    st0 = self->stride[0];
-  }
-  else if(self->nDimension == 2)
-  {
-    sz1 = 1;
-    sz0 = self->size[1];
-
-    st1 = self->stride[1];
-    st0 = self->stride[0];
-  }
-  else if(self->nDimension == 3)
-  {
-    sz2 = 1;
-    sz1 = self->size[2];
-    sz0 = sz1*self->size[1];
-
-    st2 = self->stride[2];
-    st1 = self->stride[1];
-    st0 = self->stride[0];
-  }
-  else if(self->nDimension == 4)
-  {
-    sz3 = 1;
-    sz2 = self->size[3];
-    sz1 = sz2*self->size[2];
-    sz0 = sz1*self->size[1];
-
-    st3 = self->stride[3];
-    st2 = self->stride[2];
-    st1 = self->stride[1];
-    st0 = self->stride[0];
-  }
   long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
-  THCudaTensor_kernel_fill<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, size,
-                                                                      sz0, sz1, sz2, sz3,
-                                                                      st0, st1, st2, st3);
+  THCudaTensor_kernel_fill<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, size);
 }
 
-void THByteTensor_copyCuda(THByteTensor *self, THCudaTensor *src)
+void THCudaTensor_copy(THCudaTensor *self, THCudaTensor *src)
 {
-}
+  THArgCheck(THCudaTensor_nElement(self) == THCudaTensor_nElement(src), 2, "sizes do not match"); 
 
-void THCharTensor_copyCuda(THCharTensor *self, THCudaTensor *src)
-{
-}
+  if(THCudaTensor_isContiguous(self) && THCudaTensor_isContiguous(src))
+    THCudaCheck(cudaMemcpy(self->storage->data + self->storageOffset, src->storage->data + src->storageOffset, THCudaTensor_nElement(src) * sizeof(float), cudaMemcpyDeviceToDevice));
+  else
+  {    
+    long *d_self_sz, *d_self_st, *d_src_sz, *d_src_st;
+    long nElement = THCudaTensor_nElement(self);
+    long nbBlocksPerGrid = (nElement + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
 
-void THShortTensor_copyCuda(THShortTensor *self, THCudaTensor *src)
-{
-}
+    THCudaTensor_computesz(self, &d_self_sz, &d_self_st);
+    THCudaTensor_computesz(src, &d_src_sz, &d_src_st);
+    
+    THCudaTensor_kernel_copy<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), 
+                                                                        d_self_sz, d_self_st, self->nDimension,
+                                                                        THCudaTensor_data(src),
+                                                                        d_src_sz, d_src_st, src->nDimension,
+                                                                        nElement);
 
-void THIntTensor_copyCuda(THIntTensor *self, THCudaTensor *src)
-{
-}
-
-void THLongTensor_copyCuda(THLongTensor *self, THCudaTensor *src)
-{
-}
-
-void THFloatTensor_copyCuda(THFloatTensor *self, THCudaTensor *src)
-{
-}
-
-void THDoubleTensor_copyCuda(THDoubleTensor *self, THCudaTensor *src)
-{
-}
-
-void THCudaTensor_copyCuda(THCudaTensor *self, THCudaTensor *src)
-{
+    THCudaCheck(cudaFree(d_self_sz));
+    THCudaCheck(cudaFree(d_self_st));
+    THCudaCheck(cudaFree(d_src_sz));
+    THCudaCheck(cudaFree(d_src_st));
+  }
 }

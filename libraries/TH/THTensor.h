@@ -10,4 +10,7 @@
 #include "generic/THTensor.h"
 #include "THGenerateAllTypes.h"
 
+#include "generic/THTensorCopy.h"
+#include "THGenerateAllTypes.h"
+
 #endif

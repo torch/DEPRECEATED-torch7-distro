@@ -1042,6 +1042,22 @@ int luaT_cmt__call(lua_State *L)
 
 int luaT_cmt__newindex(lua_State *L)
 {
-  luaL_error(L, "constructor tables are read-only");
+  if(!lua_istable(L, 1))
+    luaL_error(L, "internal error in __newindex: not a constructor table");
+
+  if(!lua_getmetatable(L, 1))
+    luaL_error(L, "internal error in __newindex: no metatable available");
+
+  lua_pushstring(L, "__metatable");
+  lua_rawget(L, -2);
+
+  if(!lua_istable(L, -1))
+    luaL_error(L, "internal error in __newindex: no metaclass available");
+
+  lua_insert(L, 2);
+  lua_pop(L, 1); /* remove the metatable over the constructor table */
+
+  lua_rawset(L, -3);
+
   return 0;
 }

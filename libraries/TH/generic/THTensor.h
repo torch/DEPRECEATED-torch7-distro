@@ -95,6 +95,7 @@ TH_API long THTensor_(nElement)(THTensor *self);
 
 TH_API void THTensor_(retain)(THTensor *self);
 TH_API void THTensor_(free)(THTensor *self);
+TH_API void THTensor_(freeCopyTo)(THTensor *self, THTensor *dest);
 
 /* Slow access methods [check everything] */
 TH_API void THTensor_(set1d)(THTensor *tensor, long x0, real value);
@@ -106,24 +107,5 @@ TH_API real THTensor_(get1d)(THTensor *tensor, long x0);
 TH_API real THTensor_(get2d)(THTensor *tensor, long x0, long x1);
 TH_API real THTensor_(get3d)(THTensor *tensor, long x0, long x1, long x2);
 TH_API real THTensor_(get4d)(THTensor *tensor, long x0, long x1, long x2, long x3);
-
-/* Support for copy between different Tensor types */
-
-struct THByteTensor;
-struct THCharTensor;
-struct THShortTensor;
-struct THIntTensor;
-struct THLongTensor;
-struct THFloatTensor;
-struct THDoubleTensor;
-
-TH_API void THTensor_(copy)(THTensor *tensor, THTensor *src);
-TH_API void THTensor_(copyByte)(THTensor *tensor, struct THByteTensor *src);
-TH_API void THTensor_(copyChar)(THTensor *tensor, struct THCharTensor *src);
-TH_API void THTensor_(copyShort)(THTensor *tensor, struct THShortTensor *src);
-TH_API void THTensor_(copyInt)(THTensor *tensor, struct THIntTensor *src);
-TH_API void THTensor_(copyLong)(THTensor *tensor, struct THLongTensor *src);
-TH_API void THTensor_(copyFloat)(THTensor *tensor, struct THFloatTensor *src);
-TH_API void THTensor_(copyDouble)(THTensor *tensor, struct THDoubleTensor *src);
 
 #endif

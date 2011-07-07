@@ -202,6 +202,14 @@ static int torch_Tensor_(new)(lua_State *L)
   return 1;
 }
 
+static int torch_Tensor_(contiguous)(lua_State *L)
+{
+  THTensor *self = luaT_checkudata(L, 1, torch_Tensor_id);
+  self = THTensor_(newContiguous)(self, 0);
+  luaT_pushudata(L, self, torch_Tensor_id);  
+  return 1;
+}
+
 /* Resize */
 static int torch_Tensor_(resizeAs)(lua_State *L)
 {
@@ -814,6 +822,7 @@ static int torch_Tensor_(read)(lua_State *L)
 }
 
 static const struct luaL_Reg torch_Tensor_(_) [] = {
+  {"contiguous", torch_Tensor_(contiguous)},
   {"size", torch_Tensor_(size)},
   {"__len__", torch_Tensor_(size)},
   {"stride", torch_Tensor_(stride)},
@@ -845,14 +854,8 @@ static const struct luaL_Reg torch_Tensor_(_) [] = {
 void torch_Tensor_(init)(lua_State *L)
 {
   torch_File_id = luaT_checktypename2id(L, "torch.File");
-
-  torch_ByteStorage_id = luaT_checktypename2id(L, "torch.ByteStorage");
-  torch_CharStorage_id = luaT_checktypename2id(L, "torch.CharStorage");
-  torch_ShortStorage_id = luaT_checktypename2id(L, "torch.ShortStorage");
-  torch_IntStorage_id = luaT_checktypename2id(L, "torch.IntStorage");
   torch_LongStorage_id = luaT_checktypename2id(L, "torch.LongStorage");
-  torch_FloatStorage_id = luaT_checktypename2id(L, "torch.FloatStorage");
-  torch_DoubleStorage_id = luaT_checktypename2id(L, "torch.DoubleStorage");
+  torch_Storage_id = luaT_checktypename2id(L, STRING_torchStorage);
 
   torch_Tensor_id = luaT_newmetatable(L, STRING_torchTensor, NULL,
                                  torch_Tensor_(new), torch_Tensor_(free), torch_Tensor_(factory));

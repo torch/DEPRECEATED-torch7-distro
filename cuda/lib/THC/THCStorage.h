@@ -10,6 +10,10 @@
 #include "generic/THStorage.h"
 #undef TH_GENERIC_FILE
 
+#define TH_GENERIC_FILE "generic/THStorageCopy.h"
+#include "generic/THStorageCopy.h"
+#undef TH_GENERIC_FILE
+
 #undef real
 #undef Real
 

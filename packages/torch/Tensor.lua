@@ -2,14 +2,14 @@
 local function Storage__printformat(self)
    local intMode = true
    local type = torch.typename(self)
-   if type == 'torch.FloatStorage' or type == 'torch.DoubleStorage' then
+--   if type == 'torch.FloatStorage' or type == 'torch.DoubleStorage' then
       for i=1,self:size() do
          if self[i] ~= math.ceil(self[i]) then
             intMode = false
             break
          end
       end
-   end
+--   end
    local tensor = torch.DoubleTensor(torch.DoubleStorage(self:size()):copy(self), 1, self:size()):abs()
    local expMin = tensor:min()
    if expMin ~= 0 then
