@@ -76,6 +76,7 @@ function Tester:run()
 	 print('Function call failed: Test No ' .. i .. ' ' .. self.testnames[i])
 	 print(message)
       end
+      collectgarbage()
    end
    print()
    print()

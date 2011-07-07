@@ -70,8 +70,8 @@ function nn.jacobian.test_jac_param (module, input, param, dparam, minval, maxva
    local inrange = maxval - minval
    input:copy(lab.rand(input:nElement()):mul(inrange):add(minval))
    param:copy(lab.rand(param:nElement()):mul(inrange):add(minval))
-   jac_bprop = nn.jacobian.get_jac_bprop(module, input, param, dparam)
-   jac_fprop = nn.jacobian.get_jac_fprop(module, input, param)
+   local jac_bprop = nn.jacobian.get_jac_bprop(module, input, param, dparam)
+   local jac_fprop = nn.jacobian.get_jac_fprop(module, input, param)
    local error = jac_fprop - jac_bprop
    return error:abs():max()
 end

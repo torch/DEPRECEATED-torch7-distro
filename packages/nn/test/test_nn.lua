@@ -258,6 +258,48 @@ function nntest.SpatialConvolution()
    mytester:assert_eq(0, berr, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.SpatialSubSampling()
+   local from = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(10,20)
+   local outj = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.SpatialSubSampling(from, ki, kj, si, sj)
+   local input = torch.Tensor(from, inj, ini):zero()
+   
+   local err = jac.test_jac(module, input)
+   mytester:assert_lt(err, precision, 'error on state ')
+   
+   local err = jac.test_jac_param(module, input, module.weight, module.gradWeight)
+   mytester:assert_lt(err , precision, 'error on weight ')
+   
+   local err = jac.test_jac_param(module, input, module.bias, module.gradBias)
+   mytester:assert_lt(err , precision, 'error on bias ')
+   
+   local ferr, berr = jac.test_io(module, input)
+   mytester:assert_eq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
+   mytester:assert_eq(0, berr, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.Sum()
+   local ini = math.random(10,20)
+   local inj = math.random(10,20)
+   local ink = math.random(10,20)
+   local input = torch.Tensor(ini,inj*ink):zero()
+   local module = nn.Sum(1)
+
+   local err = jac.test_jac(module,input)
+   mytester:assert_lt(err,precision, 'error on state ')
+
+   local ferr,berr = jac.test_io(module,input)
+   mytester:assert_eq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:assert_eq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
 function nntest.Tanh()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
@@ -273,6 +315,55 @@ function nntest.Tanh()
    mytester:assert_eq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
    mytester:assert_eq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
+
+function nntest.TemporalConvolution()
+   local from = math.random(1,10)
+   local to = math.random(1,10)
+   local ki = math.random(1,10)
+   local si = math.random(1,4)
+   local outi = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local module = nn.TemporalConvolution(from, to, ki,si)
+   local input = torch.Tensor(ini, from):zero()
+   
+   local err = jac.test_jac(module, input)
+   mytester:assert_lt(err, precision, 'error on state ')
+   
+   local err = jac.test_jac_param(module, input, module.weight, module.gradWeight)
+   mytester:assert_lt(err , precision, 'error on weight ')
+   
+   local err = jac.test_jac_param(module, input, module.bias, module.gradBias)
+   mytester:assert_lt(err , precision, 'error on bias ')
+   
+   local ferr, berr = jac.test_io(module, input)
+   mytester:assert_eq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
+   mytester:assert_eq(0, berr, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.TemporalSubSampling()
+   local from = math.random(1,10)
+   local ki = math.random(1,10)
+   local si = math.random(1,4)
+   local outi = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local module = nn.TemporalSubSampling(from, ki, si)
+   local input = torch.Tensor(ini, from):zero()
+   
+   local err = jac.test_jac(module, input)
+   mytester:assert_lt(err, precision, 'error on state ')
+   
+   local err = jac.test_jac_param(module, input, module.weight, module.gradWeight)
+   mytester:assert_lt(err , precision, 'error on weight ')
+   
+   local err = jac.test_jac_param(module, input, module.bias, module.gradBias)
+   mytester:assert_lt(err , precision, 'error on bias ')
+   
+   local ferr, berr = jac.test_io(module, input)
+   mytester:assert_eq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
+   mytester:assert_eq(0, berr, torch.typename(module) .. ' - i/o backward err ')
+end
+
+
 
 mytester:add(nntest)
 --mytester:add(test_SpatialConvolution)
