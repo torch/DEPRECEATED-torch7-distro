@@ -137,6 +137,8 @@ function lab.closeall()
 	 v=nil
       end
    end
+   _gptable = {}
+   findgnuplot()
    _gptable.current = nil
 end
 
