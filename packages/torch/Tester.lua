@@ -89,6 +89,8 @@ function Tester:run()
       end
       collectgarbage()
    end
+   pstr = statstr .. '  ==> Done '
+   io.write('\r' .. pstr)
    print()
    print()
    self:report()
