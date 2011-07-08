@@ -202,6 +202,22 @@ static int torch_Tensor_(new)(lua_State *L)
   return 1;
 }
 
+static int torch_Tensor_(clone)(lua_State *L)
+{
+  THTensor *self = luaT_checkudata(L, 1, torch_Tensor_id);
+  self = THTensor_(newClone)(self);
+  luaT_pushudata(L, self, torch_Tensor_id);
+  return 1;
+}
+
+static int torch_Tensor_(contiguous)(lua_State *L)
+{
+  THTensor *self = luaT_checkudata(L, 1, torch_Tensor_id);
+  self = THTensor_(newContiguous)(self);
+  luaT_pushudata(L, self, torch_Tensor_id);
+  return 1;
+}
+
 /* Resize */
 static int torch_Tensor_(resizeAs)(lua_State *L)
 {
@@ -822,6 +838,8 @@ static const struct luaL_Reg torch_Tensor_(_) [] = {
   {"nDimension", torch_Tensor_(nDimension)},
   {"storage", torch_Tensor_(storage)},
   {"storageOffset", torch_Tensor_(storageOffset)},
+  {"clone", torch_Tensor_(clone)},
+  {"contiguous", torch_Tensor_(contiguous)},
   {"resizeAs", torch_Tensor_(resizeAs)},
   {"resize", torch_Tensor_(resize)},
   {"narrow", torch_Tensor_(narrow)},

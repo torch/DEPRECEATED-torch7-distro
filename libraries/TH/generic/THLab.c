@@ -671,8 +671,8 @@ void THLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
   THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
 
-  THTensor *input = THTensor_(newContiguous)(t_, 0);
-  THTensor *kernel = THTensor_(newContiguous)(k_, 0);
+  THTensor *input = THTensor_(newContiguous)(t_);
+  THTensor *kernel = THTensor_(newContiguous)(k_);
 
   nInputPlane = input->size[0];
   istride0    = input->stride[0];
@@ -747,8 +747,8 @@ void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
   THArgCheck(*type == 'v' || *type == 'f', 7, "type of convolution can 'v' or 'f'");
 
-  THTensor *input = THTensor_(newContiguous)(t_, 0);
-  THTensor *kernel = THTensor_(newContiguous)(k_, 0);
+  THTensor *input = THTensor_(newContiguous)(t_);
+  THTensor *kernel = THTensor_(newContiguous)(k_);
 
   nInputPlane = input->size[0];
   istride0    = input->stride[0];
@@ -833,10 +833,10 @@ void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long 
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
   THArgCheck(*type == 'v' || *type == 'f', 7, "type of convolution can 'v' or 'f'");
 
-  THTensor *input = THTensor_(newContiguous)(t_, 0);
+  THTensor *input = THTensor_(newContiguous)(t_);
   THTensor* kernel;
   if (!(k_->stride[3] == 1) || !(k_->stride[2] == k_->size[3])) {
-    kernel = THTensor_(newContiguous)(k_, 0);
+    kernel = THTensor_(newContiguous)(k_);
   } else {
     THTensor_(retain)(k_);
     kernel = k_;
@@ -921,8 +921,8 @@ void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
   THArgCheck(*type == 'v' || *type == 'f', 7, "type of convolution can 'v' or 'f'");
 
-  THTensor *input = THTensor_(newContiguous)(t_, 0);
-  THTensor* kernel = THTensor_(newContiguous)(k_, 0);
+  THTensor *input = THTensor_(newContiguous)(t_);
+  THTensor* kernel = THTensor_(newContiguous)(k_);
 
   long nInputRows  = input->size[0];
   long nInputCols  = input->size[1];
