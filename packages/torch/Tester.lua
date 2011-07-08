@@ -66,9 +66,11 @@ function Tester:run()
       
       --clear
       io.write('\r' .. string.rep(' ', pstr:len()))
+      io.flush()
       --write
       pstr = statstr:sub(1,i-1) .. '|' .. statstr:sub(i+1) .. '  ==> ' .. self.curtestname
       io.write('\r' .. pstr)
+      io.flush()
       
       local stat, message, pass = self:pcall(v)
       
