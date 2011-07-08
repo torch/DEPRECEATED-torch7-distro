@@ -65,4 +65,4 @@ torch.include('nn', 'MarginRankingCriterion.lua')
 torch.include('nn', 'StochasticGradient.lua')
 
 torch.include('nn', 'Jacobian.lua')
-torch.include('nn', 'test_nn.lua')
+torch.include('nn', 'test.lua')

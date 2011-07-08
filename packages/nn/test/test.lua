@@ -1,12 +1,7 @@
 require 'torch'
 
-if not nn then
-   require 'nn'
-   nn.test()
-end
-
 local mytester = torch.Tester()
-local jac = nn.Jacobian
+local jac
 
 local precision = 1e-5
 
@@ -21,7 +16,7 @@ function nntest.Add()
 
    local err = jac.testJacobian(module,input)
    mytester:assertlt(err,precision, 'error on state ')
-   local err = jac.testJacobianParam(module, input, module.bias, module.gradBias)
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err,precision, 'error on bias ')
 
    local ferr,berr = jac.testIO(module,input)
@@ -39,7 +34,7 @@ function nntest.CMul()
    local err = jac.testJacobian(module,input)
    mytester:assertlt(err,precision, 'error on state ')
 
-   local err = jac.testJacobianParam(module, input, module.weight, module.gradWeight)
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
    mytester:assertlt(err,precision, 'error on weight ')
 
    local ferr,berr = jac.testIO(module,input)
@@ -87,10 +82,10 @@ function nntest.Linear()
    local err = jac.testJacobian(module,input)
    mytester:assertlt(err,precision, 'error on state ')
 
-   local err = jac.testJacobianParam(module, input, module.weight, module.gradWeight)
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
    mytester:assertlt(err,precision, 'error on weight ')
 
-   local err = jac.testJacobianParam(module, input, module.bias, module.gradBias)
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err,precision, 'error on weight ')
 
    local ferr,berr = jac.testIO(module,input)
@@ -182,7 +177,7 @@ function nntest.Mul()
 
    local err = jac.testJacobian(module,input)
    mytester:assertlt(err,precision, 'error on state ')
-   local err = jac.testJacobianParam(module, input, module.weight, module.gradWeight)
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
    mytester:assertlt(err,precision, 'error on bias ')
 
    local ferr,berr = jac.testIO(module,input)
@@ -253,10 +248,10 @@ function nntest.SpatialConvolution()
    local err = jac.testJacobian(module, input)
    mytester:assertlt(err, precision, 'error on state ')
    
-   local err = jac.testJacobianParam(module, input, module.weight, module.gradWeight)
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
    mytester:assertlt(err , precision, 'error on weight ')
    
-   local err = jac.testJacobianParam(module, input, module.bias, module.gradBias)
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
    
    local ferr, berr = jac.testIO(module, input)
@@ -280,10 +275,10 @@ function nntest.SpatialSubSampling()
    local err = jac.testJacobian(module, input)
    mytester:assertlt(err, precision, 'error on state ')
    
-   local err = jac.testJacobianParam(module, input, module.weight, module.gradWeight)
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
    mytester:assertlt(err , precision, 'error on weight ')
    
-   local err = jac.testJacobianParam(module, input, module.bias, module.gradBias)
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
    
    local ferr, berr = jac.testIO(module, input)
@@ -335,10 +330,10 @@ function nntest.TemporalConvolution()
    local err = jac.testJacobian(module, input)
    mytester:assertlt(err, precision, 'error on state ')
    
-   local err = jac.testJacobianParam(module, input, module.weight, module.gradWeight)
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
    mytester:assertlt(err , precision, 'error on weight ')
    
-   local err = jac.testJacobianParam(module, input, module.bias, module.gradBias)
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
    
    local ferr, berr = jac.testIO(module, input)
@@ -358,10 +353,10 @@ function nntest.TemporalSubSampling()
    local err = jac.testJacobian(module, input)
    mytester:assertlt(err, precision, 'error on state ')
    
-   local err = jac.testJacobianParam(module, input, module.weight, module.gradWeight)
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
    mytester:assertlt(err , precision, 'error on weight ')
    
-   local err = jac.testJacobianParam(module, input, module.bias, module.gradBias)
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
    
    local ferr, berr = jac.testIO(module, input)
@@ -375,7 +370,13 @@ mytester:add(nntest)
 --mytester:add(test_SpatialConvolution)
 --mytester:add(test_AbsCriterion)
 
-function nn.test()
+if not nn then
+   require 'nn'
+   jac = nn.Jacobian
    mytester:run()
+else
+   jac = nn.Jacobian
+   function nn.test()
+      mytester:run()
+   end
 end
-
