@@ -1,6 +1,6 @@
-nn.jacobian = {}
+nn.Jacobian = {}
 
-function nn.jacobian.get_jac_bprop (module, input, param, dparam)
+function nn.Jacobian.getJacBprop (module, input, param, dparam)
    local doparam = 0
    if param then
       doparam = 1
@@ -27,7 +27,7 @@ function nn.jacobian.get_jac_bprop (module, input, param, dparam)
    return jacobian
 end
 
-function nn.jacobian.get_jac_fprop(module, input, param)
+function nn.Jacobian.getJacFprop(module, input, param)
    param = param or input
    -- perturbation amount
    local small = 1e-6
@@ -53,30 +53,30 @@ function nn.jacobian.get_jac_fprop(module, input, param)
    return jacobian
 end
 
-function nn.jacobian.test_jac (module, input, minval, maxval)
+function nn.Jacobian.testJacobian (module, input, minval, maxval)
    minval = minval or -2
    maxval = maxval or 2
    local inrange = maxval - minval
    input:copy(lab.rand(input:nElement()):mul(inrange):add(minval))
-   local jac_fprop = nn.jacobian.get_jac_fprop(module,input)
-   local jac_bprop = nn.jacobian.get_jac_bprop(module,input)
+   local jac_fprop = nn.Jacobian.getJacFprop(module,input)
+   local jac_bprop = nn.Jacobian.getJacBprop(module,input)
    local error = jac_fprop:dist(jac_bprop,2)
    return error
 end
 
-function nn.jacobian.test_jac_param (module, input, param, dparam, minval, maxval)
+function nn.Jacobian.testJacobianParam (module, input, param, dparam, minval, maxval)
    minval = minval or -2
    maxval = maxval or 2
    local inrange = maxval - minval
    input:copy(lab.rand(input:nElement()):mul(inrange):add(minval))
    param:copy(lab.rand(param:nElement()):mul(inrange):add(minval))
-   local jac_bprop = nn.jacobian.get_jac_bprop(module, input, param, dparam)
-   local jac_fprop = nn.jacobian.get_jac_fprop(module, input, param)
+   local jac_bprop = nn.Jacobian.getJacBprop(module, input, param, dparam)
+   local jac_fprop = nn.Jacobian.getJacFprop(module, input, param)
    local error = jac_fprop - jac_bprop
    return error:abs():max()
 end
 
-function nn.jacobian.test_io(module,input, minval, maxval)
+function nn.Jacobian.testIO(module,input, minval, maxval)
    minval = minval or -2
    maxval = maxval or 2
    local inrange = maxval - minval
@@ -98,7 +98,7 @@ function nn.jacobian.test_io(module,input, minval, maxval)
    m:forward(input)
    m:backward(input,go)
    -- cleanup
-   os.execute('rm tmp.bin')
+   os.remove('tmp.bin')
 
    local fo2 = torch.Tensor():resizeAs(m.output):copy(m.output)
    local bo2 = torch.Tensor():resizeAs(m.gradInput):copy(m.gradInput)

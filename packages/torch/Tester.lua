@@ -19,19 +19,19 @@ end
 function Tester:assert (condition, message)
    self:assert_sub(condition,string.format('%s\n%s  condition=%s',message,' BOOL violation ', tostring(condition)))
 end
-function Tester:assert_lt (val, condition, message)
+function Tester:assertlt (val, condition, message)
    self:assert_sub(val<condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
 end
-function Tester:assert_gt (val, condition, message)
+function Tester:assertgt (val, condition, message)
    self:assert_sub(val>condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
 end
-function Tester:assert_le (val, condition, message)
+function Tester:assertle (val, condition, message)
    self:assert_sub(val<=condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
 end
-function Tester:assert_ge (val, condition, message)
+function Tester:assertge (val, condition, message)
    self:assert_sub(val>=condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
 end
-function Tester:assert_eq (val, condition, message)
+function Tester:asserteq (val, condition, message)
    self:assert_sub(val==condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
 end
 
@@ -58,17 +58,26 @@ end
 
 function Tester:run()
    print('Running ' .. #self.tests .. ' tests')
-   io.write(string.rep('_',#self.tests).. '\r')
+   local statstr = string.rep('_',#self.tests)
+   local pstr = ''
+   io.write(statstr .. '\r')
    for i,v in ipairs(self.tests) do
-      io.write(string.format('|'))
       self.curtestname = self.testnames[i]
+      
+      --clear
+      io.write('\r' .. string.rep(' ', pstr:len()))
+      --write
+      pstr = statstr:sub(1,i-1) .. '|' .. statstr:sub(i+1) .. '  ==> ' .. self.curtestname
+      io.write('\r' .. pstr)
       
       local stat, message, pass = self:pcall(v)
       
       if pass then
-	 io.write(string.format('\b_'))
+	 --io.write(string.format('\b_'))
+	 statstr = statstr:sub(1,i-1) .. '_' .. statstr:sub(i+1)
       else
-	 io.write(string.format('\b*'))
+	 statstr = statstr:sub(1,i-1) .. '*' .. statstr:sub(i+1)
+	 --io.write(string.format('\b*'))
       end
       
       if not stat then
