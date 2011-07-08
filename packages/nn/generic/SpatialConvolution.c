@@ -35,7 +35,7 @@ static int nn_(SpatialConvolution_forward)(lua_State *L)
   THTensor_(free)(outn);
 
   /* do convolutions */
-  THLab_(conv2Dmv)(output, 1.0, input, weight, dH, dW, "valid");
+  THLab_(conv2Dmv)(output, 1.0, input, weight, dH, dW, "vx");
 
   return 1;
 }
@@ -73,7 +73,7 @@ static int nn_(SpatialConvolution_backward)(lua_State *L)
 
   /* gradient to input */
   THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
-  THLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "full");
+  THLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "fx");
   THTensor_(free)(tweight);
 
   return 1;
