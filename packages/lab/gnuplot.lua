@@ -4,22 +4,108 @@ require 'paths'
 local _gptable = {}
 _gptable.current = nil
 _gptable.term = nil
+_gptable.exe = nil
+
+local function getexec()
+   if not _gptable.exe then
+      error('gnuplot executable is not set')
+   end
+   return _gptable.exe
+end
+
+local function findos()
+   if paths.dirp('C:\\') then
+      return 'windows'
+   else
+      local ff = io.popen('uname -a','r')
+      local s = ff:read('*all')
+      ff:close()
+      if s:match('Darwin') then
+	 return 'mac'
+      elseif s:match('Linux') then
+	 return 'linux'
+      else
+	 --error('I don\'t know your operating system')
+	 return '?'
+      end
+   end
+end
+
+local function gnuplothasterm(term)
+   if not _gptable.exe then
+      return false--error('gnuplot exe is not found, can not chcek terminal')
+   end
+   local tfni = os.tmpname()
+   local tfno = os.tmpname()
+   local fi = io.open(tfni,'w')
+   fi:write('set terminal\n\n')
+   fi:close()
+   os.execute(getexec() .. ' < ' .. tfni .. ' 2> ' .. tfno)
+   local tf = io.open(tfno,'r')
+   local s = tf:read('*l')
+   while s do
+      if s:match('^.*%s+  '.. term .. ' ') then
+	 return true
+      end
+      s = tf:read('*l')
+   end
+   return false
+end
+
+local function findgnuplotexe()
+   local os = findos()
+   if os == 'windows' then
+      return 'gnuplot.exe' -- I don't know how to find executables in Windows
+   else
+      local ff = io.popen('which gnuplot','r')
+      local s=ff:read('*l')
+      ff:close()
+      if s and s:len() > 0 and s:match('gnuplot') then
+	 return s
+      else
+	 return nil
+      end
+   end
+end
+
+local function findgnuplot()
+   local exe = findgnuplotexe()
+   local os = findos()
+   if not exe then
+      return nil--error('I could not find gnuplot exe')
+   end
+   _gptable.exe = exe
+
+   if os == 'windows' and gnuplothasterm('windows') then
+      _gptable.term = 'windows'
+   elseif os == 'linux' and gnuplothasterm('x11') then
+      _gptable.term = 'x11'
+   elseif os == 'mac' and gnuplothasterm('aqua') then
+      _gptable.term = 'aqua'
+   elseif os == 'mac' and gnuplothasterm('aqua') then
+      _gptable.term = 'aqua'
+   elseif os == 'mac' and gnuplothasterm('x11') then
+      _gptable.term = 'x11'
+   else
+      return nil--error('can not find terminal')
+   end
+end
 
 function lab.setgnuplotexe(exe)
    if paths.filep(exe) then
       _gptable.exe = exe
+      print('You have manually set the gnuplot exe, run lab.setgnuplotterminal("terminal-name") to set term type')
    else
       error(exe .. ' does not exist')
    end
 end
 
-function findgnuplot()
-   if paths.dirp('C:\\') then
-      _gptable.term = 'windows'
-      return nil
+function lab.setgnuplotterminal(term)
+   if gnuplothasterm(term) then
+      _gptable.term = term
+   else
+      error('gnuplot does not seem to have this term')
    end
-   _gptable.term = 'x11'
-   return _gptable.term
 end
 
 local function getCurrentPlot()
@@ -93,7 +179,7 @@ local function getvars(t)
       end
    end
    legend = legend or 'data'
-   format = format or '.-'
+   format = format or '.'
    if not x then
       error('expecting [string,] tensor [,tensor] [,string]')
    end
@@ -144,7 +230,7 @@ end
 
 function lab.epsfigure(fname)
    local n = #_gptable+1
-   _gptable[n] = torch.PipeFile('gnuplot -persist ','w')
+   _gptable[n] = torch.PipeFile(getexec() .. ' -persist ','w')
    _gptable.current = n
    writeToCurrent('set term postscript eps enhanced color')
    writeToCurrent('set output \''.. fname .. '\'')
@@ -152,7 +238,7 @@ end
 
 function lab.pngfigure(fname)
    local n = #_gptable+1
-   _gptable[n] = torch.PipeFile('gnuplot -persist ','w')
+   _gptable[n] = torch.PipeFile(getexec() .. ' -persist ','w')
    _gptable.current = n
    writeToCurrent('set term png')
    writeToCurrent('set output \''.. fname .. '\'')
@@ -175,7 +261,7 @@ function lab.figure(n)
    local nfigures = #_gptable
    if not n or _gptable[n] == nil then -- we want new figure
       n = n or #_gptable+1
-      _gptable[n] = torch.PipeFile('gnuplot -persist ','w')
+      _gptable[n] = torch.PipeFile(getexec() .. ' -persist ','w')
    end
    _gptable.current = n
    writeToCurrent('set term ' .. _gptable.term .. ' ' .. n .. '\n')
@@ -183,7 +269,7 @@ end
 
 function lab.gnuplot(legend,x,y,format)
    local hdr,data = lab.gnuplot_string(legend,x,y,format)
-   writeToCurrent('set pointsize 2')
+   --writeToCurrent('set pointsize 2')
    writeToCurrent(hdr)
    writeToCurrent(data)
 end
@@ -218,7 +304,16 @@ function lab.grid(toggle)
       print('toggle expects 1 for grid on, 0 for grid off')
    end
 end
-
+function lab.movelegend(hloc,vloc)
+   if hloc ~= 'left' and hloc ~= 'right' and hloc ~= 'center' then
+      error('horizontal location is unknown : lab.movelegend expects 2 strings as location {left|right|center}{bottom|top|middle}')
+   end
+   if vloc ~= 'bottom' and vloc ~= 'top' and vloc ~= 'middle' then
+      error('horizontal location is unknown : lab.movelegend expects 2 strings as location {left|right|center}{bottom|top|middle}')
+   end
+   writeToCurrent('set key ' .. hloc .. ' ' .. vloc)
+   writeToCurrent('refresh')
+end
 function lab.gnuplotraw(str)
    writeToCurrent(str)
 end
