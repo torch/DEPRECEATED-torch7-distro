@@ -265,6 +265,7 @@ function lab.figure(n)
    end
    _gptable.current = n
    writeToCurrent('set term ' .. _gptable.term .. ' ' .. n .. '\n')
+   return n
 end
 
 function lab.gnuplot(legend,x,y,format)
