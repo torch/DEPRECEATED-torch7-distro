@@ -207,6 +207,7 @@ local function gnuplot_string(legend,x,y,format)
       elseif f == '.' or f == 'dots' then return 'with dots'
       elseif f == '-' or f == 'lines' then return 'with lines'
       elseif f == '+-' or f == 'linespoints' then return 'with linespoints' 
+      elseif f == '|' or f == 'boxes' then return 'with boxes'
       elseif f == '~' or f == 'csplines' then return 'smooth csplines'
       elseif f == 'acsplines' then return 'smooth acsplines'
       end
@@ -368,6 +369,18 @@ function lab.plot(...)
       ydata[#ydata+1] = y
    end
    lab.gnuplot(legends,xdata,ydata,formats)
+end
+
+-- bar(y)
+-- bar(x,y)
+function lab.bar(...)
+   local arg = {...}
+   local nargs = {}
+   for i = 1,select('#',...) do
+      table.insert(nargs,arg[i])
+   end
+   table.insert(nargs, '|')
+   lab.plot(nargs)
 end
 
 findgnuplot()
