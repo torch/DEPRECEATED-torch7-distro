@@ -25,6 +25,7 @@ function Sequential:forward(input)
    for i=1,#self.modules do 
       currentOutput = self.modules[i]:forward(currentOutput)
    end 
+   self.output = currentOutput
    return currentOutput
 end
 
@@ -37,7 +38,8 @@ function Sequential:backward(input, gradOutput)
       currentModule = previousModule
    end
    currentGradOutput = currentModule:backward(input, currentGradOutput)
-  return currentGradOutput
+   self.gradInput = currentGradOutput
+   return currentGradOutput
 end
 
 function Sequential:zeroGradParameters()

@@ -546,7 +546,6 @@ void THLab_(cat)(THTensor *r_, THTensor *ta, THTensor *tb, int dimension)
   }
 }
 
-
 /* floating point only now */
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)

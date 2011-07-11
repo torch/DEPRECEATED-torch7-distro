@@ -27,4 +27,7 @@
 #include "generic/THStorage.h"
 #include "THGenerateAllTypes.h"
 
+#include "generic/THStorageCopy.h"
+#include "THGenerateAllTypes.h"
+
 #endif
