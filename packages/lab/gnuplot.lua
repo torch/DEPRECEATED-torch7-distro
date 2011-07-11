@@ -193,7 +193,7 @@ local function getvars(t)
    return legend,x,y,format
 end
 
-function lab.gnuplot_string(legend,x,y,format)
+local function gnuplot_string(legend,x,y,format)
    local hstr = 'plot '
    local dstr = ""
    local function gformat(f)
@@ -269,7 +269,7 @@ function lab.figure(n)
 end
 
 function lab.gnuplot(legend,x,y,format)
-   local hdr,data = lab.gnuplot_string(legend,x,y,format)
+   local hdr,data = gnuplot_string(legend,x,y,format)
    --writeToCurrent('set pointsize 2')
    writeToCurrent(hdr)
    writeToCurrent(data)
@@ -323,8 +323,10 @@ end
 -- plot(x,'.'), plot(x,'.-')
 -- plot(x,y,'.'), plot(x,y,'.-')
 -- plot({x1,y1,'.'},{x2,y2,'.-'})
+-- plot({{x1,y1,'.'},{x2,y2,'.-'}})
 function lab.plot(...)
-   if arg.n == 0 then
+   local arg = {...}
+   if select('#',...) == 0 then
       error('no inputs, expecting at least a vector')
    end
 
@@ -334,12 +336,15 @@ function lab.plot(...)
    local legends = {}
 
    if type(arg[1]) == "table" then
+      if type(arg[1][1]) == "table" then
+         arg = arg[1]
+      end
       for i,v in ipairs(arg) do
-	 local l,x,y,f = getvars(v)
-	 legends[#legends+1] = l
-	 formats[#formats+1] = f
-	 xdata[#xdata+1] = x
-	 ydata[#ydata+1] = y
+         local l,x,y,f = getvars(v)
+         legends[#legends+1] = l
+         formats[#formats+1] = f
+         xdata[#xdata+1] = x
+         ydata[#ydata+1] = y
       end
    else
       local l,x,y,f = getvars(arg)
