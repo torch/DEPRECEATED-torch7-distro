@@ -18,8 +18,8 @@ void THCudaTensor_copyFloat(THCudaTensor *self, struct THFloatTensor *src)
   THArgCheck(THCudaTensor_nElement(self) == THFloatTensor_nElement(src), 2, "sizes do not match"); 
 
   {
-    THCudaTensor *selfc = THCudaTensor_newContiguous(self, 0);
-    src = THFloatTensor_newContiguous(src, 0);
+    THCudaTensor *selfc = THCudaTensor_newContiguous(self);
+    src = THFloatTensor_newContiguous(src);
   
     THCudaCheck(cudaMemcpy(selfc->storage->data + selfc->storageOffset, src->storage->data + src->storageOffset, THFloatTensor_nElement(src) * sizeof(float), cudaMemcpyHostToDevice));
 
@@ -60,8 +60,8 @@ void THFloatTensor_copyCuda(THFloatTensor *self, struct THCudaTensor *src)
   THArgCheck(THFloatTensor_nElement(self) == THCudaTensor_nElement(src), 2, "sizes do not match"); 
 
   {
-    THFloatTensor *selfc = THFloatTensor_newContiguous(self, 0);
-    src = THCudaTensor_newContiguous(src, 0);
+    THFloatTensor *selfc = THFloatTensor_newContiguous(self);
+    src = THCudaTensor_newContiguous(src);
 
     THCudaCheck(cudaMemcpy(selfc->storage->data + selfc->storageOffset, src->storage->data + src->storageOffset, THCudaTensor_nElement(src) * sizeof(float), cudaMemcpyDeviceToHost));
 
