@@ -178,7 +178,7 @@ local function getvars(t)
 	 error('expecting [string,] tensor [,tensor] [,string]')
       end
    end
-   legend = legend or 'data'
+   legend = legend or ''
    format = format or '.'
    if not x then
       error('expecting [string,] tensor [,tensor] [,string]')
