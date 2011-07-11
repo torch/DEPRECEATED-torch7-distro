@@ -195,21 +195,35 @@ end
 
 local function gnuplot_string(legend,x,y,format)
    local hstr = 'plot '
-   local dstr = ""
+   local dstr = ''
+   local coef
    local function gformat(f)
-      if f == '.' then return 'points' end
-      if f == '-' then return 'lines' end
-      if f == '.-' then return 'linespoints' end
-      error('format string expected to be . or - or .-')
+      if f ~= '~' and f:find('~') or f:find('acsplines') then
+         coef = f:gsub('~',''):gsub('acsplines','')
+         coef = tonumber(coef)
+         f = 'acsplines'
+      end
+      if f == '+'  or f == 'points' then return 'with points'
+      elseif f == '.' or f == 'dots' then return 'with dots'
+      elseif f == '-' or f == 'lines' then return 'with lines'
+      elseif f == '+-' or f == 'linespoints' then return 'with linespoints' 
+      elseif f == '~' or f == 'csplines' then return 'smooth csplines'
+      elseif f == 'acsplines' then return 'smooth acsplines'
+      end
+      error("format string accepted: '.' or '-' or '+' or '+-' or '~' or '~ COEF'")
    end
    for i=1,#legend do
       if i > 1 then hstr = hstr .. ' , ' end
-      hstr = hstr .. " '-' title '" .. legend[i] .. "' with " .. gformat(format[i])
+      hstr = hstr .. " '-' title '" .. legend[i] .. "' " .. gformat(format[i])
    end
    hstr = hstr .. '\n'
    for i=1,#legend do
       for j=1,x[i]:size(1) do
-	 dstr = dstr .. string.format('%g %g\n',x[i][j],y[i][j])
+         if coef then
+            dstr = dstr .. string.format('%g %g %g\n',x[i][j],y[i][j],coef)
+         else
+            dstr = dstr .. string.format('%g %g\n',x[i][j],y[i][j])
+         end
       end
       dstr = string.format('%se\n',dstr)
    end
