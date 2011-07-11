@@ -465,11 +465,6 @@ static int torch_Tensor_(__newindex__)(lua_State *L)
   if(lua_isnumber(L, 2))
   {
     long index = luaL_checklong(L,2)-1;
-<<<<<<< HEAD
-    real value = (real)luaL_checknumber(L,3);
-    luaL_argcheck(L, tensor->nDimension == 1, 1, "must be a one dimensional tensor");
-    THTensor_(set1d)(tensor, index, value);
-=======
     void *src;
     if (lua_isnumber(L,3)) {
       real value = (real)luaL_checknumber(L,3);
@@ -507,7 +502,6 @@ static int torch_Tensor_(__newindex__)(lua_State *L)
     } else {
       luaL_typerror(L, 3, "torch.*Tensor"); 
     }
->>>>>>> master
     lua_pushboolean(L, 1);
   }
   else if((idx = luaT_toudata(L, 2, torch_LongStorage_id)))
