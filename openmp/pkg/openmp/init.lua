@@ -1,7 +1,8 @@
 require 'torch'
 require 'lab'
 require 'nn'
-require 'libopenmp'
+require 'paths'
+paths.require 'libopenmp'
 
 local function spatialConvolution_enable(tensorType)
    tensorType.nn.SpatialConvolution_forward_ = tensorType.nn.SpatialConvolution_forward
