@@ -2,6 +2,8 @@
 #include "luaT.h"
 #include "utils.h"
 
+#include "sys/time.h"
+
 #define torch_(NAME) TH_CONCAT_3(torch_, Real, NAME)
 #define torch_string_(NAME) TH_CONCAT_STRING_3(torch., Real, NAME)
 
@@ -41,6 +43,26 @@ static int lab_getdefaulttensortype(lua_State *L)
   lua_pushstring(L, luaT_id2typename(L, lab_default_tensor_id));
   return 1;
 }
+
+static int lab_tic(lua_State* L)
+{
+  struct timeval tv;
+  gettimeofday(&tv,NULL);
+  double ttime = (double)tv.tv_sec + (double)(tv.tv_usec)/1000000.0;
+  lua_pushnumber(L,ttime);
+  return 1;
+}
+
+static int lab_toc(lua_State* L)
+{
+  struct timeval tv;
+  gettimeofday(&tv,NULL);
+  double toctime = (double)tv.tv_sec + (double)(tv.tv_usec)/1000000.0;
+  lua_Number tictime = luaL_checknumber(L,1);
+  lua_pushnumber(L,toctime-tictime);
+  return 1;
+}
+
 
 
 #define LUAT_DYNT_FUNCTION_WRAPPER(PKG, FUNC)                           \
@@ -145,6 +167,8 @@ LUAT_DYNT_FUNCTION_WRAPPER(lab, triu_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, triu)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, cat_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, cat)
+LUAT_DYNT_FUNCTION_WRAPPER(lab, conv2)
+LUAT_DYNT_FUNCTION_WRAPPER(lab, xcorr2)
 
 LUAT_DYNT_FUNCTION_WRAPPER(lab, log_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, log)
@@ -200,6 +224,8 @@ LUAT_DYNT_CONSTRUCTOR_WRAPPER(lab, randn)
 static const struct luaL_Reg lab_stuff__ [] = {
   {"setdefaulttensortype", lab_setdefaulttensortype},
   {"getdefaulttensortype", lab_getdefaulttensortype},
+  {"tic", lab_tic},
+  {"toc", lab_toc},
 
   {"numel", lab_numel},
   {"max_", lab_max_},
@@ -239,6 +265,8 @@ static const struct luaL_Reg lab_stuff__ [] = {
   {"triu", lab_triu},
   {"cat_", lab_cat_},
   {"cat", lab_cat},
+  {"conv2", lab_conv2},
+  {"xcorr2", lab_xcorr2},
 
   {"log_", lab_log_},
   {"log", lab_log},

@@ -202,11 +202,38 @@ static int torch_Tensor_(new)(lua_State *L)
   return 1;
 }
 
+static int torch_Tensor_(set)(lua_State *L)
+{
+  THTensor *self = luaT_checkudata(L, 1, torch_Tensor_id);
+  THStorage *storage;
+  long storageOffset;
+  THLongStorage *size, *stride;
+
+  torch_Tensor_(c_readTensorStorageSizeStride)(L, 2, 1, 1, 1, 1,
+                                               &storage, &storageOffset, &size, &stride);
+
+  THTensor_(setStorage)(self, storage, storageOffset, size, stride);
+
+  THLongStorage_free(size);
+  THLongStorage_free(stride);
+
+  lua_settop(L, 1);
+  return 1;
+}
+
+static int torch_Tensor_(clone)(lua_State *L)
+{
+  THTensor *self = luaT_checkudata(L, 1, torch_Tensor_id);
+  self = THTensor_(newClone)(self);
+  luaT_pushudata(L, self, torch_Tensor_id);
+  return 1;
+}
+
 static int torch_Tensor_(contiguous)(lua_State *L)
 {
   THTensor *self = luaT_checkudata(L, 1, torch_Tensor_id);
-  self = THTensor_(newContiguous)(self, 0);
-  luaT_pushudata(L, self, torch_Tensor_id);  
+  self = THTensor_(newContiguous)(self);
+  luaT_pushudata(L, self, torch_Tensor_id);
   return 1;
 }
 
@@ -422,7 +449,7 @@ static int torch_Tensor_(copy)(lua_State *L)
     THTensor_(copyLong)(tensor, src);
   else if( (src = luaT_toudata(L, 2, torch_FloatTensor_id)) )
     THTensor_(copyFloat)(tensor, src);
-  else if( (src = luaT_toudata(L, 2, torch_Tensor_id)) )
+  else if( (src = luaT_toudata(L, 2, torch_DoubleTensor_id)) )
     THTensor_(copyDouble)(tensor, src);
   else
     luaL_typerror(L, 2, "torch.*Tensor");
@@ -438,9 +465,49 @@ static int torch_Tensor_(__newindex__)(lua_State *L)
   if(lua_isnumber(L, 2))
   {
     long index = luaL_checklong(L,2)-1;
+<<<<<<< HEAD
     real value = (real)luaL_checknumber(L,3);
     luaL_argcheck(L, tensor->nDimension == 1, 1, "must be a one dimensional tensor");
     THTensor_(set1d)(tensor, index, value);
+=======
+    void *src;
+    if (lua_isnumber(L,3)) {
+      real value = (real)luaL_checknumber(L,3);
+      luaL_argcheck(L, tensor->nDimension == 1, 1, "must be a one dimensional tensor");
+      luaL_argcheck(L, index >= 0 && index < tensor->size[0], 2, "out of range");
+      (tensor->storage->data+tensor->storageOffset)[index*tensor->stride[0]] = value;
+    } else if( (src = luaT_toudata(L, 3, torch_Tensor_id)) ) {      
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copy)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_ByteTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyByte)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_CharTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyChar)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_ShortTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyShort)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_IntTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyInt)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_LongTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyLong)(tensor, src);
+    } else if( (src = luaT_toudata(L, 3, torch_FloatTensor_id)) ) {
+      tensor = THTensor_(newWithTensor)(tensor);
+      THTensor_(narrow)(tensor, NULL, 0, index, 1);
+      THTensor_(copyFloat)(tensor, src);
+    } else {
+      luaL_typerror(L, 3, "torch.*Tensor"); 
+    }
+>>>>>>> master
     lua_pushboolean(L, 1);
   }
   else if((idx = luaT_toudata(L, 2, torch_LongStorage_id)))
@@ -828,8 +895,11 @@ static const struct luaL_Reg torch_Tensor_(_) [] = {
   {"stride", torch_Tensor_(stride)},
   {"dim", torch_Tensor_(nDimension)},
   {"nDimension", torch_Tensor_(nDimension)},
+  {"set", torch_Tensor_(set)},
   {"storage", torch_Tensor_(storage)},
   {"storageOffset", torch_Tensor_(storageOffset)},
+  {"clone", torch_Tensor_(clone)},
+  {"contiguous", torch_Tensor_(contiguous)},
   {"resizeAs", torch_Tensor_(resizeAs)},
   {"resize", torch_Tensor_(resize)},
   {"narrow", torch_Tensor_(narrow)},

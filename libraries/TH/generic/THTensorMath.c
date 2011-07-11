@@ -203,7 +203,7 @@ void THTensor_(addmv)(THTensor *tensor, real alpha, THTensor *mat, THTensor *vec
   }
   else
   {
-    THTensor *cmat = THTensor_(newContiguous)(mat, 0);
+    THTensor *cmat = THTensor_(newContiguous)(mat);
 
     THBlas_(gemv)('t',  mat->size[1], mat->size[0],
                   alpha, THTensor_(data)(cmat), cmat->stride[0],
@@ -241,15 +241,14 @@ void THTensor_(addr)(THTensor *tensor, real alpha, THTensor *vec1, THTensor *vec
   }
   else
   {
-    THTensor *ctensor = THTensor_(newContiguous)(tensor, 1);
+    THTensor *ctensor = THTensor_(newClone)(tensor);
 
     THBlas_(ger)(vec2->size[0], vec1->size[0],
                  alpha, THTensor_(data)(vec2), vec2->stride[0],
                  THTensor_(data)(vec1), vec1->stride[0],
                  THTensor_(data)(ctensor), ctensor->stride[0]);
 
-    THTensor_(copy)(tensor, ctensor);
-    THTensor_(free)(ctensor);
+    THTensor_(freeCopyTo)(ctensor, tensor);
   }
 }
 
@@ -289,7 +288,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   {
     transpose = 'n';
     THTensor_(transpose)(tensor, NULL, 0, 1);
-    tensor_ = THTensor_(newContiguous)(tensor, 1);
+    tensor_ = THTensor_(newClone)(tensor);
     THTensor_(transpose)(tensor, NULL, 0, 1);
     THTensor_(transpose)(tensor_, NULL, 0, 1);
   }
@@ -308,7 +307,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   else
   {
     transpose_m1 = 't';
-    m1_ = THTensor_(newContiguous)(m1, 0);
+    m1_ = THTensor_(newContiguous)(m1);
   }
 
   /* m2 */
@@ -325,7 +324,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
   else
   {
     transpose_m2 = 't';
-    m2_ = THTensor_(newContiguous)(m2, 0);
+    m2_ = THTensor_(newContiguous)(m2);
   }
 
   /* do the operation */
@@ -351,10 +350,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
     THTensor_(free)(m2_);
 
   if(tensor_ != tensor)
-  {
-    THTensor_(copy)(tensor, tensor_);
-    THTensor_(free)(tensor_);
-  }
+    THTensor_(freeCopyTo)(tensor_, tensor);
 
   if(transpose == 't')
   {
@@ -363,5 +359,6 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
     THTensor_(transpose)(m2, NULL, 0, 1);
   }
 } 
+
 
 #endif

@@ -22,7 +22,7 @@ static int nn_(TemporalConvolution_forward)(lua_State *L)
   luaL_argcheck(L, input->size[1] == inputFrameSize, 2, "invalid input frame size");
   luaL_argcheck(L, input->size[0] >= kW, 2, "input sequence smaller than kernel size");
 
-  input = THTensor_(newContiguous)(input, 0);
+  input = THTensor_(newContiguous)(input);
   outputFrame = THTensor_(new)();
   inputWindow = THTensor_(new)();
 
@@ -66,7 +66,7 @@ static int nn_(TemporalConvolution_backward)(lua_State *L)
 
 
   /* Not necessary with partial backprop: */
-  input = THTensor_(newContiguous)(input, 0);
+  input = THTensor_(newContiguous)(input);
   gradOutputFrame = THTensor_(new)();
   inputWindow = THTensor_(new)();
   gradInputWindow = THTensor_(new)();

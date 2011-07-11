@@ -159,15 +159,18 @@ THTensor *THTensor_(newWithSize4d)(long size0, long size1, long size2, long size
   return self;
 }
 
-THTensor *THTensor_(newContiguous)(THTensor *self, int forcecopy)
+THTensor *THTensor_(newClone)(THTensor *self)
 {
-  if(forcecopy || (!THTensor_(isContiguous)(self)))
-  {
-    THTensor *tensor = THTensor_(new)();
-    THTensor_(resizeAs)(tensor, self);
-    THTensor_(copy)(tensor, self);
-    return tensor;
-  }
+  THTensor *tensor = THTensor_(new)();
+  THTensor_(resizeAs)(tensor, self);
+  THTensor_(copy)(tensor, self);
+  return tensor;
+}
+
+THTensor *THTensor_(newContiguous)(THTensor *self)
+{
+  if(!THTensor_(isContiguous)(self))
+    return THTensor_(newClone)(self);
   else
   {
     THTensor_(retain)(self);
@@ -470,10 +473,10 @@ void THTensor_(free)(THTensor *self)
   }
 }
 
-void THTensor_(freeCopyTo)(THTensor *self, THTensor *dest)
+void THTensor_(freeCopyTo)(THTensor *self, THTensor *dst)
 {
-  if(self != dest)
-    THTensor_(copy)(dest, self);
+  if(self != dst)
+    THTensor_(copy)(dst, self);
 
   THTensor_(free)(self);
 }

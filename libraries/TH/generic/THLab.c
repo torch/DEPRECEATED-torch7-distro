@@ -114,11 +114,11 @@ void THLab_(sum)(THTensor *r_, THTensor *t, int dimension)
   THLongStorage_free(dim);
 
   TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                           real sum = 0;
-                           long i;
-                           for(i = 0; i < t_size; i++)
-                             sum += t_data[i*t_stride];
-                           *r__data = sum;);
+                       real sum = 0;
+                       long i;
+                       for(i = 0; i < t_size; i++)
+                         sum += t_data[i*t_stride];
+                       *r__data = sum;);
 }
 
 void THLab_(prod)(THTensor *r_, THTensor *t, int dimension)
@@ -133,11 +133,11 @@ void THLab_(prod)(THTensor *r_, THTensor *t, int dimension)
   THLongStorage_free(dim);
   
   TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                           real prod = 1;
-                           long i;
-                           for(i = 0; i < t_size; i++)
-                             prod *= t_data[i*t_stride];
-                           *r__data = prod;);
+                       real prod = 1;
+                       long i;
+                       for(i = 0; i < t_size; i++)
+                         prod *= t_data[i*t_stride];
+                       *r__data = prod;);
 
 }
 
@@ -148,13 +148,13 @@ void THLab_(cumsum)(THTensor *r_, THTensor *t, int dimension)
   THTensor_(resizeAs)(r_, t);
 
   TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                           real cumsum = 0;
-                           long i;
-                           for(i = 0; i < t_size; i++)
-                           {
-                             cumsum += t_data[i*t_stride];
-                             r__data[i*r__stride] = cumsum;
-                           });
+                       real cumsum = 0;
+                       long i;
+                       for(i = 0; i < t_size; i++)
+                       {
+                         cumsum += t_data[i*t_stride];
+                         r__data[i*r__stride] = cumsum;
+                       });
 }
 
 void THLab_(cumprod)(THTensor *r_, THTensor *t, int dimension)
@@ -164,13 +164,13 @@ void THLab_(cumprod)(THTensor *r_, THTensor *t, int dimension)
   THTensor_(resizeAs)(r_, t);
 
   TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                           real cumprod = 1;
-                           long i;
-                           for(i = 0; i < t_size; i++)
-                           {
-                             cumprod *= t_data[i*t_stride];
-                             r__data[i*r__stride] = cumprod;
-                           });
+                       real cumprod = 1;
+                       long i;
+                       for(i = 0; i < t_size; i++)
+                       {
+                         cumprod *= t_data[i*t_stride];
+                         r__data[i*r__stride] = cumprod;
+                       });
 }
 
 void THLab_(trace)(real *trace_, THTensor *t)
@@ -227,9 +227,9 @@ void THLab_(cross)(THTensor *r_, THTensor *a, THTensor *b, int dimension)
   THTensor_(resizeAs)(r_, a);
 
   TH_TENSOR_DIM_APPLY3(real, a, real, b, real, r_, dimension,
-                           r__data[0*r__stride] = a_data[1*a_stride]*b_data[2*b_stride] - a_data[2*a_stride]*b_data[1*b_stride];
-                           r__data[1*r__stride] = a_data[2*a_stride]*b_data[0*b_stride] - a_data[0*a_stride]*b_data[2*b_stride];
-                           r__data[2*r__stride] = a_data[0*a_stride]*b_data[1*b_stride] - a_data[1*a_stride]*b_data[0*b_stride];);
+                       r__data[0*r__stride] = a_data[1*a_stride]*b_data[2*b_stride] - a_data[2*a_stride]*b_data[1*b_stride];
+                       r__data[1*r__stride] = a_data[2*a_stride]*b_data[0*b_stride] - a_data[0*a_stride]*b_data[2*b_stride];
+                       r__data[2*r__stride] = a_data[0*a_stride]*b_data[1*b_stride] - a_data[1*a_stride]*b_data[0*b_stride];);
 }
 
 void THLab_(zeros)(THTensor *r_, THLongStorage *size)
@@ -427,7 +427,7 @@ void THLab_(sort)(THTensor *rt_, THLongTensor *ri_, THTensor *t, int dimension, 
                          for(i = 0; i < ri__size; i++)
                            ri__data[i*ri__stride] = i;
                          THLab_(quicksortdescend)(rt__data, ri__data, rt__size, rt__stride);)
-  }
+      }
   else
   {
     TH_TENSOR_DIM_APPLY2(real, rt_, long, ri_, dimension,
@@ -435,7 +435,7 @@ void THLab_(sort)(THTensor *rt_, THLongTensor *ri_, THTensor *t, int dimension, 
                          for(i = 0; i < ri__size; i++)
                            ri__data[i*ri__stride] = i;
                          THLab_(quicksortascend)(rt__data, ri__data, rt__size, rt__stride);)
-  }
+      }
 }
 
 void THLab_(tril)(THTensor *r_, THTensor *t, long k)
@@ -557,13 +557,13 @@ void THLab_(cat)(THTensor *r_, THTensor *ta, THTensor *tb, int dimension)
     TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data);); \
   }                                                           \
 
-#define LAB_IMPLEMENT_BASIC_FUNCTION_VALUE(NAME, CFUNC)              \
-  void THLab_(NAME)(THTensor *r_, THTensor *t, real value)           \
-  {                                                                  \
-    THTensor_(resizeAs)(r_, t);                                      \
+#define LAB_IMPLEMENT_BASIC_FUNCTION_VALUE(NAME, CFUNC)                 \
+  void THLab_(NAME)(THTensor *r_, THTensor *t, real value)              \
+  {                                                                     \
+    THTensor_(resizeAs)(r_, t);                                         \
     TH_TENSOR_APPLY2(real, t, real, r_, *r__data = CFUNC(*t_data, value);); \
-  }                                                                  \
-
+  }                                                                     \
+                                                                        \
 LAB_IMPLEMENT_BASIC_FUNCTION(log,log)
 LAB_IMPLEMENT_BASIC_FUNCTION(log1p,log1p)
 LAB_IMPLEMENT_BASIC_FUNCTION(exp,exp)
@@ -594,11 +594,11 @@ void THLab_(mean)(THTensor *r_, THTensor *t, int dimension)
   THLongStorage_free(dim);
 
   TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                           real sum = 0;
-                           long i;
-                           for(i = 0; i < t_size; i++)
-                             sum += t_data[i*t_stride];
-                           *r__data = sum/t_size;);
+                       real sum = 0;
+                       long i;
+                       for(i = 0; i < t_size; i++)
+                         sum += t_data[i*t_stride];
+                       *r__data = sum/t_size;);
 }
 
 void THLab_(std)(THTensor *r_, THTensor *t, int dimension, int flag)
@@ -613,32 +613,32 @@ void THLab_(std)(THTensor *r_, THTensor *t, int dimension, int flag)
   THLongStorage_free(dim);
 
   TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                           real sum = 0;
-                           real sum2 = 0;
-                           long i;
-                           for(i = 0; i < t_size; i++)
-                           {
-                             real z = t_data[i*t_stride];
-                             sum += z;
-                             sum2 += z*z;
-                           }
+                       real sum = 0;
+                       real sum2 = 0;
+                       long i;
+                       for(i = 0; i < t_size; i++)
+                       {
+                         real z = t_data[i*t_stride];
+                         sum += z;
+                         sum2 += z*z;
+                       }
 
-                           if(flag)
-                           {
-                             sum /= t_size;
-                             sum2 /= t_size;
-                             sum2 -= sum*sum;
-                             sum2 = (sum2 < 0 ? 0 : sum2);
-                             *r__data = sqrt(sum2);
-                           }
-                           else
-                           {
-                             sum /= t_size;
-                             sum2 /= t_size-1;
-                             sum2 -= ((real)t_size)/((real)(t_size-1))*sum*sum;
-                             sum2 = (sum2 < 0 ? 0 : sum2);
-                             *r__data = sqrt(sum2);
-                           });
+                       if(flag)
+                       {
+                         sum /= t_size;
+                         sum2 /= t_size;
+                         sum2 -= sum*sum;
+                         sum2 = (sum2 < 0 ? 0 : sum2);
+                         *r__data = sqrt(sum2);
+                       }
+                       else
+                       {
+                         sum /= t_size;
+                         sum2 /= t_size-1;
+                         sum2 -= ((real)t_size)/((real)(t_size-1))*sum*sum;
+                         sum2 = (sum2 < 0 ? 0 : sum2);
+                         *r__data = sqrt(sum2);
+                       });
 }
 
 void THLab_(var)(THTensor *r_, THTensor *t, int dimension, int flag)
@@ -653,32 +653,32 @@ void THLab_(var)(THTensor *r_, THTensor *t, int dimension, int flag)
   THLongStorage_free(dim);
 
   TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                           real sum = 0;
-                           real sum2 = 0;
-                           long i;
-                           for(i = 0; i < t_size; i++)
-                           {
-                             real z = t_data[i*t_stride];
-                             sum += z;
-                             sum2 += z*z;
-                           }
+                       real sum = 0;
+                       real sum2 = 0;
+                       long i;
+                       for(i = 0; i < t_size; i++)
+                       {
+                         real z = t_data[i*t_stride];
+                         sum += z;
+                         sum2 += z*z;
+                       }
 
-                           if(flag)
-                           {
-                             sum /= t_size;
-                             sum2 /= t_size;
-                             sum2 -= sum*sum;
-                             sum2 = (sum2 < 0 ? 0 : sum2);
-                             *r__data = sum2;
-                           }
-                           else
-                           {
-                             sum /= t_size;
-                             sum2 /= t_size-1;
-                             sum2 -= ((real)t_size)/((real)(t_size-1))*sum*sum;
-                             sum2 = (sum2 < 0 ? 0 : sum2);
-                             *r__data = sum2;
-                           });
+                       if(flag)
+                       {
+                         sum /= t_size;
+                         sum2 /= t_size;
+                         sum2 -= sum*sum;
+                         sum2 = (sum2 < 0 ? 0 : sum2);
+                         *r__data = sum2;
+                       }
+                       else
+                       {
+                         sum /= t_size;
+                         sum2 /= t_size-1;
+                         sum2 -= ((real)t_size)/((real)(t_size-1))*sum*sum;
+                         sum2 = (sum2 < 0 ? 0 : sum2);
+                         *r__data = sum2;
+                       });
 }
 
 void THLab_(norm)(real *norm_, THTensor *t, real value)
