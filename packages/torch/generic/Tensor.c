@@ -202,6 +202,25 @@ static int torch_Tensor_(new)(lua_State *L)
   return 1;
 }
 
+static int torch_Tensor_(set)(lua_State *L)
+{
+  THTensor *self = luaT_checkudata(L, 1, torch_Tensor_id);
+  THStorage *storage;
+  long storageOffset;
+  THLongStorage *size, *stride;
+
+  torch_Tensor_(c_readTensorStorageSizeStride)(L, 2, 1, 1, 1, 1,
+                                               &storage, &storageOffset, &size, &stride);
+
+  THTensor_(setStorage)(self, storage, storageOffset, size, stride);
+
+  THLongStorage_free(size);
+  THLongStorage_free(stride);
+
+  lua_settop(L, 1);
+  return 1;
+}
+
 static int torch_Tensor_(clone)(lua_State *L)
 {
   THTensor *self = luaT_checkudata(L, 1, torch_Tensor_id);
@@ -836,6 +855,7 @@ static const struct luaL_Reg torch_Tensor_(_) [] = {
   {"stride", torch_Tensor_(stride)},
   {"dim", torch_Tensor_(nDimension)},
   {"nDimension", torch_Tensor_(nDimension)},
+  {"set", torch_Tensor_(set)},
   {"storage", torch_Tensor_(storage)},
   {"storageOffset", torch_Tensor_(storageOffset)},
   {"clone", torch_Tensor_(clone)},
