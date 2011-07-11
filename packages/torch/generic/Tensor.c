@@ -430,7 +430,7 @@ static int torch_Tensor_(copy)(lua_State *L)
     THTensor_(copyLong)(tensor, src);
   else if( (src = luaT_toudata(L, 2, torch_FloatTensor_id)) )
     THTensor_(copyFloat)(tensor, src);
-  else if( (src = luaT_toudata(L, 2, torch_Tensor_id)) )
+  else if( (src = luaT_toudata(L, 2, torch_DoubleTensor_id)) )
     THTensor_(copyDouble)(tensor, src);
   else
     luaL_typerror(L, 2, "torch.*Tensor");
