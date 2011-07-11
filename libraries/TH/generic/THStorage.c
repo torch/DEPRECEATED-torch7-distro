@@ -211,20 +211,6 @@ void THStorage_(resize)(THStorage *storage, long size)
   storage->size = size;
 }
 
-void THStorage_(rawCopy)(THStorage *storage, real *src)
-{
-  long i;
-  for(i = 0; i < storage->size; i++)
-    storage->data[i] = src[i];
-}
-
-void THStorage_(copy)(THStorage *storage, THStorage *src)
-{
-  THArgCheck(storage->size == src->size, 2, "size mismatch");
-  THStorage_(rawCopy)(storage, src->data);
-}
-
-
 void THStorage_(fill)(THStorage *storage, real value)
 {
   long i;
@@ -243,22 +229,5 @@ real THStorage_(get)(THStorage *self, long idx)
   THArgCheck((idx >= 0) && (idx < self->size), 2, "out of bounds");
   return self->data[idx];
 }
-
-#define IMPLEMENT_THStorage_COPY(TYPENAMESRC) \
-void THStorage_(copy##TYPENAMESRC)(THStorage *storage, TH##TYPENAMESRC##Storage *src) \
-{ \
-  long i; \
-  THArgCheck(storage->size == src->size, 2, "size mismatch"); \
-  for(i = 0; i < storage->size; i++) \
-    storage->data[i] = (real)src->data[i]; \
-}
-
-IMPLEMENT_THStorage_COPY(Byte)
-IMPLEMENT_THStorage_COPY(Char)
-IMPLEMENT_THStorage_COPY(Short)
-IMPLEMENT_THStorage_COPY(Int)
-IMPLEMENT_THStorage_COPY(Long)
-IMPLEMENT_THStorage_COPY(Float)
-IMPLEMENT_THStorage_COPY(Double)
 
 #endif
