@@ -78,10 +78,10 @@ local function findgnuplot()
 
    if os == 'windows' and gnuplothasterm('windows') then
       _gptable.term = 'windows'
+   elseif os == 'linux' and gnuplothasterm('wxt') then
+      _gptable.term = 'wxt'
    elseif os == 'linux' and gnuplothasterm('x11') then
       _gptable.term = 'x11'
-   elseif os == 'mac' and gnuplothasterm('aqua') then
-      _gptable.term = 'aqua'
    elseif os == 'mac' and gnuplothasterm('aqua') then
       _gptable.term = 'aqua'
    elseif os == 'mac' and gnuplothasterm('x11') then
