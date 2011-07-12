@@ -179,7 +179,7 @@ local function getvars(t)
       end
    end
    legend = legend or ''
-   format = format or '.'
+   format = format or ''
    if not x then
       error('expecting [string,] tensor [,tensor] [,string]')
    end
@@ -203,7 +203,8 @@ local function gnuplot_string(legend,x,y,format)
          coef = tonumber(coef)
          f = 'acsplines'
       end
-      if f == '+'  or f == 'points' then return 'with points'
+      if f == ''  or f == '' then return ''
+      elseif f == '+'  or f == 'points' then return 'with points'
       elseif f == '.' or f == 'dots' then return 'with dots'
       elseif f == '-' or f == 'lines' then return 'with lines'
       elseif f == '+-' or f == 'linespoints' then return 'with linespoints' 
