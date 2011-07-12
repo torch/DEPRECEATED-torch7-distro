@@ -29,14 +29,6 @@ static void THCudaTensor_computesz(THCudaTensor *self, long **sz_, long **st_)
   *st_ = st;
 }
 
-__global__ void THCudaTensor_kernel_fill(float *data, float value, long size)
-{
-  long k = blockDim.x * blockIdx.x + threadIdx.x;
-  
-  if(k < size)
-    data[k] = value;
-}
-
 __global__ void THCudaTensor_kernel_copy(float *dst, 
                                          long *dst_sz, long *dst_st, int dst_dim,
                                          float *src,
@@ -65,14 +57,6 @@ __global__ void THCudaTensor_kernel_copy(float *dst,
 
     dst[dst_idx] = src[src_idx];
   }
-}
-
-void THCudaTensor_fill(THCudaTensor *self, float value)
-{
-  long size = THCudaTensor_nElement(self);
-
-  long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
-  THCudaTensor_kernel_fill<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, size);
 }
 
 void THCudaTensor_copy(THCudaTensor *self, THCudaTensor *src)
