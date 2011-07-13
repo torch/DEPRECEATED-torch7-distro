@@ -20,7 +20,6 @@ static const void *torch_CudaTensor_id = NULL;
 
 #define real float
 #define Real Cuda
-#define TH_GENERIC_FILE "generic/Tensor.c"
 
 #define torch_Storage_(NAME) TH_CONCAT_4(torch_,Real,Storage_,NAME)
 #define torch_Storage_id TH_CONCAT_3(torch_,Real,Storage_id)
@@ -29,11 +28,12 @@ static const void *torch_CudaTensor_id = NULL;
 #define torch_Tensor_id TH_CONCAT_3(torch_,Real,Tensor_id)
 #define STRING_torchTensor TH_CONCAT_STRING_3(torch.,Real,Tensor)
 
+#define TH_GENERIC_FILE "generic/Tensor.c"
 #include "generic/Tensor.c"
+#undef TH_GENERIC_FILE
 
 #undef real
 #undef Real
-#undef TH_GENERIC_FILE
 
 /* now we overwrite some methods specific to CudaTensor */
 

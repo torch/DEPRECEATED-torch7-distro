@@ -1,23 +1,18 @@
 #include "THCTensorMath.h"
 #include "THCGeneral.h"
 
-#define NB_THREADS_PER_BLOCK 256
+#include <thrust/fill.h>
+#include <thrust/functional.h>
+#include <thrust/reduce.h>
 
-__global__ void THCudaTensor_kernel_fill(float *data, float value, long size)
-{
-  long k = blockDim.x * blockIdx.x + threadIdx.x;
-  
-  if(k < size)
-    data[k] = value;
-}
+#define NB_THREADS_PER_BLOCK 256
 
 void THCudaTensor_fill(THCudaTensor *self_, float value)
 {
   THCudaTensor *self = THCudaTensor_newContiguous(self_);
-  long size = THCudaTensor_nElement(self);
-  long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
+  thrust::device_ptr<float> self_data(THCudaTensor_data(self));
 
-  THCudaTensor_kernel_fill<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, size);
+  thrust::fill(self_data, self_data+THCudaTensor_nElement(self), value);
 
   THCudaTensor_freeCopyTo(self, self_);
 }
@@ -81,14 +76,6 @@ void THCudaTensor_cadd(THCudaTensor *self_, float value, THCudaTensor *src)
   }
 }
 
-__global__ void THCudaTensor_kernel_cmul(float *data, float *src, long size)
-{
-  long k = blockDim.x * blockIdx.x + threadIdx.x;
-  
-  if(k < size)
-    data[k] *= src[k];
-}
-
 void THCudaTensor_cmul(THCudaTensor *self_, THCudaTensor *src)
 {
   THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src), 2, "size do not match");
@@ -96,38 +83,30 @@ void THCudaTensor_cmul(THCudaTensor *self_, THCudaTensor *src)
   {
     THCudaTensor *self = THCudaTensor_newContiguous(self_);
     long size = THCudaTensor_nElement(self);
-    long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
     src = THCudaTensor_newContiguous(src);
-    
+    thrust::device_ptr<float> self_data(THCudaTensor_data(self));
+    thrust::device_ptr<float> src_data(THCudaTensor_data(src));
 
-    THCudaTensor_kernel_cmul<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), THCudaTensor_data(src), size);
-                
+    thrust::transform(src_data, src_data+size, self_data, self_data, thrust::multiplies<float>());
+
     THCudaTensor_free(src);
     THCudaTensor_freeCopyTo(self, self_);
   }
 }
 
-__global__ void THCudaTensor_kernel_cdiv(float *data, float *src, long size)
-{
-  long k = blockDim.x * blockIdx.x + threadIdx.x;
-  
-  if(k < size)
-    data[k] /= src[k];
-}
-
 void THCudaTensor_cdiv(THCudaTensor *self_, THCudaTensor *src)
 {
-  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src), 1, "size do not match");
+  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src), 2, "size do not match");
 
   {
     THCudaTensor *self = THCudaTensor_newContiguous(self_);
     long size = THCudaTensor_nElement(self);
-    long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
     src = THCudaTensor_newContiguous(src);
-    
+    thrust::device_ptr<float> self_data(THCudaTensor_data(self));
+    thrust::device_ptr<float> src_data(THCudaTensor_data(src));
 
-    THCudaTensor_kernel_cdiv<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), THCudaTensor_data(src), size);
-                
+    thrust::transform(self_data, self_data+size, src_data, self_data, thrust::divides<float>());
+
     THCudaTensor_free(src);
     THCudaTensor_freeCopyTo(self, self_);
   }
@@ -214,38 +193,34 @@ float THCudaTensor_dot(THCudaTensor *self, THCudaTensor *src)
 
 float THCudaTensor_min(THCudaTensor *self)
 {
-  int index;
-  int result;
+  self = THCudaTensor_newContiguous(self);
+  thrust::device_ptr<float> self_data(THCudaTensor_data(self));
 
-  self = THCudaTensor_newContiguous(self);  
-  index = cublasIsamin(THCudaTensor_nElement(self), THCudaTensor_data(self), 1);
-  result = *(THCudaTensor_data(self)+index);
+  float result = thrust::reduce(self_data, self_data+THCudaTensor_nElement(self), (float)(THInf), thrust::minimum<float>());
+
   THCudaTensor_free(self);
-
   return result;
 }
 
 float THCudaTensor_max(THCudaTensor *self)
 {
-  int index;
-  int result;
+  self = THCudaTensor_newContiguous(self);
+  thrust::device_ptr<float> self_data(THCudaTensor_data(self));
 
-  self = THCudaTensor_newContiguous(self);  
-  index = cublasIsamax(THCudaTensor_nElement(self), THCudaTensor_data(self), 1);
-  result = *(THCudaTensor_data(self)+index);
+  float result = thrust::reduce(self_data, self_data+THCudaTensor_nElement(self), (float)(-THInf), thrust::maximum<float>());
+
   THCudaTensor_free(self);
-
   return result;
 }
 
 float THCudaTensor_sum(THCudaTensor *self)
 {
-  int result;
+  self = THCudaTensor_newContiguous(self);
+  thrust::device_ptr<float> self_data(THCudaTensor_data(self));
 
-  self = THCudaTensor_newContiguous(self);  
-  result = cublasSasum(THCudaTensor_nElement(self), THCudaTensor_data(self), 1);
+  float result = thrust::reduce(self_data, self_data+THCudaTensor_nElement(self), (float)(0), thrust::plus<float>());
+
   THCudaTensor_free(self);
-
   return result;
 }
 
