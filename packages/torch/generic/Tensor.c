@@ -470,8 +470,8 @@ static int torch_Tensor_(__newindex__)(lua_State *L)
       real value = (real)luaL_checknumber(L,3);
       luaL_argcheck(L, tensor->nDimension == 1, 1, "must be a one dimensional tensor");
       luaL_argcheck(L, index >= 0 && index < tensor->size[0], 2, "out of range");
-      (tensor->storage->data+tensor->storageOffset)[index*tensor->stride[0]] = value;
-    } else if( (src = luaT_toudata(L, 3, torch_Tensor_id)) ) {      
+      THStorage_(set)(tensor->storage, tensor->storageOffset+index*tensor->stride[0], value);
+    } else if( (src = luaT_toudata(L, 3, torch_Tensor_id)) ) {
       tensor = THTensor_(newWithTensor)(tensor);
       THTensor_(narrow)(tensor, NULL, 0, index, 1);
       THTensor_(copy)(tensor, src);
@@ -500,36 +500,36 @@ static int torch_Tensor_(__newindex__)(lua_State *L)
       THTensor_(narrow)(tensor, NULL, 0, index, 1);
       THTensor_(copyFloat)(tensor, src);
     } else {
-      luaL_typerror(L, 3, "torch.*Tensor"); 
+      luaL_typerror(L, 3, "torch.*Tensor");
     }
     lua_pushboolean(L, 1);
   }
   else if((idx = luaT_toudata(L, 2, torch_LongStorage_id)))
   {
-    real *data = THTensor_(data)(tensor);
+    long index = THTensor_(storageOffset)(tensor);
     real value = (real)luaL_checknumber(L,3);
     int dim;
 
     luaL_argcheck(L, idx->size == tensor->nDimension, 2, "invalid size");
-    
+
     for(dim = 0; dim < idx->size; dim++)
     {
       long z = idx->data[dim]-1;
       luaL_argcheck(L, (z >= 0) && (z < tensor->size[dim]), 2, "index out of bound");
-      data += z*tensor->stride[dim];
+      index += z*tensor->stride[dim];
     }
 
-    *data = value;
+    THStorage_(set)(tensor->storage, index, value);
     lua_pushboolean(L, 1);
   }
   else if(lua_istable(L, 2))
   {
-    real *data = THTensor_(data)(tensor);
+    long index = THTensor_(storageOffset)(tensor);
     real value = (real)luaL_checknumber(L,3);
     int dim;
 
     luaL_argcheck(L, lua_objlen(L,2) == tensor->nDimension, 2, "invalid size");
-    
+
     for(dim = 0; dim < tensor->nDimension; dim++)
     {
       long z;
@@ -542,9 +542,9 @@ static int torch_Tensor_(__newindex__)(lua_State *L)
       lua_pop(L, 1);
 
       luaL_argcheck(L, (z >= 0) && (z < tensor->size[dim]), 2, "index out of bound");
-      data += z*tensor->stride[dim];
+      index += z*tensor->stride[dim];
     }
-    *data = value;
+    THStorage_(set)(tensor->storage, index, value);
     lua_pushboolean(L, 1);
   }
   else
@@ -833,10 +833,10 @@ static int torch_Tensor_(factory)(lua_State *L)
 }
 
 static int torch_Tensor_(write)(lua_State *L)
-{  
+{
   THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor_id);
   THFile *file = luaT_checkudata(L, 2, torch_File_id);
- 
+
   THFile_writeIntScalar(file, tensor->nDimension);
   THFile_writeLongRaw(file, tensor->size, tensor->nDimension);
   THFile_writeLongRaw(file, tensor->stride, tensor->nDimension);
@@ -862,7 +862,7 @@ static int torch_Tensor_(read)(lua_State *L)
 {
   THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor_id);
   THFile *file = luaT_checkudata(L, 2, torch_File_id);
-  
+
   tensor->nDimension = THFile_readIntScalar(file);
   tensor->size = THAlloc(sizeof(long)*tensor->nDimension);
   tensor->stride = THAlloc(sizeof(long)*tensor->nDimension);
