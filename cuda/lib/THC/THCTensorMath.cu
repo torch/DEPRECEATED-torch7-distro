@@ -431,7 +431,7 @@ float THCudaTensor_norm(THCudaTensor *self, float value)
   float result = thrust::transform_reduce(self_data, self_data+size, norm_functor(value), (float)0, thrust::plus<float>());
 
   THCudaTensor_free(self);
-  return result;
+  return pow(result, 1.0/value);
 }
 
 struct dist_functor
@@ -459,5 +459,5 @@ float THCudaTensor_dist(THCudaTensor *self, THCudaTensor *src, float value)
   THCudaTensor_free(src);
   THCudaTensor_free(self);
 
-  return result;
+  return pow(result, 1.0/value);
 }
