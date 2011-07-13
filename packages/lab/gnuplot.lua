@@ -284,6 +284,15 @@ function lab.figure(n)
    return n
 end
 
+function lab.plotflush(n)
+   if not n then n = _gptable.current end
+   if not n then return end
+   if _gptable[n] == nil then return end
+   local _gp = _gptable[n]
+   _gp:writeString('unset output\n')
+   _gp:synchronize()
+end
+
 function lab.gnuplot(legend,x,y,format)
    local hdr,data = gnuplot_string(legend,x,y,format)
    --writeToCurrent('set pointsize 2')
