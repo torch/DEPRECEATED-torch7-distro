@@ -223,7 +223,7 @@ float THCudaTensor_sum(THCudaTensor *self)
   return result;
 }
 
-void THCudaTensor_addmv(THCudaTensor *self_, float alpha, THCudaTensor *mat, THCudaTensor *vec)
+void THCudaTensor_addmv(THCudaTensor *self, float alpha, THCudaTensor *mat, THCudaTensor *vec)
 {
   if( (mat->nDimension != 2) || (vec->nDimension != 1) )
     THError("matrix and vector expected");
@@ -231,88 +231,182 @@ void THCudaTensor_addmv(THCudaTensor *self_, float alpha, THCudaTensor *mat, THC
   if( mat->size[1] != vec->size[0] )
     THError("size mismatch");
 
-  if(self_->nDimension != 1)
+  if(self->nDimension != 1)
     THError("size mismatch");
 
-  if( self_->size[0] != mat->size[0] )
+  if( self->size[0] != mat->size[0] )
     THError("size mismatch");
 
+  if(mat->stride[0] == 1)
   {
-    THCudaTensor *self = THCudaTensor_newContiguous(self_);
-    mat = THCudaTensor_newContiguous(mat);
-    vec = THCudaTensor_newContiguous(vec);
-
+    cublasSgemv('n', mat->size[0], mat->size[1],
+                alpha, THCudaTensor_data(mat), mat->stride[1],
+                  THCudaTensor_data(vec), vec->stride[0],
+                1, THCudaTensor_data(self), self->stride[0]);
+  }
+  else if(mat->stride[1] == 1)
+  {
     cublasSgemv('t',  mat->size[1], mat->size[0],
                 alpha, THCudaTensor_data(mat), mat->stride[0],
                 THCudaTensor_data(vec), vec->stride[0],
                 1, THCudaTensor_data(self), self->stride[0]);
-
-    THCudaTensor_free(mat);
-    THCudaTensor_free(vec);
-    THCudaTensor_freeCopyTo(self, self_);
   }
+  else
+  {
+    mat = THCudaTensor_newContiguous(mat);
+    
+    cublasSgemv('t',  mat->size[1], mat->size[0],
+                alpha, THCudaTensor_data(mat), mat->stride[0],
+                THCudaTensor_data(vec), vec->stride[0],
+                1, THCudaTensor_data(self), self->stride[0]);
+    
+    THCudaTensor_free(mat);
+  }
+  
 }
 
-void THCudaTensor_addmm(THCudaTensor *self_, float alpha, THCudaTensor *mat1, THCudaTensor *mat2)
+void THCudaTensor_addmm(THCudaTensor *self, float alpha, THCudaTensor *m1, THCudaTensor *m2)
 {
-  if( (mat1->nDimension != 2) || (mat2->nDimension != 2) ) 
+  char transpose, transpose_m1, transpose_m2;
+  THCudaTensor *self_, *m1_, *m2_;
+
+  if( (m1->nDimension != 2) || (m2->nDimension != 2) ) 
     THError("matrix and matrix expected"); 
 
-  if(self_->nDimension != 2)
+  if(self->nDimension != 2)
     THError("size mismatch"); 
 
-  if( (self_->size[0] != mat1->size[0]) || (self_->size[1] != mat2->size[1]) || (mat1->size[1] != mat2->size[0]) ) 
+  if( (self->size[0] != m1->size[0]) || (self->size[1] != m2->size[1]) || (m1->size[1] != m2->size[0]) ) 
     THError("size mismatch"); 
 
+  /* self */
+  if(self->stride[0] == 1)
   {
-    THCudaTensor *self = THCudaTensor_newContiguous(self_);
-    mat1 = THCudaTensor_newContiguous(mat1);
-    mat2 = THCudaTensor_newContiguous(mat2);
+    transpose = 'n';
+    self_ = self;
+  }
+  else if(self->stride[1] == 1)
+  {
+    THCudaTensor *swap = m2;
+    m2 = m1;
+    m1 = swap;
+    THCudaTensor_transpose(self, NULL, 0, 1);
+    THCudaTensor_transpose(m1, NULL, 0, 1);
+    THCudaTensor_transpose(m2, NULL, 0, 1);
+    transpose = 't';
+    self_ = self;
+  }
+  else
+  {
+    transpose = 'n';
+    THCudaTensor_transpose(self, NULL, 0, 1);
+    self_ = THCudaTensor_newClone(self);
+    THCudaTensor_transpose(self, NULL, 0, 1);
+    THCudaTensor_transpose(self_, NULL, 0, 1);
+  }
 
-    cublasSgemm('n',
-                'n',
-                self->size[1],
-                self->size[0],
-                mat2->size[0],
-                alpha,
-                THCudaTensor_data(mat2),
-                mat2->stride[0],
-                THCudaTensor_data(mat1),
-                mat1->stride[0],
-                1,
-                THCudaTensor_data(self),
-                self->stride[0]);
+  /* m1 */
+  if(m1->stride[0] == 1)
+  {
+    transpose_m1 = 'n';
+    m1_ = m1;
+  }
+  else if(m1->stride[1] == 1)
+  {
+    transpose_m1 = 't';
+    m1_ = m1;
+  }
+  else
+  {
+    transpose_m1 = 't';
+    m1_ = THCudaTensor_newContiguous(m1);
+  }
 
-    THCudaTensor_free(mat1);
-    THCudaTensor_free(mat2);
-    THCudaTensor_freeCopyTo(self, self_);
+  /* m2 */
+  if(m2->stride[0] == 1)
+  {
+    transpose_m2 = 'n';
+    m2_ = m2;
+  }
+  else if(m2->stride[1] == 1)
+  {
+    transpose_m2 = 't';
+    m2_ = m2;
+  }
+  else
+  {
+    transpose_m2 = 't';
+    m2_ = THCudaTensor_newContiguous(m2);
+  }
+
+  /* do the operation */
+  cublasSgemm(transpose_m1,
+              transpose_m2,
+              self_->size[0],
+              self_->size[1],
+              m1_->size[1],
+              alpha,
+              THCudaTensor_data(m1_),
+              (transpose_m1 == 'n' ? m1_->stride[1] : m1_->stride[0]),
+              THCudaTensor_data(m2_),
+              (transpose_m2 == 'n' ? m2_->stride[1] : m2_->stride[0]),
+              1,
+              THCudaTensor_data(self_),
+              self_->stride[1]);
+
+  /* free intermediate variables */
+  if(m1_ != m1)
+    THCudaTensor_free(m1_);
+
+  if(m2_ != m2)
+    THCudaTensor_free(m2_);
+
+  if(self_ != self)
+    THCudaTensor_freeCopyTo(self_, self);
+
+  if(transpose == 't')
+  {
+    THCudaTensor_transpose(self, NULL, 0, 1);
+    THCudaTensor_transpose(m1, NULL, 0, 1);
+    THCudaTensor_transpose(m2, NULL, 0, 1);
   }
 }
 
-void THCudaTensor_addr(THCudaTensor *self_, float alpha, THCudaTensor *vec1, THCudaTensor *vec2)
+void THCudaTensor_addr(THCudaTensor *self, float alpha, THCudaTensor *vec1, THCudaTensor *vec2)
 {
   if( (vec1->nDimension != 1) || (vec2->nDimension != 1) )
     THError("vector and vector expected");
 
-  if(self_->nDimension != 2)
+  if(self->nDimension != 2)
     THError("size mismatch");
 
-  if( (self_->size[0] != vec1->size[0]) || (self_->size[1] != vec2->size[0]) )
+  if( (self->size[0] != vec1->size[0]) || (self->size[1] != vec2->size[0]) )
     THError("size mismatch");
 
+  if(self->stride[0] == 1)
   {
-    THCudaTensor *self = THCudaTensor_newContiguous(self_);
-    vec1 = THCudaTensor_newContiguous(vec1);
-    vec2 = THCudaTensor_newContiguous(vec2);
-
+    cublasSger(vec1->size[0], vec2->size[0],
+               alpha, THCudaTensor_data(vec1), vec1->stride[0],
+               THCudaTensor_data(vec2), vec2->stride[0],
+               THCudaTensor_data(self), self->stride[1]);
+  }
+  else if(self->stride[1] == 1)
+  {
     cublasSger(vec2->size[0], vec1->size[0],
                alpha, THCudaTensor_data(vec2), vec2->stride[0],
                THCudaTensor_data(vec1), vec1->stride[0],
                THCudaTensor_data(self), self->stride[0]);
+  }
+  else
+  {
+    THCudaTensor *cself = THCudaTensor_newClone(self);
 
-    THCudaTensor_free(vec1);
-    THCudaTensor_free(vec2);
-    THCudaTensor_freeCopyTo(self, self_);
+    cublasSger(vec2->size[0], vec1->size[0],
+               alpha, THCudaTensor_data(vec2), vec2->stride[0],
+               THCudaTensor_data(vec1), vec1->stride[0],
+               THCudaTensor_data(cself), cself->stride[0]);
+
+    THCudaTensor_freeCopyTo(cself, self);
   }
 }
 
