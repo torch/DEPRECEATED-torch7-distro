@@ -5,6 +5,7 @@ static const void *torch_CudaStorage_id = NULL;
 
 #define real float
 #define Real Cuda
+#define TH_REAL_IS_FLOAT
 
 #define torch_TensorMath_(NAME) TH_CONCAT_4(torch_,Real,TensorMath_,NAME)
 #define torch_Tensor_id TH_CONCAT_3(torch_,Real,Tensor_id)
