@@ -468,7 +468,8 @@ void THTensor_(free)(THTensor *self)
   {
     THFree(self->size);
     THFree(self->stride);
-    THStorage_(free)(self->storage);
+    if(self->storage)
+      THStorage_(free)(self->storage);
     THFree(self);
   }
 }
