@@ -72,15 +72,13 @@ DLL_EXPORT int luaopen_libcutorch(lua_State *L)
   lua_newtable(L);
   luaL_register(L, NULL, cutorch_stuff__);
 
-  if(cublasInit() != CUBLAS_STATUS_SUCCESS)
-    THError("unable to initialize cublas");
+  THCudaInit();
 
   cutorch_CudaStorage_init(L);
   cutorch_CudaTensor_init(L);
   cutorch_CudaTensorMath_init(L);
 
-  if(cublasShutdown() != CUBLAS_STATUS_SUCCESS)
-    THError("unable to shutdown cublas");
+  THCudaShutdown();
 
   return 1;
 }

@@ -1,17 +1,9 @@
 #include "THCStorage.h"
 
-#define NB_THREADS_PER_BLOCK 256
+#include <thrust/fill.h>
 
-__global__ void Storage_kernel_fill(float *data, float value, long size)
+void THCudaStorage_fill(THCudaStorage *self, float value)
 {
-  long i = blockDim.x * blockIdx.x + threadIdx.x;
-  
-  if(i < size)
-    data[i] = value;
-}
-
-void THCudaStorage_fill(THCudaStorage *storage, float value)
-{
-  long nbBlocksPerGrid = (storage->size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
-  Storage_kernel_fill<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(storage->data, value, storage->size);
+  thrust::device_ptr<float> self_data(self->data);
+  thrust::fill(self_data, self_data+self->size, value);
 }

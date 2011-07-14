@@ -2,8 +2,6 @@
 #include "THCGeneral.h"
 #include "THGeneral.h"
 
-#define NB_THREADS_PER_BLOCK 256
-
 static void THCudaTensor_computesz(THCudaTensor *self, long **sz_, long **st_)
 {
   long *sz, *st, *szh;
@@ -35,7 +33,7 @@ __global__ void THCudaTensor_kernel_copy(float *dst,
                                          long *src_sz, long *src_st, int src_dim,
                                          long n_elem)
 {
-  long k = blockDim.x * blockIdx.x + threadIdx.x;
+  long k = (((blockIdx.y * gridDim.x) + blockIdx.x) * blockDim.x) + threadIdx.x;
   
   if(k < n_elem)
   {
@@ -68,17 +66,27 @@ void THCudaTensor_copy(THCudaTensor *self, THCudaTensor *src)
   else
   {    
     long *d_self_sz, *d_self_st, *d_src_sz, *d_src_st;
-    long nElement = THCudaTensor_nElement(self);
-    long nbBlocksPerGrid = (nElement + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
+    long size = THCudaTensor_nElement(self);
 
     THCudaTensor_computesz(self, &d_self_sz, &d_self_st);
     THCudaTensor_computesz(src, &d_src_sz, &d_src_st);
-    
-    THCudaTensor_kernel_copy<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), 
-                                                                        d_self_sz, d_self_st, self->nDimension,
-                                                                        THCudaTensor_data(src),
-                                                                        d_src_sz, d_src_st, src->nDimension,
-                                                                        nElement);
+
+    int nBlockPerRow, nBlockPerColumn, nThreadPerBlock;
+    THCudaGetGridSize(&nBlockPerRow, &nBlockPerColumn, &nThreadPerBlock, size);    
+    dim3 threads(nThreadPerBlock);
+    dim3 grid(nBlockPerRow, nBlockPerColumn);
+
+    THCudaTensor_kernel_copy<<<grid, threads>>>(THCudaTensor_data(self), 
+                                                d_self_sz, d_self_st, self->nDimension,
+                                                THCudaTensor_data(src),
+                                                d_src_sz, d_src_st, src->nDimension,
+                                                size);
+
+    cudaError errcode = cudaGetLastError();
+    if(errcode != cudaSuccess)
+      THError(cudaGetErrorString(errcode));
+
+    cudaThreadSynchronize();
 
     THCudaCheck(cudaFree(d_self_sz));
     THCudaCheck(cudaFree(d_self_st));

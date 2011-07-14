@@ -24,23 +24,29 @@ void THCudaTensor_zero(THCudaTensor *self_)
   THCudaTensor_freeCopyTo(self, self_);
 }
 
-__global__ void THCudaTensor_kernel_add(float *data, float value, long size)
+struct addvalue_functor
 {
-  long k = blockDim.x * blockIdx.x + threadIdx.x;
-  
-  if(k < size)
-    data[k] += value;
-}
+  const float value;
+
+  addvalue_functor(float value_) : value(value_) {}
+
+    __host__ __device__ float operator()(const float& x) const
+  {
+    return (x+value);
+  }
+};
 
 void THCudaTensor_add(THCudaTensor *self_, float value)
 {
-  THCudaTensor *self = THCudaTensor_newContiguous(self_);
-  long size = THCudaTensor_nElement(self);
-  long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
+  {
+    THCudaTensor *self = THCudaTensor_newContiguous(self_);
+    long size = THCudaTensor_nElement(self);
+    thrust::device_ptr<float> self_data(THCudaTensor_data(self));
 
-  THCudaTensor_kernel_add<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, size);
-  
-  THCudaTensor_freeCopyTo(self, self_);
+    thrust::transform(self_data, self_data+size, self_data, addvalue_functor(value));
+
+    THCudaTensor_freeCopyTo(self, self_);
+  }
 }
 
 void THCudaTensor_mul(THCudaTensor *self_, float value)
@@ -48,6 +54,7 @@ void THCudaTensor_mul(THCudaTensor *self_, float value)
   THCudaTensor *self = THCudaTensor_newContiguous(self_);
 
   cublasSscal(THCudaTensor_nElement(self), value, THCudaTensor_data(self), 1);
+  THCublasCheck();
 
   THCudaTensor_freeCopyTo(self, self_);
 }
@@ -57,6 +64,7 @@ void THCudaTensor_div(THCudaTensor *self_, float value)
   THCudaTensor *self = THCudaTensor_newContiguous(self_);
 
   cublasSscal(THCudaTensor_nElement(self), 1/value, THCudaTensor_data(self), 1);
+  THCublasCheck();
 
   THCudaTensor_freeCopyTo(self, self_);
 }
@@ -70,6 +78,7 @@ void THCudaTensor_cadd(THCudaTensor *self_, float value, THCudaTensor *src)
     src = THCudaTensor_newContiguous(src);
 
     cublasSaxpy(THCudaTensor_nElement(self), value, THCudaTensor_data(src), 1, THCudaTensor_data(self), 1);
+    THCublasCheck();
 
     THCudaTensor_free(src);
     THCudaTensor_freeCopyTo(self, self_);
@@ -114,7 +123,7 @@ void THCudaTensor_cdiv(THCudaTensor *self_, THCudaTensor *src)
 
 __global__ void THCudaTensor_kernel_addcmul(float *data, float value, float *src1, float *src2, long size)
 {
-  long k = blockDim.x * blockIdx.x + threadIdx.x;
+  long k = (((blockIdx.y * gridDim.x) + blockIdx.x) * blockDim.x) + threadIdx.x;
   
   if(k < size)
     data[k] += value*src1[k]*src2[k];
@@ -129,12 +138,21 @@ void THCudaTensor_addcmul(THCudaTensor *self_, float value, THCudaTensor *src1, 
   {
     THCudaTensor *self = THCudaTensor_newContiguous(self_);
     long size = THCudaTensor_nElement(self);
-    long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
     src1 = THCudaTensor_newContiguous(src1);
     src2 = THCudaTensor_newContiguous(src2);
 
+    int nBlockPerRow, nBlockPerColumn, nThreadPerBlock;
+    THCudaGetGridSize(&nBlockPerRow, &nBlockPerColumn, &nThreadPerBlock, size);
+    dim3 threads(nThreadPerBlock);
+    dim3 grid(nBlockPerRow, nBlockPerColumn);
 
-    THCudaTensor_kernel_addcmul<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, THCudaTensor_data(src1), THCudaTensor_data(src2), size);
+    THCudaTensor_kernel_addcmul<<<grid, threads>>>(THCudaTensor_data(self), value, THCudaTensor_data(src1), THCudaTensor_data(src2), size);
+
+    cudaError errcode = cudaGetLastError();
+    if(errcode != cudaSuccess)
+      THError(cudaGetErrorString(errcode));
+
+    cudaThreadSynchronize();
 
     THCudaTensor_free(src1);
     THCudaTensor_free(src2);
@@ -144,7 +162,7 @@ void THCudaTensor_addcmul(THCudaTensor *self_, float value, THCudaTensor *src1, 
 
 __global__ void THCudaTensor_kernel_addcdiv(float *data, float value, float *src1, float *src2, long size)
 {
-  long k = blockDim.x * blockIdx.x + threadIdx.x;
+  long k = (((blockIdx.y * gridDim.x) + blockIdx.x) * blockDim.x) + threadIdx.x;
 
   if(k < size)
     data[k] += value*src1[k]/src2[k];
@@ -159,11 +177,21 @@ void THCudaTensor_addcdiv(THCudaTensor *self_, float value, THCudaTensor *src1, 
   {
     THCudaTensor *self = THCudaTensor_newContiguous(self_);
     long size = THCudaTensor_nElement(self);
-    long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
     src1 = THCudaTensor_newContiguous(src1);
     src2 = THCudaTensor_newContiguous(src2);
 
-    THCudaTensor_kernel_addcdiv<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, THCudaTensor_data(src1), THCudaTensor_data(src2), size);
+    int nBlockPerRow, nBlockPerColumn, nThreadPerBlock;
+    THCudaGetGridSize(&nBlockPerRow, &nBlockPerColumn, &nThreadPerBlock, size);
+    dim3 threads(nThreadPerBlock);
+    dim3 grid(nBlockPerRow, nBlockPerColumn);
+
+    THCudaTensor_kernel_addcdiv<<<grid, threads>>>(THCudaTensor_data(self), value, THCudaTensor_data(src1), THCudaTensor_data(src2), size);
+
+    cudaError errcode = cudaGetLastError();
+    if(errcode != cudaSuccess)
+      THError(cudaGetErrorString(errcode));
+
+    cudaThreadSynchronize();
 
     THCudaTensor_free(src1);
     THCudaTensor_free(src2);
@@ -182,6 +210,8 @@ float THCudaTensor_dot(THCudaTensor *self, THCudaTensor *src)
     float result = cublasSdot(THCudaTensor_nElement(self),
                               THCudaTensor_data(self), 1,
                               THCudaTensor_data(src), 1);
+
+    THCublasCheck();
 
     THCudaTensor_free(src);
     THCudaTensor_free(self);
@@ -262,7 +292,8 @@ void THCudaTensor_addmv(THCudaTensor *self, float alpha, THCudaTensor *mat, THCu
     
     THCudaTensor_free(mat);
   }
-  
+
+  THCublasCheck();  
 }
 
 void THCudaTensor_addmm(THCudaTensor *self, float alpha, THCudaTensor *m1, THCudaTensor *m2)
@@ -354,6 +385,8 @@ void THCudaTensor_addmm(THCudaTensor *self, float alpha, THCudaTensor *m1, THCud
               THCudaTensor_data(self_),
               self_->stride[1]);
 
+  THCublasCheck();
+
   /* free intermediate variables */
   if(m1_ != m1)
     THCudaTensor_free(m1_);
@@ -408,24 +441,26 @@ void THCudaTensor_addr(THCudaTensor *self, float alpha, THCudaTensor *vec1, THCu
 
     THCudaTensor_freeCopyTo(cself, self);
   }
+
+  THCublasCheck();
 }
 
 #define IMPLEMENT_CUDA_TENSOR_BASIC_FUNC(NAME, CFUNC)                   \
-  __global__ void THCudaTensor_kernel_##NAME(float *data, long size)       \
+  struct NAME##_functor                                                \
   {                                                                     \
-    long k = blockDim.x * blockIdx.x + threadIdx.x;                     \
-                                                                        \
-    if(k < size)                                                        \
-      data[k] = CFUNC(data[k]);                                           \
-  }                                                                     \
+    __host__ __device__ float operator()(const float& x) const          \
+    {                                                                   \
+      return CFUNC(x);                                                  \
+    }                                                                   \
+  };                                                                    \
                                                                         \
   void THCudaTensor_##NAME(THCudaTensor *self_)                         \
   {                                                                     \
     THCudaTensor *self = THCudaTensor_newContiguous(self_);             \
     long size = THCudaTensor_nElement(self);                            \
-    long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK; \
+    thrust::device_ptr<float> self_data(THCudaTensor_data(self));       \
                                                                         \
-    THCudaTensor_kernel_##NAME<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), size); \
+    thrust::transform(self_data, self_data+size, self_data, NAME##_functor()); \
                                                                         \
     THCudaTensor_freeCopyTo(self, self_);                               \
   }
@@ -447,21 +482,25 @@ IMPLEMENT_CUDA_TENSOR_BASIC_FUNC(ceil, ceil)
 IMPLEMENT_CUDA_TENSOR_BASIC_FUNC(floor, floor)
 IMPLEMENT_CUDA_TENSOR_BASIC_FUNC(abs, fabs)
 
-__global__ void THCudaTensor_kernel_pow(float *data, float value, long size)
+struct pow_functor
 {
-  long k = blockDim.x * blockIdx.x + threadIdx.x;
+  const float value;
 
-  if(k < size)
-    data[k] = pow(data[k], value);
-}
+  pow_functor(float value_) : value(value_) {}
+
+    __host__ __device__ float operator()(const float& x) const
+  {
+    return pow(x, value);
+  }
+};
 
 void THCudaTensor_pow(THCudaTensor *self_, float value)
 {
   THCudaTensor *self = THCudaTensor_newContiguous(self_);
   long size = THCudaTensor_nElement(self);
-  long nbBlocksPerGrid = (size + NB_THREADS_PER_BLOCK - 1) / NB_THREADS_PER_BLOCK;
-
-  THCudaTensor_kernel_pow<<<nbBlocksPerGrid, NB_THREADS_PER_BLOCK>>>(THCudaTensor_data(self), value, size);
+  thrust::device_ptr<float> self_data(THCudaTensor_data(self));
+  
+  thrust::transform(self_data, self_data+size, self_data, pow_functor(value));
 
   THCudaTensor_freeCopyTo(self, self_);
 }
@@ -525,7 +564,7 @@ float THCudaTensor_norm(THCudaTensor *self, float value)
   float result = thrust::transform_reduce(self_data, self_data+size, norm_functor(value), (float)0, thrust::plus<float>());
 
   THCudaTensor_free(self);
-  return pow(result, 1.0/value);
+  return pow(result, (float)1.0/value);
 }
 
 struct dist_functor
@@ -552,6 +591,6 @@ float THCudaTensor_dist(THCudaTensor *self, THCudaTensor *src, float value)
 
   THCudaTensor_free(src);
   THCudaTensor_free(self);
-
-  return pow(result, 1.0/value);
+  
+  return pow(result, (float)1.0/value);
 }
