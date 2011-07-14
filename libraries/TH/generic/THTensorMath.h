@@ -16,11 +16,11 @@ TH_API void THTensor_(cdiv)(THTensor *self, THTensor *src);
 TH_API void THTensor_(addcmul)(THTensor *self, real value, THTensor *src1, THTensor *src2);
 TH_API void THTensor_(addcdiv)(THTensor *self, real value, THTensor *src1, THTensor *src2);
 
-TH_API real THTensor_(dot)(THTensor *self, THTensor *src);
+TH_API accreal THTensor_(dot)(THTensor *self, THTensor *src);
   
 TH_API real THTensor_(min)(THTensor *self);
 TH_API real THTensor_(max)(THTensor *self);
-TH_API real THTensor_(sum)(THTensor *self);
+TH_API accreal THTensor_(sum)(THTensor *self);
 
 TH_API void THTensor_(addmv)(THTensor *self, real alpha, THTensor *mat, THTensor *vec);
 TH_API void THTensor_(addmm)(THTensor *self, real alpha, THTensor *mat1, THTensor *mat2);
@@ -45,11 +45,11 @@ TH_API void THTensor_(ceil)(THTensor *self);
 TH_API void THTensor_(floor)(THTensor *self);
 TH_API void THTensor_(abs)(THTensor *self);
 
-TH_API real THTensor_(mean)(THTensor *self);
-TH_API real THTensor_(var)(THTensor *self);
-TH_API real THTensor_(std)(THTensor *self);
-TH_API real THTensor_(norm)(THTensor *self, real value);
-TH_API real THTensor_(dist)(THTensor *self, THTensor *src, real value);
+TH_API accreal THTensor_(mean)(THTensor *self);
+TH_API accreal THTensor_(var)(THTensor *self);
+TH_API accreal THTensor_(std)(THTensor *self);
+TH_API accreal THTensor_(norm)(THTensor *self, real value);
+TH_API accreal THTensor_(dist)(THTensor *self, THTensor *src, real value);
 #endif
 
 #endif
