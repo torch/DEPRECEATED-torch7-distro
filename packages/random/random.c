@@ -22,7 +22,25 @@ static int random_initialSeed(lua_State *L)
 
 static int random_random(lua_State *L)
 {
-  lua_pushnumber(L, THRandom_random());
+  int narg = lua_gettop(L);
+
+  if(narg == 0)
+    lua_pushnumber(L, THRandom_random());
+  else if(narg == 1)
+  {
+    long b = luaL_checklong(L, 1);
+    lua_pushnumber(L, (THRandom_random() % b) + 1);
+  }
+  else if(narg == 2)
+  {
+    long a = luaL_checklong(L, 1);
+    long b = luaL_checklong(L, 2);
+    luaL_argcheck(L, b >= a, 2, "upper bound must be larger than lower bound");
+    lua_pushnumber(L, (THRandom_random() % (b+1-a)) + a);
+  }
+  else
+    luaL_error(L, "invalid arguments");
+
   return 1;
 }
 
