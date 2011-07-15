@@ -10,10 +10,6 @@ function Linear:__init(inputSize, outputSize)
    self.gradWeight = torch.Tensor(outputSize, inputSize)
    self.gradBias = torch.Tensor(outputSize)
    
-   -- state
-   self.gradInput:resize(inputSize)
-   self.output:resize(outputSize)
-
    self:reset()
 end
 
@@ -37,6 +33,7 @@ end
 
 function Linear:forward(input)
    if input:dim() == 1 then
+      self.output:resize(self.bias:size(1))
       self.output:copy(self.bias)
       self.output:addmv(1, self.weight, input)
    elseif input:dim() == 2 then
@@ -66,6 +63,7 @@ function Linear:backward(input, gradOutput)
          self.gradWeight:add(self.weightDecay, self.weight)
       end
       
+      self.gradInput:resizeAs(input)
       self.gradInput:zero()
       self.gradInput:addmv(1, self.weight:t(), gradOutput)
    elseif input:dim() == 2 then
