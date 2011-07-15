@@ -3,6 +3,7 @@
 #endif
 
 #define real float
+#define accreal double
 #define Real Float
 #define TH_REAL_IS_FLOAT
 #line 1 TH_GENERIC_FILE
@@ -12,6 +13,7 @@
 #undef TH_REAL_IS_FLOAT
 
 #define real double
+#define accreal double
 #define Real Double
 #define TH_REAL_IS_DOUBLE
 #line 1 TH_GENERIC_FILE

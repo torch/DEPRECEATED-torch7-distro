@@ -66,9 +66,9 @@ void THTensor_(addcdiv)(THTensor *tensor, real value, THTensor *src1, THTensor *
   TH_TENSOR_APPLY3(real, tensor, real, src1, real, src2, *tensor_data += value * *src1_data / *src2_data;);
 }
 
-real THTensor_(dot)(THTensor *tensor, THTensor *src)
+accreal THTensor_(dot)(THTensor *tensor, THTensor *src)
 {
-  real sum = 0;
+  accreal sum = 0;
   /* we use a trick here. careful with that. */
   TH_TENSOR_APPLY2(real, tensor, real, src,
                    long sz = (tensor_size-tensor_i < src_size-src_i ? tensor_size-tensor_i : src_size-src_i);
@@ -99,9 +99,9 @@ real THTensor_(max)(THTensor *tensor)
   return theMax; 
 }
 
-real THTensor_(sum)(THTensor *tensor)
+accreal THTensor_(sum)(THTensor *tensor)
 {
-  real sum = 0;
+  accreal sum = 0;
   TH_TENSOR_APPLY(real, tensor, sum += *tensor_data;);
   return sum;
 }
@@ -138,34 +138,34 @@ TENSOR_IMPLEMENT_BASIC_FUNCTION(abs, fabs)
 
 
 /* basic statistics */
-real THTensor_(mean)(THTensor *tensor)
+accreal THTensor_(mean)(THTensor *tensor)
 { 
   THArgCheck(tensor->nDimension > 0, 1, "empty Tensor");
   return THTensor_(sum)(tensor)/THTensor_(nElement)(tensor);
 }  
 
-real THTensor_(var)(THTensor *tensor)
+accreal THTensor_(var)(THTensor *tensor)
 { 
-  real mean = THTensor_(mean)(tensor);
-  real sum = 0;
+  accreal mean = THTensor_(mean)(tensor);
+  accreal sum = 0;
   TH_TENSOR_APPLY(real, tensor, sum += (*tensor_data - mean)*(*tensor_data - mean););
   sum /= (THTensor_(nElement)(tensor)-1);
   return sum;
 }
 
-real THTensor_(std)(THTensor *tensor)
+accreal THTensor_(std)(THTensor *tensor)
 { 
   return sqrt(THTensor_(var)(tensor));
 } 
  
-real THTensor_(norm)(THTensor *tensor, real value)
+accreal THTensor_(norm)(THTensor *tensor, real value)
 { 
-  real sum = 0;
+  accreal sum = 0;
   TH_TENSOR_APPLY(real, tensor, sum += pow(fabs(*tensor_data), value););
   return pow(sum, 1.0/value);
 }
 
-real THTensor_(dist)(THTensor *tensor, THTensor *src, real value)
+accreal THTensor_(dist)(THTensor *tensor, THTensor *src, real value)
 { 
   real sum = 0;
   TH_TENSOR_APPLY2(real, tensor, real, src, 
@@ -359,6 +359,5 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
     THTensor_(transpose)(m2, NULL, 0, 1);
   }
 } 
-
 
 #endif
