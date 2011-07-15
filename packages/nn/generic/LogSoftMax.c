@@ -6,16 +6,17 @@ static int nn_(LogSoftMax_forward)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
-	real sum = THLogZero;
-  
+  real maxInput = THTensor_(max)(input);
+	accreal logsum = 0;
+
+  TH_TENSOR_APPLY(real, input,
+                  logsum += THExpMinusApprox(maxInput - *input_data););
+  logsum = maxInput + log(logsum);
+
   THTensor_(resizeAs)(output, input);
   
-  TH_TENSOR_APPLY2(real, output, real, input,   \
-                   real z = *input_data;           \
-                   *output_data = z;               \
-                   sum = THLogAdd(sum, z);)
-    
-  THTensor_(add)(output, -sum);
+  TH_TENSOR_APPLY2(real, output, real, input,
+                   *output_data = *input_data - logsum;)
 
   return 1;
 }
