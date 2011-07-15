@@ -4,7 +4,7 @@ function Min:__init(dimension)
    parent.__init(self)
    dimension = dimension or 1
    self.dimension = dimension
-   self.indices = torch.Tensor()
+   self.indices = self.Tensor()
 end
 
 function Min:forward(input)

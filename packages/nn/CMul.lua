@@ -3,8 +3,8 @@ local CMul, parent = torch.class('nn.CMul', 'nn.Module')
 function CMul:__init(inputSize)
    parent.__init(self)
   
-   self.weight = torch.Tensor(inputSize)
-   self.gradWeight = torch.Tensor(inputSize)
+   self.weight = self.Tensor(inputSize)
+   self.gradWeight = self.Tensor(inputSize)
    
    -- state
    self.gradInput:resize(inputSize)

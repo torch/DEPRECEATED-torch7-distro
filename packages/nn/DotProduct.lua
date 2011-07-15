@@ -2,8 +2,8 @@ local DotProduct, parent = torch.class('nn.DotProduct', 'nn.Module')
 
 function DotProduct:__init()
    parent.__init(self)
-   self.gradInput = {torch.Tensor(), torch.Tensor()}
-   self.output=torch.Tensor(1)
+   self.gradInput = {self.Tensor(), self.Tensor()}
+   self.output=self.Tensor(1)
 end 
  
 function DotProduct:forward(input,y)

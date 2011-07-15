@@ -5,7 +5,7 @@ function HingeEmbeddingCriterion:__init(margin)
    parent.__init(self)
    margin=margin or 1 
    self.margin = margin 
-   self.gradInput = torch.Tensor(1)
+   self.gradInput = self.Tensor(1)
 end 
  
 function HingeEmbeddingCriterion:forward(input,y)

@@ -1,8 +1,9 @@
 local Module = torch.class('nn.Module')
 
 function Module:__init()
-   self.gradInput = torch.Tensor()
-   self.output = torch.Tensor()
+   self.Tensor = torch.Tensor
+   self.gradInput = self.Tensor()
+   self.output = self.Tensor()
 end
 
 function Module:forward(input)
@@ -20,11 +21,13 @@ function Module:updateParameters(learningRate)
 end
 
 function Module:write(file)
+   file:writeString(self.Tensor.__typename)
    file:writeObject(self.gradInput)
    file:writeObject(self.output)
 end
 
 function Module:read(file)
+   self.Tensor = torch.getconstructortable(file:readString())
    self.gradInput = file:readObject()
    self.output = file:readObject()
 end

@@ -4,7 +4,7 @@ function CosineEmbeddingCriterion:__init(margin)
    parent.__init(self)
    margin=margin or 0
    self.margin = margin 
-   self.gradInput = {torch.Tensor(), torch.Tensor()}
+   self.gradInput = {self.Tensor(), self.Tensor()}
 end 
  
 function CosineEmbeddingCriterion:forward(input,y)
@@ -32,8 +32,8 @@ end
 function CosineEmbeddingCriterion:backward(input, y)
    local v1 = input[1]
    local v2 = input[2]
-   local gw1=torch.Tensor()
-   local gw2=torch.Tensor()
+   local gw1=self.Tensor()
+   local gw2=self.Tensor()
    gw1:resizeAs(v1) 
    gw2:resizeAs(v1)
 

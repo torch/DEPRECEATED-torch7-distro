@@ -3,8 +3,8 @@ local Euclidean, parent = torch.class('nn.Euclidean', 'nn.Module')
 function Euclidean:__init(inputSize,outputSize)
    parent.__init(self)
   
-   self.weight = torch.Tensor(inputSize,outputSize) 
-   self.gradWeight = torch.Tensor(inputSize,outputSize)
+   self.weight = self.Tensor(inputSize,outputSize) 
+   self.gradWeight = self.Tensor(inputSize,outputSize)
    
    -- state
    self.gradInput:resize(inputSize)

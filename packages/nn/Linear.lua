@@ -5,10 +5,10 @@ function Linear:__init(inputSize, outputSize)
 
    self.weightDecay = 0
   
-   self.weight = torch.Tensor(outputSize, inputSize)
-   self.bias = torch.Tensor(outputSize)
-   self.gradWeight = torch.Tensor(outputSize, inputSize)
-   self.gradBias = torch.Tensor(outputSize)
+   self.weight = self.Tensor(outputSize, inputSize)
+   self.bias = self.Tensor(outputSize)
+   self.gradWeight = self.Tensor(outputSize, inputSize)
+   self.gradBias = self.Tensor(outputSize)
    
    self:reset()
 end
@@ -40,7 +40,7 @@ function Linear:forward(input)
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local bias = torch.Tensor(self.bias:storage(), 1,
+      local bias = self.Tensor(self.bias:storage(), 1,
                                 nframe, 0,
                                 nunit, 1)
 
@@ -70,7 +70,7 @@ function Linear:backward(input, gradOutput)
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local gradBias = torch.Tensor(self.gradBias:storage(), 1,
+      local gradBias = self.Tensor(self.gradBias:storage(), 1,
                                     nframe, 0,
                                     nunit, 1)
 

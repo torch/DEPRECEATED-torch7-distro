@@ -34,7 +34,7 @@ end
 function JoinTable:backward(input, gradOutput)
    for i=1,#input do 
 	  if self.gradInput[i]==nil then
-		self.gradInput[i]=torch.Tensor();
+		self.gradInput[i]=self.Tensor();
 	  end
 	  self.gradInput[i]:resizeAs(input[i])
    end

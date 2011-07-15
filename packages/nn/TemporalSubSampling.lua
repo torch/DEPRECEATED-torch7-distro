@@ -9,10 +9,10 @@ function TemporalSubSampling:__init(inputFrameSize, kW, dW)
    self.kW = kW
    self.dW = dW
 
-   self.weight = torch.Tensor(inputFrameSize)
-   self.bias = torch.Tensor(inputFrameSize)
-   self.gradWeight = torch.Tensor(inputFrameSize)
-   self.gradBias = torch.Tensor(inputFrameSize)
+   self.weight = self.Tensor(inputFrameSize)
+   self.bias = self.Tensor(inputFrameSize)
+   self.gradWeight = self.Tensor(inputFrameSize)
+   self.gradBias = self.Tensor(inputFrameSize)
    
    self:reset()
 end

@@ -3,8 +3,8 @@ local Mul, parent = torch.class('nn.Mul', 'nn.Module')
 function Mul:__init(inputSize)
    parent.__init(self)
   
-   self.weight = torch.Tensor(1)
-   self.gradWeight = torch.Tensor(1)
+   self.weight = self.Tensor(1)
+   self.gradWeight = self.Tensor(1)
    
    -- state
    self.gradInput:resize(inputSize)

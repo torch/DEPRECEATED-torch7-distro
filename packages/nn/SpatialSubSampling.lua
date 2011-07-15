@@ -12,10 +12,10 @@ function SpatialSubSampling:__init(nInputPlane, kW, kH, dW, dH)
    self.dW = dW
    self.dH = dH
 
-   self.weight = torch.Tensor(nInputPlane)
-   self.bias = torch.Tensor(nInputPlane)
-   self.gradWeight = torch.Tensor(nInputPlane)
-   self.gradBias = torch.Tensor(nInputPlane)
+   self.weight = self.Tensor(nInputPlane)
+   self.bias = self.Tensor(nInputPlane)
+   self.gradWeight = self.Tensor(nInputPlane)
+   self.gradBias = self.Tensor(nInputPlane)
    
    self:reset()
 end
