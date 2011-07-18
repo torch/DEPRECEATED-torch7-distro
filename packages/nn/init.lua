@@ -13,12 +13,11 @@ torch.include('nn', 'SparseLinear.lua')
 torch.include('nn', 'Reshape.lua')  
 torch.include('nn', 'Select.lua')
   
+torch.include('nn', 'Copy.lua')
 torch.include('nn', 'Min.lua')
 torch.include('nn', 'Max.lua')
 torch.include('nn', 'Mean.lua')
 torch.include('nn', 'Sum.lua')
-
-
 torch.include('nn', 'CMul.lua')  
 torch.include('nn', 'Mul.lua')  
 torch.include('nn', 'Add.lua')  
