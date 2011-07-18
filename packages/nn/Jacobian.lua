@@ -7,11 +7,12 @@ function nn.Jacobian.backward (module, input, param, dparam)
    end
    param = param or input
    -- output deriv
-   local dout = self.Tensor():resizeAs(module:forward(input))
+   module:forward(input)
+   local dout = module.output.new():resizeAs(module.output)
    -- 1D view
-   local sdout = self.Tensor(dout:storage(),1,dout:nElement())
+   local sdout = module.output.new(dout:storage(),1,dout:nElement())
    -- jacobian matrix to calculate
-   local jacobian = self.Tensor(param:nElement(),dout:nElement()):zero()
+   local jacobian = torch.Tensor(param:nElement(),dout:nElement()):zero()
 
    for i=1,sdout:nElement() do
       dout:zero()
@@ -33,12 +34,12 @@ function nn.Jacobian.forward(module, input, param)
    local small = 1e-6
    -- 1D view of input
    local tst = param:storage()
-   local sin = self.Tensor(tst,1,tst:size())
+   local sin = param.new(tst,1,tst:size())
    -- jacobian matrix to calculate
-   local jacobian = self.Tensor():resize(param:nElement(),module:forward(input):nElement())
+   local jacobian = torch.Tensor():resize(param:nElement(),module:forward(input):nElement())
    
-   local outa = self.Tensor(jacobian:size(2))
-   local outb = self.Tensor(jacobian:size(2))
+   local outa = torch.Tensor(jacobian:size(2))
+   local outb = torch.Tensor(jacobian:size(2))
    
    for i=1,sin:nElement() do      
       sin[i] = sin[i] - small
@@ -83,11 +84,11 @@ function nn.Jacobian.testIO(module,input, minval, maxval)
 
    -- run module
    module:forward(input)
-   local go = self.Tensor():resizeAs(module.output):copy(lab.rand(module.output:nElement()):mul(inrange):add(minval))
+   local go = module.output:clone():copy(lab.rand(module.output:nElement()):mul(inrange):add(minval))
    module:backward(input,go)
 
-   local fo = self.Tensor():resizeAs(module.output):copy(module.output)
-   local bo = self.Tensor():resizeAs(module.gradInput):copy(module.gradInput)
+   local fo = module.output:clone()
+   local bo = module.gradInput:clone()
 
    -- write module
    local f = torch.DiskFile('tmp.bin','w'):binary()
@@ -100,8 +101,8 @@ function nn.Jacobian.testIO(module,input, minval, maxval)
    -- cleanup
    os.remove('tmp.bin')
 
-   local fo2 = self.Tensor():resizeAs(m.output):copy(m.output)
-   local bo2 = self.Tensor():resizeAs(m.gradInput):copy(m.gradInput)
+   local fo2 = m.output:clone()
+   local bo2 = m.gradInput:clone()
 
    local errf = fo - fo2
    local errb = bo - bo2

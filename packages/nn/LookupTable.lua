@@ -19,7 +19,7 @@ function LookupTable:__init(nIndex, ...)
    end
 
    self.size[1] = nIndex
-   self.weight = self.Tensor(self.size)
+   self.weight = torch.Tensor(self.size)
    self.currentGradWeights = {}
    self.currentInputs = {}
 
@@ -53,8 +53,8 @@ function LookupTable:zeroGradParameters()
 end
 
 function LookupTable:backward(input, gradOutput)
-   table.insert(self.currentInputs, self.Tensor(input:size()):copy(input))
-   table.insert(self.currentGradWeights, self.Tensor(gradOutput:size()):copy(gradOutput))
+   table.insert(self.currentInputs, input.new(input:size()):copy(input))
+   table.insert(self.currentGradWeights, input.new(gradOutput:size()):copy(gradOutput))
 end
 
 function LookupTable:updateParameters(learningRate)

@@ -13,10 +13,10 @@ function SpatialConvolution:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH)
    self.dW = dW
    self.dH = dH
 
-   self.weight = self.Tensor(nOutputPlane, nInputPlane, kH, kW)
-   self.bias = self.Tensor(nOutputPlane)
-   self.gradWeight = self.Tensor(nOutputPlane, nInputPlane, kH, kW)
-   self.gradBias = self.Tensor(nOutputPlane)
+   self.weight = torch.Tensor(nOutputPlane, nInputPlane, kH, kW)
+   self.bias = torch.Tensor(nOutputPlane)
+   self.gradWeight = torch.Tensor(nOutputPlane, nInputPlane, kH, kW)
+   self.gradBias = torch.Tensor(nOutputPlane)
    
    self:reset()
 end

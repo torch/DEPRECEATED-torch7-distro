@@ -4,8 +4,8 @@ function PairwiseDistance:__init(p)
    parent.__init(self)
 
    -- state
-   self.gradInput = {self.Tensor(), self.Tensor()}
-   self.output = self.Tensor(1)
+   self.gradInput = {torch.Tensor(), torch.Tensor()}
+   self.output = torch.Tensor(1)
    self.norm=p
 end 
   

@@ -10,10 +10,10 @@ function TemporalConvolution:__init(inputFrameSize, outputFrameSize, kW, dW)
    self.kW = kW
    self.dW = dW
 
-   self.weight = self.Tensor(outputFrameSize, inputFrameSize*kW)
-   self.bias = self.Tensor(outputFrameSize)
-   self.gradWeight = self.Tensor(outputFrameSize, inputFrameSize*kW)
-   self.gradBias = self.Tensor(outputFrameSize)
+   self.weight = torch.Tensor(outputFrameSize, inputFrameSize*kW)
+   self.bias = torch.Tensor(outputFrameSize)
+   self.gradWeight = torch.Tensor(outputFrameSize, inputFrameSize*kW)
+   self.gradBias = torch.Tensor(outputFrameSize)
    
    self:reset()
 end

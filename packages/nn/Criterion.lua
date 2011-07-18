@@ -1,7 +1,7 @@
 local Criterion = torch.class('nn.Criterion')
 
 function Criterion:__init()
-   self.gradInput = self.Tensor()
+   self.gradInput = torch.Tensor()
    self.output = 0
 end
 

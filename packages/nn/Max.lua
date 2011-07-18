@@ -4,7 +4,7 @@ function Max:__init(dimension)
    parent.__init(self)
    dimension = dimension or 1
    self.dimension = dimension
-   self.indices = self.Tensor()
+   self.indices = torch.Tensor()
 end
 
 function Max:forward(input)

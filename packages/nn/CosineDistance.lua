@@ -2,8 +2,8 @@ local CosineDistance, parent = torch.class('nn.CosineDistance', 'nn.Module')
 
 function CosineDistance:__init()
    parent.__init(self)
-   self.gradInput = {self.Tensor(), self.Tensor()}
-   self.output=self.Tensor(1)
+   self.gradInput = {torch.Tensor(), torch.Tensor()}
+   self.output=torch.Tensor(1)
 end 
  
 function CosineDistance:forward(input)
@@ -18,10 +18,10 @@ function CosineDistance:forward(input)
 end
 
 function CosineDistance:backward(input, gradOutput)
-   local v1 = input[1]
-   local v2 = input[2]
-   local gw1=self.Tensor()
-   local gw2=self.Tensor()
+   local v1  = input[1]
+   local v2  = input[2]
+   local gw1 = input[1].new()
+   local gw2 = input[2].new()
    gw1:resizeAs(v1) 
    gw2:resizeAs(v1)
 

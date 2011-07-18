@@ -5,8 +5,8 @@ function Add:__init(inputSize,scalar)
   
    local size=inputSize
    if scalar then size=1; end
-   self.bias = self.Tensor(size)
-   self.gradBias = self.Tensor(size)
+   self.bias = torch.Tensor(size)
+   self.gradBias = torch.Tensor(size)
      
    -- state
    self.gradInput:resize(inputSize)

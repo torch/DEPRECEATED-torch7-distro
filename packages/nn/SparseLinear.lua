@@ -4,11 +4,11 @@ function SparseLinear:__init(inputSize, outputSize)
    parent.__init(self)
 
    self.weightDecay = 0
-   self.weight = self.Tensor(outputSize, inputSize)
-   self.bias = self.Tensor(outputSize)
-   self.gradWeight = self.Tensor(outputSize, inputSize)
-   self.gradBias = self.Tensor(outputSize)
-   self.lastInput = self.Tensor()
+   self.weight = torch.Tensor(outputSize, inputSize)
+   self.bias = torch.Tensor(outputSize)
+   self.gradWeight = torch.Tensor(outputSize, inputSize)
+   self.gradBias = torch.Tensor(outputSize)
+   self.lastInput = torch.Tensor()
    -- state
    self.gradInput:resize(inputSize)
    self.output:resize(outputSize)
@@ -54,6 +54,7 @@ function SparseLinear:write(file)
    file:writeObject(self.bias)
    file:writeObject(self.gradWeight)
    file:writeObject(self.gradBias)
+   file:writeObject(self.lastInput)
 end
 
 function SparseLinear:read(file)
@@ -63,9 +64,5 @@ function SparseLinear:read(file)
    self.bias = file:readObject()
    self.gradWeight = file:readObject()
    self.gradBias = file:readObject()
-
-   self.lastInput = self.Tensor()
-   self.gradInput = self.Tensor()
-   self.output = self.Tensor()
-   self.output:resizeAs(self.bias)
+   self.lastInput = file:readObject()
 end
