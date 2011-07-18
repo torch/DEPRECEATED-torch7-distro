@@ -12,11 +12,26 @@ function Reshape:__init(...)
          self.size[i] = select(i, ...)
       end
    end
-   self.output:resize(self.size)
 end
 
 function Reshape:forward(input)
-   return self.output:copy(input)
+   -- infer dimensions if missing
+   self.resolvedSize = self.resolvedSize or torch.LongStorage()
+   self.resolvedSize:resize(#self.size)
+   local next = 1
+   for i = 1,#self.size do
+      if self.size[i] == -1 then
+         self.resolvedSize[i] = input:size(next)
+         next = next + 1
+      else
+         self.resolvedSize[i] = self.size[i]
+      end
+   end
+
+   -- reshape input with given dimensions
+   input = input:contiguous()
+   self.output = torch.Tensor(input:storage(), input:storageOffset(), self.resolvedSize)
+   return self.output
 end
 
 function Reshape:backward(input, gradOutput)
