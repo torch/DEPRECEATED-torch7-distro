@@ -42,9 +42,7 @@ static int cunn_LogSoftMax_forward(lua_State *L)
   long size = THCudaTensor_nElement(input);
 
   input = THCudaTensor_newContiguous(input);
-
   THCudaTensor_resizeAs(output, input);
-  THCudaTensor_copy(output, input);
 
   thrust::device_ptr<float> output_data(THCudaTensor_data(output));
   thrust::device_ptr<float> input_data(THCudaTensor_data(input));
