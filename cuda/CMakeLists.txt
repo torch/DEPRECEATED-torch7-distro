@@ -1,4 +1,9 @@
-FIND_PACKAGE(CUDA 2.3 REQUIRED)
+FIND_PACKAGE(CUDA 4.0 REQUIRED)
+
+# bug on Apple
+IF(APPLE)
+  LINK_DIRECTORIES("/usr/local/cuda/lib/")
+ENDIF(APPLE)
 
 FILE(GLOB _all_files *)
 
