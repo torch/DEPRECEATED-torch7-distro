@@ -10,6 +10,12 @@ static int cutorch_getDevice(lua_State *L)
   return 1;
 }
 
+static int cutorch_deviceReset(lua_State *L)
+{
+  THCudaCheck(cudaDeviceReset());
+  return 0;
+}
+
 static int cutorch_getDeviceCount(lua_State *L)
 {
   int ndevice;
@@ -61,6 +67,7 @@ static int cutorch_getDeviceProperties(lua_State *L)
 
 static const struct luaL_Reg cutorch_stuff__ [] = {
   {"getDevice", cutorch_getDevice},
+  {"deviceReset", cutorch_deviceReset},
   {"getDeviceCount", cutorch_getDeviceCount},
   {"getDeviceProperties", cutorch_getDeviceProperties},
   {"setDevice", cutorch_setDevice},
