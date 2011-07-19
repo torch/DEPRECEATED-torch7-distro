@@ -30,7 +30,7 @@ function Reshape:forward(input)
 
    -- reshape input with given dimensions
    input = input:contiguous()
-   self.output = input.new(input:storage(), input:storageOffset(), self.resolvedSize)
+   self.output:set(input):resize(self.resolvedSize)
    return self.output
 end
 
