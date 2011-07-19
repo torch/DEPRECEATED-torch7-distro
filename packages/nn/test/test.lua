@@ -73,6 +73,121 @@ function nntest.HardTanh()
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.Abs()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+   
+   local module = nn.Abs()
+   
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision ,  'error on state ')
+   
+   local ferr, berr = jac.testIO(module, input, 0.1, 2)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.Threshold()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local module = nn.Threshold(random.uniform(-2,2),random.uniform(-2,2))
+
+   local err = nn.Jacobian.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = nn.Jacobian.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.HardShrink()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local module = nn.HardShrink()
+
+   local err = nn.Jacobian.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = nn.Jacobian.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.Power()
+   local in1 = lab.rand(10,20)
+   local module = nn.Power(2)
+   local out = module:forward(in1)
+   local err = out:dist(in1:cmul(in1))
+   mytester:asserteq(err, 0, torch.typename(module) .. ' - forward err ')
+
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local pw = random.uniform()*math.random(1,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local module = nn.Power(pw)
+
+   local err = nn.Jacobian.testJacobian(module, input, 0.1, 2)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = nn.Jacobian.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.Square()
+   local in1 = lab.rand(10,20)
+   local module = nn.Square()
+   local out = module:forward(in1)
+   local err = out:dist(in1:cmul(in1))
+   mytester:asserteq(err, 0, torch.typename(module) .. ' - forward err ')
+
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local module = nn.Square()
+
+   local err = nn.Jacobian.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = nn.Jacobian.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.Sqrt()
+   local in1 = lab.rand(10,20)
+   local module = nn.Sqrt()
+   local out = module:forward(in1)
+   local err = out:dist(in1:sqrt())
+   mytester:asserteq(err, 0, torch.typename(module) .. ' - forward err ')
+
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local module = nn.Sqrt()
+
+   local err = nn.Jacobian.testJacobian(module, input, 0.1, 2)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = nn.Jacobian.testIO(module, input, 0.1, 2)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
 function nntest.Linear()
    local ini = math.random(50,70)
    local inj = math.random(50,70)
