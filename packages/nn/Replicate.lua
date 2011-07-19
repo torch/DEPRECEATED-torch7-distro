@@ -16,7 +16,7 @@ function Replicate:forward(input)
    for i = 1,input:dim() do
       st[i+1] = input:stride(i)
    end
-   self.output = torch.Tensor(input:storage(),input:storageOffset(),sz,st)
+   self.output = input.new(input:storage(),input:storageOffset(),sz,st)
    return self.output
 end
 
