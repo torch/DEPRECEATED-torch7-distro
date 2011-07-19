@@ -40,9 +40,9 @@ function Linear:forward(input)
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local bias = torch.Tensor(self.bias:storage(), 1,
-                                nframe, 0,
-                                nunit, 1)
+      local bias = input.new(self.bias:storage(), 1,
+                             nframe, 0,
+                             nunit, 1)
 
       self.output:resize(nframe, nunit)
       self.output:copy(bias)
@@ -70,9 +70,9 @@ function Linear:backward(input, gradOutput)
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local gradBias = torch.Tensor(self.gradBias:storage(), 1,
-                                    nframe, 0,
-                                    nunit, 1)
+      local gradBias = input.new(self.gradBias:storage(), 1,
+                                 nframe, 0,
+                                 nunit, 1)
 
       self.gradWeight:addmm(1, gradOutput:t(), input)
       gradBias:add(gradOutput)

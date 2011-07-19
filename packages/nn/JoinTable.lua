@@ -14,11 +14,11 @@ function JoinTable:forward(input)
          self.size:resize(currentOutput:dim()):copy(currentOutput:size())
       else
          self.size[self.dimension] = self.size[self.dimension] 
-				     + currentOutput:size(self.dimension)
+            + currentOutput:size(self.dimension)
       end 
    end
    self.output:resize(self.size)
-    
+   
    local offset = 1  
    for i=1,#input do
       local currentOutput = input[i]
@@ -33,10 +33,10 @@ end
 
 function JoinTable:backward(input, gradOutput)
    for i=1,#input do 
-	  if self.gradInput[i]==nil then
-		self.gradInput[i]=torch.Tensor();
-	  end
-	  self.gradInput[i]:resizeAs(input[i])
+      if self.gradInput[i] == nil then
+         self.gradInput[i] = input.new()
+      end
+      self.gradInput[i]:resizeAs(input[i])
    end
 
    local offset = 1
