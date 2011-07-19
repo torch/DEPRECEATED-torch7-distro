@@ -54,6 +54,7 @@ function SparseLinear:write(file)
    file:writeObject(self.bias)
    file:writeObject(self.gradWeight)
    file:writeObject(self.gradBias)
+   file:writeObject(self.lastInput)
 end
 
 function SparseLinear:read(file)
@@ -63,9 +64,5 @@ function SparseLinear:read(file)
    self.bias = file:readObject()
    self.gradWeight = file:readObject()
    self.gradBias = file:readObject()
-
-   self.lastInput = torch.Tensor()
-   self.gradInput = torch.Tensor()
-   self.output = torch.Tensor()
-   self.output:resizeAs(self.bias)
+   self.lastInput = file:readObject()
 end

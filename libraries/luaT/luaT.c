@@ -504,6 +504,10 @@ int luaT_lua_newmetatable(lua_State *L)
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
 
+    /* new points to constructor */
+    lua_pushvalue(L, 3);
+    lua_setfield(L, -2, "new");
+
     /* __typename contains the typename */
     lua_pushstring(L, tname);
     lua_setfield(L, -2, "__typename");

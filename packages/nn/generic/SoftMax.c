@@ -5,24 +5,15 @@
 static int nn_(SoftMax_forward)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
-  real shift = luaT_getfieldchecknumber(L, 1, "shift");
-  int computeShift = luaT_getfieldcheckboolean(L, 1, "computeShift");
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
-  real sum;
-
-  if(computeShift)
-  {
-    shift = THTensor_(max)(input);
-    lua_pushnumber(L, shift);
-    lua_setfield(L, 1, "shift");
-  }
+  real inputMax = THTensor_(max)(input);
+  real sum = 0;
 
   THTensor_(resizeAs)(output, input);
 
-  sum = 0;
-  TH_TENSOR_APPLY2(real, output, real, input,         \
-                   real z = exp(*input_data - shift); \
-                   *output_data = z;                  \
+  TH_TENSOR_APPLY2(real, output, real, input,                         \
+                   real z = THExpMinusApprox(inputMax - *input_data); \
+                   *output_data = z;                                  \
                    sum += z;)
 
   THTensor_(mul)(output, 1/sum);

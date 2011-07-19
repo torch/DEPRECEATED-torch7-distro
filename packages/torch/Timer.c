@@ -3,8 +3,8 @@
 #ifdef _MSC_VER
 #include <time.h>
 #else
-#include <sys/times.h>
-#include <unistd.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 #endif
 
 #ifdef _MSC_VER
@@ -16,21 +16,36 @@ static const void* torch_Timer_id = NULL;
 typedef struct _Timer
 {
     int isRunning;
-    double totalTime;
-    double startTime;
+
+    double totalrealtime;
+    double totalusertime;
+    double totalsystime;
+
+    double startrealtime;
+    double startusertime;
+    double startsystime;
+
 } Timer;
 
-static double torch_Timer_runTime()
+static double torch_Timer_realtime()
 {
-#ifdef _MSC_VER
-  time_t truc_foireux;
-  time(&truc_foireux);
-  return(difftime(truc_foireux, base_time));
-#else
-  struct tms current;
-  times(&current);
-  return(((double)current.tms_utime)/((double)sysconf(_SC_CLK_TCK)));
-#endif
+  struct timeval current;
+  gettimeofday(&current, NULL);
+  return (current.tv_sec + current.tv_usec/1000000.0);
+}
+
+static double torch_Timer_usertime()
+{
+  struct rusage current;
+  getrusage(RUSAGE_SELF, &current);
+  return (current.ru_utime.tv_sec + current.ru_utime.tv_usec/1000000.0);
+}
+
+static double torch_Timer_systime()
+{
+  struct rusage current;
+  getrusage(RUSAGE_SELF, &current);
+  return (current.ru_stime.tv_sec + current.ru_stime.tv_usec/1000000.0);
 }
 
 static int torch_Timer_new(lua_State *L)
@@ -40,9 +55,13 @@ static int torch_Timer_new(lua_State *L)
   while(!base_time)
     time(&base_time);
 #endif
-  timer->totalTime = 0;
   timer->isRunning = 1;
-  timer->startTime = torch_Timer_runTime();
+  timer->totalrealtime = 0;
+  timer->totalusertime = 0;
+  timer->totalsystime = 0;
+  timer->startrealtime = torch_Timer_realtime();
+  timer->startusertime = torch_Timer_usertime();
+  timer->startsystime = torch_Timer_systime();
   luaT_pushudata(L, timer, torch_Timer_id);
   return 1;
 }
@@ -50,8 +69,12 @@ static int torch_Timer_new(lua_State *L)
 static int torch_Timer_reset(lua_State *L)
 {
   Timer *timer = luaT_checkudata(L, 1, torch_Timer_id);
-  timer->totalTime = 0;
-  timer->startTime = torch_Timer_runTime();
+  timer->totalrealtime = 0;
+  timer->totalusertime = 0;
+  timer->totalsystime = 0;
+  timer->startrealtime = torch_Timer_realtime();
+  timer->startusertime = torch_Timer_usertime();
+  timer->startsystime = torch_Timer_systime();
   lua_settop(L, 1);
   return 1;
 }
@@ -68,8 +91,12 @@ static int torch_Timer_stop(lua_State *L)
   Timer *timer = luaT_checkudata(L, 1, torch_Timer_id);
   if(timer->isRunning)  
   {
-    double currentTime = torch_Timer_runTime() - timer->startTime;
-    timer->totalTime += currentTime;
+    double realtime = torch_Timer_realtime() - timer->startrealtime;
+    double usertime = torch_Timer_usertime() - timer->startusertime;
+    double systime = torch_Timer_systime() - timer->startsystime;
+    timer->totalrealtime += realtime;
+    timer->totalusertime += usertime;
+    timer->totalsystime += systime;
     timer->isRunning = 0;
   }
   lua_settop(L, 1);
@@ -81,8 +108,10 @@ static int torch_Timer_resume(lua_State *L)
   Timer *timer = luaT_checkudata(L, 1, torch_Timer_id);
   if(!timer->isRunning)
   {
-    timer->startTime = torch_Timer_runTime();
     timer->isRunning = 1;
+    timer->startrealtime = torch_Timer_realtime();
+    timer->startusertime = torch_Timer_usertime();
+    timer->startsystime = torch_Timer_systime();
   }
   lua_settop(L, 1);
   return 1;  
@@ -91,9 +120,17 @@ static int torch_Timer_resume(lua_State *L)
 static int torch_Timer_time(lua_State *L)
 {
   Timer *timer = luaT_checkudata(L, 1, torch_Timer_id);
-  double returnTime = (timer->isRunning ? (timer->totalTime + torch_Timer_runTime() - timer->startTime) : timer->totalTime);
-  lua_pushnumber(L, returnTime);
-  return 1;  
+  double realtime = (timer->isRunning ? (timer->totalrealtime + torch_Timer_realtime() - timer->startrealtime) : timer->totalrealtime);
+  double usertime = (timer->isRunning ? (timer->totalusertime + torch_Timer_usertime() - timer->startusertime) : timer->totalusertime);
+  double systime = (timer->isRunning ? (timer->totalsystime + torch_Timer_systime() - timer->startsystime) : timer->totalsystime);
+  lua_createtable(L, 0, 3);
+  lua_pushnumber(L, realtime);
+  lua_setfield(L, -2, "real");
+  lua_pushnumber(L, usertime);
+  lua_setfield(L, -2, "user");
+  lua_pushnumber(L, systime);
+  lua_setfield(L, -2, "sys");
+  return 1;
 }
 
 static int torch_Timer___tostring__(lua_State *L)
