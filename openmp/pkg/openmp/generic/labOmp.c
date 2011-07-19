@@ -178,6 +178,4 @@ void labOmp_(init)(lua_State *L)
   lua_pop(L, 1);
 }
 
-
-
 #endif

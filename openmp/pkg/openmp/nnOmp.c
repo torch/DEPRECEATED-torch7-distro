@@ -9,6 +9,8 @@
 static const void* torch_FloatTensor_id = NULL;
 static const void* torch_DoubleTensor_id = NULL;
 
+extern void setompnthread(lua_State *L, int ud, const char *field);
+
 #include "generic/SpatialConvolutionOmp.c"
 #include "THGenerateFloatTypes.h"
 

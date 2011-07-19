@@ -7,6 +7,7 @@ static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
+  setompnthread(L,1,"nThread");
 
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor *bias = luaT_getfieldcheckudata(L, 1, "bias", torch_(Tensor_id));
@@ -24,6 +25,7 @@ static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
   long outputHeight = (inputHeight - kH) / dH + 1;
 
   THTensor_(resize3d)(output, nOutputPlane, outputHeight, outputWidth);
+
 
   /* add bias */
   long i;
@@ -56,6 +58,7 @@ static int nnOmp_(SpatialConvolution_backwardOmp)(lua_State *L)
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
+  setompnthread(L,1,"nThread");
 
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
@@ -71,6 +74,8 @@ static int nnOmp_(SpatialConvolution_backwardOmp)(lua_State *L)
   real *gradOutput_data = THTensor_(data)(gradOutput);
   long noutSlice = gradOutput->size[1]*gradOutput->size[2];
   /*THTensor* gradOutSlice = THTensor_(new)();*/
+
+
 #pragma omp parallel for private(k)
   for(k = 0; k < nOutputPlane; k++)
   {

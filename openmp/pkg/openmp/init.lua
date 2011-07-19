@@ -58,23 +58,12 @@ local function nn_enable(tensorType)
    spatialSubSampling_enable(tensorType)
    hardTanh_enable(tensorType)
    tanh_enable(tensorType)
-
-   tensorType.nn.SpatialConvolution_enableOpenMP = function() spatialConvolution_enable(tensorType) end
-   tensorType.nn.SpatialSubSampling_enableOpenMP = function() spatialSubSampling_enable(tensorType) end
-   tensorType.nn.HardTanh_enableOpenMP = function() hardTanh_enable(tensorType) end
-   tensorType.nn.Tanh_enableOpenMP = function() tanh_enable(tensorType) end
-
-   tensorType.nn.SpatialConvolution_disableOpenMP = function() spatialConvolution_disable(tensorType) end
-   tensorType.nn.SpatialSubSampling_disableOpenMP = function() spatialSubSampling_disable(tensorType) end
-   tensorType.nn.HardTanh_disableOpenMP = function() hardTanh_disable(tensorType) end
-   tensorType.nn.Tanh_disableOpenMP = function() tanh_disable(tensorType) end
 end
 local function nn_disable(tensorType)
    spatialConvolution_disable(tensorType)
    spatialSubSampling_disable(tensorType)
    hardTanh_disable(tensorType)
    tanh_disable(tensorType)
-
 end
 
 function openmp.enable ()

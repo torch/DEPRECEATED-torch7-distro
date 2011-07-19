@@ -5,6 +5,7 @@
 static int nnOmp_(HardTanh_forwardOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  setompnthread(L,1,"nThread");
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
 
   THTensor_(resizeAs)(output, input);
@@ -24,6 +25,8 @@ static int nnOmp_(HardTanh_forwardOmp)(lua_State *L)
     real* output_data = THTensor_(data)(output);
     real* input_data  = THTensor_(data)(input);
     long k;
+
+
 #pragma omp parallel for private(k)
     for (k = 0; k < input->size[0]; k++)
     {
@@ -48,6 +51,7 @@ static int nnOmp_(HardTanh_forwardOmp)(lua_State *L)
 static int nnOmp_(HardTanh_backwardOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  setompnthread(L,1,"nThread");
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
 
@@ -70,6 +74,7 @@ static int nnOmp_(HardTanh_backwardOmp)(lua_State *L)
     real* gradInput_data  = THTensor_(data)(gradInput);
     real* input_data      = THTensor_(data)(input);
     long k;
+
 #pragma omp parallel for private(k)
     for (k = 0; k < input->size[0]; k++)
     {

@@ -10,6 +10,7 @@ static int nnOmp_(SpatialSubSampling_forwardOmp)(lua_State *L)
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
+  setompnthread(L,1,"nThread");
 
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor *bias = luaT_getfieldcheckudata(L, 1, "bias", torch_(Tensor_id));
@@ -33,7 +34,7 @@ static int nnOmp_(SpatialSubSampling_forwardOmp)(lua_State *L)
   luaL_argcheck(L, input->size[0] == nInputPlane, 2, "invalid number of input planes");
   luaL_argcheck(L, inputWidth >= kW && inputHeight >= kH, 2, "input image smaller than kernel size");
 
-  input = THTensor_(newContiguous)(input, 0);
+  input = THTensor_(newContiguous)(input);
   input_data = THTensor_(data)(input);
 
   THTensor_(resize3d)(output,
@@ -99,6 +100,7 @@ static int nnOmp_(SpatialSubSampling_backwardOmp)(lua_State *L)
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
+  setompnthread(L,1,"nThread");
 
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
@@ -118,7 +120,7 @@ static int nnOmp_(SpatialSubSampling_backwardOmp)(lua_State *L)
   real *gradOutput_data = THTensor_(data)(gradOutput);
   real *input_data, *gradInput_data;
 
-  input = THTensor_(newContiguous)(input, 0);
+  input = THTensor_(newContiguous)(input);
   input_data = THTensor_(data)(input);
 
 #pragma omp parallel for private(k,i)
