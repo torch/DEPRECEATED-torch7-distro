@@ -88,3 +88,5 @@ end
 
 openmp.enabled = false
 openmp.enable()
+
+torch.include('openmp', 'test.lua')

@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}/../../lib/THOmp")
 SET(src init.c openmp.c labOmp.c nnOmp.c)
 
 # List of Lua sources
-SET(luasrc init.lua)
+SET(luasrc init.lua test/test.lua)
 
 # Add a Torch package
 ADD_TORCH_PACKAGE(openmp "${src}" "${luasrc}")
