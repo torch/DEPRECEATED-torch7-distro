@@ -53,8 +53,8 @@ function LookupTable:zeroGradParameters()
 end
 
 function LookupTable:backward(input, gradOutput)
-   table.insert(self.currentInputs, torch.Tensor(input:size()):copy(input))
-   table.insert(self.currentGradWeights, torch.Tensor(gradOutput:size()):copy(gradOutput))
+   table.insert(self.currentInputs, input.new(input:size()):copy(input))
+   table.insert(self.currentGradWeights, input.new(gradOutput:size()):copy(gradOutput))
 end
 
 function LookupTable:updateParameters(learningRate)

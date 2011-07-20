@@ -10,10 +10,6 @@ function Linear:__init(inputSize, outputSize)
    self.gradWeight = torch.Tensor(outputSize, inputSize)
    self.gradBias = torch.Tensor(outputSize)
    
-   -- state
-   self.gradInput:resize(inputSize)
-   self.output:resize(outputSize)
-
    self:reset()
 end
 
@@ -37,15 +33,16 @@ end
 
 function Linear:forward(input)
    if input:dim() == 1 then
+      self.output:resize(self.bias:size(1))
       self.output:copy(self.bias)
       self.output:addmv(1, self.weight, input)
    elseif input:dim() == 2 then
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local bias = torch.Tensor(self.bias:storage(), 1,
-                                nframe, 0,
-                                nunit, 1)
+      local bias = input.new(self.bias:storage(), 1,
+                             nframe, 0,
+                             nunit, 1)
 
       self.output:resize(nframe, nunit)
       self.output:copy(bias)
@@ -66,15 +63,16 @@ function Linear:backward(input, gradOutput)
          self.gradWeight:add(self.weightDecay, self.weight)
       end
       
+      self.gradInput:resizeAs(input)
       self.gradInput:zero()
       self.gradInput:addmv(1, self.weight:t(), gradOutput)
    elseif input:dim() == 2 then
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local gradBias = torch.Tensor(self.gradBias:storage(), 1,
-                                    nframe, 0,
-                                    nunit, 1)
+      local gradBias = input.new(self.gradBias:storage(), 1,
+                                 nframe, 0,
+                                 nunit, 1)
 
       self.gradWeight:addmm(1, gradOutput:t(), input)
       gradBias:add(gradOutput)

@@ -18,10 +18,10 @@ function CosineDistance:forward(input)
 end
 
 function CosineDistance:backward(input, gradOutput)
-   local v1 = input[1]
-   local v2 = input[2]
-   local gw1=torch.Tensor()
-   local gw2=torch.Tensor()
+   local v1  = input[1]
+   local v2  = input[2]
+   local gw1 = input[1].new()
+   local gw2 = input[2].new()
    gw1:resizeAs(v1) 
    gw2:resizeAs(v1)
 
