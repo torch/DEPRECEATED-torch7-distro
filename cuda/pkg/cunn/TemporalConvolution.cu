@@ -166,10 +166,88 @@ static int cunn_TemporalConvolution_backward(lua_State *L)
   return 1;
 }
 
+static int cunn_TemporalConvolution_backward2(lua_State *L)
+{
+  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);  
+  THCudaTensor *gradOutput = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);  
+  int kW = luaT_getfieldcheckint(L, 1, "kW");
+  int dW = luaT_getfieldcheckint(L, 1, "dW");
+  long nInputFrame = input->size[0];
+  long nOutputFrame = gradOutput->size[0];
+
+  THCudaTensor *weight = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
+  THCudaTensor *gradWeight = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradWeight", torch_CudaTensor_id);
+  THCudaTensor *gradBias = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradBias", torch_CudaTensor_id);
+  THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
+
+  THCudaTensor *gradOutputWindow;
+  THCudaTensor *inputWindow, *gradInputWindow;
+  long k;
+
+
+  /* Not necessary with partial backprop: */
+  input = THCudaTensor_newContiguous(input);
+  gradOutputWindow = THCudaTensor_new();
+  inputWindow = THCudaTensor_new();
+  gradInputWindow = THCudaTensor_new();
+
+  THCudaTensor_resizeAs(gradInput, input);
+  THCudaTensor_zero(gradInput);
+
+  /* bias first */
+  for(k = 0; k < nOutputFrame; k++)
+  {
+    THCudaTensor_select(gradOutputWindow, gradOutput, 0, k);
+    THCudaTensor_cadd(gradBias, 1, gradOutputWindow);
+  }
+
+  /* ouch */
+  for(k = 0; (k < kW+dW-1) && (nOutputFrame > 0); k++)
+  {
+    long nDistinctInputFrame = (nInputFrame+dW-1)/(kW+dW-1);
+    long nFrame = THMin(nDistinctInputFrame, nOutputFrame);
+    long nOverlapFrame = THMax(1, kW-dW+1);
+
+    /* ------------------------- gradWeight ------------------------------------- */
+
+    THCudaTensor_setStorage2d(inputWindow, input->storage,
+                            input->storageOffset+k*dW*input->size[1],
+                            nFrame, (kW+dW-1)*input->size[1],
+                            kW*input->size[1], 1);
+
+    THCudaTensor_setStorage2d(gradOutputWindow, gradOutput->storage, 
+                            gradOutput->storageOffset + k*gradOutput->size[1],
+                            nFrame, nOverlapFrame*gradOutput->size[1],
+                            gradOutput->size[1], 1);
+
+    THCudaTensor_transpose(gradOutputWindow, NULL, 0, 1);
+    THCudaTensor_addmm(gradWeight, 1, gradOutputWindow, inputWindow);
+    THCudaTensor_transpose(gradOutputWindow, NULL, 0, 1);
+
+    /* -------------------------- gradInput ------------------------------------- */
+
+    THCudaTensor_setStorage2d(gradInputWindow, gradInput->storage,
+                            gradInput->storageOffset+k*dW*gradInput->size[1],
+                            nFrame, (kW+dW-1)*gradInput->size[1],
+                            kW*gradInput->size[1], 1);
+
+    THCudaTensor_addmm(gradInputWindow, 1, gradOutputWindow, weight);
+
+  }
+
+  THCudaTensor_free(gradOutputWindow);
+  THCudaTensor_free(inputWindow);
+  THCudaTensor_free(gradInputWindow);
+  THCudaTensor_free(input);
+
+  return 1;
+}
+
 static const struct luaL_Reg cunn_TemporalConvolution__ [] = {
   {"TemporalConvolution_forward", cunn_TemporalConvolution_forward},
   {"TemporalConvolution_forward2", cunn_TemporalConvolution_forward2},
   {"TemporalConvolution_backward", cunn_TemporalConvolution_backward},
+  {"TemporalConvolution_backward2", cunn_TemporalConvolution_backward2},
   {NULL, NULL}
 };
 

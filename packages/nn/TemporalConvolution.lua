@@ -44,6 +44,10 @@ function TemporalConvolution:backward(input, gradOutput)
    return input.nn.TemporalConvolution_backward(self, input, gradOutput)
 end
 
+function TemporalConvolution:backward2(input, gradOutput)
+   return input.nn.TemporalConvolution_backward2(self, input, gradOutput)
+end
+
 function TemporalConvolution:zeroGradParameters()
    self.gradWeight:zero()
    self.gradBias:zero()
