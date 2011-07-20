@@ -22,7 +22,7 @@ void THOmpLab_(validXCorr2Dptr)(real *r_,
       /* Dot product in two dimensions... (between input image and the mask) */
       real *pi_ = t_ + yy*sr*ic + xx*sc;
       real *pw_ = k_;
-      real sum = 0;
+      accreal sum = 0;
       long kx, ky;
       for(ky = 0; ky < kr; ky++)
       {
@@ -58,7 +58,7 @@ void THOmpLab_(validConv2Dptr)(real *r_,
       /* Dot product in two dimensions... (between input image and the mask) */
       real *pi_ = t_ + yy*sr*ic + xx*sc;
       real *pw_ = k_ + kr*kc - 1;
-      real sum = 0;
+      accreal sum = 0;
       long kx, ky;
       for(ky = 0; ky < kr; ky++)
       {
@@ -96,7 +96,7 @@ void THOmpLab_(fullXCorr2Dptr)(real *r_,
       /* Outer product in two dimensions... (between input image and the mask) */
       real *po_ = r_ + yy*sr*oc + xx*sc;
       real *pw_ = k_;
-      real sum = 0;
+      accreal sum = 0;
       long kx, ky;
       for(ky = 0; ky < kr; ky++)
       {
@@ -130,7 +130,7 @@ void THOmpLab_(fullConv2Dptr)(real *r_,
       /* Outer product in two dimensions... (between input image and the mask) */
       real *po_ = r_ + yy*sr*oc + xx*sc;
       real *pw_ = k_ + kr*kc -1;
-      real sum = 0;
+      accreal sum = 0;
       long kx, ky;
       for(ky = 0; ky < kr; ky++)
       {
