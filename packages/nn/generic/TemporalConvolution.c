@@ -87,34 +87,22 @@ static int nn_(TemporalConvolution_forward2)(lua_State *L)
   }
 
   /* ouch */
-  for(k = 0; (k < kW+dW-1) && (nOutputFrame > 0); k++)
+  for(k = 0; nOutputFrame > 0; k++)
   {
-    long nOverlapFrame = (kW-1)/dW+1;
-    long nGapFrame = nOverlapFrame*dW;
-    long nFrame = (nInputFrame-k*dW-kW)/nGapFrame + 1;
-//    long nOverlapFrame = ((kW % dW) ? kW / dW + 1 : kW / dW);
-//    long nGapFrame = ((kW % dW) ? kW / dW + 1 : kW / dW)*dW;
+    long outputFrameStride = (kW-1)/dW+1;
+    long inputFrameStride = outputFrameStride*dW;
+    long nFrame = (nInputFrame-k*dW-kW)/inputFrameStride + 1;
     nOutputFrame -= nFrame;
 
-//    printf("k = %ld, gap = %ld nframe = %ld\n", k, nGapFrame, nFrame);
-
-//    printf("k = %ld, input->storage->size: %ld\n", k, input->storage->size);
     THTensor_(setStorage2d)(inputWindow, input->storage,
                             input->storageOffset+k*dW*input->size[1],
-                            nFrame, nGapFrame*input->size[1],
+                            nFrame, inputFrameStride*input->size[1],
                             kW*input->size[1], 1);
-//    printf("k = %ld, input->storage->size: %ld\n", k, input->storage->size);
 
-//    printf("k = %ld, output->storage->size: %ld\n", k, output->storage->size);
     THTensor_(setStorage2d)(outputWindow, output->storage, 
                             output->storageOffset + k*output->size[1],
-                            nFrame, nOverlapFrame*output->size[1],
+                            nFrame, outputFrameStride*output->size[1],
                             output->size[1], 1);
-//    printf("k = %ld, output->storage->size: %ld\n", k, output->storage->size);
-
-//    printf("outputWindow %ld x %ld\n", outputWindow->size[0], outputWindow->size[1]);
-//    printf("weight %ld x %ld\n", weight->size[0], weight->size[1]);
-//    printf("inputWindow %ld x %ld\n", inputWindow->size[0], inputWindow->size[1]);
 
     THTensor_(transpose)(weight, NULL, 0, 1);
     THTensor_(addmm)(outputWindow, 1, inputWindow, weight);
@@ -213,61 +201,37 @@ static int nn_(TemporalConvolution_backward2)(lua_State *L)
   }
 
   /* ouch */
-  for(k = 0; (k < kW+dW-1) && (nOutputFrame > 0); k++)
+  for(k = 0; nOutputFrame > 0; k++)
   {
-    long nOverlapFrame = (kW-1)/dW+1;
-    long nGapFrame = nOverlapFrame*dW;
-    long nFrame = (nInputFrame-k*dW-kW)/nGapFrame + 1;
-
-//X    long nGapFrame = ((kW % dW) ? kW / dW + 1 : kW / dW)*dW;
-//X    long nFrame = (nInputFrame-k-kW)/nGapFrame + 1;
-//    long nDistinctInputFrame = (nInputFrame-k+THMax(0,dW-kW))/(kW+THMax(0,dW-kW));//(nInputFrame-k+dW-1)/(kW+dW-1);
-//    long nDistinctInputFrame = (nInputFrame-k+dW-1)/(kW+dW-1);
-//    long nFrame = THMin(nDistinctInputFrame, nOutputFrame);
-//X    long nOverlapFrame = THMax(1, kW-dW+1);
+    long outputFrameStride = (kW-1)/dW+1;
+    long inputFrameStride = outputFrameStride*dW;
+    long nFrame = (nInputFrame-k*dW-kW)/inputFrameStride + 1;
     nOutputFrame -= nFrame;
 
     /* ------------------------- gradWeight ------------------------------------- */
 
-//    printf("k = %ld, input->storage->size: %ld\n", k, input->storage->size);
-//    printf("nframe = %ld\n", nFrame);
-//    printf("ok1\n");
     THTensor_(setStorage2d)(inputWindow, input->storage,
                             input->storageOffset+k*dW*input->size[1],
-                            nFrame, nGapFrame*input->size[1],
+                            nFrame, inputFrameStride*input->size[1],
                             kW*input->size[1], 1);
-//    printf("k = %ld, input->storage->size: %ld\n", k, input->storage->size);
-//    printf("k = %ld, gradOutput->storage->size: %ld\n", k, gradOutput->storage->size);
 
-    
-//    printf("ok2\n");
     THTensor_(setStorage2d)(gradOutputWindow, gradOutput->storage, 
                             gradOutput->storageOffset + k*gradOutput->size[1],
-                            nFrame, nOverlapFrame*gradOutput->size[1],
+                            nFrame, outputFrameStride*gradOutput->size[1],
                             gradOutput->size[1], 1);
 
-//    printf("ok3 k=%ld nframe=%ld\n", k, nFrame);
     THTensor_(transpose)(gradOutputWindow, NULL, 0, 1);
-//    printf("ok4\n");
     THTensor_(addmm)(gradWeight, 1, gradOutputWindow, inputWindow);
-//    printf("ok5\n");
     THTensor_(transpose)(gradOutputWindow, NULL, 0, 1);
-
-//    printf("k = %ld, gradOutput->storage->size: %ld\n", k, gradOutput->storage->size);
 
     /* -------------------------- gradInput ------------------------------------- */
 
-//    printf("ok6\n");
     THTensor_(setStorage2d)(gradInputWindow, gradInput->storage,
                             gradInput->storageOffset+k*dW*gradInput->size[1],
-                            nFrame, nGapFrame*gradInput->size[1],
+                            nFrame, inputFrameStride*gradInput->size[1],
                             kW*gradInput->size[1], 1);
 
-//    printf("ok7\n");
     THTensor_(addmm)(gradInputWindow, 1, gradOutputWindow, weight);
-
-//    printf("ok8\n");
-
   }
 
   THTensor_(free)(gradOutputWindow);

@@ -82,28 +82,24 @@ static int cunn_TemporalConvolution_forward2(lua_State *L)
     THCudaTensor_copy(outputWindow, bias);
   }
   
-  
-  for(k = 0; (k < kW+dW-1) && (nOutputFrame > 0); k++)
-  {
-    long nDistinctInputFrame = (nInputFrame+dW-1)/(kW+dW-1);
-    long nFrame = THMin(nDistinctInputFrame, nOutputFrame);
-    long nOverlapFrame = THMax(1, kW-dW+1);
 
+  /* ouch */
+  for(k = 0; nOutputFrame > 0; k++)
+  {
+    long outputFrameStride = (kW-1)/dW+1;
+    long inputFrameStride = outputFrameStride*dW;
+    long nFrame = (nInputFrame-k*dW-kW)/inputFrameStride + 1;
     nOutputFrame -= nFrame;
 
     THCudaTensor_setStorage2d(inputWindow, input->storage,
                             input->storageOffset+k*dW*input->size[1],
-                            nFrame, (kW+dW-1)*input->size[1],
+                            nFrame, inputFrameStride*input->size[1],
                             kW*input->size[1], 1);
 
     THCudaTensor_setStorage2d(outputWindow, output->storage, 
                             output->storageOffset + k*output->size[1],
-                            nFrame, nOverlapFrame*output->size[1],
+                            nFrame, outputFrameStride*output->size[1],
                             output->size[1], 1);
-
-//    printf("outputWindow %ld x %ld\n", outputWindow->size[0], outputWindow->size[1]);
-//    printf("weight %ld x %ld\n", weight->size[0], weight->size[1]);
-//    printf("inputWindow %ld x %ld\n", inputWindow->size[0], inputWindow->size[1]);
 
     THCudaTensor_transpose(weight, NULL, 0, 1);
     THCudaTensor_addmm(outputWindow, 1, inputWindow, weight);
@@ -202,22 +198,23 @@ static int cunn_TemporalConvolution_backward2(lua_State *L)
   }
 
   /* ouch */
-  for(k = 0; (k < kW+dW-1) && (nOutputFrame > 0); k++)
+  for(k = 0; nOutputFrame > 0; k++)
   {
-    long nDistinctInputFrame = (nInputFrame+dW-1)/(kW+dW-1);
-    long nFrame = THMin(nDistinctInputFrame, nOutputFrame);
-    long nOverlapFrame = THMax(1, kW-dW+1);
+    long outputFrameStride = (kW-1)/dW+1;
+    long inputFrameStride = outputFrameStride*dW;
+    long nFrame = (nInputFrame-k*dW-kW)/inputFrameStride + 1;
+    nOutputFrame -= nFrame;
 
     /* ------------------------- gradWeight ------------------------------------- */
 
     THCudaTensor_setStorage2d(inputWindow, input->storage,
                             input->storageOffset+k*dW*input->size[1],
-                            nFrame, (kW+dW-1)*input->size[1],
+                            nFrame, inputFrameStride*input->size[1],
                             kW*input->size[1], 1);
 
     THCudaTensor_setStorage2d(gradOutputWindow, gradOutput->storage, 
                             gradOutput->storageOffset + k*gradOutput->size[1],
-                            nFrame, nOverlapFrame*gradOutput->size[1],
+                            nFrame, outputFrameStride*gradOutput->size[1],
                             gradOutput->size[1], 1);
 
     THCudaTensor_transpose(gradOutputWindow, NULL, 0, 1);
@@ -228,11 +225,10 @@ static int cunn_TemporalConvolution_backward2(lua_State *L)
 
     THCudaTensor_setStorage2d(gradInputWindow, gradInput->storage,
                             gradInput->storageOffset+k*dW*gradInput->size[1],
-                            nFrame, (kW+dW-1)*gradInput->size[1],
+                            nFrame, inputFrameStride*gradInput->size[1],
                             kW*gradInput->size[1], 1);
 
     THCudaTensor_addmm(gradInputWindow, 1, gradOutputWindow, weight);
-
   }
 
   THCudaTensor_free(gradOutputWindow);
