@@ -51,7 +51,9 @@ function CmdLine:__readOption__(params, arg, i)
    end
 end
 
-function CmdLine:__init()
+function CmdLine:__init(argseparator_,keyseparator_)
+   self.argseparator = argseparator_ or ','
+   self.keyseparator = keyseparator_ or '='
    self.options = {}
    self.arguments = {}
    self.helplines = {}
@@ -126,7 +128,7 @@ function CmdLine:string(prefix, params, ignore)
                   v = 'f'
                end
             end
-            table.insert(options, k .. '=' .. v)
+            table.insert(options, k .. self.keyseparator .. v)
             print(k,v,self.options['-' .. k].default)
         end
        else
@@ -137,23 +139,23 @@ function CmdLine:string(prefix, params, ignore)
             end
          end
          if narg then
-            arguments[narg] = k .. '=' .. v
+            arguments[narg] = k .. self.keyseparator .. v
          else
             print('WARNING: unknown option/argument: ' .. k .. ' IGNORING for DIRECTORY NAME')
          end
       end
    end
    table.sort(options)
-   local str = table.concat(arguments, ',')
+   local str = table.concat(arguments, self.argseparator)
    if str == '' then
-      str = table.concat(options, ',')
+      str = table.concat(options, self.argseparator)
    else
-      str = str .. ',' .. table.concat(options, ',')
+      str = str .. self.argseparator .. table.concat(options, self.argseparator)
    end
    if str == '' then
       return prefix
    else
-      return prefix .. ',' .. str
+      return prefix .. self.argseparator .. str
    end
 end
 
