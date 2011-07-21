@@ -5,5 +5,6 @@
 #include "THCStorage.h"
 #include "THCTensor.h"
 #include "THCTensorMath.h"
+#include "THCTensorConv.h"
 
 #endif

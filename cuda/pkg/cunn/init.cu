@@ -13,6 +13,7 @@ const void *torch_CudaTensor_id = NULL;
 #include "LogSoftMax.cu"
 #include "TemporalLogSoftMax.cu"
 #include "TemporalConvolution.cu"
+#include "SpatialConvolution.cu"
 
 DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
 {
@@ -24,6 +25,7 @@ DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
   cunn_LogSoftMax_init(L);
   cunn_TemporalLogSoftMax_init(L);
   cunn_TemporalConvolution_init(L);
+  cunn_SpatialConvolution_init(L);
 
   return 1;
 }
