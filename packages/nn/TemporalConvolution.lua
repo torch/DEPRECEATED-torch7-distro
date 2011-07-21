@@ -36,16 +36,8 @@ function TemporalConvolution:forward(input)
    return input.nn.TemporalConvolution_forward(self, input)
 end
 
-function TemporalConvolution:forward2(input)
-   return input.nn.TemporalConvolution_forward2(self, input)
-end
-
 function TemporalConvolution:backward(input, gradOutput)
    return input.nn.TemporalConvolution_backward(self, input, gradOutput)
-end
-
-function TemporalConvolution:backward2(input, gradOutput)
-   return input.nn.TemporalConvolution_backward2(self, input, gradOutput)
 end
 
 function TemporalConvolution:zeroGradParameters()
