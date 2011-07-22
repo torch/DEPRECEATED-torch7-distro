@@ -315,9 +315,15 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
 
   }
 
+  cudaThreadSynchronize();
+
   // clean up
   THCudaTensor_free(input);
   THCudaTensor_free(kernel);
+
+  cudaError errcode = cudaGetLastError();
+  if(errcode != cudaSuccess)
+    THError(cudaGetErrorString(errcode));
 }
 
 /*
