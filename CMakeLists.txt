@@ -88,10 +88,17 @@ IF(EXISTS "${Torch_SOURCE_DIR}/milde/CMakeLists.txt")
   ADD_SUBDIRECTORY(milde)
 ENDIF(EXISTS "${Torch_SOURCE_DIR}/milde/CMakeLists.txt")
 
+
 # Cuda
 IF(EXISTS "${Torch_SOURCE_DIR}/cuda/CMakeLists.txt")
   ADD_SUBDIRECTORY(cuda)
 ENDIF(EXISTS "${Torch_SOURCE_DIR}/cuda/CMakeLists.txt")
+
+# OpenMP
+IF(EXISTS "${Torch_SOURCE_DIR}/openmp/CMakeLists.txt")
+  ADD_SUBDIRECTORY(openmp)
+ENDIF(EXISTS "${Torch_SOURCE_DIR}/openmp/CMakeLists.txt")
+
 
 # Dev Packages
 ADD_SUBDIRECTORY(dev)

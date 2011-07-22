@@ -72,7 +72,12 @@ THTensor *THTensor_(newWithTensor)(THTensor *tensor)
 {
   THTensor *self = THAlloc(sizeof(THTensor));
   THTensor_(rawInit)(self);
-  THTensor_(rawSet)(self, tensor->storage, tensor->storageOffset, tensor->nDimension, tensor->size, tensor->stride);
+  THTensor_(rawSet)(self,
+                    tensor->storage,
+                    tensor->storageOffset,
+                    tensor->nDimension,
+                    tensor->size,
+                    tensor->stride);
   return self;
 }
 
@@ -84,8 +89,10 @@ THTensor *THTensor_(newWithStorage)(THStorage *storage, long storageOffset, THLo
     THArgCheck(size->size == stride->size, 4, "inconsistent size");
 
   THTensor_(rawInit)(self);  
-  THTensor_(rawSet)(self, storage, storageOffset,
-                    (size ? size->size : 0),
+  THTensor_(rawSet)(self,
+                    storage,
+                    storageOffset,
+                    (size ? size->size : (stride ? stride->size : 0)),
                     (size ? size->data : NULL),
                     (stride ? stride->data : NULL));
 
@@ -262,14 +269,25 @@ void THTensor_(resize4d)(THTensor *self, long size0, long size1, long size2, lon
 void THTensor_(set)(THTensor *self, THTensor *src)
 {
   if(self != src)
-    THTensor_(rawSet)(self, src->storage, src->storageOffset, src->nDimension, src->size, src->stride);
+    THTensor_(rawSet)(self,
+                      src->storage,
+                      src->storageOffset,
+                      src->nDimension,
+                      src->size,
+                      src->stride);
 }
 
 void THTensor_(setStorage)(THTensor *self, THStorage *storage_, long storageOffset_, THLongStorage *size_, THLongStorage *stride_)
 {
-  THArgCheck(size_->size == stride_->size, 5, "inconsistent size/stride sizes");
+  if(size_ && stride_)
+    THArgCheck(size_->size == stride_->size, 5, "inconsistent size/stride sizes");
   
-  THTensor_(rawSet)(self, storage_, storageOffset_, size_->size, size_->data, stride_->data);  
+  THTensor_(rawSet)(self, 
+                    storage_,
+                    storageOffset_,
+                    (size_ ? size_->size : (stride_ ? stride_->size : 0)),
+                    (size_ ? size_->data : NULL),
+                    (stride_ ? stride_->data : NULL));
 }
 
 void THTensor_(setStorage1d)(THTensor *self, THStorage *storage_, long storageOffset_,
