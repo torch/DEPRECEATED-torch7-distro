@@ -116,12 +116,20 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
               float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
               float *kernel_p = shared_kernel + ii * kernel_w * kernel_h + koffset;
               float sum = 0;
-              for(ky = 0; ky < kernel_h; ky++) {
-                for(kx = 0; kx < kernel_w; kx++) {
-                  if (swapkernel) sum += input_p[kx]*(*kernel_p--);
-                  else sum += input_p[kx]*(*kernel_p++);
+              if (swapkernel) {
+                for(ky = 0; ky < kernel_h; ky++) {
+                  for(kx = 0; kx < kernel_w; kx++) {
+                    sum += input_p[kx]*(*kernel_p--);
+                  }
+                  input_p += input_w;
                 }
-                input_p += input_w;
+              } else {
+                for(ky = 0; ky < kernel_h; ky++) {
+                  for(kx = 0; kx < kernel_w; kx++) {
+                    sum += input_p[kx]*(*kernel_p++);
+                  }
+                  input_p += input_w;
+                }
               }
               *output_p += sum;
             }
@@ -245,27 +253,27 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
                                                           nInputPlane, nInputRows, nInputCols,
                                                           nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                           srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 5) && (nKernelRows == 5))
+      else if ((nKernelCols == 5) && (nKernelRows == 5))
         conv2generic <false, 5, 5> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                           nInputPlane, nInputRows, nInputCols,
                                                           nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                           srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 7) && (nKernelRows == 7))
+      else if ((nKernelCols == 7) && (nKernelRows == 7))
         conv2generic <false, 7, 7> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                           nInputPlane, nInputRows, nInputCols,
                                                           nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                           srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 9) && (nKernelRows == 9))
+      else if ((nKernelCols == 9) && (nKernelRows == 9))
         conv2generic <false, 9, 9> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                           nInputPlane, nInputRows, nInputCols,
                                                           nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                           srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 11) && (nKernelRows == 11))
+      else if ((nKernelCols == 11) && (nKernelRows == 11))
         conv2generic <false, 11, 11> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                             nInputPlane, nInputRows, nInputCols,
                                                             nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                             srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 13) && (nKernelRows == 13))
+      else if ((nKernelCols == 13) && (nKernelRows == 13))
         conv2generic <false, 13, 13> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                             nInputPlane, nInputRows, nInputCols,
                                                             nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
@@ -281,27 +289,27 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                          srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 5) && (nKernelRows == 5))
+      else if ((nKernelCols == 5) && (nKernelRows == 5))
         conv2generic <true, 5, 5> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                          srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 7) && (nKernelRows == 7))
+      else if ((nKernelCols == 7) && (nKernelRows == 7))
         conv2generic <true, 7, 7> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                          srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 9) && (nKernelRows == 9))
+      else if ((nKernelCols == 9) && (nKernelRows == 9))
         conv2generic <true, 9, 9> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                          srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 11) && (nKernelRows == 11))
+      else if ((nKernelCols == 11) && (nKernelRows == 11))
         conv2generic <true, 11, 11> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                            nInputPlane, nInputRows, nInputCols,
                                                            nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                            srow, scol, patch_h, patch_w);
-      if ((nKernelCols == 13) && (nKernelRows == 13))
+      else if ((nKernelCols == 13) && (nKernelRows == 13))
         conv2generic <true, 13, 13> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                            nInputPlane, nInputRows, nInputCols,
                                                            nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
