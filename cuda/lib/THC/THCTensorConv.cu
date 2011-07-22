@@ -11,6 +11,7 @@
  */
 
 #define CUDA_SHARED_MEM_SIZE (4*1024-32) // this is given by nVidia: max shared mem per block
+#define CUDA_ORDER_FOR_COALESCING        // this reorders memory reads to enable coalescing
 
 /*
  * Description:
@@ -41,10 +42,18 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
   int koffset = swapkernel ? kernel_w*kernel_h-1 : 0;
 
   // generate offsets according to block/thread ids
+#ifdef CUDA_ORDER_FOR_COALESCING
+  int xx_start = threadIdx.x; // * patch_w;
+  int xx_end = output_w;
+  int xx_step = blockDim.x;
+#else
   int xx_start = threadIdx.x * patch_w;
   int xx_end = xx_start + patch_w; if (xx_end > output_w) xx_end = output_w;
+  int xx_step = 1;
+#endif
   int yy_start = threadIdx.y * patch_h;
   int yy_end = yy_start + patch_h; if (yy_end > output_h) yy_end = output_h;
+  int yy_step = 1;
   int oo_start = blockIdx.x;
   int oo_end = oo_start+1;
   int ii_start = 0;
@@ -74,8 +83,8 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
       // unrolled convolution loop
       for(oo = oo_start; oo < oo_end; oo++) {
         for(ii = ii_start; ii < ii_end; ii++) {
-          for(yy = yy_start; yy < yy_end; yy++) {
-            for(xx = xx_start; xx < xx_end; xx++) {
+          for(yy = yy_start; yy < yy_end; yy+=yy_step) {
+            for(xx = xx_start; xx < xx_end; xx+=xx_step) {
               // Dot product in two dimensions... (between input image and the mask)
               float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
               float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
@@ -109,8 +118,8 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
       // default convolution loop
       for(oo = oo_start; oo < oo_end; oo++) {
         for(ii = ii_start; ii < ii_end; ii++) {
-          for(yy = yy_start; yy < yy_end; yy++) {
-            for(xx = xx_start; xx < xx_end; xx++) {
+          for(yy = yy_start; yy < yy_end; yy+=yy_step) {
+            for(xx = xx_start; xx < xx_end; xx+=xx_step) {
               // Dot product in two dimensions... (between input image and the mask)
               float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
               float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
@@ -143,8 +152,8 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
     // convolution loop
     for(oo = oo_start; oo < oo_end; oo++) {
       for(ii = ii_start; ii < ii_end; ii++) {
-        for(yy = yy_start; yy < yy_end; yy++) {
-          for(xx = xx_start; xx < xx_end; xx++) {
+        for(yy = yy_start; yy < yy_end; yy+=yy_step) {
+          for(xx = xx_start; xx < xx_end; xx+=xx_step) {
             // Dot product in two dimensions... (between input image and the mask)
             float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
             float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
@@ -323,12 +332,14 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
 
   }
 
+  // sync
   cudaThreadSynchronize();
 
   // clean up
   THCudaTensor_free(input);
   THCudaTensor_free(kernel);
 
+  // check potential errors
   cudaError errcode = cudaGetLastError();
   if(errcode != cudaSuccess)
     THError(cudaGetErrorString(errcode));
