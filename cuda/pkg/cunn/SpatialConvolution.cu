@@ -50,16 +50,14 @@ static int cunn_SpatialConvolution_backward(lua_State *L)
 
   THArgCheck(nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane");
 
-  long k;
-
   /* gradient to bias */
-  float *gradBias_data = THCudaTensor_data(gradBias);
+  long k;
   THCudaTensor *gradOutSlice = THCudaTensor_new();
-  for(k = 0; k < nOutputPlane; k++)
-    {
-      THCudaTensor_select(gradOutSlice, gradOutput, 0, k);
-      gradBias_data[k] += THCudaTensor_sum(gradOutSlice);
-    }
+  for(k = 0; k < nOutputPlane; k++) {
+    THCudaTensor_select(gradOutSlice, gradOutput, 0, k);
+    float sum = THCudaTensor_sum(gradOutSlice);
+    THCudaTensor_set1d(gradBias, k, THCudaTensor_get1d(gradBias, k) + sum);
+  }
   THCudaTensor_free(gradOutSlice);
 
   /* gradient to kernels */
