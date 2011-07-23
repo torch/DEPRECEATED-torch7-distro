@@ -7,6 +7,8 @@
  *   the ones in THLabConv.
  *
  * History:
+ *   July 22, 2011, 8:38PM   -  Clement Farabet  -  All Valid/Full/XCORR/CONV implemented
+ *   July 22, 2011, 4:00PM   -  Clement Farabet  -  Rewrote for loop to insure memory coalescing
  *   July 21, 2011, 11:21PM  -  Clement Farabet  -  Creation, based conv2d routine
  */
 
@@ -21,11 +23,6 @@
  *   - the swapkernel flag can be used to generate a conv2 instead of xcorr2
  *   - the templated kernel size is useful to generate code that's 2x faster
  *     but can be set to 0 to allow arbitrary kernel sizes
- *
- * to do:
- *   + the most crucial thing is to make the threads make contiguous
- *     memory accesses wrt each other, to enable memory reads to coalesce.
- *     this should give an extra 4 to 8x speedup
  */
 template <bool swapkernel, int T_kernel_h, int T_kernel_w>
   __global__ void conv2generic(float *input, float *kernel, float *output,
@@ -356,12 +353,13 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
 }
 
 /*
-  3D input, 3D kernel, 4D output
-  like rank1 update
-  A <- xx' + beta*A
-  for sr,sc=1 this is equivalent to xcorr2Dger, but otherwise it is useful for
-  calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
-*/
+ * API-compatible with THRealTensor_conv2DRevger
+ * 3D input, 3D kernel, 4D output
+ * like rank1 update
+ * A <- xx' + beta*A
+ * for sr,sc=1 this is equivalent to xcorr2Dger, but otherwise it is useful for
+ * calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
+ */
 TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, THCudaTensor *input,
                                       THCudaTensor *kernel, long srow, long scol)
 {
