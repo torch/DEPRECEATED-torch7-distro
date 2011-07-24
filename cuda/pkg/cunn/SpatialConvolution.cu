@@ -65,7 +65,7 @@ static int cunn_SpatialConvolution_backward(lua_State *L)
 
   /* gradient to input */
   THCudaTensor *tweight = THCudaTensor_newTranspose(weight,0,1);
-  THCudaTensor_conv2Dmv(gradInput, 0.0, gradOutput, tweight, dH, dW, "fx");
+  THCudaTensor_conv2Dmv(gradInput, 0.0, gradOutput, tweight, dH, dW, "fc");
   THCudaTensor_free(tweight);
 
   return 1;
