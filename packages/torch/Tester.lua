@@ -23,16 +23,19 @@ function Tester:assertlt (val, condition, message)
    self:assert_sub(val<condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
 end
 function Tester:assertgt (val, condition, message)
-   self:assert_sub(val>condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
+   self:assert_sub(val>condition,string.format('%s\n%s  val=%s, condition=%s',message,' GT(>) violation ', tostring(val), tostring(condition)))
 end
 function Tester:assertle (val, condition, message)
-   self:assert_sub(val<=condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
+   self:assert_sub(val<=condition,string.format('%s\n%s  val=%s, condition=%s',message,' LE(<=) violation ', tostring(val), tostring(condition)))
 end
 function Tester:assertge (val, condition, message)
-   self:assert_sub(val>=condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
+   self:assert_sub(val>=condition,string.format('%s\n%s  val=%s, condition=%s',message,' GE(>=) violation ', tostring(val), tostring(condition)))
 end
 function Tester:asserteq (val, condition, message)
-   self:assert_sub(val==condition,string.format('%s\n%s  val=%s, condition=%s',message,' LT(<) violation ', tostring(val), tostring(condition)))
+   self:assert_sub(val==condition,string.format('%s\n%s  val=%s, condition=%s',message,' EQ(==) violation ', tostring(val), tostring(condition)))
+end
+function Tester:assertne (val, condition, message)
+   self:assert_sub(val~=condition,string.format('%s\n%s  val=%s, condition=%s',message,' NE(~=) violation ', tostring(val), tostring(condition)))
 end
 
 function Tester:pcall(f)
@@ -89,8 +92,13 @@ function Tester:run()
       end
       collectgarbage()
    end
+   --clear
+   io.write('\r' .. string.rep(' ', pstr:len()))
+   io.flush()
+   -- write finish
    pstr = statstr .. '  ==> Done '
    io.write('\r' .. pstr)
+   io.flush()
    print()
    print()
    self:report()
