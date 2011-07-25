@@ -88,6 +88,11 @@ IF(EXISTS "${Torch_SOURCE_DIR}/milde/CMakeLists.txt")
   ADD_SUBDIRECTORY(milde)
 ENDIF(EXISTS "${Torch_SOURCE_DIR}/milde/CMakeLists.txt")
 
+# OpenMP
+IF(EXISTS "${Torch_SOURCE_DIR}/openmp/CMakeLists.txt")
+  ADD_SUBDIRECTORY(openmp)
+ENDIF(EXISTS "${Torch_SOURCE_DIR}/openmp/CMakeLists.txt")
+
 # Dev Packages
 ADD_SUBDIRECTORY(dev)
 

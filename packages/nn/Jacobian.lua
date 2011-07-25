@@ -61,8 +61,8 @@ function nn.Jacobian.testJacobian (module, input, minval, maxval)
    input:copy(lab.rand(input:nElement()):mul(inrange):add(minval))
    local jac_fprop = nn.Jacobian.forward(module,input)
    local jac_bprop = nn.Jacobian.backward(module,input)
-   local error = jac_fprop:dist(jac_bprop,2)
-   return error
+   local error = jac_fprop-jac_bprop
+   return error:abs():max()
 end
 
 function nn.Jacobian.testJacobianParameters (module, input, param, dparam, minval, maxval)
