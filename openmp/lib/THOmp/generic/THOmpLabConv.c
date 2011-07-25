@@ -198,7 +198,7 @@ void THOmpLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
 
       /* do image, kernel convolution */
       if (type[0] == 'f')
-	if (type[1] == 'c')
+	if (type[1] == 'x')
 	  THLab_(fullXCorr2Dptr)(ptr_output,
 				    ptr_input,  nInputRows,  nInputCols,
 				    ptr_weight, nKernelRows, nKernelCols,
@@ -328,7 +328,7 @@ void THOmpLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, lo
 
       /* do image, kernel convolution */
       if (type[0] == 'f')
-	if (type[1] == 'c')
+	if (type[1] == 'x')
 	  THLab_(fullXCorr2Dptr)(ptr_output,
 				    ptr_input,  nInputRows,  nInputCols,
 				    ptr_weight, nKernelRows, nKernelCols,
