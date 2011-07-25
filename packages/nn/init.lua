@@ -52,6 +52,7 @@ torch.include('nn', 'Threshold.lua')
 
 torch.include('nn', 'LookupTable.lua')
 torch.include('nn', 'SpatialConvolution.lua')
+torch.include('nn', 'SpatialConvolutionMap.lua')
 torch.include('nn', 'SpatialSubSampling.lua')
 torch.include('nn', 'TemporalConvolution.lua')
 torch.include('nn', 'TemporalSubSampling.lua')

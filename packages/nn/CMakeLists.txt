@@ -10,7 +10,8 @@ SET(luasrc init.lua Linear.lua SparseLinear.lua Copy.lua CMul.lua
            SoftPlus.lua Reshape.lua Select.lua Narrow.lua Abs.lua
            Tanh.lua Concat.lua Parallel.lua Replicate.lua
            Power.lua Sqrt.lua Square.lua Threshold.lua
-           SoftMax.lua Mean.lua Max.lua Min.lua Sum.lua SpatialConvolution.lua
+           SoftMax.lua Mean.lua Max.lua Min.lua Sum.lua
+           SpatialConvolution.lua SpatialConvolutionMap.lua
            SpatialSubSampling.lua TemporalConvolution.lua TemporalSubSampling.lua
            Criterion.lua MSECriterion.lua AbsCriterion.lua ClassNLLCriterion.lua
            TemporalClassNLLCriterion.lua MultiCriterion.lua
