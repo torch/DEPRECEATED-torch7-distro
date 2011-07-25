@@ -245,9 +245,9 @@ void THLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
 
       /* do image, kernel convolution */
       THLab_(validXCorr2DRevptr)(output_data,
-                                ptr_input,  nInputRows,  nInputCols,
-                                ptr_weight, nKernelRows, nKernelCols,
-                                srow, scol);
+				 ptr_input,  nInputRows,  nInputCols,
+				 ptr_weight, nKernelRows, nKernelCols,
+				 srow, scol);
       /* Next output plane */
       output_data += nOutputCols*nOutputRows;
     }
@@ -327,7 +327,7 @@ void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
 
       /* do image, kernel convolution */
       if (type[0] == 'f')
-	if (type[1] == 'x')
+	if (type[1] == 'c')
 	  THLab_(fullXCorr2Dptr)(output_data,
 				 ptr_input,  nInputRows,  nInputCols,
 				 ptr_weight, nKernelRows, nKernelCols,
@@ -432,7 +432,7 @@ void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long 
 
       /* do image, kernel convolution */
       if (type[0] == 'f')
-	if (type[1] == 'x')
+	if (type[1] == 'c')
 	  THLab_(fullXCorr2Dptr)(output_data,
 				 ptr_input,  nInputRows,  nInputCols,
 				 ptr_weight, nKernelRows, nKernelCols,
@@ -509,7 +509,7 @@ void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   
   /* do image, kernel convolution */
   if (type[0] == 'f')
-    if (type[1] == 'x')
+    if (type[1] == 'c')
       THLab_(fullXCorr2Dptr)(output_data,
 			     ptr_input,  nInputRows,  nInputCols,
 			     ptr_weight, nKernelRows, nKernelCols,
