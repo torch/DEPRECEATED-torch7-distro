@@ -5,7 +5,7 @@
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel.
 */
-static void THLab_(validXCorr2Dptr)(real *r_,
+TH_API void THLab_(validXCorr2Dptr)(real *r_,
 				    real *t_, long ir, long ic, 
 				    real *k_, long kr, long kc, 
 				    long sr, long sc)
@@ -41,7 +41,7 @@ static void THLab_(validXCorr2Dptr)(real *r_,
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel.
 */
-static void THLab_(validConv2Dptr)(real *r_,
+TH_API void THLab_(validConv2Dptr)(real *r_,
                                    real *t_, long ir, long ic, 
                                    real *k_, long kr, long kc, 
                                    long sr, long sc)
@@ -78,7 +78,7 @@ static void THLab_(validConv2Dptr)(real *r_,
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
 */
-static void THLab_(fullXCorr2Dptr)(real *r_,
+TH_API void THLab_(fullXCorr2Dptr)(real *r_,
 				   real *t_, long ir, long ic, 
 				   real *k_, long kr, long kc, 
 				   long sr, long sc)
@@ -113,7 +113,7 @@ static void THLab_(fullXCorr2Dptr)(real *r_,
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
 */
-static void THLab_(fullConv2Dptr)(real *r_,
+TH_API void THLab_(fullConv2Dptr)(real *r_,
                                   real *t_, long ir, long ic, 
                                   real *k_, long kr, long kc, 
                                   long sr, long sc)
@@ -150,7 +150,7 @@ static void THLab_(fullConv2Dptr)(real *r_,
   for sr,sc=1 this is equivalent to validXCorr2Dptr, but otherwise it is useful for
   calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
 */
-static void THLab_(validXCorr2DRevptr)(real *r_,
+TH_API void THLab_(validXCorr2DRevptr)(real *r_,
 				       real *t_, long ir, long ic, 
 				       real *k_, long kr, long kc, 
 				       long sr, long sc)

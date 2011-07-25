@@ -2,182 +2,182 @@
 #define TH_GENERIC_FILE "generic/THOmpLabConv.c"
 #else
 
-/*
-  2D Input, 2D kernel  : convolve given image with the given kernel.
-*/
-void THOmpLab_(validXCorr2Dptr)(real *r_,
-				real *t_, long ir, long ic, 
-				real *k_, long kr, long kc, 
-				long sr, long sc)
-{
-  long or = (ir - kr) / sr + 1;
-  long oc = (ic - kc) / sc + 1;
+/* /\* */
+/*   2D Input, 2D kernel  : convolve given image with the given kernel. */
+/* *\/ */
+/* void THOmpLab_(validXCorr2Dptr)(real *r_, */
+/* 				real *t_, long ir, long ic,  */
+/* 				real *k_, long kr, long kc,  */
+/* 				long sr, long sc) */
+/* { */
+/*   long or = (ir - kr) / sr + 1; */
+/*   long oc = (ic - kc) / sc + 1; */
 
-  long xx, yy;  
+/*   long xx, yy;   */
 
-  for(yy = 0; yy < or; yy++)
-  {
-    for(xx = 0; xx < oc; xx++)
-    {
-      /* Dot product in two dimensions... (between input image and the mask) */
-      real *pi_ = t_ + yy*sr*ic + xx*sc;
-      real *pw_ = k_;
-      accreal sum = 0;
-      long kx, ky;
-      for(ky = 0; ky < kr; ky++)
-      {
-	for(kx = 0; kx < kc; kx++) {
-	  sum += pi_[kx]*pw_[kx];
-	}
-	pi_ += ic; /* next input line */
-	pw_ += kc; /* next mask line */
-      }
-      /* Update output */
-      *r_ += sum;
-      *r_++;
-    }
-  }
-}
-/*
-  2D Input, 2D kernel  : convolve given image with the given kernel.
-*/
-void THOmpLab_(validConv2Dptr)(real *r_,
-			       real *t_, long ir, long ic, 
-			       real *k_, long kr, long kc, 
-			       long sr, long sc)
-{
-  long or = (ir - kr) / sr + 1;
-  long oc = (ic - kc) / sc + 1;
+/*   for(yy = 0; yy < or; yy++) */
+/*   { */
+/*     for(xx = 0; xx < oc; xx++) */
+/*     { */
+/*       /\* Dot product in two dimensions... (between input image and the mask) *\/ */
+/*       real *pi_ = t_ + yy*sr*ic + xx*sc; */
+/*       real *pw_ = k_; */
+/*       accreal sum = 0; */
+/*       long kx, ky; */
+/*       for(ky = 0; ky < kr; ky++) */
+/*       { */
+/* 	for(kx = 0; kx < kc; kx++) { */
+/* 	  sum += pi_[kx]*pw_[kx]; */
+/* 	} */
+/* 	pi_ += ic; /\* next input line *\/ */
+/* 	pw_ += kc; /\* next mask line *\/ */
+/*       } */
+/*       /\* Update output *\/ */
+/*       *r_ += sum; */
+/*       *r_++; */
+/*     } */
+/*   } */
+/* } */
+/* /\* */
+/*   2D Input, 2D kernel  : convolve given image with the given kernel. */
+/* *\/ */
+/* void THOmpLab_(validConv2Dptr)(real *r_, */
+/* 			       real *t_, long ir, long ic,  */
+/* 			       real *k_, long kr, long kc,  */
+/* 			       long sr, long sc) */
+/* { */
+/*   long or = (ir - kr) / sr + 1; */
+/*   long oc = (ic - kc) / sc + 1; */
 
-  long xx, yy;  
+/*   long xx, yy;   */
 
-  for(yy = 0; yy < or; yy++)
-  {
-    for(xx = 0; xx < oc; xx++)
-    {
-      /* Dot product in two dimensions... (between input image and the mask) */
-      real *pi_ = t_ + yy*sr*ic + xx*sc;
-      real *pw_ = k_ + kr*kc - 1;
-      accreal sum = 0;
-      long kx, ky;
-      for(ky = 0; ky < kr; ky++)
-      {
-        for(kx = 0; kx < kc; kx++) {
-          sum += pi_[kx]*pw_[-kx];
-        }
-        pi_ += ic; /* next input line */
-        pw_ -= kc; /* next mask line */
-      }
-      /* Update output */
-      *r_ += sum;
-      *r_++;
-    }
-  }
-}
+/*   for(yy = 0; yy < or; yy++) */
+/*   { */
+/*     for(xx = 0; xx < oc; xx++) */
+/*     { */
+/*       /\* Dot product in two dimensions... (between input image and the mask) *\/ */
+/*       real *pi_ = t_ + yy*sr*ic + xx*sc; */
+/*       real *pw_ = k_ + kr*kc - 1; */
+/*       accreal sum = 0; */
+/*       long kx, ky; */
+/*       for(ky = 0; ky < kr; ky++) */
+/*       { */
+/*         for(kx = 0; kx < kc; kx++) { */
+/*           sum += pi_[kx]*pw_[-kx]; */
+/*         } */
+/*         pi_ += ic; /\* next input line *\/ */
+/*         pw_ -= kc; /\* next mask line *\/ */
+/*       } */
+/*       /\* Update output *\/ */
+/*       *r_ += sum; */
+/*       *r_++; */
+/*     } */
+/*   } */
+/* } */
 
 
-/*
-  2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
-*/
-void THOmpLab_(fullXCorr2Dptr)(real *r_,
-			       real *t_, long ir, long ic, 
-			       real *k_, long kr, long kc, 
-			       long sr, long sc)
-{
-  long or = (ir - 1) * sr + kr;
-  long oc = (ic - 1) * sc + kc;
+/* /\* */
+/*   2D Input, 2D kernel  : convolve given image with the given kernel, full convolution. */
+/* *\/ */
+/* void THOmpLab_(fullXCorr2Dptr)(real *r_, */
+/* 			       real *t_, long ir, long ic,  */
+/* 			       real *k_, long kr, long kc,  */
+/* 			       long sr, long sc) */
+/* { */
+/*   long or = (ir - 1) * sr + kr; */
+/*   long oc = (ic - 1) * sc + kc; */
 
-  long xx, yy;
+/*   long xx, yy; */
 
-  for(yy = 0; yy < ir; yy++)
-  {
-    for(xx = 0; xx < ic; xx++)
-    {
-      /* Outer product in two dimensions... (between input image and the mask) */
-      real *po_ = r_ + yy*sr*oc + xx*sc;
-      real *pw_ = k_;
-      accreal sum = 0;
-      long kx, ky;
-      for(ky = 0; ky < kr; ky++)
-      {
-	for(kx = 0; kx < kc; kx++) {
-	  po_[kx] += *t_ * pw_[kx];
-	}
-	po_ += oc; /* next input line */
-	pw_ += kc; /* next mask line */
-      }
-      t_++;
-    }
-  }
-}
-/*
-  2D Input, 2D kernel  : convolve given image with the given kernel, full convolution.
-*/
-void THOmpLab_(fullConv2Dptr)(real *r_,
-                                  real *t_, long ir, long ic, 
-                                  real *k_, long kr, long kc, 
-                                  long sr, long sc)
-{
-  long or = (ir - 1) * sr + kr;
-  long oc = (ic - 1) * sc + kc;
+/*   for(yy = 0; yy < ir; yy++) */
+/*   { */
+/*     for(xx = 0; xx < ic; xx++) */
+/*     { */
+/*       /\* Outer product in two dimensions... (between input image and the mask) *\/ */
+/*       real *po_ = r_ + yy*sr*oc + xx*sc; */
+/*       real *pw_ = k_; */
+/*       accreal sum = 0; */
+/*       long kx, ky; */
+/*       for(ky = 0; ky < kr; ky++) */
+/*       { */
+/* 	for(kx = 0; kx < kc; kx++) { */
+/* 	  po_[kx] += *t_ * pw_[kx]; */
+/* 	} */
+/* 	po_ += oc; /\* next input line *\/ */
+/* 	pw_ += kc; /\* next mask line *\/ */
+/*       } */
+/*       t_++; */
+/*     } */
+/*   } */
+/* } */
+/* /\* */
+/*   2D Input, 2D kernel  : convolve given image with the given kernel, full convolution. */
+/* *\/ */
+/* void THOmpLab_(fullConv2Dptr)(real *r_, */
+/*                                   real *t_, long ir, long ic,  */
+/*                                   real *k_, long kr, long kc,  */
+/*                                   long sr, long sc) */
+/* { */
+/*   long or = (ir - 1) * sr + kr; */
+/*   long oc = (ic - 1) * sc + kc; */
 
-  long xx, yy;
+/*   long xx, yy; */
 
-  for(yy = 0; yy < ir; yy++)
-  {
-    for(xx = 0; xx < ic; xx++)
-    {
-      /* Outer product in two dimensions... (between input image and the mask) */
-      real *po_ = r_ + yy*sr*oc + xx*sc;
-      real *pw_ = k_ + kr*kc -1;
-      accreal sum = 0;
-      long kx, ky;
-      for(ky = 0; ky < kr; ky++)
-      {
-        for(kx = 0; kx < kc; kx++) {
-          po_[kx] += *t_ * pw_[-kx];
-        }
-        po_ += oc; /* next input line */
-        pw_ -= kc; /* next mask line */
-      }
-      t_++;
-    }
-  }
-}
+/*   for(yy = 0; yy < ir; yy++) */
+/*   { */
+/*     for(xx = 0; xx < ic; xx++) */
+/*     { */
+/*       /\* Outer product in two dimensions... (between input image and the mask) *\/ */
+/*       real *po_ = r_ + yy*sr*oc + xx*sc; */
+/*       real *pw_ = k_ + kr*kc -1; */
+/*       accreal sum = 0; */
+/*       long kx, ky; */
+/*       for(ky = 0; ky < kr; ky++) */
+/*       { */
+/*         for(kx = 0; kx < kc; kx++) { */
+/*           po_[kx] += *t_ * pw_[-kx]; */
+/*         } */
+/*         po_ += oc; /\* next input line *\/ */
+/*         pw_ -= kc; /\* next mask line *\/ */
+/*       } */
+/*       t_++; */
+/*     } */
+/*   } */
+/* } */
 
-/*
-  2D Input, 2D kernel  : convolve given image with the given kernel, valid convolution.
-  for sr,sc=1 this is equivalent to validConv2Dptr, but otherwise it is useful for
-  calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
-*/
-void THOmpLab_(validXCorr2DRevptr)(real *r_,
-				   real *t_, long ir, long ic, 
-				   real *k_, long kr, long kc, 
-				   long sr, long sc)
-{
-  long or = ir - (kr - 1) * sr;
-  long oc = ic - (kc - 1) * sc;
+/* /\* */
+/*   2D Input, 2D kernel  : convolve given image with the given kernel, valid convolution. */
+/*   for sr,sc=1 this is equivalent to validConv2Dptr, but otherwise it is useful for */
+/*   calculating derivatives wrt a kernel that is applied with stride sr,sc != 1 */
+/* *\/ */
+/* void THOmpLab_(validXCorr2DRevptr)(real *r_, */
+/* 				   real *t_, long ir, long ic,  */
+/* 				   real *k_, long kr, long kc,  */
+/* 				   long sr, long sc) */
+/* { */
+/*   long or = ir - (kr - 1) * sr; */
+/*   long oc = ic - (kc - 1) * sc; */
 
-  long xx, yy;
-  for(yy = 0; yy < kr; yy++)
-  {
-    for(xx = 0; xx < kc; xx++)
-    {
-      real *po_ = r_;
-      real *pi_ = t_ + yy*sr*ic + xx*sc;
-      real z = *k_++;
-      long kx, ky;
+/*   long xx, yy; */
+/*   for(yy = 0; yy < kr; yy++) */
+/*   { */
+/*     for(xx = 0; xx < kc; xx++) */
+/*     { */
+/*       real *po_ = r_; */
+/*       real *pi_ = t_ + yy*sr*ic + xx*sc; */
+/*       real z = *k_++; */
+/*       long kx, ky; */
       
-      for(ky = 0; ky < or; ky++)
-      {
-	for(kx = 0; kx < oc; kx++)
-	  po_[kx] += z * pi_[kx];
-	pi_ += ic;
-	po_ += oc;
-      }
-    }
-  }
-}
+/*       for(ky = 0; ky < or; ky++) */
+/*       { */
+/* 	for(kx = 0; kx < oc; kx++) */
+/* 	  po_[kx] += z * pi_[kx]; */
+/* 	pi_ += ic; */
+/* 	po_ += oc; */
+/*       } */
+/*     } */
+/*   } */
+/* } */
 
 
 /* 
@@ -269,10 +269,10 @@ void THOmpLab_(conv2DRevger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_
       real *ptr_input = input_data+i*istride0;
 
       /* do image, kernel convolution */
-      THOmpLab_(validXCorr2DRevptr)(ptr_output,
-				    ptr_input,  nInputRows,  nInputCols,
-				    ptr_weight, nKernelRows, nKernelCols,
-				    srow, scol);
+      THLab_(validXCorr2DRevptr)(ptr_output,
+				 ptr_input,  nInputRows,  nInputCols,
+				 ptr_weight, nKernelRows, nKernelCols,
+				 srow, scol);
       /* Next output plane */
       /* output_data += nOutputCols*nOutputRows; */
     }
@@ -377,23 +377,23 @@ void THOmpLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, l
       /* do image, kernel convolution */
       if (type[0] == 'f')
 	if (type[1] == 'x')
-	  THOmpLab_(fullXCorr2Dptr)(ptr_output,
+	  THLab_(fullXCorr2Dptr)(ptr_output,
 				    ptr_input,  nInputRows,  nInputCols,
 				    ptr_weight, nKernelRows, nKernelCols,
 				    srow, scol);
 	else
-	  THOmpLab_(fullConv2Dptr)(ptr_output,
+	  THLab_(fullConv2Dptr)(ptr_output,
 				   ptr_input,  nInputRows,  nInputCols,
 				   ptr_weight, nKernelRows, nKernelCols,
 				   srow, scol);
       else
 	if (type[1] == 'x')
-	  THOmpLab_(validXCorr2Dptr)(ptr_output,
+	  THLab_(validXCorr2Dptr)(ptr_output,
 				     ptr_input,  nInputRows,  nInputCols,
 				     ptr_weight, nKernelRows, nKernelCols,
 				     srow, scol);
 	else
-	  THOmpLab_(validConv2Dptr)(ptr_output,
+	  THLab_(validConv2Dptr)(ptr_output,
 				    ptr_input,  nInputRows,  nInputCols,
 				    ptr_weight, nKernelRows, nKernelCols,
 				    srow, scol);
@@ -507,23 +507,23 @@ void THOmpLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, lo
       /* do image, kernel convolution */
       if (type[0] == 'f')
 	if (type[1] == 'x')
-	  THOmpLab_(fullXCorr2Dptr)(ptr_output,
+	  THLab_(fullXCorr2Dptr)(ptr_output,
 				    ptr_input,  nInputRows,  nInputCols,
 				    ptr_weight, nKernelRows, nKernelCols,
 				    srow, scol);
 	else
-	  THOmpLab_(fullConv2Dptr)(ptr_output,
+	  THLab_(fullConv2Dptr)(ptr_output,
 				   ptr_input,  nInputRows,  nInputCols,
 				   ptr_weight, nKernelRows, nKernelCols,
 				   srow, scol);
       else
 	if (type[1] == 'x')
-	  THOmpLab_(validXCorr2Dptr)(ptr_output,
+	  THLab_(validXCorr2Dptr)(ptr_output,
 				     ptr_input,  nInputRows,  nInputCols,
 				     ptr_weight, nKernelRows, nKernelCols,
 				     srow, scol);
 	else
-	  THOmpLab_(validConv2Dptr)(ptr_output,
+	  THLab_(validConv2Dptr)(ptr_output,
 				    ptr_input,  nInputRows,  nInputCols,
 				    ptr_weight, nKernelRows, nKernelCols,
 				    srow, scol);
