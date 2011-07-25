@@ -404,17 +404,10 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
                                                         srow, scol, patch_h, patch_w);
   }
 
-  // sync
-  cudaThreadSynchronize();
-
-  // clean up
+  // sync & clean
+  cudaDeviceSynchronize();
   THCudaTensor_free(input);
   THCudaTensor_free(kernel);
-
-  // check potential errors
-  cudaError errcode = cudaGetLastError();
-  if(errcode != cudaSuccess)
-    THError(cudaGetErrorString(errcode));
 }
 
 /*
@@ -489,7 +482,8 @@ TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, THCudaTe
                                          nKernelPlane, nKernelRows, nKernelCols,
                                          srow, scol, patch_h, patch_w);
 
-  // clean up
+  // sync & clean
+  cudaDeviceSynchronize();
   THCudaTensor_free(input);
   THCudaTensor_free(kernel);
 }
