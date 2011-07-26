@@ -396,6 +396,79 @@ TH_API void THLab_(validXCorr3DRevptr)(real *r_,
   }
 }
 
+void THLab_(conv2d)(real* output_data,
+	    real* ptr_input, long nInputRows, long nInputCols,
+	    real* ptr_weight, long nKernelRows, long nKernelCols,
+	    long srow, long scol,
+	    const char* type)
+{
+  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can be 'v' or 'f'");
+  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can be 'x' or 'c'");
+  if (type[0] == 'f')
+    if (type[1] == 'x')
+      THLab_(fullXCorr2Dptr)(output_data,
+			     ptr_input,  nInputRows,  nInputCols,
+			     ptr_weight, nKernelRows, nKernelCols,
+			     srow, scol);
+    else
+      THLab_(fullConv2Dptr)(output_data,
+			    ptr_input,  nInputRows,  nInputCols,
+			    ptr_weight, nKernelRows, nKernelCols,
+			    srow, scol);
+  else
+    if (type[1] == 'x')
+      THLab_(validXCorr2Dptr)(output_data,
+			      ptr_input,  nInputRows,  nInputCols,
+			      ptr_weight, nKernelRows, nKernelCols,
+			      srow, scol);
+    else
+      THLab_(validConv2Dptr)(output_data,
+			     ptr_input,  nInputRows,  nInputCols,
+			     ptr_weight, nKernelRows, nKernelCols,
+			     srow, scol);
+}
+
+void THLab_(conv3d)(real* output_data,
+		    real* ptr_input, long nInputDepth, long nInputRows, long nInputCols,
+		    real* ptr_weight, long nKernelDepth, long nKernelRows, long nKernelCols,
+		    long sdepth, long srow, long scol,
+		    const char* type)
+{
+  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can be 'v' or 'f'");
+  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can be 'x' or 'c'");
+  if (type[0] == 'f')
+    if (type[1] == 'x')
+      THLab_(fullXCorr3Dptr)(output_data,
+			     ptr_input, nInputDepth, nInputRows,  nInputCols,
+			     ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
+			     sdepth, srow, scol);
+    else
+      THLab_(fullConv3Dptr)(output_data,
+			    ptr_input, nInputDepth, nInputRows,  nInputCols,
+			    ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
+			    sdepth, srow, scol);
+  else
+    if (type[1] == 'x')
+      THLab_(validXCorr3Dptr)(output_data,
+			      ptr_input, nInputDepth, nInputRows,  nInputCols,
+			      ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
+			      sdepth, srow, scol);
+    else
+      THLab_(validConv3Dptr)(output_data,
+			     ptr_input, nInputDepth, nInputRows,  nInputCols,
+			     ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
+			     sdepth, srow, scol); 
+}
+
+long THLab_(convsize)(long x, long k, long s, const char* type)
+{
+  THArgCheck(type[0] == 'v' || type[0] == 'f', 1, "type of convolution can be 'v' or 'f'");
+  if (*type == 'v')
+    return (x-k)/s + 1;
+  else
+    return (x-1)*s + k;
+}
+
 
 /* 
    3D input, 3D kernel, 4D output
@@ -490,8 +563,6 @@ void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   THArgCheck(k_->nDimension == 3 , 4, "kernel: 3D Tensor expected");
   THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
-  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
-  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
 
   THTensor *input = THTensor_(newContiguous)(t_);
   THTensor *kernel = THTensor_(newContiguous)(k_);
@@ -509,13 +580,8 @@ void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
 
   THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv2Dger : Input image is smaller than kernel");
 
-  if (*type == 'f') {
-    nOutputRows = (nInputRows - 1) * srow + nKernelRows;
-    nOutputCols = (nInputCols - 1) * scol + nKernelCols;
-  } else { // valid
-    nOutputRows = (nInputRows - nKernelRows) / srow + 1;
-    nOutputCols = (nInputCols - nKernelCols) / scol + 1;
-  }
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
 
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize4d)(r_,nKernelPlane, nInputPlane, nOutputRows, nOutputCols);
@@ -543,28 +609,11 @@ void THLab_(conv2Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
       real *ptr_input = input_data+i*istride0;
 
       /* do image, kernel convolution */
-      if (type[0] == 'f')
-	if (type[1] == 'x')
-	  THLab_(fullXCorr2Dptr)(output_data,
-				 ptr_input,  nInputRows,  nInputCols,
-				 ptr_weight, nKernelRows, nKernelCols,
-				 srow, scol);
-	else
-	  THLab_(fullConv2Dptr)(output_data,
-				ptr_input,  nInputRows,  nInputCols,
-				ptr_weight, nKernelRows, nKernelCols,
-				srow, scol);
-      else
-	if (type[1] == 'x')
-	  THLab_(validXCorr2Dptr)(output_data,
-				  ptr_input,  nInputRows,  nInputCols,
-				  ptr_weight, nKernelRows, nKernelCols,
-				  srow, scol);
-	else
-	  THLab_(validConv2Dptr)(output_data,
-				 ptr_input,  nInputRows,  nInputCols,
-				 ptr_weight, nKernelRows, nKernelCols,
-				 srow, scol);
+      THLab_(conv2d)(output_data, 
+	     ptr_input, nInputRows, nInputCols, 
+	     ptr_weight, nKernelRows, nKernelCols, 
+	     srow, scol, type);
+
       /* Next output plane */
       output_data += nOutputCols*nOutputRows;
     }
@@ -589,8 +638,6 @@ void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long 
   THArgCheck(k_->nDimension == 4 , 4, "kernel: 4D Tensor expected");
   THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
-  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
-  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
 
   THTensor *input = THTensor_(newContiguous)(t_);
   THTensor* kernel;
@@ -615,13 +662,8 @@ void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long 
 
   THArgCheck( (nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv2Dmv : Input image is smaller than kernel");
   
-  if (*type == 'f') {
-    nOutputRows = (nInputRows - 1) * srow + nKernelRows;
-    nOutputCols = (nInputCols - 1) * scol + nKernelCols;
-  } else { // valid
-    nOutputRows = (nInputRows - nKernelRows) / srow + 1;
-    nOutputCols = (nInputCols - nKernelCols) / scol + 1;
-  }
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
 
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize3d)(r_, nOutputPlane, nOutputRows, nOutputCols);
@@ -648,28 +690,10 @@ void THLab_(conv2Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long 
       real *ptr_input = input_data + i*istride0;
 
       /* do image, kernel convolution */
-      if (type[0] == 'f')
-	if (type[1] == 'x')
-	  THLab_(fullXCorr2Dptr)(output_data,
-				 ptr_input,  nInputRows,  nInputCols,
-				 ptr_weight, nKernelRows, nKernelCols,
-				 srow, scol);
-	else
-	  THLab_(fullConv2Dptr)(output_data,
-				ptr_input,  nInputRows,  nInputCols,
-				ptr_weight, nKernelRows, nKernelCols,
-				srow, scol);
-      else
-	if (type[1] == 'x')
-	  THLab_(validXCorr2Dptr)(output_data,
-				  ptr_input,  nInputRows,  nInputCols,
-				  ptr_weight, nKernelRows, nKernelCols,
-				  srow, scol);
-	else
-	  THLab_(validConv2Dptr)(output_data,
-				 ptr_input,  nInputRows,  nInputCols,
-				 ptr_weight, nKernelRows, nKernelCols,
-				 srow, scol);
+      THLab_(conv2d)(output_data, 
+	     ptr_input, nInputRows, nInputCols, 
+	     ptr_weight, nKernelRows, nKernelCols, 
+	     srow, scol, type);
     }
     /* Next output plane */
     output_data += nOutputCols*nOutputRows;
@@ -690,8 +714,6 @@ void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   THArgCheck(k_->nDimension == 2 , 4, "kernel: 2D Tensor expected");
   THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
-  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
-  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
 
   THTensor *input = THTensor_(newContiguous)(t_);
   THTensor* kernel = THTensor_(newContiguous)(k_);
@@ -702,15 +724,10 @@ void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   long nKernelCols = kernel->size[1];
   long nOutputRows, nOutputCols;
 
-  THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "Input image is smaller than kernel");
+  THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv2Dmul : Input image is smaller than kernel");
   
-  if (*type == 'f') {
-    nOutputRows = (nInputRows - 1) * srow + nKernelRows;
-    nOutputCols = (nInputCols - 1) * scol + nKernelCols;
-  } else { // valid
-    nOutputRows = (nInputRows - nKernelRows) / srow + 1;
-    nOutputCols = (nInputCols - nKernelCols) / scol + 1;
-  }
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
 
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize2d)(r_, nOutputRows, nOutputCols);
@@ -725,28 +742,158 @@ void THLab_(conv2Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long
   
   
   /* do image, kernel convolution */
-  if (type[0] == 'f')
-    if (type[1] == 'x')
-      THLab_(fullXCorr2Dptr)(output_data,
-			     ptr_input,  nInputRows,  nInputCols,
-			     ptr_weight, nKernelRows, nKernelCols,
-			     srow, scol);
-    else
-      THLab_(fullConv2Dptr)(output_data,
-			    ptr_input,  nInputRows,  nInputCols,
-			    ptr_weight, nKernelRows, nKernelCols,
-			    srow, scol);
-  else
-    if (type[1] == 'x')
-      THLab_(validXCorr2Dptr)(output_data,
-			      ptr_input,  nInputRows,  nInputCols,
-			      ptr_weight, nKernelRows, nKernelCols,
-			      srow, scol);
-    else
-      THLab_(validConv2Dptr)(output_data,
-			     ptr_input,  nInputRows,  nInputCols,
-			     ptr_weight, nKernelRows, nKernelCols,
-			     srow, scol);
+  THLab_(conv2d)(output_data, 
+	 ptr_input, nInputRows, nInputCols, 
+	 ptr_weight, nKernelRows, nKernelCols, 
+	 srow, scol, type);
+  THTensor_(free)(input);
+  THTensor_(free)(kernel);
+}
+
+/* 
+   3D input, 3D kernel, 3D output
+   component wise multiplication like
+   y <- y.*x + beta*y
+*/
+void THLab_(conv2Dcmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, long srow, long scol, const char *type)
+{
+  long nInputPlane, nInputRows, nInputCols;
+  long nKernelRows, nKernelCols;
+  long nOutputPlane, nOutputRows, nOutputCols;
+  long istride0, kstride0;
+					 
+  THArgCheck(t_->nDimension == 3 , 3, "input: 3D Tensor expected");
+  THArgCheck(k_->nDimension == 3 , 4, "kernel: 3D Tensor expected");
+  THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
+  THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
+
+  THTensor *input = THTensor_(newContiguous)(t_);
+  THTensor* kernel = THTensor_(newContiguous)(k_);
+
+  istride0    = input->stride[0];
+  nInputPlane = input->size[0];
+  nInputRows  = input->size[1];
+  nInputCols  = input->size[2];
+  
+  kstride0    = kernel->stride[0];
+  nOutputPlane = kernel->size[0];
+  nKernelRows = kernel->size[1];
+  nKernelCols = kernel->size[2];
+
+  THArgCheck(nOutputPlane == nInputPlane, 2, "invalid number of input/kernel planes");
+  THArgCheck( (nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv2Dcmul : Input image is smaller than kernel");
+  
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
+
+  long nelem = THTensor_(nElement)(r_);
+  THTensor_(resize3d)(r_, nOutputPlane, nOutputRows, nOutputCols);
+
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
+  {
+    THTensor_(zero)(r_);
+  }
+  else if (beta != 1)
+    THTensor_(mul)(r_, beta);
+
+  real *input_data = THTensor_(data)(input);
+  real *weight_data = THTensor_(data)(kernel);
+  real *output_data = THTensor_(data)(r_);  
+  
+  long k;
+  for(k = 0; k < nOutputPlane; k++)
+  {
+    /* get kernel */
+    real *ptr_weight = weight_data + k*kstride0;
+    /* get input */
+    real *ptr_input = input_data + k*istride0;
+
+    /* do image, kernel convolution */
+    THLab_(conv2d)(output_data, 
+	   ptr_input, nInputRows, nInputCols, 
+	   ptr_weight, nKernelRows, nKernelCols, 
+	   srow, scol, type);
+    /* Next output plane */
+    output_data += nOutputCols*nOutputRows;
+  }
+  THTensor_(free)(input);
+  THTensor_(free)(kernel);
+}
+
+/* 
+   3D input, 3D kernel, 3D output
+   component wise multiplication like with a permutation map
+   y <- y.*x + beta*y
+*/
+void THLab_(conv2Dmap)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, THTensor *map, long srow, long scol, const char *type)
+{
+  long nInputPlane, nInputRows, nInputCols;
+  long nKernelRows, nKernelCols;
+  long nOutputPlane, nOutputRows, nOutputCols;
+  long istride0, kstride0;
+					 
+  THArgCheck(t_->nDimension == 3 , 3, "input: 3D Tensor expected");
+  THArgCheck(k_->nDimension == 3 , 4, "kernel: 3D Tensor expected");
+  THArgCheck(map->nDimension == 2 , 4, "map: 2D Tensor expected");
+  THArgCheck(srow >= 1, 6, "Stride should be a positive integer");
+  THArgCheck(scol >= 1, 7, "Stride should be a positive integer");
+
+  THTensor *input = THTensor_(newContiguous)(t_);
+  THTensor* kernel = THTensor_(newContiguous)(k_);
+
+  istride0    = input->stride[0];
+  nInputPlane = input->size[0];
+  nInputRows  = input->size[1];
+  nInputCols  = input->size[2];
+  
+  kstride0    = kernel->stride[0];
+  nOutputPlane = kernel->size[0];
+  nKernelRows = kernel->size[1];
+  nKernelCols = kernel->size[2];
+
+  THArgCheck(nOutputPlane == nInputPlane, 2, "invalid number of input/kernel planes");
+  THArgCheck( (nInputRows >= nKernelRows && nInputCols >= nKernelCols) 
+	      || *type == 'f', 2, "conv2Dmap : Input image is smaller than kernel");
+  
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
+
+  long nelem = THTensor_(nElement)(r_);
+  THTensor_(resize3d)(r_, nOutputPlane, nOutputRows, nOutputCols);
+
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
+  {
+    THTensor_(zero)(r_);
+  }
+  else if (beta != 1)
+    THTensor_(mul)(r_, beta);
+
+  real *input_data = THTensor_(data)(input);
+  real *weight_data = THTensor_(data)(kernel);
+  real *output_data = THTensor_(data)(r_);  
+
+  long nmaps = map->size[0];
+  
+  long k;
+  for(k = 0; k < nmaps; k++)
+  {
+    /* get indices */
+    long from = (long)THTensor_(get2d)(map,k,0)-1;
+    long to   = (long)THTensor_(get2d)(map,k,1)-1;
+    
+    /* get kernel */
+    real *ptr_weight = weight_data + k*kstride0;
+    /* get input */
+    real *ptr_input = input_data + from*istride0;
+    /* get output */
+    real *ptr_output = output_data + to*nOutputRows*nOutputCols;
+
+    /* do image, kernel convolution */
+    THLab_(conv2d)(ptr_output,
+	   ptr_input, nInputRows, nInputCols, 
+	   ptr_weight, nKernelRows, nKernelCols, 
+	   srow, scol, type);
+  }
   THTensor_(free)(input);
   THTensor_(free)(kernel);
 }
@@ -873,17 +1020,11 @@ void THLab_(conv3Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_,
   THArgCheck((nInputDepth >= nKernelDepth
 	      && nInputRows >= nKernelRows 
 	      && nInputCols >= nKernelCols)
-	     || *type == 'f', 2, "conv2Dger : Input image is smaller than kernel");
-  
-  if (*type == 'f') {
-    nOutputDepth = (nInputDepth - 1) * sdepth + nKernelDepth;
-    nOutputRows = (nInputRows - 1) * srow + nKernelRows;
-    nOutputCols = (nInputCols - 1) * scol + nKernelCols;
-  } else { // valid
-    nOutputDepth = (nInputDepth - nKernelDepth) / sdepth + 1;
-    nOutputRows = (nInputRows - nKernelRows) / srow + 1;
-    nOutputCols = (nInputCols - nKernelCols) / scol + 1;
-  }
+	     || *type == 'f', 2, "conv3Dger : Input image is smaller than kernel");
+
+  nOutputDepth = THLab_(convsize)(nInputDepth, nKernelDepth, sdepth, type);
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
 
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize5d)(r_,nKernelPlane, nInputPlane, nOutputDepth, nOutputRows, nOutputCols);
@@ -897,7 +1038,7 @@ void THLab_(conv3Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_,
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
-  real *output_data = THTensor_(data)(r_);  
+  real *output_data = THTensor_(data)(r_);
   
   long k,i;
   for(k = 0; k < nKernelPlane; k++)
@@ -911,28 +1052,11 @@ void THLab_(conv3Dger)(THTensor *r_, real beta, THTensor *t_, THTensor *k_,
       real *ptr_input = input_data+i*istride0;
 
       /* do image, kernel convolution */
-      if (type[0] == 'f')
-	if (type[1] == 'x')
-	  THLab_(fullXCorr3Dptr)(output_data,
-				 ptr_input,  nInputDepth, nInputRows,  nInputCols,
-				 ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-				 sdepth, srow, scol);
-	else
-	  THLab_(fullConv3Dptr)(output_data,
-				ptr_input,  nInputDepth, nInputRows,  nInputCols,
-				ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-				sdepth, srow, scol);
-      else
-	if (type[1] == 'x')
-	  THLab_(validXCorr3Dptr)(output_data,
-				  ptr_input, nInputDepth, nInputRows,  nInputCols,
-				  ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-				  sdepth, srow, scol);
-	else
-	  THLab_(validConv3Dptr)(output_data,
-				 ptr_input, nInputDepth, nInputRows,  nInputCols,
-				 ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-				 sdepth, srow, scol);
+      THLab_(conv3d)(output_data,
+		     ptr_input,  nInputDepth, nInputRows,  nInputCols,
+		     ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
+		     sdepth, srow, scol, type);
+
       /* Next output plane */
       output_data += nOutputDepth*nOutputCols*nOutputRows;
     }
@@ -987,15 +1111,9 @@ void THLab_(conv3Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_,
 
   THArgCheck( (nInputDepth >= nKernelDepth && nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv3Dmv : Input image is smaller than kernel");
   
-  if (*type == 'f') {
-    nOutputDepth = (nInputDepth - 1) * sdepth + nKernelDepth;
-    nOutputRows = (nInputRows - 1) * srow + nKernelRows;
-    nOutputCols = (nInputCols - 1) * scol + nKernelCols;
-  } else { // valid
-    nOutputDepth = (nInputDepth - nKernelDepth) / sdepth + 1;
-    nOutputRows = (nInputRows - nKernelRows) / srow + 1;
-    nOutputCols = (nInputCols - nKernelCols) / scol + 1;
-  }
+  nOutputDepth = THLab_(convsize)(nInputDepth, nKernelDepth, sdepth, type);
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
 
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize4d)(r_, nOutputPlane, nOutputDepth, nOutputRows, nOutputCols);
@@ -1022,28 +1140,10 @@ void THLab_(conv3Dmv)(THTensor *r_, real beta, THTensor *t_, THTensor *k_,
       real *ptr_input = input_data + i*istride0;
 
       /* do image, kernel convolution */
-      if (type[0] == 'f')
-	if (type[1] == 'x')
-	  THLab_(fullXCorr3Dptr)(output_data,
-				 ptr_input, nInputDepth, nInputRows,  nInputCols,
-				 ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-				 sdepth, srow, scol);
-	else
-	  THLab_(fullConv3Dptr)(output_data,
-				ptr_input, nInputDepth, nInputRows,  nInputCols,
-				ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-				sdepth, srow, scol);
-      else
-	if (type[1] == 'x')
-	  THLab_(validXCorr3Dptr)(output_data,
-				  ptr_input, nInputDepth, nInputRows,  nInputCols,
-				  ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-				  sdepth, srow, scol);
-	else
-	  THLab_(validConv3Dptr)(output_data,
-				 ptr_input, nInputDepth, nInputRows,  nInputCols,
-				 ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-				 sdepth, srow, scol);
+      THLab_(conv3d)(output_data,
+		     ptr_input,  nInputDepth, nInputRows,  nInputCols,
+		     ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
+		     sdepth, srow, scol, type);
     }
     /* Next output plane */
     output_data += nOutputDepth*nOutputCols*nOutputRows;
@@ -1080,17 +1180,11 @@ void THLab_(conv3Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_,
   long nKernelCols = kernel->size[2];
   long nOutputDepth, nOutputRows, nOutputCols;
 
-  THArgCheck((nInputDepth >= nKernelDepth && nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "Input image is smaller than kernel");
+  THArgCheck((nInputDepth >= nKernelDepth && nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv3Dmul : Input image is smaller than kernel");
   
-  if (*type == 'f') {
-    nOutputDepth = (nInputDepth - 1) * sdepth + nKernelDepth;
-    nOutputRows = (nInputRows - 1) * srow + nKernelRows;
-    nOutputCols = (nInputCols - 1) * scol + nKernelCols;
-  } else { // valid
-    nOutputDepth = (nInputDepth - nKernelDepth) / sdepth + 1;
-    nOutputRows = (nInputRows - nKernelRows) / srow + 1;
-    nOutputCols = (nInputCols - nKernelCols) / scol + 1;
-  }
+  nOutputDepth = THLab_(convsize)(nInputDepth, nKernelDepth, sdepth, type);
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
 
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize3d)(r_, nOutputDepth, nOutputRows, nOutputCols);
@@ -1105,28 +1199,173 @@ void THLab_(conv3Dmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_,
   
   
   /* do image, kernel convolution */
-  if (type[0] == 'f')
-    if (type[1] == 'x')
-      THLab_(fullXCorr3Dptr)(output_data,
-			     ptr_input, nInputDepth, nInputRows,  nInputCols,
-			     ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-			     sdepth, srow, scol);
-    else
-      THLab_(fullConv3Dptr)(output_data,
-			    ptr_input, nInputDepth, nInputRows,  nInputCols,
-			    ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-			    sdepth, srow, scol);
-  else
-    if (type[1] == 'x')
-      THLab_(validXCorr3Dptr)(output_data,
-			      ptr_input, nInputDepth, nInputRows,  nInputCols,
-			      ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-			      sdepth, srow, scol);
-    else
-      THLab_(validConv3Dptr)(output_data,
-			     ptr_input, nInputDepth, nInputRows,  nInputCols,
-			     ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
-			     sdepth, srow, scol);
+  THLab_(conv3d)(output_data,
+		 ptr_input,  nInputDepth, nInputRows,  nInputCols,
+		 ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
+		 sdepth, srow, scol, type);
+  THTensor_(free)(input);
+  THTensor_(free)(kernel);
+}
+
+/* 
+   4D input, 4D kernel, 4D output
+   component wise multiplication like
+   y <- y.*x + beta*y
+*/
+void THLab_(conv3Dcmul)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, 
+			long sdepth, long srow, long scol, const char *type)
+{
+  long nInputPlane, nInputDepth, nInputRows, nInputCols;
+  long nKernelDepth, nKernelRows, nKernelCols;
+  long nOutputPlane, nOutputDepth, nOutputRows, nOutputCols;
+  long istride0, kstride0;
+					 
+  THArgCheck(t_->nDimension == 4 , 3, "input: 3D Tensor expected");
+  THArgCheck(k_->nDimension == 4 , 4, "kernel: 3D Tensor expected");
+  THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
+  THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
+  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
+  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
+
+  THTensor *input = THTensor_(newContiguous)(t_);
+  THTensor* kernel = THTensor_(newContiguous)(k_);
+
+  istride0    = input->stride[0];
+  nInputPlane = input->size[0];
+  nInputDepth = input->size[1];
+  nInputRows  = input->size[2];
+  nInputCols  = input->size[3];
+  
+  kstride0    = kernel->stride[0];
+  nOutputPlane = kernel->size[0];
+  nKernelDepth = kernel->size[1];
+  nKernelRows = kernel->size[2];
+  nKernelCols = kernel->size[3];
+
+  THArgCheck(nOutputPlane == nInputPlane, 2, "invalid number of input/kernel planes");
+  THArgCheck( (nInputDepth >= nKernelDepth && nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv3Dcmul : Input image is smaller than kernel");
+    
+  nOutputDepth = THLab_(convsize)(nInputDepth, nKernelDepth, sdepth, type);
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
+
+  long nelem = THTensor_(nElement)(r_);
+  THTensor_(resize4d)(r_, nOutputPlane, nOutputDepth, nOutputRows, nOutputCols);
+
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
+  {
+    THTensor_(zero)(r_);
+  }
+  else if (beta != 1)
+    THTensor_(mul)(r_, beta);
+
+  real *input_data = THTensor_(data)(input);
+  real *weight_data = THTensor_(data)(kernel);
+  real *output_data = THTensor_(data)(r_);  
+  
+  long k;
+  for(k = 0; k < nOutputPlane; k++)
+  {
+    /* get kernel */
+    real *ptr_weight = weight_data + k*kstride0;
+    /* get input */
+    real *ptr_input = input_data + k*istride0;
+
+    /* do image, kernel convolution */
+    THLab_(conv3d)(output_data,
+		   ptr_input,  nInputDepth, nInputRows,  nInputCols,
+		   ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
+		   sdepth, srow, scol, type);
+
+    /* Next output plane */
+    output_data += nOutputDepth*nOutputCols*nOutputRows;
+  }
+  THTensor_(free)(input);
+  THTensor_(free)(kernel);
+}
+
+/* 
+   4D input, 4D kernel, 4D output
+   component wise multiplication like with a permutation map
+   y <- y.*x + beta*y
+*/
+void THLab_(conv3Dmap)(THTensor *r_, real beta, THTensor *t_, THTensor *k_, THTensor *map, 
+		       long sdepth, long srow, long scol, const char *type)
+{
+  long nInputPlane, nInputDepth, nInputRows, nInputCols;
+  long nKernelDepth, nKernelRows, nKernelCols;
+  long nOutputPlane, nOutputDepth, nOutputRows, nOutputCols;
+  long istride0, kstride0;
+					 
+  THArgCheck(t_->nDimension == 4 , 3, "input: 4D Tensor expected");
+  THArgCheck(k_->nDimension == 4 , 4, "kernel: 4D Tensor expected");
+  THArgCheck(map->nDimension == 2 , 4, "map: 2D Tensor expected");
+  THArgCheck(srow >= 1, 6, "Stride should be a positive integer");
+  THArgCheck(scol >= 1, 7, "Stride should be a positive integer");
+  THArgCheck(type[0] == 'v' || type[0] == 'f', 8, "type of convolution can 'v' or 'f'");
+  THArgCheck(type[1] == 'c' || type[1] == 'x', 8, "type of convolution can 'x' or 'c'");
+
+  THTensor *input = THTensor_(newContiguous)(t_);
+  THTensor* kernel = THTensor_(newContiguous)(k_);
+
+  istride0    = input->stride[0];
+  nInputPlane = input->size[0];
+  nInputDepth = input->size[1];
+  nInputRows  = input->size[2];
+  nInputCols  = input->size[3];
+  
+  kstride0    = kernel->stride[0];
+  nOutputPlane = kernel->size[0];
+  nKernelDepth = kernel->size[1];
+  nKernelRows = kernel->size[2];
+  nKernelCols = kernel->size[3];
+
+  THArgCheck(nOutputPlane == nInputPlane, 2, "invalid number of input/kernel planes");
+  THArgCheck((nInputDepth >= nKernelDepth 
+	      && nInputRows >= nKernelRows 
+	      && nInputCols >= nKernelCols) || *type == 'f', 
+	     2, "conv3Dmap : Input image is smaller than kernel");
+  
+  nOutputDepth = THLab_(convsize)(nInputDepth, nKernelDepth, sdepth, type);
+  nOutputRows = THLab_(convsize)(nInputRows, nKernelRows, srow, type);
+  nOutputCols = THLab_(convsize)(nInputCols, nKernelCols, scol, type);
+
+  long nelem = THTensor_(nElement)(r_);
+  THTensor_(resize4d)(r_, nOutputPlane, nOutputDepth, nOutputRows, nOutputCols);
+
+  if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
+  {
+    THTensor_(zero)(r_);
+  }
+  else if (beta != 1)
+    THTensor_(mul)(r_, beta);
+
+  real *input_data = THTensor_(data)(input);
+  real *weight_data = THTensor_(data)(kernel);
+  real *output_data = THTensor_(data)(r_);  
+
+  long nmaps = map->size[0];
+  
+  long k;
+  for(k = 0; k < nmaps; k++)
+  {
+    /* get indices */
+    long from = (long)THTensor_(get2d)(map,k,0)-1;
+    long to   = (long)THTensor_(get2d)(map,k,1)-1;
+    
+    /* get kernel */
+    real *ptr_weight = weight_data + k*kstride0;
+    /* get input */
+    real *ptr_input = input_data + from*istride0;
+    /* get output */
+    real *ptr_output = output_data + to*nOutputDepth*nOutputRows*nOutputCols;
+
+    /* do image, kernel convolution */
+    THLab_(conv3d)(ptr_output,
+		   ptr_input,  nInputDepth, nInputRows,  nInputCols,
+		   ptr_weight, nKernelDepth, nKernelRows, nKernelCols,
+		   sdepth, srow, scol, type);
+  }
   THTensor_(free)(input);
   THTensor_(free)(kernel);
 }

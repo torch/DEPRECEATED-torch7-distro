@@ -92,7 +92,7 @@ static int nnOmp_(SpatialConvolution_backwardOmp)(lua_State *L)
 
   /* gradient to input */
   THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
-  THOmpLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "fx");
+  THOmpLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "fc");
   THTensor_(free)(tweight);
 
   return 1;
