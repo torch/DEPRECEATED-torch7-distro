@@ -266,6 +266,13 @@ void THTensor_(resize4d)(THTensor *self, long size0, long size1, long size2, lon
   THTensor_(rawResize)(self, 4, size, NULL);
 }
 
+void THTensor_(resize5d)(THTensor *self, long size0, long size1, long size2, long size3, long size4)
+{
+    long size[5] = {size0, size1, size2, size3, size4};
+
+  THTensor_(rawResize)(self, 5, size, NULL);
+}
+
 void THTensor_(set)(THTensor *self, THTensor *src)
 {
   if(self != src)
