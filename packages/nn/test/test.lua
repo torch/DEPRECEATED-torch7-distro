@@ -537,6 +537,37 @@ function nntest.TemporalSubSampling()
    mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.VolumetricConvolution()
+   local from = math.random(2,5)
+   local to = math.random(2,5)
+   local kt = math.random(3,7)
+   local ki = math.random(3,7)
+   local kj = math.random(3,7)
+   local st = math.random(2,4)
+   local si = math.random(2,4)
+   local sj = math.random(2,4)
+   local outt = math.random(3,7)
+   local outi = math.random(3,7)
+   local outj = math.random(3,7)
+   local int = (outt-1)*st+kt
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.VolumetricConvolution(from, to, kt, ki, kj, st, si, sj)
+   local input = torch.Tensor(from, int, inj, ini):zero()
+   
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+   
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
+   mytester:assertlt(err , precision, 'error on weight ')
+   
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
+   mytester:assertlt(err , precision, 'error on bias ')
+   
+   local ferr, berr = jac.testIO(module, input)
+   mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
+end
 
 
 mytester:add(nntest)

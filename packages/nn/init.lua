@@ -57,6 +57,8 @@ torch.include('nn', 'SpatialSubSampling.lua')
 torch.include('nn', 'TemporalConvolution.lua')
 torch.include('nn', 'TemporalSubSampling.lua')
 
+torch.include('nn', 'VolumetricConvolution.lua')
+
 torch.include('nn', 'ParallelTable.lua')  
 torch.include('nn', 'ConcatTable.lua')  
 torch.include('nn', 'SplitTable.lua')  
