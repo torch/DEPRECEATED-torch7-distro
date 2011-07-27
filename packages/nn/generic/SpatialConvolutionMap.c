@@ -144,10 +144,10 @@ static int nn_(SpatialConvolutionMap_backward)(lua_State *L)
                                dH, dW);
     
     // gradient to input
-    THLab_(fullXCorr2Dptr)(gradInput_data + i*input_w*input_h,
-                           gradOutput_data + o*output_w*output_h,  output_h,  output_w,
-                           weight_data + k*weight_w*weight_h, weight_h, weight_w,
-                           dH, dW);
+    THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
+                          gradOutput_data + o*output_w*output_h,  output_h,  output_w,
+                          weight_data + k*weight_w*weight_h, weight_h, weight_w,
+                          dH, dW);
   }
 
   // clean up
