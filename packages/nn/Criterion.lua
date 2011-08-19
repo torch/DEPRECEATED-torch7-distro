@@ -20,3 +20,12 @@ function Criterion:read(file)
    self.gradInput = file:readObject()
    self.output = file:readDouble()
 end
+
+function Criterion:clone()
+   local f = torch.MemoryFile("rw"):binary()
+   f:writeObject(self)
+   f:seek(1)
+   local clone = f:readObject()
+   f:close()
+   return clone
+end
