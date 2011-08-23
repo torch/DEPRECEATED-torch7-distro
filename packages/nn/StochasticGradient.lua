@@ -17,7 +17,7 @@ function StochasticGradient:train(dataset)
    local module = self.module
    local criterion = self.criterion
 
-   local shuffledIndices = lab.randperm(dataset:size())
+   local shuffledIndices = lab.randperm(dataset:size(), 'torch.LongTensor')
    if not self.shuffleIndices then
       for t = 1,dataset:size() do
          shuffledIndices[t] = t
