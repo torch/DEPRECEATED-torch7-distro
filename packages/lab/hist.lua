@@ -69,18 +69,7 @@ function lab.histc(...)
    local hist = lab.zeros(bins)
    local ten = torch.Tensor(tensor:nElement()):copy(tensor)
    ten:add(-min):div(max-min):mul(bins - 1e-6):floor():add(1)
-   ten:apply(function (x)
-                -- need to treat edge cases if we allow arbitrary
-                -- min and max args.
-                if x < 1 then
-                   hist[1] = hist[1] + 1
-                elseif x > bins then
-                   hist[bins] = hist[bins] + 1
-                else
-                   hist[x] = hist[x] + 1
-                end
-                return x
-             end)
+   ten.lab._histc(ten, hist, bins)
 
    -- cleanup hist
    local cleanhist = {}

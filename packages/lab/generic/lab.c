@@ -383,6 +383,20 @@ static int lab_(cat)(lua_State *L)
   return lab_(cat_)(L);
 }
 
+static int lab_(histc)(lua_State *L)
+{
+  THTensor *r = luaT_checkudata(L, 1, torch_(Tensor_id));
+  THTensor *h = luaT_checkudata(L, 2, torch_(Tensor_id));
+  int nbins = luaL_checknumber(L, 3);
+  real *h_data = THTensor_(data)(h);
+
+  TH_TENSOR_APPLY(real, r,                                      \
+                  if ((*r_data <= nbins) && (*r_data >= 1)) {   \
+                    *(h_data + (int)(*r_data) - 1) += 1;        \
+                  })
+  return 0;
+}
+
 static int lab_(convxcorr2)(lua_State *L,char* ktype)
 {
   THTensor *r_ = NULL;
@@ -797,6 +811,7 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"tril", lab_(tril)},
   {"triu_", lab_(triu_)},
   {"triu", lab_(triu)},
+  {"_histc", lab_(histc)},
   {"cat_", lab_(cat_)},
   {"cat", lab_(cat)},
   {"conv2", lab_(conv2)},
