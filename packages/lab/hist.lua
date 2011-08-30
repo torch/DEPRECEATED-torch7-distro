@@ -64,12 +64,16 @@ function lab.histc(...)
    local bins = args[2] or 10
    local min = args[3] or tensor:min()
    local max = args[4] or tensor:max()
+   local raw = args[5] or false
 
    -- compute histogram
    local hist = lab.zeros(bins)
    local ten = torch.Tensor(tensor:nElement()):copy(tensor)
    ten:add(-min):div(max-min):mul(bins - 1e-6):floor():add(1)
    ten.lab._histc(ten, hist, bins)
+
+   -- return raw histogram (no extra info)
+   if raw then return hist end
 
    -- cleanup hist
    local cleanhist = {}
