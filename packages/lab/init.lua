@@ -10,5 +10,4 @@ end
 
 lab.setdefaulttensortype(torch.getdefaulttensortype())
 
-torch.include('lab','gnuplot.lua')
 torch.include('lab','hist.lua')

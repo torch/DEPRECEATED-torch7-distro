@@ -95,13 +95,3 @@ function lab.histc(...)
    return cleanhist
 end
 
--- complete function: compute hist and display it
-function lab.hist(tensor,bins,min,max)
-   local h = lab.histc(tensor,bins,min,max)
-   local x_axis = torch.Tensor(#h)
-   for i = 1,#h do
-      x_axis[i] = h[i].val
-   end
-   lab.bar(x_axis, h.raw)
-   return h
-end

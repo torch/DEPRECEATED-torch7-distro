@@ -1,5 +1,5 @@
 SET(src lab.c utils.c init.c)
-SET(luasrc init.lua gnuplot.lua hist.lua)
+SET(luasrc init.lua hist.lua)
   
 ADD_TORCH_PACKAGE(lab "${src}" "${luasrc}" "Lab")
 
