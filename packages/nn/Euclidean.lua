@@ -12,8 +12,7 @@ function Euclidean:__init(inputSize,outputSize)
 
    self:reset()
 end
- 
- 
+  
 function Euclidean:reset(stdv)
    if stdv then
       stdv = stdv * math.sqrt(3)
@@ -21,8 +20,6 @@ function Euclidean:reset(stdv)
       stdv = 1./math.sqrt(self.weight:size(1))
    end
 
-   -- we do this so the initialization is exactly
-   -- the same than in previous torch versions
    for i=1,self.weight:size(2) do
       self.weight:select(2, i):apply(function()
                                         return random.uniform(-stdv, stdv)
@@ -30,7 +27,6 @@ function Euclidean:reset(stdv)
    end
 end
 
- 
 function Euclidean:forward(input) 
    self.output:zero()
    for i=1,self.weight:size(2) do
@@ -40,38 +36,20 @@ function Euclidean:forward(input)
 end
 
 function Euclidean:backward(input, gradOutput)
-  
+  if self.gradInput then
+     self.gradInput:zero()
+     for i=1,self.weight:size(2) do
+        self.gradInput:add(2*gradOutput[i],input);
+        self.gradInput:add(-2*gradOutput[i],self.weight:select(2,i));
+     end
+     return self.gradInput
+  end
+end
+
+function Euclidean:accGradParameters(input, gradOuput, scale)
    for i=1,self.weight:size(2) do
-    local gW=self.gradWeight:select(2,i) 
-    gW:add(2*gradOutput[i],self.weight:select(2,i));
-    gW:add(-2*gradOutput[i],input);
+      local gW=self.gradWeight:select(2,i) 
+      gW:add(2*gradOutput[i]*scale,self.weight:select(2,i));
+      gW:add(-2*gradOutput[i]*scale,input);
    end
-
-   self.gradInput:zero();
-   for i=1,self.weight:size(2) do
-    self.gradInput:add(2*gradOutput[i],input);
-    self.gradInput:add(-2*gradOutput[i],self.weight:select(2,i));
-   end
-
-   return self.gradInput
-end
-
-function Euclidean:zeroGradParameters()
-   self.gradWeight:zero()
-end
- 
-function Euclidean:updateParameters(learningRate)
-   self.weight:add(-learningRate, self.gradWeight)
-end
-
-function Euclidean:write(file)
-   parent.write(self, file)
-   file:writeObject(self.weight)
-   file:writeObject(self.gradWeight)
-end
-
-function Euclidean:read(file)
-   parent.read(self, file)
-   self.weight = file:readObject()
-   self.gradWeight = file:readObject()
 end

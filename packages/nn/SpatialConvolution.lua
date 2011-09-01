@@ -40,43 +40,11 @@ function SpatialConvolution:forward(input)
 end
 
 function SpatialConvolution:backward(input, gradOutput)
-   return input.nn.SpatialConvolution_backward(self, input, gradOutput)
+   if self.gradInput then
+      return input.nn.SpatialConvolution_backward(self, input, gradOutput)
+   end
 end
 
-function SpatialConvolution:zeroGradParameters()
-   self.gradWeight:zero()
-   self.gradBias:zero()
-end
-
-function SpatialConvolution:updateParameters(learningRate)
-   self.weight:add(-learningRate, self.gradWeight)
-   self.bias:add(-learningRate, self.gradBias)
-end
-
-function SpatialConvolution:write(file)
-   parent.write(self, file)
-   file:writeInt(self.kW)
-   file:writeInt(self.kH)
-   file:writeInt(self.dW)
-   file:writeInt(self.dH)
-   file:writeInt(self.nInputPlane)
-   file:writeInt(self.nOutputPlane)
-   file:writeObject(self.weight)
-   file:writeObject(self.bias)
-   file:writeObject(self.gradWeight)
-   file:writeObject(self.gradBias)
-end
-
-function SpatialConvolution:read(file)
-   parent.read(self, file)
-   self.kW = file:readInt()
-   self.kH = file:readInt()
-   self.dW = file:readInt()
-   self.dH = file:readInt()
-   self.nInputPlane = file:readInt()
-   self.nOutputPlane = file:readInt()
-   self.weight = file:readObject()
-   self.bias = file:readObject()
-   self.gradWeight = file:readObject()
-   self.gradBias = file:readObject()
+function SpatialConvolution:accGradParameters(input, gradOutput, scale)
+   return input.nn.SpatialConvolution_backward(self, input, gradOutput, scale)
 end

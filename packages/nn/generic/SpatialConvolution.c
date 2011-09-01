@@ -50,9 +50,31 @@ static int nn_(SpatialConvolution_backward)(lua_State *L)
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
 
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
+  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
+  
+  THArgCheck( nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane" );
+
+  long k;
+
+  /* gradient to input */
+  THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
+  THLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "fx");
+  THTensor_(free)(tweight);
+
+  return 1;
+}
+
+static int nn_(SpatialConvolution_accGradParameters)(lua_State *L)
+{
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
+  real scale = luaL_optnumber(L, 4, 1);
+  int dW = luaT_getfieldcheckint(L, 1, "dW");
+  int dH = luaT_getfieldcheckint(L, 1, "dH");
+  int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
+
   THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
   THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
-  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
   
   THArgCheck( nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane" );
 
@@ -64,24 +86,20 @@ static int nn_(SpatialConvolution_backward)(lua_State *L)
   for(k = 0; k < nOutputPlane; k++)
   {
     THTensor_(select)(gradOutSlice, gradOutput, 0, k);
-    gradBias_data[k] += THTensor_(sum)(gradOutSlice);
+    gradBias_data[k] += scale*THTensor_(sum)(gradOutSlice);
   }
   THTensor_(free)(gradOutSlice);
 
   /* gradient to kernels */
-  THLab_(conv2DRevger)(gradWeight, 1.0, input, gradOutput, dH, dW);
+  THLab_(conv2DRevger)(gradWeight, scale, input, gradOutput, dH, dW);
 
-  /* gradient to input */
-  THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
-  THLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "fx");
-  THTensor_(free)(tweight);
-
-  return 1;
+  return 0;
 }
 
 static const struct luaL_Reg nn_(SpatialConvolution__) [] = {
   {"SpatialConvolution_forward", nn_(SpatialConvolution_forward)},
   {"SpatialConvolution_backward", nn_(SpatialConvolution_backward)},
+  {"SpatialConvolution_accGradParameters", nn_(SpatialConvolution_accGradParameters)},
   {NULL, NULL}
 };
 

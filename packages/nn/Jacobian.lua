@@ -19,6 +19,7 @@ function nn.Jacobian.backward (module, input, param, dparam)
       sdout[i] = 1
       module:zeroGradParameters()
       local din = module:backward(input, dout)
+      module:accGradParameters(input, dout)
       if doparam == 1 then
 	 jacobian:select(2,i):copy(dparam)
       else
@@ -86,6 +87,7 @@ function nn.Jacobian.testIO(module,input, minval, maxval)
    module:forward(input)
    local go = module.output:clone():copy(lab.rand(module.output:nElement()):mul(inrange):add(minval))
    module:backward(input,go)
+   module:accGradParameters(input,go)
 
    local fo = module.output:clone()
    local bo = module.gradInput:clone()
@@ -98,6 +100,7 @@ function nn.Jacobian.testIO(module,input, minval, maxval)
    local m = torch.DiskFile('tmp.bin'):binary():readObject()
    m:forward(input)
    m:backward(input,go)
+   m:accGradParameters(input,go)
    -- cleanup
    os.remove('tmp.bin')
 

@@ -23,19 +23,3 @@ function Reshape:backward(input, gradOutput)
    self.gradInput:resizeAs(input)
    return self.gradInput:copy(gradOutput)
 end
-
-function Reshape:write(file)
-   parent.write(self, file)
-   file:writeObject(self.size)
-end
-
-function Reshape:read(file, version)
-   parent.read(self, file)
-   if version > 0 then
-      self.size = file:readObject()
-   else
-      local size = file:readObject()
-      self.size = torch.LongStorage(size:size())
-      self.size:copy(size)
-   end
-end

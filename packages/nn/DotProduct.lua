@@ -27,11 +27,3 @@ function DotProduct:backward(input, gradOutput)
 
    return self.gradInput
 end
-
-function DotProduct:write(file)
-   parent.write(self, file)
-end
-
-function DotProduct:read(file)
-   parent.read(self, file)
-end
