@@ -15,7 +15,7 @@ TH_API void THLab_(validXCorr2Dptr)(real *r_,
 
   long xx, yy, kx, ky;
 
-  if (sc != 1)  {
+  if ((sc != 1) || (oc < 4))  {
     // regular convolution
     for(yy = 0; yy < or; yy++) {
       for(xx = 0; xx < oc; xx++) {
@@ -68,7 +68,7 @@ TH_API void THLab_(validConv2Dptr)(real *r_,
 
   long xx, yy, kx, ky;
 
-  if (sc != 1)  {
+  if ((sc != 1) || (oc < 4))  {
     // regular convolution
     for(yy = 0; yy < or; yy++) {
       for(xx = 0; xx < oc; xx++) {
