@@ -13,31 +13,48 @@ TH_API void THLab_(validXCorr2Dptr)(real *r_,
   long or = (ir - kr) / sr + 1;
   long oc = (ic - kc) / sc + 1;
 
-  long xx, yy;  
+  long xx, yy, kx, ky;
 
-  for(yy = 0; yy < or; yy++)
-  {
-    for(xx = 0; xx < oc; xx++)
-    {
-      /* Dot product in two dimensions... (between input image and the mask) */
-      real *pi_ = t_ + yy*sr*ic + xx*sc;
+  if (sc != 1)  {
+    // regular convolution
+    for(yy = 0; yy < or; yy++) {
+      for(xx = 0; xx < oc; xx++) {
+        /* Dot product in two dimensions... (between input image and the mask) */
+        real *pi_ = t_ + yy*sr*ic + xx*sc;
+        real *pw_ = k_;
+        accreal sum = 0;
+        for(ky = 0; ky < kr; ky++) {
+          for(kx = 0; kx < kc; kx++) {
+            sum += pi_[kx]*pw_[kx];
+          }
+          pi_ += ic; /* next input line */
+          pw_ += kc; /* next mask line */
+        }
+        /* Update output */
+        *r_ += sum;
+        *r_++;
+      }
+    }
+
+  } else {
+    // SSE-based convolution
+    for(yy = 0; yy < or; yy++) {
+      real *pi_ = t_ + yy*sr*ic;
       real *pw_ = k_;
-      accreal sum = 0;
-      long kx, ky;
-      for(ky = 0; ky < kr; ky++)
-      {
-        for(kx = 0; kx < kc; kx++) {
-          sum += pi_[kx]*pw_[kx];
+      for (ky = 0; ky < kr; ky++) {
+        real *pis_ = pi_;
+        for (kx = 0; kx < kc; kx++) {
+          THVector_(add)(r_, pis_, pw_[kx], oc);
+          pis_++;
         }
         pi_ += ic; /* next input line */
         pw_ += kc; /* next mask line */
       }
-      /* Update output */
-      *r_ += sum;
-      *r_++;
+      r_ += oc;
     }
   }
 }
+
 /*
   2D Input, 2D kernel  : convolve given image with the given kernel.
 */
@@ -49,28 +66,44 @@ TH_API void THLab_(validConv2Dptr)(real *r_,
   long or = (ir - kr) / sr + 1;
   long oc = (ic - kc) / sc + 1;
 
-  long xx, yy;  
+  long xx, yy, kx, ky;
 
-  for(yy = 0; yy < or; yy++)
-  {
-    for(xx = 0; xx < oc; xx++)
-    {
-      /* Dot product in two dimensions... (between input image and the mask) */
-      real *pi_ = t_ + yy*sr*ic + xx*sc;
+  if (sc != 1)  {
+    // regular convolution
+    for(yy = 0; yy < or; yy++) {
+      for(xx = 0; xx < oc; xx++) {
+        /* Dot product in two dimensions... (between input image and the mask) */
+        real *pi_ = t_ + yy*sr*ic + xx*sc;
+        real *pw_ = k_ + kr*kc - 1;
+        accreal sum = 0;
+        for(ky = 0; ky < kr; ky++) {
+          for(kx = 0; kx < kc; kx++) {
+            sum += pi_[kx]*pw_[-kx];
+          }
+          pi_ += ic; /* next input line */
+          pw_ -= kc; /* next mask line */
+        }
+        /* Update output */
+        *r_ += sum;
+        *r_++;
+      }
+    }
+
+  } else {
+    // SSE-based convolution
+    for(yy = 0; yy < or; yy++) {
       real *pw_ = k_ + kr*kc - 1;
-      accreal sum = 0;
-      long kx, ky;
-      for(ky = 0; ky < kr; ky++)
-      {
-        for(kx = 0; kx < kc; kx++) {
-          sum += pi_[kx]*pw_[-kx];
+      real *pi_ = t_ + yy*sr*ic;
+      for (ky = 0; ky < kr; ky++) {
+        real *pis_ = pi_;
+        for (kx = 0; kx < kc; kx++) {
+          THVector_(add)(r_, pis_, pw_[-kx], oc);
+          pis_++;
         }
         pi_ += ic; /* next input line */
         pw_ -= kc; /* next mask line */
       }
-      /* Update output */
-      *r_ += sum;
-      *r_++;
+      r_ += oc;
     }
   }
 }
