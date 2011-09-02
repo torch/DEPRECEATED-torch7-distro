@@ -8,6 +8,7 @@
 #define TH_REAL_IS_FLOAT
 #line 1 TH_GENERIC_FILE
 #include TH_GENERIC_FILE
+#undef accreal
 #undef real
 #undef Real
 #undef TH_REAL_IS_FLOAT
@@ -18,6 +19,7 @@
 #define TH_REAL_IS_DOUBLE
 #line 1 TH_GENERIC_FILE
 #include TH_GENERIC_FILE
+#undef accreal
 #undef real
 #undef Real
 #undef TH_REAL_IS_DOUBLE

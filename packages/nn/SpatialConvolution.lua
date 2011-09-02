@@ -46,5 +46,5 @@ function SpatialConvolution:backward(input, gradOutput)
 end
 
 function SpatialConvolution:accGradParameters(input, gradOutput, scale)
-   return input.nn.SpatialConvolution_backward(self, input, gradOutput, scale)
+   return input.nn.SpatialConvolution_accGradParameters(self, input, gradOutput, scale)
 end

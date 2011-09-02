@@ -4,10 +4,10 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 SET(hdr 
   THGeneral.h THStorage.h THTensor.h THTensorApply.h 
-  THBlas.h THTensorMath.h THLogAdd.h THRandom.h)
+  THBlas.h THTensorMath.h THLogAdd.h THRandom.h THVector.h)
 SET(src 
-  THGeneral.c THStorage.c THTensor.c THBlas.c 
-  THTensorMath.c THLogAdd.c THRandom.c
+  THGeneral.c THStorage.c THTensor.c THBlas.c
+  THTensorMath.c THLogAdd.c THRandom.c THVector.c
   THTensorRandom.c
   THLab.c
   THFile.c THDiskFile.c THMemoryFile.c)
@@ -46,16 +46,46 @@ INSTALL(TARGETS TH
 INSTALL(FILES
           TH.h
           THBlas.h
+          THVector.h
+          THLab.h
           THGeneral.h
           THLogAdd.h
           THRandom.h
           THStorage.h
-          generic/THStorage.h
+          THTensorMacros.h
           THTensor.h
-          generic/THTensor.h
           THTensorApply.h
           THTensorDimApply.h
+          THGenerateAllTypes.h
+          THGenerateFloatTypes.h
+          THGenerateIntTypes.h
+          THFile.h
+          THDiskFile.h
+          THFilePrivate.h
+          THMemoryFile.h
+          THTensorMath.h
+          THTensorRandom.h
         DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}/TH")
+
+INSTALL(FILES
+          generic/THBlas.h
+          generic/THVector.h
+          generic/THLab.h
+          generic/THLabConv.h
+          generic/THStorage.h
+          generic/THTensor.h
+          generic/THTensorMath.h
+          generic/THTensorRandom.h
+          generic/THBlas.c
+          generic/THStorageCopy.h
+          generic/THTensorCopy.h
+          generic/THLab.c
+          generic/THVector.c
+          generic/THStorage.c
+          generic/THTensor.c
+          generic/THTensorMath.c
+          generic/THTensorRandom.c
+        DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}/TH/generic")
 
 # Create THConfig.cmake
 GET_TARGET_PROPERTY(TH_OUTPUT_NAME TH LOCATION)

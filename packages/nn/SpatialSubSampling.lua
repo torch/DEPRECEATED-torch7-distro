@@ -45,5 +45,5 @@ function SpatialSubSampling:backward(input, gradOutput)
 end
 
 function SpatialSubSampling:accGradParameters(input, gradOutput, scale)
-   return input.nn.SpatialSubSampling_backward(self, input, gradOutput, scale)
+   return input.nn.SpatialSubSampling_accGradParameters(self, input, gradOutput, scale)
 end
