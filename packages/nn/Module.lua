@@ -31,8 +31,8 @@ end
 function Module:accUpdateGradParameters(input, gradOutput, lr)
    local gradWeight = self.gradWeight
    local gradBias = self.gradBias
-   self.gradWeight = weight
-   self.gradBias = bias
+   self.gradWeight = self.weight
+   self.gradBias = self.bias
    self:accGradParameters(input, gradOutput, -lr)
    self.gradWeight = gradWeight
    self.gradBias = gradBias
