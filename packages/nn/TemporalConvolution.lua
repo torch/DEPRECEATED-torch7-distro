@@ -43,5 +43,13 @@ function TemporalConvolution:backward(input, gradOutput)
 end
 
 function TemporalConvolution:accGradParameters(input, gradOutput, scale)
-   return input.nn.TemporalConvolution_backward(self, input, gradOutput, scale)
+   scale = scale or 1
+   input.nn.TemporalConvolution_accGradParameters(self, input, gradOutput, scale)
 end
+
+-- function TemporalConvolution:accUpdateGradParameters(input, gradOutput, lr)
+--    print('using slow version')
+--    self:zeroGradParameters()
+--    self:accGradParameters(input, gradOutput)
+--    self:updateParameters(lr)
+-- end

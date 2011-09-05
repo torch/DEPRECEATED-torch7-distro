@@ -31,6 +31,6 @@ function CMul:backward(input, gradOutput)
    end
 end
 
-function CMul:accGradParameters(input, gradOuput, scale)
+function CMul:accGradParameters(input, gradOutput, scale)
    self.gradWeight:addcmul(scale or 1, input, gradOutput)
 end

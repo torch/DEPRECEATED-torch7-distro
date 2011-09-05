@@ -44,5 +44,5 @@ function TemporalSubSampling:backward(input, gradOutput)
 end
 
 function TemporalSubSampling:accGradParameters(input, gradOutput, scale)
-   return input.nn.TemporalSubSampling_backward(self, input, gradOutput, scale)
+   return input.nn.TemporalSubSampling_accGradParameters(self, input, gradOutput, scale)
 end

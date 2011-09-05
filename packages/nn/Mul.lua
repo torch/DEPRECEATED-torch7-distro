@@ -37,5 +37,6 @@ function Mul:backward(input, gradOutput)
 end
 
 function Mul:accGradParameters(input, gradOutput, scale) 
+   scale = scale or 1
    self.gradWeight[1] = self.gradWeight[1] + scale*input:dot(gradOutput);
 end

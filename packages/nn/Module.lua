@@ -11,7 +11,7 @@ function Module:parameters()
    elseif self.weight then
       return {self.weight}, {self.gradWeight}
    elseif self.bias then
-      return {self.bias}, {self.bias}
+      return {self.bias}, {self.gradBias}
    else
       return
    end
@@ -47,16 +47,20 @@ function Module:accUpdateGradParameters(input, gradOutput, lr)
 end
 
 function Module:zeroGradParameters()
-   local params = self:parameters()
-   for i=1,#params do
-      params[i]:zero()
+   local _,gradParams = self:parameters()
+   if gradParams then
+      for i=1,#gradParams do
+         gradParams[i]:zero()
+      end
    end
 end
 
 function Module:updateParameters(learningRate)
    local params, gradParams = self:parameters()
-   for i=1,#params do
-      params[i]:add(-lr, gradParams)
+   if params then
+      for i=1,#params do
+         params[i]:add(-learningRate, gradParams[i])
+      end
    end
 end
 

@@ -72,6 +72,7 @@ static int nn_(TemporalSubSampling_backward)(lua_State *L)
   for(k = 0; k < gradOutput->size[0]; k++)
   {
     THTensor_(narrow)(gradInputWindow, gradInput, 0, k*dW, kW);
+    THTensor_(select)(gradOutputFrame, gradOutput, 0, k);
     THLab_(cmul)(buffer, weight, gradOutputFrame);
     THTensor_(addr)(gradInputWindow, 1, kwunit, buffer);
   }

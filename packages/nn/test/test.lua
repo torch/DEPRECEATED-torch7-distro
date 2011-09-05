@@ -6,6 +6,7 @@ local jac
 local precision = 1e-5
 
 local nntest = {}
+local nntestx = {}
 
 function nntest.Add()
    local ini = math.random(10,20)
@@ -18,6 +19,9 @@ function nntest.Add()
    mytester:assertlt(err,precision, 'error on state ')
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err,precision, 'error on bias ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err,precision, 'error on bias [direct update]')
 
    local ferr,berr = jac.testIO(module,input)
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
@@ -36,6 +40,9 @@ function nntest.CMul()
 
    local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
    mytester:assertlt(err,precision, 'error on weight ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err,precision, 'error on weight [direct update] ')
 
    local ferr,berr = jac.testIO(module,input)
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
@@ -87,7 +94,13 @@ function nntest.Linear()
    mytester:assertlt(err,precision, 'error on weight ')
 
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
-   mytester:assertlt(err,precision, 'error on weight ')
+   mytester:assertlt(err,precision, 'error on bias ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err,precision, 'error on weight [direct update] ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err,precision, 'error on bias [direct update] ')
 
    -- 2D
    local nframe = math.random(50,70)
@@ -101,6 +114,12 @@ function nntest.Linear()
 
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err,precision, 'error on weight ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err,precision, 'error on weight [direct update] ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err,precision, 'error on bias [direct update] ')
 
    -- IO
    local ferr,berr = jac.testIO(module,input)
@@ -207,13 +226,14 @@ function nntest.Mul()
    local err = jac.testJacobian(module,input)
    mytester:assertlt(err,precision, 'error on state ')
    local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
-   mytester:assertlt(err,precision, 'error on bias ')
+   mytester:assertlt(err,precision, 'error on weight ')
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err,precision, 'error on weight [direct update] ')
 
    local ferr,berr = jac.testIO(module,input)
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
-
 
 function nntest.Sigmoid()
    local ini = math.random(10,20)
@@ -282,6 +302,12 @@ function nntest.SpatialConvolution()
    
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err , precision, 'error on weight [direct update] ')
+   
+   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err , precision, 'error on bias [direct update] ')
    
    local ferr, berr = jac.testIO(module, input)
    mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
@@ -309,6 +335,12 @@ function nntest.SpatialSubSampling()
    
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err , precision, 'error on weight [direct update] ')
+   
+   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err , precision, 'error on bias [direct update] ')
    
    local ferr, berr = jac.testIO(module, input)
    mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
@@ -364,6 +396,12 @@ function nntest.TemporalConvolution()
    
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err , precision, 'error on weight [direct update]')
+
+--   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+--   mytester:assertlt(err , precision, 'error on bias [direct update]')
    
    local ferr, berr = jac.testIO(module, input)
    mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
@@ -388,6 +426,12 @@ function nntest.TemporalSubSampling()
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
    
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err , precision, 'error on weight [direct update] ')
+   
+   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err , precision, 'error on bias [direct update] ')
+
    local ferr, berr = jac.testIO(module, input)
    mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
    mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
@@ -419,6 +463,12 @@ function nntest.VolumetricConvolution()
    
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err , precision, 'error on weight [direct update] ')
+   
+   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err , precision, 'error on bias [direct update] ')
    
    local ferr, berr = jac.testIO(module, input)
    mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')

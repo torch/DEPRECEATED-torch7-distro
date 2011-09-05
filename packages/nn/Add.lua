@@ -38,17 +38,17 @@ function Add:forward(input)
 end 
 
 function Add:backward(input, gradOutput)
-   if gradInput then
-      gradInput:copy(gradOutput) 
-      return gradInput
+   if self.gradInput then
+      self.gradInput:copy(gradOutput) 
+      return self.gradInput
    end
 end
 
 function Add:accGradParameters(input, gradOutput, scale)
    scale = scale or 1
-   if gradBias:size(1) == 1 then
-      gradBias[1] = gradBias[1] + scale*gradOutput:sum();
+   if self.gradBias:size(1) == 1 then
+      self.gradBias[1] = self.gradBias[1] + scale*gradOutput:sum();
    else
-      gradBias:add(scale, gradOutput)
+      self.gradBias:add(scale, gradOutput)
    end
 end
