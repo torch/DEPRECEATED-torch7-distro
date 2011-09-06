@@ -35,6 +35,7 @@ function Reshape:forward(input)
 end
 
 function Reshape:backward(input, gradOutput)
-   self.gradInput:resizeAs(input)
-   return self.gradInput:copy(gradOutput)
+   -- gradOutput should be contiguous
+   self.gradInput:set(gradOutput):resizeAs(input)
+   return self.gradInput
 end
