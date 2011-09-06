@@ -67,7 +67,7 @@
     }                                           \
     long off = (n) - ((n)%8);                   \
     for (i=0; i<((n)%8); i++) {                 \
-      z[off+i] = x[i] - y[i];                   \
+      z[off+i] = x[off+i] - y[off+i];           \
     }                                           \
   }
 
@@ -110,7 +110,7 @@
     }                                           \
     long off = (n) - ((n)%8);                   \
     for (i=0; i<((n)%8); i++) {                 \
-      y[off+i] *= x[i];                         \
+      y[off+i] *= x[off+i];                     \
     }                                           \
   }
 
@@ -146,7 +146,7 @@
     }                                           \
     long off = (n) - ((n)%8);                   \
     for (i=0; i<((n)%8); i++) {                 \
-      y[off+i] += c * x[i];                     \
+      y[off+i] += c * x[off+i];                 \
     }                                           \
   }
 
@@ -172,7 +172,7 @@
     }                                           \
     long off = (n) - ((n)%16);                  \
     for (i=0; i<((n)%16); i++) {                \
-      z[off+i] = x[i] - y[i];                   \
+      z[off+i] = x[off+i] - y[off+i];           \
     }                                           \
   }
 
@@ -215,7 +215,7 @@
     }                                           \
     long off = (n) - ((n)%16);                  \
     for (i=0; i<((n)%16); i++) {                \
-      y[off+i] *= x[i];                         \
+      y[off+i] *= x[off+i];                     \
     }                                           \
   }
 
