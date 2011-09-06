@@ -22,7 +22,7 @@ TH_API void THLab_(validXCorr2Dptr)(real *r_,
         /* Dot product in two dimensions... (between input image and the mask) */
         real *pi_ = t_ + yy*sr*ic + xx*sc;
         real *pw_ = k_;
-        accreal sum = 0;
+        real sum = 0;
         for(ky = 0; ky < kr; ky++) {
           for(kx = 0; kx < kc; kx++) {
             sum += pi_[kx]*pw_[kx];
@@ -75,7 +75,7 @@ TH_API void THLab_(validConv2Dptr)(real *r_,
         /* Dot product in two dimensions... (between input image and the mask) */
         real *pi_ = t_ + yy*sr*ic + xx*sc;
         real *pw_ = k_ + kr*kc - 1;
-        accreal sum = 0;
+        real sum = 0;
         for(ky = 0; ky < kr; ky++) {
           for(kx = 0; kx < kc; kx++) {
             sum += pi_[kx]*pw_[-kx];
@@ -128,7 +128,6 @@ TH_API void THLab_(fullConv2Dptr)(real *r_,
         /* Outer product in two dimensions... (between input image and the mask) */
         real *po_ = r_ + yy*sr*oc + xx*sc;
         real *pw_ = k_;
-        accreal sum = 0;
         for(ky = 0; ky < kr; ky++)
           {
             for(kx = 0; kx < kc; kx++) {
@@ -180,7 +179,6 @@ TH_API void THLab_(fullXCorr2Dptr)(real *r_,
         /* Outer product in two dimensions... (between input image and the mask) */
         real *po_ = r_ + yy*sr*oc + xx*sc;
         real *pw_ = k_ + kr*kc -1;
-        accreal sum = 0;
         long kx, ky;
         for(ky = 0; ky < kr; ky++)
           {
@@ -285,7 +283,7 @@ TH_API void THLab_(validXCorr3Dptr)(real *r_,
 	/* Dot product in two dimensions... (between input image and the mask) */
 	real *pi_ = t_ + zz*st*ir*ic + yy*sr*ic + xx*sc;
 	real *pw_ = k_;
-	accreal sum = 0;
+	real sum = 0;
 	long kz, kx, ky;
 	for(kz = 0; kz < kt; kz++)
 	{
@@ -329,7 +327,7 @@ TH_API void THLab_(validConv3Dptr)(real *r_,
 	/* Dot product in two dimensions... (between input image and the mask) */
 	real *pi_ = t_ + zz*st*ir*ic + yy*sr*ic + xx*sc;
 	real *pw_ = k_ + kt*kr*kc - 1;
-	accreal sum = 0;
+  real sum = 0;
 	long kz, kx, ky;
 	for(kz = 0; kz < kt; kz++)
 	{
@@ -374,7 +372,6 @@ TH_API void THLab_(fullConv3Dptr)(real *r_,
 	/* Outer product in two dimensions... (between input image and the mask) */
 	real *po_ = r_ + zz*st*or*oc + yy*sr*oc + xx*sc;
 	real *pw_ = k_;
-	accreal sum = 0;
 	long kz, kx, ky;
 	//printf("Output Plane : %ld,%ld,%ld, input val=%g\n",zz,yy,xx,*t_);
 	for(kz = 0; kz < kt; kz++)
@@ -421,7 +418,6 @@ TH_API void THLab_(fullXCorr3Dptr)(real *r_,
 	/* Outer product in two dimensions... (between input image and the mask) */
 	real *po_ = r_ + zz*st*or*oc + yy*sr*oc + xx*sc;
 	real *pw_ = k_ + kt*kr*kc -1;
-	accreal sum = 0;
 	long kz, kx, ky;
 	for(kz = 0; kz < kt; kz++)
 	{

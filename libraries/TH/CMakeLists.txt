@@ -7,7 +7,7 @@ SET(hdr
   THBlas.h THTensorMath.h THLogAdd.h THRandom.h THVector.h)
 SET(src 
   THGeneral.c THStorage.c THTensor.c THBlas.c
-  THTensorMath.c THLogAdd.c THRandom.c THVector.c
+  THTensorMath.c THLogAdd.c THRandom.c
   THTensorRandom.c
   THLab.c
   THFile.c THDiskFile.c THMemoryFile.c)
@@ -69,7 +69,6 @@ INSTALL(FILES
 
 INSTALL(FILES
           generic/THBlas.h
-          generic/THVector.h
           generic/THLab.h
           generic/THLabConv.h
           generic/THStorage.h
