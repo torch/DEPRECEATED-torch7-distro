@@ -39,7 +39,7 @@ static int nn_(VolumetricConvolution_forward)(lua_State *L)
   THTensor_(free)(outn);
 
   /* do convolutions */
-  THLab_(conv3Dmv)(output, 1.0, input, weight, dT, dH, dW, "vx");
+  THLab_(conv3Dmv)(output, 1.0, 1.0, input, weight, dT, dH, dW, "vx");
 
   return 1;
 }
@@ -74,11 +74,11 @@ static int nn_(VolumetricConvolution_backward)(lua_State *L)
   THTensor_(free)(gradOutSlice);
 
   /* gradient to kernels */
-  THLab_(conv3DRevger)(gradWeight, 1.0, input, gradOutput, dT, dH, dW);
+  THLab_(conv3DRevger)(gradWeight, 1.0, 1.0, input, gradOutput, dT, dH, dW);
 
   /* gradient to input */
   THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
-  THLab_(conv3Dmv)(gradInput, 0.0, gradOutput, tweight, dT, dH, dW, "fc");
+  THLab_(conv3Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dT, dH, dW, "fc");
   THTensor_(free)(tweight);
 
   return 1;

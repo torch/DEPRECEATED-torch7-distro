@@ -45,7 +45,7 @@ static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
   /*THTensor_(free)(outn);*/
 
   /* do convolutions */
-  THOmpLab_(conv2Dmv)(output, 1.0, input, weight, dH, dW, "vx");
+  THOmpLab_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
 
   return 1;
 }
@@ -88,11 +88,11 @@ static int nnOmp_(SpatialConvolution_backwardOmp)(lua_State *L)
   /*THTensor_(free)(gradOutSlice);*/
 
   /* gradient to kernels */
-  THOmpLab_(conv2DRevger)(gradWeight, 1.0, input, gradOutput, dH, dW);
+  THOmpLab_(conv2DRevger)(gradWeight, 1.0, 1.0, input, gradOutput, dH, dW);
 
   /* gradient to input */
   THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
-  THOmpLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "fc");
+  THOmpLab_(conv2Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
   THTensor_(free)(tweight);
 
   return 1;
