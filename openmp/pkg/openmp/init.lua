@@ -9,24 +9,32 @@ local function spatialConvolution_enable(tensorType)
    tensorType.nn.SpatialConvolution_forward  = tensorType.nn.SpatialConvolution_forwardOmp
    tensorType.nn.SpatialConvolution_backward_ = tensorType.nn.SpatialConvolution_backward
    tensorType.nn.SpatialConvolution_backward  = tensorType.nn.SpatialConvolution_backwardOmp
+   tensorType.nn.SpatialConvolution_accGradParameters_ = tensorType.nn.SpatialConvolution_accGradParameters
+   tensorType.nn.SpatialConvolution_accGradParameters  = tensorType.nn.SpatialConvolution_accGradParametersOmp
 end
 local function spatialConvolution_disable(tensorType)
    tensorType.nn.SpatialConvolution_forward  = tensorType.nn.SpatialConvolution_forward_
    tensorType.nn.SpatialConvolution_forward_ = tensorType.nn.SpatialConvolution_forwardOmp
    tensorType.nn.SpatialConvolution_backward = tensorType.nn.SpatialConvolution_backward_
    tensorType.nn.SpatialConvolution_backward_  = tensorType.nn.SpatialConvolution_backwardOmp
+   tensorType.nn.SpatialConvolution_accGradParameters = tensorType.nn.SpatialConvolution_accGradParameters_
+   tensorType.nn.SpatialConvolution_accGradParameters_  = tensorType.nn.SpatialConvolution_accGradParametersOmp
 end
 local function spatialSubSampling_enable(tensorType)
    tensorType.nn.SpatialSubSampling_forward_ = tensorType.nn.SpatialSubSampling_forward
    tensorType.nn.SpatialSubSampling_forward  = tensorType.nn.SpatialSubSampling_forwardOmp
    tensorType.nn.SpatialSubSampling_backward_ = tensorType.nn.SpatialSubSampling_backward
    tensorType.nn.SpatialSubSampling_backward  = tensorType.nn.SpatialSubSampling_backwardOmp
+   tensorType.nn.SpatialSubSampling_accGradParameters_ = tensorType.nn.SpatialSubSampling_accGradParameters
+   tensorType.nn.SpatialSubSampling_accGradParameters  = tensorType.nn.SpatialSubSampling_accGradParametersOmp
 end
 local function spatialSubSampling_disable(tensorType)
    tensorType.nn.SpatialSubSampling_forward  = tensorType.nn.SpatialSubSampling_forward_
    tensorType.nn.SpatialSubSampling_forward_ = tensorType.nn.SpatialSubSampling_forwardOmp
    tensorType.nn.SpatialSubSampling_backward = tensorType.nn.SpatialSubSampling_backward_
    tensorType.nn.SpatialSubSampling_backward_  = tensorType.nn.SpatialSubSampling_backwardOmp
+   tensorType.nn.SpatialSubSampling_accGradParameters = tensorType.nn.SpatialSubSampling_accGradParameters_
+   tensorType.nn.SpatialSubSampling_accGradParameters_  = tensorType.nn.SpatialSubSampling_accGradParametersOmp
 end
 local function hardTanh_enable(tensorType)
    tensorType.nn.HardTanh_forward_ = tensorType.nn.HardTanh_forward
