@@ -64,6 +64,7 @@ static int nn_(SpatialConvolutionMap_forward)(lua_State *L)
 
     // convolve each map
     THLab_(validXCorr2Dptr)(output_data + o*output_w*output_h,
+                            1.0,
                             input_data + i*input_w*input_h, input_h, input_w,
                             weight_data + k*weight_w*weight_h, weight_h, weight_w,
                             dH, dW);
@@ -139,12 +140,14 @@ static int nn_(SpatialConvolutionMap_backward)(lua_State *L)
 
     // gradient to kernel
     THLab_(validXCorr2DRevptr)(gradWeight_data + k*weight_w*weight_h,
+                               1.0,
                                input_data + i*input_w*input_h, input_h, input_w,
                                gradOutput_data + o*output_w*output_h, output_h, output_w,
                                dH, dW);
     
     // gradient to input
     THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
+                          1.0,
                           gradOutput_data + o*output_w*output_h,  output_h,  output_w,
                           weight_data + k*weight_w*weight_h, weight_h, weight_w,
                           dH, dW);
