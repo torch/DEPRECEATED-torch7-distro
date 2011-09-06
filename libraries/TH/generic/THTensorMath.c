@@ -4,12 +4,14 @@
 
 void THTensor_(fill)(THTensor *tensor, real value)
 {
-  TH_TENSOR_APPLY(real, tensor, *tensor_data = value;);
+  TH_TENSOR_APPLY(real, tensor, 
+                  THVector_(fill)(tensor_data, value, tensor_size); break;);
 }
 
 void THTensor_(zero)(THTensor *tensor)
 {
-  TH_TENSOR_APPLY(real, tensor, *tensor_data = 0;);
+  TH_TENSOR_APPLY(real, tensor, 
+                  THVector_(fill)(tensor_data, 0, tensor_size); break;);
 }
 
 void THTensor_(add)(THTensor *tensor, real value)
@@ -41,13 +43,20 @@ void THTensor_(cadd)(THTensor *tensor, real value, THTensor *src)
                    tensor_i += sz;
                    src_i += sz;
                    tensor_data += sz*tensor_stride;
-                   src_data += sz*src_stride; 
+                   src_data += sz*src_stride;
                    break;);
 }
 
 void THTensor_(cmul)(THTensor *tensor, THTensor *src)
 {
-  TH_TENSOR_APPLY2(real, tensor, real, src, *tensor_data *= *src_data;);
+  TH_TENSOR_APPLY2(real, tensor, real, src,
+                   long sz = (tensor_size-tensor_i < src_size-src_i ? tensor_size-tensor_i : src_size-src_i);
+                   THVector_(mul)(tensor_data, src_data, sz);
+                   tensor_i += sz;
+                   src_i += sz;
+                   tensor_data += sz*tensor_stride;
+                   src_data += sz*src_stride;
+                   break;);
 }
 
 void THTensor_(cdiv)(THTensor *tensor, THTensor *src)

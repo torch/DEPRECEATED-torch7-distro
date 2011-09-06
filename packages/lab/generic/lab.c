@@ -438,15 +438,15 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
 
   if (image->nDimension == 2 && kernel->nDimension == 2)
   {
-    THLab_(conv2Dmul)(r_,0.0,image,kernel,1,1,type);
+    THLab_(conv2Dmul)(r_,0.0,1.0,image,kernel,1,1,type);
   }
   else if (image->nDimension == 3 && kernel->nDimension == 3)
   {
-    THLab_(conv2Dger)(r_,0.0,image,kernel,1,1,type);
+    THLab_(conv2Dger)(r_,0.0,1.0,image,kernel,1,1,type);
   }
   else if (image->nDimension == 3 && kernel->nDimension == 4)
   {
-    THLab_(conv2Dmv)(r_,0.0,image,kernel,1,1,type);
+    THLab_(conv2Dmv)(r_,0.0,1.0,image,kernel,1,1,type);
   }
   else if (image->nDimension == 2 && kernel->nDimension == 3)
   {
@@ -477,14 +477,14 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
       {
         THTensor_(select)(ker,kernel,0,k);
         THTensor_(select)(ri,r_,0,k);
-        THLab_(conv2Dmul)(ri,0.0,image,ker,1,1,type);
+        THLab_(conv2Dmul)(ri,0.0,1.0,image,ker,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(ker);
     } else {
       THTensor *ker = THTensor_(new)();
       THTensor_(select)(ker,kernel,0,0);
-      THLab_(conv2Dmul)(r_,0.0,image,ker,1,1,type);
+      THLab_(conv2Dmul)(r_,0.0,1.0,image,ker,1,1,type);
       THTensor_(free)(ker);
     }
   }
@@ -516,14 +516,14 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
       {
         THTensor_(select)(im, image, 0, k);
         THTensor_(select)(ri,r_,0,k);
-        THLab_(conv2Dmul)(ri,0.0,im,kernel,1,1,type);
+        THLab_(conv2Dmul)(ri,0.0,1.0,im,kernel,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(im);
     } else {
       THTensor *im = THTensor_(new)();
       THTensor_(select)(im,image,0,0);
-      THLab_(conv2Dmul)(r_,0.0,im,kernel,1,1,type);
+      THLab_(conv2Dmul)(r_,0.0,1.0,im,kernel,1,1,type);
       THTensor_(free)(im);
     }
   }
@@ -594,15 +594,15 @@ static int lab_(convxcorr3)(lua_State *L,char* ktype)
 
   if (image->nDimension == 3 && kernel->nDimension == 3)
   {
-    THLab_(conv3Dmul)(r_,0.0,image,kernel,1,1,1,type);
+    THLab_(conv3Dmul)(r_,0.0,1.0,image,kernel,1,1,1,type);
   }
   else if (image->nDimension == 4 && kernel->nDimension == 4)
   {
-    THLab_(conv3Dger)(r_,0.0,image,kernel,1,1,1,type);
+    THLab_(conv3Dger)(r_,0.0,1.0,image,kernel,1,1,1,type);
   }
   else if (image->nDimension == 4 && kernel->nDimension == 5)
   {
-    THLab_(conv3Dmv)(r_,0.0,image,kernel,1,1,1,type);
+    THLab_(conv3Dmv)(r_,0.0,1.0,image,kernel,1,1,1,type);
   }
   else if (image->nDimension == 3 && kernel->nDimension == 4)
   {
@@ -637,14 +637,14 @@ static int lab_(convxcorr3)(lua_State *L,char* ktype)
       {
         THTensor_(select)(ker,kernel,0,k);
         THTensor_(select)(ri,r_,0,k);
-        THLab_(conv3Dmul)(ri,0.0,image,ker,1,1,1,type);
+        THLab_(conv3Dmul)(ri,0.0,1.0,image,ker,1,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(ker);
     } else {
       THTensor *ker = THTensor_(new)();
       THTensor_(select)(ker,kernel,0,0);
-      THLab_(conv3Dmul)(r_,0.0,image,ker,1,1,1,type);
+      THLab_(conv3Dmul)(r_,0.0,1.0,image,ker,1,1,1,type);
       THTensor_(free)(ker);
     }
   }
@@ -680,14 +680,14 @@ static int lab_(convxcorr3)(lua_State *L,char* ktype)
       {
         THTensor_(select)(im, image, 0, k);
         THTensor_(select)(ri,r_,0,k);
-        THLab_(conv3Dmul)(ri,0.0,im,kernel,1,1,1,type);
+        THLab_(conv3Dmul)(ri,0.0,1.0,im,kernel,1,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(im);
     } else {
       THTensor *im = THTensor_(new)();
       THTensor_(select)(im,image,0,0);
-      THLab_(conv3Dmul)(r_,0.0,im,kernel,1,1,1,type);
+      THLab_(conv3Dmul)(r_,0.0,1.0,im,kernel,1,1,1,type);
       THTensor_(free)(im);
     }
   }
