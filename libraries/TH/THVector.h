@@ -43,9 +43,10 @@
 #define THDoubleVector_add(y, x, c, n) {        \
     long i = 0;                                 \
     __m128d XMM7 = _mm_set1_pd(c);              \
+    __m128s XMM0,XMM2;                          \
     for (; i<=((n)-2); i+=2) {                  \
-      __m128d XMM0 = _mm_loadu_pd((x)+i);       \
-      __m128d XMM2 = _mm_loadu_pd((y)+i);       \
+      XMM0 = _mm_loadu_pd((x)+i);               \
+      XMM2 = _mm_loadu_pd((y)+i);               \
       XMM0 = _mm_mul_pd(XMM0, XMM7);            \
       XMM2 = _mm_add_pd(XMM2, XMM0);            \
       _mm_storeu_pd((y)+i  , XMM2);             \
