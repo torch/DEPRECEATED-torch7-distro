@@ -43,7 +43,7 @@
     long i = 0;                                 \
     __m128d XMM7 = _mm_set1_pd(c);              \
     __m128d XMM0,XMM2;                          \
-    for (; i<=((n)-4); i+=2) {                  \
+    for (; i<=((n)-8); i+=2) {                  \
       XMM0 = _mm_loadu_pd((x)+i);               \
       XMM2 = _mm_loadu_pd((y)+i);               \
       XMM0 = _mm_mul_pd(XMM0, XMM7);            \
