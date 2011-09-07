@@ -5,9 +5,24 @@
 
 #define THVector_(NAME) TH_CONCAT_4(TH,Real,Vector_,NAME)
 
-#if defined(__SSE2__)
+#if defined __SSE2__ || defined __SSE3__ || defined __SSSE3__   \
+  || defined __SSE4_1__ || defined __SSE4_2__
 
+#ifdef __SSE2__
 #include <emmintrin.h>
+#endif
+ 
+#ifdef __SSE3__
+#include <pmmintrin.h>
+#endif
+ 
+#ifdef __SSSE3__
+#include <tmmintrin.h>
+#endif
+ 
+#if defined (__SSE4_2__) || defined (__SSE4_1__)
+#include <smmintrin.h>
+#endif
 
 #define THDoubleVector_fill(x, c, n) {          \
     long i;                                     \
@@ -25,23 +40,36 @@
   }
 
 #define THDoubleVector_add(y, x, c, n) {        \
-    long i;                                     \
+    long i = 0;                                 \
     __m128d XMM7 = _mm_set1_pd(c);              \
-    for (i=0; i<=((n)-4); i+=4) {               \
-      __m128d XMM0 = _mm_loadu_pd((x)+i  );     \
-      __m128d XMM1 = _mm_loadu_pd((x)+i+2);     \
-      __m128d XMM2 = _mm_loadu_pd((y)+i  );     \
-      __m128d XMM3 = _mm_loadu_pd((y)+i+2);     \
+    __m128d XMM0,XMM2;                          \
+    for (; i<=((n)-4); i+=2) {                  \
+      XMM0 = _mm_loadu_pd((x)+i);               \
+      XMM2 = _mm_loadu_pd((y)+i);               \
       XMM0 = _mm_mul_pd(XMM0, XMM7);            \
-      XMM1 = _mm_mul_pd(XMM1, XMM7);            \
       XMM2 = _mm_add_pd(XMM2, XMM0);            \
-      XMM3 = _mm_add_pd(XMM3, XMM1);            \
       _mm_storeu_pd((y)+i  , XMM2);             \
-      _mm_storeu_pd((y)+i+2, XMM3);             \
+      i += 2;                                   \
+      XMM0 = _mm_loadu_pd((x)+i);               \
+      XMM2 = _mm_loadu_pd((y)+i);               \
+      XMM0 = _mm_mul_pd(XMM0, XMM7);            \
+      XMM2 = _mm_add_pd(XMM2, XMM0);            \
+      _mm_storeu_pd((y)+i  , XMM2);             \
+      i += 2;                                   \
+      XMM0 = _mm_loadu_pd((x)+i);               \
+      XMM2 = _mm_loadu_pd((y)+i);               \
+      XMM0 = _mm_mul_pd(XMM0, XMM7);            \
+      XMM2 = _mm_add_pd(XMM2, XMM0);            \
+      _mm_storeu_pd((y)+i  , XMM2);             \
+      i += 2;                                   \
+      XMM0 = _mm_loadu_pd((x)+i);               \
+      XMM2 = _mm_loadu_pd((y)+i);               \
+      XMM0 = _mm_mul_pd(XMM0, XMM7);            \
+      XMM2 = _mm_add_pd(XMM2, XMM0);            \
+      _mm_storeu_pd((y)+i  , XMM2);             \
     }                                           \
-    long off = (n) - ((n)%4);                   \
-    for (i=0; i<((n)%4); i++) {                 \
-      y[off+i] += c * x[off+i];                 \
+    for (; i<(n); i++) {                        \
+      y[i] += c * x[i];                         \
     }                                           \
   }
 
@@ -130,23 +158,24 @@
   }
 
 #define THFloatVector_add(y, x, c, n) {         \
-    long i;                                     \
+    long i = 0;                                 \
     __m128 XMM7 = _mm_set_ps1(c);               \
-    for (i=0; i<=((n)-8); i+=8) {               \
-      __m128 XMM0 = _mm_loadu_ps((x)+i  );      \
-      __m128 XMM1 = _mm_loadu_ps((x)+i+4);      \
-      __m128 XMM2 = _mm_loadu_ps((y)+i  );      \
-      __m128 XMM3 = _mm_loadu_ps((y)+i+4);      \
+    __m128 XMM0,XMM2;                           \
+    for (; i<=((n)-4); i+=4) {                  \
+      XMM0 = _mm_loadu_ps((x)+i);               \
+      XMM2 = _mm_loadu_ps((y)+i);               \
       XMM0 = _mm_mul_ps(XMM0, XMM7);            \
-      XMM1 = _mm_mul_ps(XMM1, XMM7);            \
       XMM2 = _mm_add_ps(XMM2, XMM0);            \
-      XMM3 = _mm_add_ps(XMM3, XMM1);            \
       _mm_storeu_ps((y)+i  , XMM2);             \
-      _mm_storeu_ps((y)+i+4, XMM3);             \
+      i += 4;                                   \
+      XMM0 = _mm_loadu_ps((x)+i);               \
+      XMM2 = _mm_loadu_ps((y)+i);               \
+      XMM0 = _mm_mul_ps(XMM0, XMM7);            \
+      XMM2 = _mm_add_ps(XMM2, XMM0);            \
+      _mm_storeu_ps((y)+i  , XMM2);             \
     }                                           \
-    long off = (n) - ((n)%8);                   \
-    for (i=0; i<((n)%8); i++) {                 \
-      y[off+i] += c * x[off+i];                 \
+    for (; i<(n); i++) {                        \
+      y[i] += c * x[i];                         \
     }                                           \
   }
 
