@@ -657,14 +657,14 @@ static void torch_Tensor_(c_readSizeStride)(lua_State *L, int index, int allowSt
   {
     int i;
 
-    size = THLongStorage_newWithSize(4);
-    stride = THLongStorage_newWithSize(4);
+    size = THLongStorage_newWithSize(8);
+    stride = THLongStorage_newWithSize(8);
     THLongStorage_fill(size, -1);
     THLongStorage_fill(stride, -1);
 
     if(allowStride)
     {
-      for(i = 0; i < 4; i++)
+      for(i = 0; i < 8; i++)
       {
         if(lua_isnone(L, index+2*i))
           break;
@@ -677,7 +677,7 @@ static void torch_Tensor_(c_readSizeStride)(lua_State *L, int index, int allowSt
     }
     else
     {
-      for(i = 0; i < 4; i++)
+      for(i = 0; i < 8; i++)
       {
         if(lua_isnone(L, index+i))
           break;

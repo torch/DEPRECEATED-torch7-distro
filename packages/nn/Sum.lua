@@ -22,13 +22,3 @@ function Sum:backward(input, gradOutput)
 
    return self.gradInput
 end
-
-function Sum:write(file)
-   parent.write(self, file)
-   file:writeInt(self.dimension)
-end
-
-function Sum:read(file)
-   parent.read(self, file)
-   self.dimension = file:readInt()
-end

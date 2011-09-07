@@ -438,15 +438,15 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
 
   if (image->nDimension == 2 && kernel->nDimension == 2)
   {
-    THLab_(conv2Dmul)(r_,0.0,image,kernel,1,1,type);
+    THLab_(conv2Dmul)(r_,0.0,1.0,image,kernel,1,1,type);
   }
   else if (image->nDimension == 3 && kernel->nDimension == 3)
   {
-    THLab_(conv2Dger)(r_,0.0,image,kernel,1,1,type);
+    THLab_(conv2Dger)(r_,0.0,1.0,image,kernel,1,1,type);
   }
   else if (image->nDimension == 3 && kernel->nDimension == 4)
   {
-    THLab_(conv2Dmv)(r_,0.0,image,kernel,1,1,type);
+    THLab_(conv2Dmv)(r_,0.0,1.0,image,kernel,1,1,type);
   }
   else if (image->nDimension == 2 && kernel->nDimension == 3)
   {
@@ -477,14 +477,14 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
       {
         THTensor_(select)(ker,kernel,0,k);
         THTensor_(select)(ri,r_,0,k);
-        THLab_(conv2Dmul)(ri,0.0,image,ker,1,1,type);
+        THLab_(conv2Dmul)(ri,0.0,1.0,image,ker,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(ker);
     } else {
       THTensor *ker = THTensor_(new)();
       THTensor_(select)(ker,kernel,0,0);
-      THLab_(conv2Dmul)(r_,0.0,image,ker,1,1,type);
+      THLab_(conv2Dmul)(r_,0.0,1.0,image,ker,1,1,type);
       THTensor_(free)(ker);
     }
   }
@@ -516,14 +516,14 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
       {
         THTensor_(select)(im, image, 0, k);
         THTensor_(select)(ri,r_,0,k);
-        THLab_(conv2Dmul)(ri,0.0,im,kernel,1,1,type);
+        THLab_(conv2Dmul)(ri,0.0,1.0,im,kernel,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(im);
     } else {
       THTensor *im = THTensor_(new)();
       THTensor_(select)(im,image,0,0);
-      THLab_(conv2Dmul)(r_,0.0,im,kernel,1,1,type);
+      THLab_(conv2Dmul)(r_,0.0,1.0,im,kernel,1,1,type);
       THTensor_(free)(im);
     }
   }
@@ -539,6 +539,169 @@ static int lab_(xcorr2)(lua_State *L)
   return lab_(convxcorr2)(L,"xcorrelation");
 }
 
+static int lab_(convxcorr3)(lua_State *L,char* ktype)
+{
+  THTensor *r_ = NULL;
+  THTensor *image = luaT_checkudata(L,1,torch_(Tensor_id));
+  THTensor *kernel = luaT_checkudata(L,2,torch_(Tensor_id));
+  int n = lua_gettop(L);
+  const char* ctype = "v";
+  if (n == 2)
+  {
+    r_ = THTensor_(new)();
+  }
+  else if (n == 3)
+  {
+    if (luaT_isudata(L,3, torch_(Tensor_id)))
+    {
+      r_ = image;
+      image = kernel;
+      kernel = luaT_checkudata(L,3,torch_(Tensor_id));
+    }
+    else if (lua_isstring(L,3))
+    {
+      r_ = THTensor_(new)();
+      ctype = luaL_checkstring(L,3);
+    }
+    else
+    {
+      return luaL_error(L, "bad arguments: [result,] source, kernel [, conv type]");
+    }
+  }
+  else if (n == 4)
+  {
+    r_ = image;
+    image = kernel;
+    kernel = luaT_checkudata(L,3,torch_(Tensor_id));
+    ctype = luaL_checkstring(L,4);
+  }
+  else
+  {
+    return luaL_error(L, "bad arguments: [result,] source, kernel [, conv type]");
+  }
+  if (!r_)
+  {
+    return luaL_error(L, "oops, bad arguments: [result,] source, kernel [, conv type]");
+  }
+  else
+  {
+    luaT_pushudata(L, r_, torch_(Tensor_id));
+  }
+
+  char type[2];
+  type[0] = ctype[0];
+  type[1] = ktype[0];
+
+  if (image->nDimension == 3 && kernel->nDimension == 3)
+  {
+    THLab_(conv3Dmul)(r_,0.0,1.0,image,kernel,1,1,1,type);
+  }
+  else if (image->nDimension == 4 && kernel->nDimension == 4)
+  {
+    THLab_(conv3Dger)(r_,0.0,1.0,image,kernel,1,1,1,type);
+  }
+  else if (image->nDimension == 4 && kernel->nDimension == 5)
+  {
+    THLab_(conv3Dmv)(r_,0.0,1.0,image,kernel,1,1,1,type);
+  }
+  else if (image->nDimension == 3 && kernel->nDimension == 4)
+  {
+    if (kernel->size[0] > 1)
+    {
+      long k;
+      THTensor *ri = THTensor_(new)();
+      THTensor *ker = THTensor_(new)();
+
+      long nInputDepth = image->size[0];
+      long nInputRows  = image->size[1];
+      long nInputCols  = image->size[2];
+      long nKernelDepth= kernel->size[1];
+      long nKernelRows = kernel->size[2];
+      long nKernelCols = kernel->size[3];
+      long nOutputDepth, nOutputRows, nOutputCols;
+
+      THArgCheck((nInputDepth >= nKernelDepth && nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "Input image is smaller than kernel");
+  
+      if (type[0] == 'f') {
+	nOutputDepth = (nInputDepth - 1) * 1 + nKernelDepth;
+	nOutputRows = (nInputRows - 1) * 1 + nKernelRows;
+	nOutputCols = (nInputCols - 1) * 1 + nKernelCols;
+      } else { // valid
+	nOutputDepth = (nInputDepth - nKernelDepth) / 1 + 1;
+	nOutputRows = (nInputRows - nKernelRows) / 1 + 1;
+	nOutputCols = (nInputCols - nKernelCols) / 1 + 1;
+      }
+
+      THTensor_(resize4d)(r_,kernel->size[0], nOutputDepth, nOutputRows, nOutputCols);
+      for (k=0; k<kernel->size[0]; k++)
+      {
+        THTensor_(select)(ker,kernel,0,k);
+        THTensor_(select)(ri,r_,0,k);
+        THLab_(conv3Dmul)(ri,0.0,1.0,image,ker,1,1,1,type);
+      }
+      THTensor_(free)(ri);
+      THTensor_(free)(ker);
+    } else {
+      THTensor *ker = THTensor_(new)();
+      THTensor_(select)(ker,kernel,0,0);
+      THLab_(conv3Dmul)(r_,0.0,1.0,image,ker,1,1,1,type);
+      THTensor_(free)(ker);
+    }
+  }
+  else if (image->nDimension == 4 && kernel->nDimension == 3)
+  {
+    if (image->size[0] > 1)
+    {
+      long k;
+      THTensor *ri = THTensor_(new)();
+      THTensor *im = THTensor_(new)();
+
+      long nInputDepth = image->size[1];
+      long nInputRows  = image->size[2];
+      long nInputCols  = image->size[3];
+      long nKernelDepth= kernel->size[0];
+      long nKernelRows = kernel->size[1];
+      long nKernelCols = kernel->size[2];
+      long nOutputDepth, nOutputRows, nOutputCols;
+
+      THArgCheck((nInputDepth >= nKernelDepth && nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "Input image is smaller than kernel");
+  
+      if (type[0] == 'f') {
+	nOutputDepth = (nInputDepth - 1) * 1 + nKernelDepth;
+	nOutputRows = (nInputRows - 1) * 1 + nKernelRows;
+	nOutputCols = (nInputCols - 1) * 1 + nKernelCols;
+      } else { // valid
+	nOutputDepth = (nInputDepth - nKernelDepth) / 1 + 1;
+	nOutputRows = (nInputRows - nKernelRows) / 1 + 1;
+	nOutputCols = (nInputCols - nKernelCols) / 1 + 1;
+      }
+      THTensor_(resize4d)(r_,image->size[0], nOutputDepth, nOutputRows, nOutputCols);
+      for (k=0; k<image->size[0]; k++)
+      {
+        THTensor_(select)(im, image, 0, k);
+        THTensor_(select)(ri,r_,0,k);
+        THLab_(conv3Dmul)(ri,0.0,1.0,im,kernel,1,1,1,type);
+      }
+      THTensor_(free)(ri);
+      THTensor_(free)(im);
+    } else {
+      THTensor *im = THTensor_(new)();
+      THTensor_(select)(im,image,0,0);
+      THLab_(conv3Dmul)(r_,0.0,1.0,im,kernel,1,1,1,type);
+      THTensor_(free)(im);
+    }
+  }
+  return 1;
+}
+
+static int lab_(conv3)(lua_State *L)
+{
+  return lab_(convxcorr3)(L,"convolution");
+}
+static int lab_(xcorr3)(lua_State *L)
+{
+  return lab_(convxcorr3)(L,"xcorrelation");
+}
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 
@@ -801,6 +964,8 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"cat", lab_(cat)},
   {"conv2", lab_(conv2)},
   {"xcorr2", lab_(xcorr2)},
+  {"conv3", lab_(conv3)},
+  {"xcorr3", lab_(xcorr3)},
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
   {"log_", lab_(log_)},
   {"log", lab_(log)},

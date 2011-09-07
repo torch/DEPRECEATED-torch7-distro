@@ -45,12 +45,11 @@ function Parallel:forward(input)
 end
 
 function Parallel:backward(input, gradOutput)
-
-   local modules=input:size(self.inputDimension)
+   local nModule=input:size(self.inputDimension)
    self.gradInput:resizeAs(input)
 
    local offset = 1
-   for i=1,modules do 
+   for i=1,nModule do 
       local module=self.modules[i];
       local currentOutput = module.output
       local currentGradInput = 
@@ -62,6 +61,38 @@ function Parallel:backward(input, gradOutput)
       offset = offset + currentOutput:size(self.outputDimension)
    end
    return self.gradInput
+end
+
+function Parallel:accGradParameters(input, gradOutput, scale)
+   local nModule=input:size(self.inputDimension)
+
+   local offset = 1
+   for i=1,nModule do 
+      local module = self.modules[i];
+      local currentOutput = module.output
+      local currentGradInput = 
+         module:accGradParameters(input:select(self.inputDimension,i),
+                                  gradOutput:narrow(self.outputDimension, 
+                                                    offset, currentOutput:size(self.outputDimension)), scale)
+        
+      offset = offset + currentOutput:size(self.outputDimension)
+   end
+end
+
+function Parallel:accUpdateGradParameters(input, gradOutput, lr)
+   local nModule=input:size(self.inputDimension)
+
+   local offset = 1
+   for i=1,nModule do 
+      local module = self.modules[i];
+      local currentOutput = module.output
+      local currentGradInput = 
+         module:accUpdateGradParameters(input:select(self.inputDimension,i),
+                                        gradOutput:narrow(self.outputDimension, 
+                                                          offset, currentOutput:size(self.outputDimension)), lr)
+        
+      offset = offset + currentOutput:size(self.outputDimension)
+   end
 end
  
 function Parallel:zeroGradParameters()
@@ -75,29 +106,6 @@ function Parallel:updateParameters(learningRate)
       module:updateParameters(learningRate)
    end
 end
-
-function Parallel:write(file)
-   parent.write(self, file)
-   file:writeObject(self.modules)
-   file:writeObject(self.size)
-   file:writeInt(self.inputDimension)   
-   file:writeInt(self.outputDimension)
-end
-
-function Parallel:read(file, version)
-   parent.read(self, file)
-   self.modules = file:readObject()
-   if version > 0 then
-      self.size = file:readObject()
-   else
-      local size = file:readObject()
-      self.size = torch.LongStorage(size:size())
-      self.size:copy(size)
-   end
-   self.inputDimension = file:readInt()
-   self.outputDimension = file:readInt()
-end
-
 
 function Parallel:share(mlp,...)
    for i=1,#self.modules do

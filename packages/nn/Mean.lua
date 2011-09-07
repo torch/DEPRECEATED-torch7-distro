@@ -23,13 +23,3 @@ function Mean:backward(input, gradOutput)
 
    return self.gradInput
 end
-
-function Mean:write(file)
-   parent.write(self, file)
-   file:writeInt(self.dimension)
-end
-
-function Mean:read(file)
-   parent.read(self, file)
-   self.dimension = file:readInt()
-end

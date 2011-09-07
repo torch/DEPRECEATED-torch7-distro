@@ -4,7 +4,7 @@
 
 static int nnOmp_(SpatialSubSampling_forwardOmp)(lua_State *L)
 {
-  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   int kW = luaT_getfieldcheckint(L, 1, "kW");
   int kH = luaT_getfieldcheckint(L, 1, "kH");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
@@ -59,7 +59,7 @@ static int nnOmp_(SpatialSubSampling_forwardOmp)(lua_State *L)
     real z = bias_data[k];
     for(i = 0; i < outputWidth*outputHeight; i++)
       ptr_output[i] = z;
-      
+
     for(yy = 0; yy < outputHeight; yy++)
     {
       for(xx = 0; xx < outputWidth; xx++)
@@ -75,7 +75,7 @@ static int nnOmp_(SpatialSubSampling_forwardOmp)(lua_State *L)
             sum += ptr_input[kx];
           ptr_input += inputWidth; // next input line
         }
-        
+
         // Update output
         *ptr_output++ += the_weight*sum;
       }
@@ -93,8 +93,72 @@ static int nnOmp_(SpatialSubSampling_forwardOmp)(lua_State *L)
 
 static int nnOmp_(SpatialSubSampling_backwardOmp)(lua_State *L)
 {
-  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
-  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
+  int kW = luaT_getfieldcheckint(L, 1, "kW");
+  int kH = luaT_getfieldcheckint(L, 1, "kH");
+  int dW = luaT_getfieldcheckint(L, 1, "dW");
+  int dH = luaT_getfieldcheckint(L, 1, "dH");
+  int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
+  setompnthread(L,1,"nThread");
+
+  THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
+  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
+
+  long inputWidth = input->size[2];
+  long inputHeight = input->size[1];
+  long outputWidth = (inputWidth - kW) / dW + 1;
+  long outputHeight = (inputHeight - kH) / dH + 1;
+
+  long i, k;
+
+  real *weight_data = THTensor_(data)(weight);
+  real *gradOutput_data = THTensor_(data)(gradOutput);
+  real *input_data, *gradInput_data;
+
+  input_data = THTensor_(data)(input);
+
+  THTensor_(resizeAs)(gradInput, input);
+  gradInput_data = THTensor_(data)(gradInput);
+  gradOutput_data = THTensor_(data)(gradOutput);
+
+#pragma omp parallel for private(k,i)
+  for(k = 0; k < nInputPlane; k++)
+  {
+    real the_weight = weight_data[k];
+    real *ptr_gradOutput = gradOutput_data + k*outputWidth*outputHeight;
+    long xx, yy;
+
+    real* ptr_gi = gradInput_data + k*inputWidth*inputHeight;
+    for(i=0; i<inputWidth*inputHeight; i++)
+      ptr_gi[i] = 0.0;
+
+    for(yy = 0; yy < outputHeight; yy++)
+    {
+      for(xx = 0; xx < outputWidth; xx++)
+      {
+        real *ptr_gradInput = gradInput_data + k*inputWidth*inputHeight + yy*dH*inputWidth+xx*dW;
+        real z = *ptr_gradOutput++ * the_weight;
+        long kx, ky;
+
+        for(ky = 0; ky < kH; ky++)
+        {
+          for(kx = 0; kx < kW; kx++)
+            ptr_gradInput[kx] += z;
+          ptr_gradInput += inputWidth;
+        }
+      }
+    }
+  }
+
+  return 1;
+}
+
+static int nnOmp_(SpatialSubSampling_accGradParametersOmp)(lua_State *L)
+{
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
+  real scale = luaL_optnumber(L, 4, 1);
   int kW = luaT_getfieldcheckint(L, 1, "kW");
   int kH = luaT_getfieldcheckint(L, 1, "kH");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
@@ -105,8 +169,7 @@ static int nnOmp_(SpatialSubSampling_backwardOmp)(lua_State *L)
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
   THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
-  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
-  
+
   long inputWidth = input->size[2];
   long inputHeight = input->size[1];
   long outputWidth = (inputWidth - kW) / dW + 1;
@@ -133,7 +196,7 @@ static int nnOmp_(SpatialSubSampling_backwardOmp)(lua_State *L)
     sum = 0;
     for(i = 0; i < outputWidth*outputHeight; i++)
       sum += ptr_gradOutput[i];
-    gradBias_data[k] += sum;
+    gradBias_data[k] += scale*sum;
 
     sum = 0;
     for(yy = 0; yy < outputHeight; yy++)
@@ -149,59 +212,23 @@ static int nnOmp_(SpatialSubSampling_backwardOmp)(lua_State *L)
           for(kx = 0; kx < kW; kx++)
             sum += z * ptr_input[kx];
           ptr_input += inputWidth;
-        }    
+        }
       }
     }
-    gradWeight_data[k] += sum;
+    gradWeight_data[k] += scale*sum;
     /*gradOutput_data += outputWidth*outputHeight;*/
     /*input_data += inputWidth*inputHeight; */
   }
 
-  THTensor_(resizeAs)(gradInput, input);
-  gradInput_data = THTensor_(data)(gradInput);
-  gradOutput_data = THTensor_(data)(gradOutput);
-
-  /*THTensor_(zero)(gradInput);*/
-
-#pragma omp parallel for private(k,i)
-  for(k = 0; k < nInputPlane; k++)
-  {
-    real the_weight = weight_data[k];
-    real *ptr_gradOutput = gradOutput_data + k*outputWidth*outputHeight;
-    long xx, yy;
-
-    real* ptr_gi = gradInput_data + k*inputWidth*inputHeight;
-    for(i=0; i<inputWidth*inputHeight; i++)
-      ptr_gi[i] = 0.0;
-
-    for(yy = 0; yy < outputHeight; yy++)
-    {
-      for(xx = 0; xx < outputWidth; xx++)
-      {
-        real *ptr_gradInput = gradInput_data + k*inputWidth*inputHeight + yy*dH*inputWidth+xx*dW;
-        real z = *ptr_gradOutput++ * the_weight;
-        long kx, ky;
-
-        for(ky = 0; ky < kH; ky++)
-        {
-          for(kx = 0; kx < kW; kx++)
-            ptr_gradInput[kx] += z;
-          ptr_gradInput += inputWidth;
-        }    
-      }
-    }
-    /*gradOutput_data += outputWidth*outputHeight;*/
-    /*gradInput_data += inputWidth*inputHeight;*/
-  }
-
   THTensor_(free)(input);
 
-  return 1;
+  return 0;
 }
 
 static const struct luaL_Reg nnOmp_(SpatialSubSampling__) [] = {
   {"SpatialSubSampling_forwardOmp", nnOmp_(SpatialSubSampling_forwardOmp)},
   {"SpatialSubSampling_backwardOmp", nnOmp_(SpatialSubSampling_backwardOmp)},
+  {"SpatialSubSampling_accGradParametersOmp", nnOmp_(SpatialSubSampling_accGradParametersOmp)},
   {NULL, NULL}
 };
 

@@ -35,9 +35,8 @@ function StochasticGradient:train(dataset)
 
          currentError = currentError + criterion:forward(module:forward(input), target)
 
-         module:zeroGradParameters()
          module:backward(input, criterion:backward(module.output, target))
-         module:updateParameters(currentLearningRate)
+         module:accUpdateGradParameters(input, criterion.gradInput, currentLearningRate)
 
          if self.hookExample then
             self.hookExample(self, example)

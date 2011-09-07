@@ -14,15 +14,3 @@ end
 function Max:backward(input, gradOutput)
    return input.nn.Max_backward(self, input, gradOutput)
 end
-
-function Max:write(file)
-   parent.write(self, file)
-   file:writeInt(self.dimension)
-   file:writeObject(self.indices)
-end
-
-function Max:read(file)
-   parent.read(self, file)
-   self.dimension = file:readInt()
-   self.indices = file:readObject()
-end

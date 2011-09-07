@@ -54,17 +54,13 @@ static int nn_(TemporalSubSampling_backward)(lua_State *L)
   int dW = luaT_getfieldcheckint(L, 1, "dW");
 
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
-  THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
-  THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
 
   THTensor *gradOutputFrame;
-  THTensor *inputWindow, *gradInputWindow, *buffer, *kwunit;
+  THTensor *gradInputWindow, *buffer, *kwunit;
   long k;
 
-
   gradOutputFrame = THTensor_(new)();
-  inputWindow = THTensor_(new)();
   gradInputWindow = THTensor_(new)();
   buffer = THTensor_(new)();
   kwunit = THTensor_(newWithSize1d)(kW);
@@ -75,21 +71,13 @@ static int nn_(TemporalSubSampling_backward)(lua_State *L)
 
   for(k = 0; k < gradOutput->size[0]; k++)
   {
-    /* ------------------------- gradWeight ------------------------------------- */
-    THTensor_(narrow)(inputWindow, input, 0, k*dW, kW);
-    THTensor_(select)(gradOutputFrame, gradOutput, 0, k);
-    THLab_(sum)(buffer, inputWindow, 0);
-    THTensor_(addcmul)(gradWeight, 1, buffer, gradOutputFrame);
-    THTensor_(cadd)(gradBias, 1, gradOutputFrame);
-
-    /* -------------------------- gradInput ------------------------------------- */
     THTensor_(narrow)(gradInputWindow, gradInput, 0, k*dW, kW);
+    THTensor_(select)(gradOutputFrame, gradOutput, 0, k);
     THLab_(cmul)(buffer, weight, gradOutputFrame);
     THTensor_(addr)(gradInputWindow, 1, kwunit, buffer);
   }
 
   THTensor_(free)(gradOutputFrame);
-  THTensor_(free)(inputWindow);
   THTensor_(free)(gradInputWindow);
   THTensor_(free)(buffer);
   THTensor_(free)(kwunit);
@@ -97,9 +85,47 @@ static int nn_(TemporalSubSampling_backward)(lua_State *L)
   return 1;
 }
 
+static int nn_(TemporalSubSampling_accGradParameters)(lua_State *L)
+{
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
+  real scale = luaL_optnumber(L, 4, 1);
+
+  int kW = luaT_getfieldcheckint(L, 1, "kW");
+  int dW = luaT_getfieldcheckint(L, 1, "dW");
+
+  THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
+  THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
+
+  THTensor *gradOutputFrame;
+  THTensor *inputWindow, *buffer;
+  long k;
+
+
+  gradOutputFrame = THTensor_(new)();
+  inputWindow = THTensor_(new)();
+  buffer = THTensor_(new)();
+
+  for(k = 0; k < gradOutput->size[0]; k++)
+  {
+    THTensor_(narrow)(inputWindow, input, 0, k*dW, kW);
+    THTensor_(select)(gradOutputFrame, gradOutput, 0, k);
+    THLab_(sum)(buffer, inputWindow, 0);
+    THTensor_(addcmul)(gradWeight, scale, buffer, gradOutputFrame);
+    THTensor_(cadd)(gradBias, scale, gradOutputFrame);
+  }
+
+  THTensor_(free)(gradOutputFrame);
+  THTensor_(free)(inputWindow);
+  THTensor_(free)(buffer);
+
+  return 0;
+}
+
 static const struct luaL_Reg nn_(TemporalSubSampling__) [] = {
   {"TemporalSubSampling_forward", nn_(TemporalSubSampling_forward)},
   {"TemporalSubSampling_backward", nn_(TemporalSubSampling_backward)},
+  {"TemporalSubSampling_accGradParameters", nn_(TemporalSubSampling_accGradParameters)},
   {NULL, NULL}
 };
 

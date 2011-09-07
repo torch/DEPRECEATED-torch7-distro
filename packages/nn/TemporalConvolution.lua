@@ -37,39 +37,19 @@ function TemporalConvolution:forward(input)
 end
 
 function TemporalConvolution:backward(input, gradOutput)
-   return input.nn.TemporalConvolution_backward(self, input, gradOutput)
+   if self.gradInput then
+      return input.nn.TemporalConvolution_backward(self, input, gradOutput)
+   end
 end
 
-function TemporalConvolution:zeroGradParameters()
-   self.gradWeight:zero()
-   self.gradBias:zero()
+function TemporalConvolution:accGradParameters(input, gradOutput, scale)
+   scale = scale or 1
+   input.nn.TemporalConvolution_accGradParameters(self, input, gradOutput, scale)
 end
 
-function TemporalConvolution:updateParameters(learningRate)
-   self.weight:add(-learningRate, self.gradWeight)
-   self.bias:add(-learningRate, self.gradBias)
-end
-
-function TemporalConvolution:write(file)
-   parent.write(self, file)
-   file:writeInt(self.kW)
-   file:writeInt(self.dW)
-   file:writeInt(self.inputFrameSize)
-   file:writeInt(self.outputFrameSize)
-   file:writeObject(self.weight)
-   file:writeObject(self.bias)
-   file:writeObject(self.gradWeight)
-   file:writeObject(self.gradBias)
-end
-
-function TemporalConvolution:read(file)
-   parent.read(self, file)
-   self.kW = file:readInt()
-   self.dW = file:readInt()
-   self.inputFrameSize = file:readInt()
-   self.outputFrameSize = file:readInt()
-   self.weight = file:readObject()
-   self.bias = file:readObject()
-   self.gradWeight = file:readObject()
-   self.gradBias = file:readObject()
-end
+-- function TemporalConvolution:accUpdateGradParameters(input, gradOutput, lr)
+--    print('using slow version')
+--    self:zeroGradParameters()
+--    self:accGradParameters(input, gradOutput)
+--    self:updateParameters(lr)
+-- end

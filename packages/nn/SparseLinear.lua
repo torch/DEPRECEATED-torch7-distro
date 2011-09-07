@@ -16,7 +16,6 @@ function SparseLinear:__init(inputSize, outputSize)
    self:reset()
 end
 
-
 function SparseLinear:reset(stdv)
    if stdv then
       stdv = stdv * math.sqrt(3)
@@ -38,31 +37,6 @@ function SparseLinear:forward(input)
    return input.nn.SparseLinear_forward(self, input)
 end
 
-function SparseLinear:backward(input, gradOutput)
-   return input.nn.SparseLinear_backward(self, input, gradOutput)
-end
-
-function SparseLinear:zeroGradParameters()
-   --self.gradWeight:zero()
-   self.gradBias:zero()
-end
-
-function SparseLinear:write(file)
-   parent.write(self, file)
-   file:writeDouble(self.weightDecay)
-   file:writeObject(self.weight)
-   file:writeObject(self.bias)
-   file:writeObject(self.gradWeight)
-   file:writeObject(self.gradBias)
-   file:writeObject(self.lastInput)
-end
-
-function SparseLinear:read(file)
-   parent.read(self, file)
-   self.weightDecay = file:readDouble()
-   self.weight = file:readObject()
-   self.bias = file:readObject()
-   self.gradWeight = file:readObject()
-   self.gradBias = file:readObject()
-   self.lastInput = file:readObject()
+function SparseLinear:accGradParameters(input, gradOutput, scale)
+   return input.nn.SparseLinear_accGradParameters(self, input, gradOutput, scale)
 end

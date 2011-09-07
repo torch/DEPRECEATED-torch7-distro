@@ -4,7 +4,7 @@
 
 static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
 {
-  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   setompnthread(L,1,"nThread");
@@ -45,7 +45,7 @@ static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
   /*THTensor_(free)(outn);*/
 
   /* do convolutions */
-  THOmpLab_(conv2Dmv)(output, 1.0, input, weight, dH, dW, "vx");
+  THOmpLab_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
 
   return 1;
 }
@@ -53,8 +53,35 @@ static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
 
 static int nnOmp_(SpatialConvolution_backwardOmp)(lua_State *L)
 {
-  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
-  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
+  int dW = luaT_getfieldcheckint(L, 1, "dW");
+  int dH = luaT_getfieldcheckint(L, 1, "dH");
+  int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
+  setompnthread(L,1,"nThread");
+
+  THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
+  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
+
+  THArgCheck( nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane" );
+
+  long k;
+
+  real *gradOutput_data = THTensor_(data)(gradOutput);
+
+  /* gradient to input */
+  THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
+  THOmpLab_(conv2Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
+  THTensor_(free)(tweight);
+
+  return 1;
+}
+
+static int nnOmp_(SpatialConvolution_accGradParametersOmp)(lua_State *L)
+{
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
+  real scale = luaL_optnumber(L, 4, 1);
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
@@ -63,8 +90,7 @@ static int nnOmp_(SpatialConvolution_backwardOmp)(lua_State *L)
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
   THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
-  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
-  
+
   THArgCheck( nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane" );
 
   long k;
@@ -83,24 +109,19 @@ static int nnOmp_(SpatialConvolution_backwardOmp)(lua_State *L)
     real *ptr_gradOutput = gradOutput_data + k*noutSlice;
     long l;
     for(l = 0; l < noutSlice; l++)
-      gradBias_data[k] += ptr_gradOutput[l];
+      gradBias_data[k] += scale*ptr_gradOutput[l];
   }
-  /*THTensor_(free)(gradOutSlice);*/
 
   /* gradient to kernels */
-  THOmpLab_(conv2DRevger)(gradWeight, 1.0, input, gradOutput, dH, dW);
+  THOmpLab_(conv2DRevger)(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
 
-  /* gradient to input */
-  THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
-  THOmpLab_(conv2Dmv)(gradInput, 0.0, gradOutput, tweight, dH, dW, "fx");
-  THTensor_(free)(tweight);
-
-  return 1;
+  return 0;
 }
 
 static const struct luaL_Reg nnOmp_(SpatialConvolutionstuff__) [] = {
   {"SpatialConvolution_forwardOmp", nnOmp_(SpatialConvolution_forwardOmp)},
   {"SpatialConvolution_backwardOmp", nnOmp_(SpatialConvolution_backwardOmp)},
+  {"SpatialConvolution_accGradParametersOmp", nnOmp_(SpatialConvolution_accGradParametersOmp)},
   {NULL, NULL}
 };
 
