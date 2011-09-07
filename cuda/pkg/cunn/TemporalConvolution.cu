@@ -56,7 +56,7 @@ static int cunn_TemporalConvolution_forward(lua_State *L)
                             output->size[1], 1);
 
     THCudaTensor_transpose(weight, NULL, 0, 1);
-    THCudaTensor_addmm(outputWindow, 1, inputWindow, weight);
+    THCudaTensor_addmm(outputWindow, 1, 1, inputWindow, weight);
     THCudaTensor_transpose(weight, NULL, 0, 1);
   }
 
@@ -123,7 +123,7 @@ static int cunn_TemporalConvolution_backward(lua_State *L)
                             gradOutput->size[1], 1);
 
     THCudaTensor_transpose(gradOutputWindow, NULL, 0, 1);
-    THCudaTensor_addmm(gradWeight, 1, gradOutputWindow, inputWindow);
+    THCudaTensor_addmm(gradWeight, 1, 1, gradOutputWindow, inputWindow);
     THCudaTensor_transpose(gradOutputWindow, NULL, 0, 1);
 
     /* -------------------------- gradInput ------------------------------------- */
@@ -133,7 +133,7 @@ static int cunn_TemporalConvolution_backward(lua_State *L)
                             nFrame, inputFrameStride*gradInput->size[1],
                             kW*gradInput->size[1], 1);
 
-    THCudaTensor_addmm(gradInputWindow, 1, gradOutputWindow, weight);
+    THCudaTensor_addmm(gradInputWindow, 1, 1, gradOutputWindow, weight);
   }
 
   THCudaTensor_free(gradOutputWindow);

@@ -253,7 +253,7 @@ float THCudaTensor_sum(THCudaTensor *self)
   return result;
 }
 
-void THCudaTensor_addmv(THCudaTensor *self, float alpha, THCudaTensor *mat, THCudaTensor *vec)
+void THCudaTensor_addmv(THCudaTensor *self, float beta, float alpha, THCudaTensor *mat, THCudaTensor *vec)
 {
   if( (mat->nDimension != 2) || (vec->nDimension != 1) )
     THError("matrix and vector expected");
@@ -271,15 +271,15 @@ void THCudaTensor_addmv(THCudaTensor *self, float alpha, THCudaTensor *mat, THCu
   {
     cublasSgemv('n', mat->size[0], mat->size[1],
                 alpha, THCudaTensor_data(mat), mat->stride[1],
-                  THCudaTensor_data(vec), vec->stride[0],
-                1, THCudaTensor_data(self), self->stride[0]);
+                THCudaTensor_data(vec), vec->stride[0],
+                beta, THCudaTensor_data(self), self->stride[0]);
   }
   else if(mat->stride[1] == 1)
   {
     cublasSgemv('t',  mat->size[1], mat->size[0],
                 alpha, THCudaTensor_data(mat), mat->stride[0],
                 THCudaTensor_data(vec), vec->stride[0],
-                1, THCudaTensor_data(self), self->stride[0]);
+                beta, THCudaTensor_data(self), self->stride[0]);
   }
   else
   {
@@ -288,7 +288,7 @@ void THCudaTensor_addmv(THCudaTensor *self, float alpha, THCudaTensor *mat, THCu
     cublasSgemv('t',  mat->size[1], mat->size[0],
                 alpha, THCudaTensor_data(mat), mat->stride[0],
                 THCudaTensor_data(vec), vec->stride[0],
-                1, THCudaTensor_data(self), self->stride[0]);
+                beta, THCudaTensor_data(self), self->stride[0]);
     
     THCudaTensor_free(mat);
   }
@@ -296,7 +296,7 @@ void THCudaTensor_addmv(THCudaTensor *self, float alpha, THCudaTensor *mat, THCu
   THCublasCheck();  
 }
 
-void THCudaTensor_addmm(THCudaTensor *self, float alpha, THCudaTensor *m1, THCudaTensor *m2)
+void THCudaTensor_addmm(THCudaTensor *self, float beta, float alpha, THCudaTensor *m1, THCudaTensor *m2)
 {
   char transpose, transpose_m1, transpose_m2;
   THCudaTensor *self_, *m1_, *m2_;
@@ -381,7 +381,7 @@ void THCudaTensor_addmm(THCudaTensor *self, float alpha, THCudaTensor *m1, THCud
               (transpose_m1 == 'n' ? m1_->stride[1] : m1_->stride[0]),
               THCudaTensor_data(m2_),
               (transpose_m2 == 'n' ? m2_->stride[1] : m2_->stride[0]),
-              1,
+              beta,
               THCudaTensor_data(self_),
               self_->stride[1]);
 
