@@ -56,12 +56,10 @@ function Linear:backward(input, gradOutput)
 
       if input:dim() == 1 then
          self.gradInput:resizeAs(input)
-         self.gradInput:zero()
-         self.gradInput:addmv(1, self.weight:t(), gradOutput)
+         self.gradInput:addmv(0, 1, self.weight:t(), gradOutput)
       elseif input:dim() == 2 then
          self.gradInput:resizeAs(input)
-         self.gradInput:zero()
-         self.gradInput:addmm(1, gradOutput, self.weight)
+         self.gradInput:addmm(0, 1, gradOutput, self.weight)
       end
 
       return self.gradInput

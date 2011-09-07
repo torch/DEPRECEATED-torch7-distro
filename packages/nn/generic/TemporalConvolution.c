@@ -59,7 +59,7 @@ static int nn_(TemporalConvolution_forward)(lua_State *L)
                             output->size[1], 1);
 
     THTensor_(transpose)(weight, NULL, 0, 1);
-    THTensor_(addmm)(outputWindow, 1, inputWindow, weight);
+    THTensor_(addmm)(outputWindow, 1, 1, inputWindow, weight);
     THTensor_(transpose)(weight, NULL, 0, 1);
   }
 
@@ -110,7 +110,7 @@ static int nn_(TemporalConvolution_backward)(lua_State *L)
                             nFrame, inputFrameStride*gradInput->size[1],
                             kW*gradInput->size[1], 1);
 
-    THTensor_(addmm)(gradInputWindow, 1, gradOutputWindow, weight);
+    THTensor_(addmm)(gradInputWindow, 1, 1, gradOutputWindow, weight);
   }
 
   THTensor_(free)(gradOutputWindow);
@@ -166,7 +166,7 @@ static int nn_(TemporalConvolution_accGradParameters)(lua_State *L)
                             gradOutput->size[1], 1);
 
     THTensor_(transpose)(gradOutputWindow, NULL, 0, 1);
-    THTensor_(addmm)(gradWeight, scale, gradOutputWindow, inputWindow);
+    THTensor_(addmm)(gradWeight, 1, scale, gradOutputWindow, inputWindow);
     THTensor_(transpose)(gradOutputWindow, NULL, 0, 1);
   }
 

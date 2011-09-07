@@ -141,8 +141,39 @@ TENSOR_IMPLEMENT_BASIC_WRAPPER_STAT(sum)
     return 1;                                                   \
 }
 
-TENSOR_IMPLEMENT_BASIC_ADDMUL(addmv)
-TENSOR_IMPLEMENT_BASIC_ADDMUL(addmm)
+#define TENSOR_IMPLEMENT_BASIC_BETA_ADDMUL(NAME)                    \
+  static int torch_TensorMath_(NAME)(lua_State *L)                  \
+  {                                                                 \
+    THTensor *tensor = NULL, *src1 = NULL, *src2 = NULL;            \
+    double alpha = 1, beta = 1;                                     \
+    int narg = lua_gettop(L);                                       \
+                                                                    \
+    if(narg == 4)                                                   \
+    {                                                               \
+      tensor = luaT_checkudata(L, 1, torch_Tensor_id);              \
+      alpha = luaL_checknumber(L, 2);                               \
+      src1 = luaT_checkudata(L, 3, torch_Tensor_id);                \
+      src2 = luaT_checkudata(L, 4, torch_Tensor_id);                \
+    }                                                               \
+    else if(narg == 5)                                              \
+    {                                                               \
+      tensor = luaT_checkudata(L, 1, torch_Tensor_id);              \
+      beta = luaL_checknumber(L, 2);                                \
+      alpha = luaL_checknumber(L, 3);                               \
+      src1 = luaT_checkudata(L, 4, torch_Tensor_id);                \
+      src2 = luaT_checkudata(L, 5, torch_Tensor_id);                \
+    }                                                               \
+    else                                                            \
+      luaL_error(L, "expected arguments: tensor, [beta], alpha, tensor, tensor"); \
+                                                                        \
+    THTensor_(NAME)(tensor, beta, alpha, src1, src2);                   \
+                                                                        \
+    lua_settop(L, 1);                                                   \
+    return 1;                                                           \
+  }
+
+TENSOR_IMPLEMENT_BASIC_BETA_ADDMUL(addmv)
+TENSOR_IMPLEMENT_BASIC_BETA_ADDMUL(addmm)
 TENSOR_IMPLEMENT_BASIC_ADDMUL(addr)
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
@@ -317,13 +348,13 @@ static int torch_TensorMath_(__mul__)(lua_State *L)
       {
         THTensor_(resize1d)(r, tensor1->size[0]);
         THTensor_(zero)(r);
-        THTensor_(addmv)(r, 1, tensor1, tensor2);
+        THTensor_(addmv)(r, 1, 1, tensor1, tensor2);
       }
       else if(dimt == 2 && dims == 2)
       {
         THTensor_(resize2d)(r, tensor1->size[0], tensor2->size[1]);
         THTensor_(zero)(r);
-        THTensor_(addmm)(r, 1, tensor1, tensor2);
+        THTensor_(addmm)(r, 1, 1, tensor1, tensor2);
       }
       else
         luaL_error(L, "multiplication between %dD and %dD tensors not yet supported", tensor1->nDimension, tensor2->nDimension); 
