@@ -35,14 +35,9 @@ local function gnuplothasterm(term)
    if not _gptable.exe then
       return false--error('gnuplot exe is not found, can not chcek terminal')
    end
-   local tfni = os.tmpname()
-   local tfno = os.tmpname()
-   local fi = io.open(tfni,'w')
-   fi:write('set terminal\n\n')
-   fi:close()
-   os.execute(getexec() .. ' < ' .. tfni .. ' 2> ' .. tfno)
-   local tf = io.open(tfno,'r')
-   local s = tf:read('*l')
+   local f = io.popen(getexec() .. ' -e "set terminal;"')
+   local s = f:read('*all')
+   f:close()
    while s do
       if s:match('^.*%s+  '.. term .. ' ') then
 	 return true
