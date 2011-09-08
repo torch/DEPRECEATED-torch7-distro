@@ -14,6 +14,10 @@ function nn.Jacobian.backward (module, input, param, dparam)
    -- jacobian matrix to calculate
    local jacobian = torch.Tensor(param:nElement(),dout:nElement()):zero()
 
+   if verbose then
+      print('pnelem ', param:nElement() , 'psize ' ,  param:size())
+   end
+
    for i=1,sdout:nElement() do
       dout:zero()
       sdout[i] = 1
@@ -21,6 +25,22 @@ function nn.Jacobian.backward (module, input, param, dparam)
       local din = module:backward(input, dout)
       module:accGradParameters(input, dout)
       if doparam == 1 then
+	 if verbose then
+	    print('i')
+	    print(i)
+	    print('out')
+	    print(module.output:size())
+	    print('dout')
+	    print(dout:size())
+	    print('param')
+	    print(param:size())
+	    print('dparam')
+	    print(dparam:size())
+	    print('input')
+	    print(input:size())
+	    print('dinput')
+	    print(din:size())
+	 end
 	 jacobian:select(2,i):copy(dparam)
       else
 	 jacobian:select(2,i):copy(din)
