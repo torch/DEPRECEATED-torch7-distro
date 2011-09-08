@@ -21,15 +21,13 @@ static int nnOmp_(SpatialSubSampling_forwardOmp)(lua_State *L)
   real *output_data;
   real *input_data;
 
-  long i, k;
-  long inputWidth, inputHeight, outputWidth, outputHeight;
 
   luaL_argcheck(L, input->nDimension == 3, 2, "3D tensor expected");
 
-  inputWidth = input->size[2];
-  inputHeight = input->size[1];
-  outputWidth = (inputWidth - kW) / dW + 1;
-  outputHeight = (inputHeight - kH) / dH + 1;
+  long inputWidth = input->size[2];
+  long inputHeight = input->size[1];
+  long outputWidth = (inputWidth - kW) / dW + 1;
+  long outputHeight = (inputHeight - kH) / dH + 1;
 
   luaL_argcheck(L, input->size[0] == nInputPlane, 2, "invalid number of input planes");
   luaL_argcheck(L, inputWidth >= kW && inputHeight >= kH, 2, "input image smaller than kernel size");
@@ -37,12 +35,11 @@ static int nnOmp_(SpatialSubSampling_forwardOmp)(lua_State *L)
   input = THTensor_(newContiguous)(input);
   input_data = THTensor_(data)(input);
 
-  THTensor_(resize3d)(output,
-                      nInputPlane,
-                      outputHeight,
-                      outputWidth);
+  THTensor_(resize3d)(output, nInputPlane, outputHeight, outputWidth);
 
   output_data = THTensor_(data)(output);
+
+  long i, k;
 
 #pragma omp parallel for private(k,i)
   for(k = 0; k < nInputPlane; k++)
