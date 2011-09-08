@@ -37,12 +37,8 @@ function Linear:forward(input)
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local bias = input.new(self.bias:storage(), 1,
-                             nframe, 0,
-                             nunit, 1)
-
       self.output:resize(nframe, nunit)
-      self.output:copy(bias)
+      self.output:zero():addr(1, input.new(nframe):fill(1), self.bias)
       self.output:addmm(1, input, self.weight:t())
    else
       error('input must be vector or matrix')
@@ -76,12 +72,8 @@ function Linear:accGradParameters(input, gradOutput, scale)
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local gradBias = input.new(self.gradBias:storage(), 1,
-                                 nframe, 0,
-                                 nunit, 1)
-
       self.gradWeight:addmm(scale, gradOutput:t(), input)
-      gradBias:add(scale, gradOutput)
+      self.gradBias:addmv(scale, gradOutput:t(), input.new(nframe):fill(1))
    end
 
 end
