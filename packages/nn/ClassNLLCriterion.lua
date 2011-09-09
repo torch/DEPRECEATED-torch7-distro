@@ -8,7 +8,7 @@ end
 function ClassNLLCriterion:forward(input, target)
    if input:dim() == 1 then
       self.output = -input[target]
-   else
+   elseif input:dim() == 2 then
       local output = 0
       for i=1,target:size(1) do
          output = output - input[i][target[i]]
@@ -17,6 +17,8 @@ function ClassNLLCriterion:forward(input, target)
          output = output / target:size(1)
       end
       self.output = output
+   else
+      error('matrix or vector expected')
    end
    return self.output
 end
