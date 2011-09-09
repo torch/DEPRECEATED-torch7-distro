@@ -243,8 +243,6 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
 
   THCudaTensor *weight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
-  THCudaTensor *gradWeight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradWeight", torch_CudaTensor_id);
-  THCudaTensor *gradBias = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradBias", torch_CudaTensor_id);
   THCudaTensor *gradInput = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
 
   long nInputCols = input->size[2];
@@ -253,14 +251,8 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   long nOutputRows = (nInputRows - kH) / dH + 1;
 
   float *weight_data = THCudaTensor_data(weight);
-  float *gradWeight_data = THCudaTensor_data(gradWeight);
-  float *gradBias_data = THCudaTensor_data(gradBias);
   float *gradOutput_data = THCudaTensor_data(gradOutput);
-  float *input_data;
   float *gradInput_data;
-
-  input = THCudaTensor_newContiguous(input);
-  input_data = THCudaTensor_data(input);
 
   THCudaTensor_resizeAs(gradInput, input);
   THCudaTensor_zero(gradInput);
@@ -278,24 +270,69 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   if ((nOutputRows % patch_h) != 0) threads.y++;
   if ((nOutputCols % patch_w) != 0) threads.x++;
 
-  subgradweight <<<blocks, threads>>> (input_data, gradOutput_data, gradWeight_data, gradBias_data,
-                                       nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW,
-                                       patch_h, patch_w);
-
   subgradinput <<<blocks, threads>>> (gradInput_data, gradOutput_data, weight_data,
                                       nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW,
                                       patch_h, patch_w);
 
   // sync & clean
   cudaDeviceSynchronize();
-  THCudaTensor_free(input);
 
   return 1;
+}
+
+static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
+{
+  THCudaTensor *input = (THCudaTensor *)luaT_checkudata(L, 2, torch_CudaTensor_id);
+  THCudaTensor *gradOutput = (THCudaTensor *)luaT_checkudata(L, 3, torch_CudaTensor_id);
+  int kW = luaT_getfieldcheckint(L, 1, "kW");
+  int kH = luaT_getfieldcheckint(L, 1, "kH");
+  int dW = luaT_getfieldcheckint(L, 1, "dW");
+  int dH = luaT_getfieldcheckint(L, 1, "dH");
+  int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
+
+  THCudaTensor *gradWeight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradWeight", torch_CudaTensor_id);
+  THCudaTensor *gradBias = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradBias", torch_CudaTensor_id);
+
+  long nInputCols = input->size[2];
+  long nInputRows = input->size[1];
+  long nOutputCols = (nInputCols - kW) / dW + 1;
+  long nOutputRows = (nInputRows - kH) / dH + 1;
+
+  float *gradWeight_data = THCudaTensor_data(gradWeight);
+  float *gradBias_data = THCudaTensor_data(gradBias);
+  float *gradOutput_data = THCudaTensor_data(gradOutput);
+  float *input_data;
+
+  input = THCudaTensor_newContiguous(input);
+  input_data = THCudaTensor_data(input);
+
+  // cuda blocks & threads:
+  // we create one block per input map, and then try to have 256 threads per map
+  // arranged in a 16x16 grid.
+  int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
+  if (patch_w < 2) patch_w = 2;
+  else if (patch_w > 32) patch_w = 32;
+  int patch_h = patch_w;
+  dim3 blocks(nInputPlane);
+  dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
+  if ((nOutputRows % patch_h) != 0) threads.y++;
+  if ((nOutputCols % patch_w) != 0) threads.x++;
+
+  subgradweight <<<blocks, threads>>> (input_data, gradOutput_data, gradWeight_data, gradBias_data,
+                                       nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW,
+                                       patch_h, patch_w);
+
+  // sync & clean
+  cudaDeviceSynchronize();
+  THCudaTensor_free(input);
+
+  return 0;
 }
 
 static const struct luaL_Reg cunn_SpatialSubSampling__ [] = {
   {"SpatialSubSampling_forward", cunn_SpatialSubSampling_forward},
   {"SpatialSubSampling_backward", cunn_SpatialSubSampling_backward},
+  {"SpatialSubSampling_accGradParameters", cunn_SpatialSubSampling_accGradParameters},
   {NULL, NULL}
 };
 

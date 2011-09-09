@@ -44,9 +44,28 @@ static int cunn_SpatialConvolution_backward(lua_State *L)
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
 
   THCudaTensor *weight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
+  THCudaTensor *gradInput = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
+
+  THArgCheck(nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane");
+
+  /* gradient to input */
+  THCudaTensor *tweight = THCudaTensor_newTranspose(weight,0,1);
+  THCudaTensor_conv2Dmv(gradInput, 0.0, gradOutput, tweight, dH, dW, "fc");
+  THCudaTensor_free(tweight);
+
+  return 1;
+}
+
+static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
+{
+  THCudaTensor *input = (THCudaTensor *)luaT_checkudata(L, 2, torch_CudaTensor_id);
+  THCudaTensor *gradOutput = (THCudaTensor *)luaT_checkudata(L, 3, torch_CudaTensor_id);
+  int dW = luaT_getfieldcheckint(L, 1, "dW");
+  int dH = luaT_getfieldcheckint(L, 1, "dH");
+  int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
+
   THCudaTensor *gradWeight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradWeight", torch_CudaTensor_id);
   THCudaTensor *gradBias = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradBias", torch_CudaTensor_id);
-  THCudaTensor *gradInput = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
 
   THArgCheck(nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane");
 
@@ -63,17 +82,13 @@ static int cunn_SpatialConvolution_backward(lua_State *L)
   /* gradient to kernels */
   THCudaTensor_conv2DRevger(gradWeight, 1.0, input, gradOutput, dH, dW);
 
-  /* gradient to input */
-  THCudaTensor *tweight = THCudaTensor_newTranspose(weight,0,1);
-  THCudaTensor_conv2Dmv(gradInput, 0.0, gradOutput, tweight, dH, dW, "fc");
-  THCudaTensor_free(tweight);
-
-  return 1;
+  return 0;
 }
 
 static const struct luaL_Reg cunn_SpatialConvolution__ [] = {
   {"SpatialConvolution_forward", cunn_SpatialConvolution_forward},
   {"SpatialConvolution_backward", cunn_SpatialConvolution_backward},
+  {"SpatialConvolution_accGradParameters", cunn_SpatialConvolution_accGradParameters},
   {NULL, NULL}
 };
 
