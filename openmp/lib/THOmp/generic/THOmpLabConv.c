@@ -180,19 +180,18 @@ void THOmpLab_(conv2DRevgerm)(THTensor *r_, real beta, real alpha, THTensor *t_,
     }
   }
 
-  long p;
-  for(p = 0; p < nbatch; p++)
-  {
-    long k;
+  long k;
 #pragma omp parallel for private(k)
-    for(k = 0; k < nKernelPlane; k++)
+  for(k = 0; k < nKernelPlane; k++)
+  {
+    long i;
+    for(i = 0; i < nInputPlane; i++)
     {
-      long i;
-      /* get kernel */
-      real *ptr_weight = weight_data + p*kstride0 + k*kstride1;
-      
-      for(i = 0; i < nInputPlane; i++)
+      long p;
+      for(p = 0; p < nbatch; p++)
       {
+	/* get kernel */
+	real *ptr_weight = weight_data + p*kstride0 + k*kstride1;
 	/* get output */
 	real *ptr_output = output_data + k*nInputPlane*nOutputCols*nOutputRows + i*nOutputCols*nOutputRows;
 	/* get input */

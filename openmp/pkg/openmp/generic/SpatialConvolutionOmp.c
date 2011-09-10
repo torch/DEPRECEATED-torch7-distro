@@ -165,14 +165,14 @@ static int nnOmp_(SpatialConvolution_accGradParametersOmp)(lua_State *L)
   }
   else
   {
-    long p;
-    for(p = 0; p < input->size[0]; p++)
-    { 
-      /* BIAS */
-      long k;
+    long k;
 #pragma omp parallel for private(k)
-      for(k = 0; k < nOutputPlane; k++)
-      {
+    for(k = 0; k < nOutputPlane; k++)
+    {
+      long p;
+      for(p = 0; p < input->size[0]; p++)
+      { 
+	/* BIAS */
 	real *ptr_gradOutput = gradOutput_data + p*nOutputPlane*noutSlice + k*noutSlice;
 	long l;
 	for(l = 0; l < noutSlice; l++)
