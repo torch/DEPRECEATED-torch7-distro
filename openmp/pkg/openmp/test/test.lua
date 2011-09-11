@@ -148,38 +148,38 @@ function omptest.SpatialSubSamplingJacobianBatch()
    mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
 end
 
--- function omptest.TanhJacobian()
---    local ini = math.random(5,10)
---    local inj = math.random(5,10)
---    local ink = math.random(5,10)
---    local input = torch.Tensor(ink, inj, ini):zero()
+function omptest.TanhJacobian()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
    
---    local module = nn.Tanh()
+   local module = nn.Tanh()
    
---    local err = jac.testJacobian(module, input)
---    mytester:assertlt(err, precision ,  'error on state ')
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision ,  'error on state ')
    
---    local ferr, berr = jac.testIO(module, input, 0.1, 2)
---    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
---    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
--- end
+   local ferr, berr = jac.testIO(module, input, 0.1, 2)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
 
 
--- function omptest.HardTanhJacobian()
---    local ini = math.random(5,10)
---    local inj = math.random(5,10)
---    local ink = math.random(5,10)
---    local input = torch.Tensor(ink, inj, ini):zero()
+function omptest.HardTanhJacobian()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
    
---    local module = nn.HardTanh()
+   local module = nn.HardTanh()
    
---    local err = jac.testJacobian(module, input)
---    mytester:assertlt(err, precision ,  'error on state ')
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision ,  'error on state ')
    
---    local ferr, berr = jac.testIO(module, input, 0.1, 2)
---    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
---    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
--- end
+   local ferr, berr = jac.testIO(module, input, 0.1, 2)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
 
 local function modtester(module,input,params)
    params = params or {}
@@ -240,43 +240,43 @@ function omptest.SpatialConvolutionCompare()
    modtester(module,input,{'gradWeight','gradBias'})
 end
 
--- function omptest.SpatialSubSamplingCompare()
---    local from = math.random(1,10)
---    local ki = math.random(1,10)
---    local kj = math.random(1,10)
---    local si = math.random(1,4)
---    local sj = math.random(1,4)
---    local outi = math.random(10,20)
---    local outj = math.random(10,20)
---    local ini = (outi-1)*si+ki
---    local inj = (outj-1)*sj+kj
---    local module = nn.SpatialSubSampling(from, ki, kj, si, sj)
---    local input = torch.Tensor(from, inj, ini):zero()
+function omptest.SpatialSubSamplingCompare()
+   local from = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(10,20)
+   local outj = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.SpatialSubSampling(from, ki, kj, si, sj)
+   local input = torch.Tensor(from, inj, ini):zero()
    
---    modtester(module,input,{'gradWeight','gradBias'})
--- end
+   modtester(module,input,{'gradWeight','gradBias'})
+end
 
--- function omptest.TanhCompare()
---    local ini = math.random(5,10)
---    local inj = math.random(5,10)
---    local ink = math.random(5,10)
---    local input = torch.Tensor(ink, inj, ini):zero()
+function omptest.TanhCompare()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
    
---    local module = nn.Tanh()
+   local module = nn.Tanh()
    
---    modtester(module,input)
--- end
+   modtester(module,input)
+end
 
 
--- function omptest.HardTanhCompare()
---    local ini = math.random(5,10)
---    local inj = math.random(5,10)
---    local ink = math.random(5,10)
---    local input = torch.Tensor(ink, inj, ini):zero()
+function omptest.HardTanhCompare()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
    
---    local module = nn.HardTanh()
---    modtester(module,input)
--- end
+   local module = nn.HardTanh()
+   modtester(module,input)
+end
 
 function openmp.test()
    -- randomize stuff
