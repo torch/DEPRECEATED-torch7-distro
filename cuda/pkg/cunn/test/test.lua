@@ -9,18 +9,18 @@ local times = {}
 function cunntest.SpatialConvolution_forward()
    local from = math.random(1,64)
    local to = math.random(1,64)
-   local ki = math.random(3,13)
-   local kj = math.random(3,13)
+   local ki = math.random(3,15)
+   local kj = math.random(3,15)
    local si = math.random(1,2)
    local sj = math.random(1,2)
-   local outi = math.random(8,256)
-   local outj = math.random(8,256)
+   local outi = math.random(1,256)
+   local outj = math.random(1,256)
    local ini = (outi-1)*si+ki
    local inj = (outj-1)*sj+kj
 
    local tm = {}
-   local title = string.format('SpatialConvolution.forward %dx%dx%d o %dx%d -> %dx%dx%d', 
-                               from, inj, ini, kj, ki, to, outj, outi)
+   local title = string.format('SpatialConvolution.forward %dx%dx%d o %dx%d -> %dx%dx%d [s: %dx%d]', 
+                               from, inj, ini, kj, ki, to, outj, outi, sj, si)
    times[title] = tm
 
    torch.setdefaulttensortype('torch.FloatTensor')
@@ -47,8 +47,8 @@ function cunntest.SpatialConvolution_forward()
 
    torch.setdefaulttensortype('torch.FloatTensor')
    local error = torch.Tensor(to,outi,outj):copy(rescuda)
-   error = (error - groundtruth)
-   mytester:assertlt(error:abs():max(), precision, 'error on state (forward) ')
+   error = (error - groundtruth):abs()
+   mytester:assertlt(error:max(), precision, 'error on state (forward) ')
 end
 
 function cunntest.SpatialConvolution_backward()

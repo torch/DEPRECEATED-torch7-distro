@@ -124,6 +124,7 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
               float sum = 0;
               if (swapkernel) {
                 for(ky = 0; ky < kernel_h; ky++) {
+#pragma unroll 5
                   for(kx = 0; kx < kernel_w; kx++) {
                     sum += input_p[kx]*(*kernel_p--);
                   }
@@ -131,6 +132,7 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
                 }
               } else {
                 for(ky = 0; ky < kernel_h; ky++) {
+#pragma unroll 5
                   for(kx = 0; kx < kernel_w; kx++) {
                     sum += input_p[kx]*(*kernel_p++);
                   }
@@ -156,12 +158,22 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
             float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
             float *kernel_p = kernel + (oo * input_n + ii) * kernel_w * kernel_h + koffset;
             float sum = 0;
-            for(ky = 0; ky < kernel_h; ky++) {
-              for(kx = 0; kx < kernel_w; kx++) {
-                if (swapkernel) sum += input_p[kx]*(*kernel_p--);
-                else sum += input_p[kx]*(*kernel_p++);
+            if (swapkernel) {
+              for(ky = 0; ky < kernel_h; ky++) {
+#pragma unroll 5
+                for(kx = 0; kx < kernel_w; kx++) {
+                  sum += input_p[kx]*(*kernel_p--);
+                }
+                input_p += input_w;
               }
-              input_p += input_w;
+            } else {
+              for(ky = 0; ky < kernel_h; ky++) {
+#pragma unroll 5
+                for(kx = 0; kx < kernel_w; kx++) {
+                  sum += input_p[kx]*(*kernel_p++);
+                }
+                input_p += input_w;
+              }
             }
             *output_p += sum;
           }
@@ -224,6 +236,7 @@ __global__ void conv2genericrev(float *input, float *kernel, float *output,
           float *output_p = output + (kk * input_n + ii)*output_h*output_w + yy*output_w + xx;
           float sum = 0;
           for(ky = 0; ky < kernel_h; ky++) {
+#pragma unroll 5
             for(kx = 0; kx < kernel_w; kx++) {
               sum += input_p[kx]*(*kernel_p++);
             }
@@ -323,11 +336,16 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
   int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
   if (patch_w < 2) patch_w = 2;
   else if (patch_w > 32) patch_w = 32;
-  int patch_h = patch_w;
+  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
+  if (patch_h < 2) patch_h = 2;
+  else if (patch_h > 32) patch_h = 32;
   dim3 blocks(nOutputPlane);
   dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
   if ((nOutputRows % patch_h) != 0) threads.y++;
   if ((nOutputCols % patch_w) != 0) threads.x++;
+
+  // sync any previous kernel exec
+  cudaDeviceSynchronize();
 
   // convolution: xcorr2 or conv2
   if (type[1] == 'x') {
@@ -358,6 +376,31 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
                                                           srow, scol, patch_h, patch_w);
     else if ((nKernelCols == 13) && (nKernelRows == 13))
       conv2generic <false, 13, 13> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                          nInputPlane, nInputRows, nInputCols,
+                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                          srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 4) && (nKernelRows == 4))
+      conv2generic <false, 4, 4> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                        nInputPlane, nInputRows, nInputCols,
+                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                        srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 6) && (nKernelRows == 6))
+      conv2generic <false, 6, 6> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                        nInputPlane, nInputRows, nInputCols,
+                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                        srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 8) && (nKernelRows == 8))
+      conv2generic <false, 8, 8> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                        nInputPlane, nInputRows, nInputCols,
+                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                        srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 10) && (nKernelRows == 10))
+      conv2generic <false, 10, 10> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                          nInputPlane, nInputRows, nInputCols,
+                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                          srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 12) && (nKernelRows == 12))
+      conv2generic <false, 12, 12> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                           nInputPlane, nInputRows, nInputCols,
                                                           nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                           srow, scol, patch_h, patch_w);
@@ -397,6 +440,36 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
                                                          srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 2) && (nKernelRows == 2))
+      conv2generic <true, 2, 2> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                       nInputPlane, nInputRows, nInputCols,
+                                                       nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                       srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 4) && (nKernelRows == 4))
+      conv2generic <true, 4, 4> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                       nInputPlane, nInputRows, nInputCols,
+                                                       nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                       srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 6) && (nKernelRows == 6))
+      conv2generic <true, 6, 6> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                       nInputPlane, nInputRows, nInputCols,
+                                                       nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                       srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 8) && (nKernelRows == 8))
+      conv2generic <true, 8, 8> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                       nInputPlane, nInputRows, nInputCols,
+                                                       nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                       srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 10) && (nKernelRows == 10))
+      conv2generic <true, 10, 10> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                         nInputPlane, nInputRows, nInputCols,
+                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                         srow, scol, patch_h, patch_w);
+    else if ((nKernelCols == 12) && (nKernelRows == 12))
+      conv2generic <true, 12, 12> <<<blocks, threads>>> (input_data, weight_data, output_data,
+                                                         nInputPlane, nInputRows, nInputCols,
+                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+                                                         srow, scol, patch_h, patch_w);
     else
       conv2generic <true, 0 , 0> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                         nInputPlane, nInputRows, nInputCols,
@@ -408,6 +481,13 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
   cudaDeviceSynchronize();
   THCudaTensor_free(input);
   THCudaTensor_free(kernel);
+
+  // check for errors
+  cudaError_t err = cudaGetLastError();
+  if (err != cudaSuccess) {
+    printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    THError("aborting");
+  }
 }
 
 /*
@@ -470,11 +550,16 @@ TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, THCudaTe
   int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
   if (patch_w < 2) patch_w = 2;
   else if (patch_w > 32) patch_w = 32;
-  int patch_h = patch_w;
+  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
+  if (patch_h < 2) patch_h = 2;
+  else if (patch_h > 32) patch_h = 32;
   dim3 blocks(nKernelPlane, nInputPlane);
   dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
   if ((nOutputRows % patch_h) != 0) threads.y++;
   if ((nOutputCols % patch_w) != 0) threads.x++;
+
+  // sync previous jobs
+  cudaDeviceSynchronize();
 
   // compute rev conv
   conv2genericrev <<<blocks, threads>>> (input_data, kernel_data, output_data,
@@ -486,4 +571,11 @@ TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, THCudaTe
   cudaDeviceSynchronize();
   THCudaTensor_free(input);
   THCudaTensor_free(kernel);
+
+  // check for errors
+  cudaError_t err = cudaGetLastError();
+  if (err != cudaSuccess) {
+    printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    THError("aborting");
+  }
 }

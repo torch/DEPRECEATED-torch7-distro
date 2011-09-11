@@ -215,12 +215,18 @@ static int cunn_SpatialSubSampling_forward(lua_State *L)
   int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
   if (patch_w < 2) patch_w = 2;
   else if (patch_w > 32) patch_w = 32;
-  int patch_h = patch_w;
+  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
+  if (patch_h < 2) patch_h = 2;
+  else if (patch_h > 32) patch_h = 32;
   dim3 blocks(nInputPlane);
   dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
   if ((nOutputRows % patch_h) != 0) threads.y++;
   if ((nOutputCols % patch_w) != 0) threads.x++;
 
+  // sync
+  cudaDeviceSynchronize();
+
+  // run subsample kernel
   subsample <<<blocks, threads>>> (input_data, output_data, weight_data, bias_data,
                                    nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW,
                                    patch_h, patch_w);
@@ -229,6 +235,12 @@ static int cunn_SpatialSubSampling_forward(lua_State *L)
   cudaDeviceSynchronize();
   THCudaTensor_free(input);
 
+  // check for errors
+  cudaError_t err = cudaGetLastError();
+  if (err != cudaSuccess) {
+    printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    THError("aborting");
+  }
   return 1;
 }
 
@@ -264,12 +276,18 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
   if (patch_w < 2) patch_w = 2;
   else if (patch_w > 32) patch_w = 32;
-  int patch_h = patch_w;
+  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
+  if (patch_h < 2) patch_h = 2;
+  else if (patch_h > 32) patch_h = 32;
   dim3 blocks(nInputPlane);
   dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
   if ((nOutputRows % patch_h) != 0) threads.y++;
   if ((nOutputCols % patch_w) != 0) threads.x++;
 
+  // sync
+  cudaDeviceSynchronize();
+
+  // run backward kernel
   subgradinput <<<blocks, threads>>> (gradInput_data, gradOutput_data, weight_data,
                                       nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW,
                                       patch_h, patch_w);
@@ -277,6 +295,12 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   // sync & clean
   cudaDeviceSynchronize();
 
+  // check for errors
+  cudaError_t err = cudaGetLastError();
+  if (err != cudaSuccess) {
+    printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    THError("aborting");
+  }
   return 1;
 }
 
@@ -312,12 +336,18 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
   int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
   if (patch_w < 2) patch_w = 2;
   else if (patch_w > 32) patch_w = 32;
-  int patch_h = patch_w;
+  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
+  if (patch_h < 2) patch_h = 2;
+  else if (patch_h > 32) patch_h = 32;
   dim3 blocks(nInputPlane);
   dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
   if ((nOutputRows % patch_h) != 0) threads.y++;
   if ((nOutputCols % patch_w) != 0) threads.x++;
 
+  // sync
+  cudaDeviceSynchronize();
+
+  // run gradweight kernel
   subgradweight <<<blocks, threads>>> (input_data, gradOutput_data, gradWeight_data, gradBias_data,
                                        nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW,
                                        patch_h, patch_w);
@@ -326,6 +356,12 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
   cudaDeviceSynchronize();
   THCudaTensor_free(input);
 
+  // check for errors
+  cudaError_t err = cudaGetLastError();
+  if (err != cudaSuccess) {
+    printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    THError("aborting");
+  }
   return 0;
 }
 
