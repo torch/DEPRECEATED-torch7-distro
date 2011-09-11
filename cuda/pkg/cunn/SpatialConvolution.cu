@@ -1,3 +1,4 @@
+
 static int cunn_SpatialConvolution_forward(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
@@ -43,6 +44,9 @@ static int cunn_SpatialConvolution_backward(lua_State *L)
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
 
+  luaL_argcheck(L, dW == 1, 1, "dW must be 1 (this will be fixed soon)");
+  luaL_argcheck(L, dH == 1, 1, "dH must be 1 (this will be fixed soon)");
+
   THCudaTensor *weight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
   THCudaTensor *gradInput = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
 
@@ -63,6 +67,9 @@ static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
+
+  luaL_argcheck(L, dW == 1, 1, "dW must be 1 (this will be fixed soon)");
+  luaL_argcheck(L, dH == 1, 1, "dH must be 1 (this will be fixed soon)");
 
   THCudaTensor *gradWeight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradWeight", torch_CudaTensor_id);
   THCudaTensor *gradBias = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradBias", torch_CudaTensor_id);
