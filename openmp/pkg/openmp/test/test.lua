@@ -194,6 +194,7 @@ local function modtester(module,input,params)
    local goutseq = lab.rand(outseq:size())
    module:zeroGradParameters()
    local ginseq = module:backward(input,goutseq):clone()
+   module:accGradParameters(input,goutseq)
    local gparseq = {}
    for i=1,#params do
       gparseq[i] = module[params[i]]:clone()
@@ -204,6 +205,7 @@ local function modtester(module,input,params)
    local goutomp = goutseq:clone()
    module:zeroGradParameters()
    local ginomp = module:backward(input,goutomp):clone()
+   module:accGradParameters(input,goutomp)
    local gparomp = {}
    for i=1,#params do
       gparomp[i] = module[params[i]]:clone()
@@ -255,6 +257,39 @@ function omptest.SpatialSubSamplingCompare()
    
    modtester(module,input,{'gradWeight','gradBias'})
 end
+
+function omptest.SpatialConvolutionBatchCompare()
+   local from = math.random(1,10)
+   local to = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(10,20)
+   local outj = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.SpatialConvolution(from, to, ki, kj, si, sj)
+   local input = lab.randn(from,inj,ini)
+
+   batchcompare(module,input, {'weight','bias','gradWeight','gradBias'})
+end
+
+function omptest.SpatialSubSamplingBatchCompare()
+   local from = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(10,20)
+   local outj = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.SpatialSubSampling(from, ki, kj, si, sj)
+   local input = lab.randn(from,inj,ini)--torch.Tensor(from, inj, ini):zero()
+   batchcompare(module,input, {'weight','bias','gradWeight','gradBias'})
+end
+
 
 function omptest.TanhCompare()
    local ini = math.random(5,10)
