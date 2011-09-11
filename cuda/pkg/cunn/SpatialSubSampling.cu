@@ -89,15 +89,10 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
   gradOutput = gradOutput + k*output_w*output_h;
   input = input + k*input_w*input_h;
 
-  // compute gradBias
-  float sum = 0;
-  int i;
-  for(i = 0; i < output_h*output_w; i++) sum += gradOutput[i];
-  gradBias[k] += sum;
-
   // create array to hold partial sums
   __shared__ float sums[CUDA_MAX_THREADS];
-  for(i = 0; i < blockDim.x*blockDim.y; i++) sums[i] = 0;
+  float *psum = &sums[blockDim.x*threadIdx.y + threadIdx.x];
+  *psum = 0;
 
   // compute partial sums
   for(yy = yy_start; yy < yy_end; yy+=yy_step) {
@@ -107,21 +102,23 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
       float z = *ptr_gradOutput;
       long kx, ky;
       for(ky = 0; ky < kH; ky++) {
-        for(kx = 0; kx < kW; kx++)
-          sums[threadIdx.y*blockDim.x + threadIdx.x] += z * ptr_input[kx];
+        for(kx = 0; kx < kW; kx++) {
+          *psum += z * ptr_input[kx];
+        }
         ptr_input += input_w;
       }
     }
   }
-
-  // sync threads
   __syncthreads();
 
   // reduce: accumulate all partial sums to produce final gradWeight
   if ((threadIdx.x == 0) && (threadIdx.y == 0)) {
-    sum = 0;
-    for(i = 0; i < blockDim.x*blockDim.y; i++) sum += sums[i];
-    gradWeight[k] += sum;
+    for(int i = 0; i < blockDim.x*blockDim.y; i++) gradWeight[k] += sums[i];
+  }
+
+  // compute gradBias
+  if ((threadIdx.x == 0) && (threadIdx.y == 0)) { 
+    for(int i = 0; i < output_h*output_w; i++) gradBias[k] += gradOutput[i];
   }
 }
 
@@ -214,10 +211,8 @@ static int cunn_SpatialSubSampling_forward(lua_State *L)
   // arranged in a 16x16 grid.
   int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
   if (patch_w < 2) patch_w = 2;
-  else if (patch_w > 32) patch_w = 32;
   int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
   if (patch_h < 2) patch_h = 2;
-  else if (patch_h > 32) patch_h = 32;
   dim3 blocks(nInputPlane);
   dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
   if ((nOutputRows % patch_h) != 0) threads.y++;
@@ -275,10 +270,8 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   // arranged in a 16x16 grid.
   int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
   if (patch_w < 2) patch_w = 2;
-  else if (patch_w > 32) patch_w = 32;
   int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
   if (patch_h < 2) patch_h = 2;
-  else if (patch_h > 32) patch_h = 32;
   dim3 blocks(nInputPlane);
   dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
   if ((nOutputRows % patch_h) != 0) threads.y++;

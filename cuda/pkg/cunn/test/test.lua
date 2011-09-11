@@ -2,7 +2,7 @@ require 'torch'
 require 'cunn'
 
 local cunntest = {}
-local precision = 1e-2
+local precision = 1e-3
 local nloop = 1
 local times = {}
 
@@ -47,8 +47,8 @@ function cunntest.SpatialConvolution_forward()
 
    torch.setdefaulttensortype('torch.FloatTensor')
    local error = torch.Tensor(to,outi,outj):copy(rescuda)
-   error = (error - groundtruth):abs()
-   mytester:assertlt(error:max(), precision, 'error on state (forward) ')
+   error = (error - groundtruth)
+   mytester:assertlt(error:abs():max(), precision, 'error on state (forward) ')
 end
 
 function cunntest.SpatialConvolution_backward()
@@ -75,10 +75,12 @@ function cunntest.SpatialConvolution_backward()
    sconv:forward(input)
    sconv:zeroGradParameters()
    local groundgrad = sconv:backward(input, gradOutput)
+   sconv:accGradParameters(input, gradOutput)
    local a = torch.Timer()
    for i = 1,nloop do
       sconv:zeroGradParameters()
       groundgrad = sconv:backward(input, gradOutput)
+      sconv:accGradParameters(input, gradOutput)
    end
    local groundweight = sconv.gradWeight
    local groundbias = sconv.gradBias
@@ -93,10 +95,12 @@ function cunntest.SpatialConvolution_backward()
    gconv:forward(input)
    gconv:zeroGradParameters()
    local rescuda = gconv:backward(input, gradOutput)
+   gconv:accGradParameters(input, gradOutput)
    a:reset()
    for i = 1,nloop do
       gconv:zeroGradParameters()
       rescuda = gconv:backward(input, gradOutput)
+      gconv:accGradParameters(input, gradOutput)
    end
    local weightcuda = gconv.gradWeight
    local biascuda = gconv.gradBias
@@ -167,8 +171,8 @@ function cunntest.SpatialSubSampling_backward()
    local kj = math.random(2,4)
    local si = ki
    local sj = kj
-   local outi = math.random(32,256)
-   local outj = math.random(32,256)
+   local outi = math.random(32,64)
+   local outj = math.random(32,64)
    local ini = (outi-1)*si+ki
    local inj = (outj-1)*sj+kj
 
@@ -184,10 +188,12 @@ function cunntest.SpatialSubSampling_backward()
    sconv:forward(input)
    sconv:zeroGradParameters()
    local groundgrad = sconv:backward(input, gradOutput)
+   sconv:accGradParameters(input, gradOutput)
    local a = torch.Timer()
    for i = 1,nloop do
       sconv:zeroGradParameters()
       groundgrad = sconv:backward(input, gradOutput)
+      sconv:accGradParameters(input, gradOutput)
    end
    local groundweight = sconv.gradWeight
    local groundbias = sconv.gradBias
@@ -202,10 +208,12 @@ function cunntest.SpatialSubSampling_backward()
    gconv:forward(input)
    gconv:zeroGradParameters()
    local rescuda = gconv:backward(input, gradOutput)
+   gconv:accGradParameters(input, gradOutput)
    a:reset()
    for i = 1,nloop do
       gconv:zeroGradParameters()
       rescuda = gconv:backward(input, gradOutput)
+      gconv:accGradParameters(input, gradOutput)
    end
    local weightcuda = gconv.gradWeight
    local biascuda = gconv.gradBias
