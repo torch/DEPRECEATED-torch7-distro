@@ -63,7 +63,8 @@ __global__ void subsample(float *input, float *output, float *weight, float *bia
  */
 __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight, float *gradBias,
                               int input_n, int input_h, int input_w,
-                              int kH, int kW, int dH, int dW)
+                              int kH, int kW, int dH, int dW,
+                              float scale)
 {
   // iterators
   int xx, yy;
@@ -113,7 +114,7 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
 
   // reduce: accumulate all partial sums to produce final gradWeight
   if ((threadIdx.x == 0) && (threadIdx.y == 0)) {
-    for(int i = 0; i < blockDim.x*blockDim.y; i++) gradWeight[k] += sums[i];
+    for(int i = 0; i < blockDim.x*blockDim.y; i++) gradWeight[k] += scale*sums[i];
   }
   __syncthreads();
 
@@ -127,7 +128,7 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
   // reduce gradBias
   if ((threadIdx.x == 0) && (threadIdx.y == 0)) { 
     for (int i=0; i<(blockDim.x*blockDim.y); i++)
-      gradBias[k] += sums[i];
+      gradBias[k] += scale*sums[i];
   }
 }
 
@@ -232,7 +233,7 @@ static int cunn_SpatialSubSampling_forward(lua_State *L)
   // check for errors
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
-    printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    printf("error in SpatialSubsampling.forward: %s\n", cudaGetErrorString(err));
     THError("aborting");
   }
   return 1;
@@ -284,7 +285,7 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   // check for errors
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
-    printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    printf("error in SpatialSubsampling.backward: %s\n", cudaGetErrorString(err));
     THError("aborting");
   }
   return 1;
@@ -299,6 +300,7 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
+  float scale = luaL_optnumber(L, 4, 1);
 
   luaL_argcheck(L, dW == kW, 1, "dW and kW must be equal (this will be fixed soon)");
   luaL_argcheck(L, dH == kH, 1, "dH and kH must be equal (this will be fixed soon)");
@@ -328,7 +330,7 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
 
   // run gradweight kernel
   subgradweight <<<blocks, threads>>> (input_data, gradOutput_data, gradWeight_data, gradBias_data,
-                                       nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
+                                       nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW, scale);
 
   // sync & clean
   cudaDeviceSynchronize();
@@ -337,7 +339,7 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
   // check for errors
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
-    printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    printf("error in SpatialSubsampling.accGradParameters: %s\n", cudaGetErrorString(err));
     THError("aborting");
   }
   return 0;

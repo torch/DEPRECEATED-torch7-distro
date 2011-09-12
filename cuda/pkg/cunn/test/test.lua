@@ -2,7 +2,8 @@ require 'torch'
 require 'cunn'
 
 local cunntest = {}
-local precision = 1e-3
+local precision_forward = 1e-4
+local precision_backward = 1e-2
 local nloop = 1
 local times = {}
 
@@ -48,7 +49,7 @@ function cunntest.SpatialConvolution_forward()
    torch.setdefaulttensortype('torch.FloatTensor')
    local error = torch.Tensor(to,outi,outj):copy(rescuda)
    error = (error - groundtruth)
-   mytester:assertlt(error:abs():max(), precision, 'error on state (forward) ')
+   mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
 end
 
 function cunntest.SpatialConvolution_backward()
@@ -114,9 +115,9 @@ function cunntest.SpatialConvolution_backward()
    local berror = torch.Tensor(to):copy(biascuda)
    berror = (berror - groundbias)
 
-   mytester:assertlt(error:abs():max(), precision, 'error on state (backward) ')
-   mytester:assertlt(werror:abs():max(), precision, 'error on weight (backward) ')
-   mytester:assertlt(berror:abs():max(), precision, 'error on bias (backward) ')
+   mytester:assertlt(error:abs():max(), precision_backward, 'error on state (backward) ')
+   mytester:assertlt(werror:abs():max(), precision_backward, 'error on weight (backward) ')
+   mytester:assertlt(berror:abs():max(), precision_backward, 'error on bias (backward) ')
 end
 
 function cunntest.SpatialSubSampling_forward()
@@ -161,7 +162,7 @@ function cunntest.SpatialSubSampling_forward()
    torch.setdefaulttensortype('torch.FloatTensor')
    local error = torch.Tensor(to,outi,outj):copy(rescuda)
    error = (error - groundtruth)
-   mytester:assertlt(error:abs():max(), precision, 'error on state (forward) ')
+   mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
 end
 
 function cunntest.SpatialSubSampling_backward()
@@ -227,9 +228,9 @@ function cunntest.SpatialSubSampling_backward()
    local berror = torch.Tensor(to):copy(biascuda)
    berror = (berror - groundbias)
 
-   mytester:assertlt(error:abs():max(), precision, 'error on state (backward) ')
-   mytester:assertlt(werror:abs():max(), precision, 'error on weight (backward) ')
-   mytester:assertlt(berror:abs():max(), precision, 'error on bias (backward) ')
+   mytester:assertlt(error:abs():max(), precision_backward, 'error on state (backward) ')
+   mytester:assertlt(werror:abs():max(), precision_backward, 'error on weight (backward) ')
+   mytester:assertlt(berror:abs():max(), precision_backward, 'error on bias (backward) ')
 end
 
 function nn.testcuda()

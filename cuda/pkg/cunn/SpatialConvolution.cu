@@ -60,7 +60,7 @@ static int cunn_SpatialConvolution_backward(lua_State *L)
   return 1;
 }
 
-__global__ void compute_gradBias(float *gradBias, float *gradOutput, 
+__global__ void compute_gradBias(float *gradBias, float *gradOutput, float scale,
                                  int output_n, int output_h, int output_w)
 {
   // each block does a plane
@@ -78,11 +78,12 @@ __global__ void compute_gradBias(float *gradBias, float *gradOutput,
   for (int i=i_start; i<i_end; i+=i_step) {
     sums[threadIdx.x] += gradOutput_k[i];
   }
+  __syncthreads();
 
   // reduce
   if (threadIdx.x == 0) {
     for (int i=0; i<blockDim.x; i++)
-      gradBias[k] += sums[i];
+      gradBias[k] += scale*sums[i];
   }
 }
 
@@ -93,6 +94,7 @@ static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
+  float scale = luaL_optnumber(L, 4, 1);
 
   luaL_argcheck(L, dW == 1, 1, "dW must be 1 (this will be fixed soon)");
   luaL_argcheck(L, dH == 1, 1, "dH must be 1 (this will be fixed soon)");
@@ -108,11 +110,11 @@ static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
   /* gradient to bias */
   dim3 blocks(nOutputPlane);
   dim3 threads(32);
-  compute_gradBias <<<blocks, threads>>> (gradBias_data, gradOutput_data, 
+  compute_gradBias <<<blocks, threads>>> (gradBias_data, gradOutput_data, scale,
                                           gradOutput->size[0], gradOutput->size[1], gradOutput->size[2]);
 
   /* gradient to kernels */
-  THCudaTensor_conv2DRevger(gradWeight, 1.0, input, gradOutput, dH, dW);
+  THCudaTensor_conv2DRevger(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
 
   return 0;
 }

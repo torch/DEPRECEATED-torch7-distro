@@ -191,7 +191,7 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
 __global__ void conv2genericrev(float *input, float *kernel, float *output,
                                 int input_n, int input_h, int input_w,
                                 int kernel_n, int kernel_h, int kernel_w,
-                                int stride_h, int stride_w)
+                                float alpha, int stride_h, int stride_w)
 {
   // output dimensions
   int output_h = input_h - (kernel_h - 1) * stride_h;
@@ -246,7 +246,7 @@ __global__ void conv2genericrev(float *input, float *kernel, float *output,
 
     // add existing output, and write back
     for (int i=tid; i<output_w*output_h; i+=nthreads) {
-      output[i] += shared_output[i];
+      output[i] += alpha*shared_output[i];
     }
   }
 }
@@ -492,8 +492,9 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
  * for sr,sc=1 this is equivalent to xcorr2Dger, but otherwise it is useful for
  * calculating derivatives wrt a kernel that is applied with stride sr,sc != 1
  */
-TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, THCudaTensor *input,
-                                      THCudaTensor *kernel, long srow, long scol)
+TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, float alpha,
+                                      THCudaTensor *input, THCudaTensor *kernel,
+                                      long srow, long scol)
 {
   long nInputPlane, nInputRows, nInputCols;
   long nKernelPlane, nKernelRows, nKernelCols;
@@ -545,7 +546,7 @@ TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, THCudaTe
   conv2genericrev <<<blocks, threads>>> (input_data, kernel_data, output_data,
                                          nInputPlane, nInputRows, nInputCols,
                                          nKernelPlane, nKernelRows, nKernelCols,
-                                         srow, scol);
+                                         alpha, srow, scol);
 
   // sync & clean
   cudaDeviceSynchronize();
@@ -555,7 +556,7 @@ TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, THCudaTe
   // check for errors
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
-    printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    printf("error in conv2DRevger: %s\n", cudaGetErrorString(err));
     THError("aborting");
   }
 }
