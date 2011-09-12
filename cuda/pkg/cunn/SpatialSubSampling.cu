@@ -89,10 +89,12 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
   gradOutput = gradOutput + k*output_w*output_h;
   input = input + k*input_w*input_h;
 
+  // thread ID
+  int tid = blockDim.x*threadIdx.y + threadIdx.x;
+
   // create array to hold partial sums
   __shared__ float sums[CUDA_MAX_THREADS];
-  float *psum = &sums[blockDim.x*threadIdx.y + threadIdx.x];
-  *psum = 0;
+  sums[tid] = 0;
 
   // compute partial sums
   for(yy = yy_start; yy < yy_end; yy+=yy_step) {
@@ -103,7 +105,7 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
       long kx, ky;
       for(ky = 0; ky < kH; ky++) {
         for(kx = 0; kx < kW; kx++) {
-          *psum += z * ptr_input[kx];
+          sums[tid] += z * ptr_input[kx];
         }
         ptr_input += input_w;
       }
@@ -115,10 +117,19 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
   if ((threadIdx.x == 0) && (threadIdx.y == 0)) {
     for(int i = 0; i < blockDim.x*blockDim.y; i++) gradWeight[k] += sums[i];
   }
+  __syncthreads();
 
   // compute gradBias
+  sums[tid] = 0;
+  for (int i=tid; i<output_w*output_h; i+=(blockDim.x*blockDim.y)) {
+    sums[tid] += gradOutput[i];
+  }
+  __syncthreads();
+
+  // reduce gradBias
   if ((threadIdx.x == 0) && (threadIdx.y == 0)) { 
-    for(int i = 0; i < output_h*output_w; i++) gradBias[k] += gradOutput[i];
+    for (int i=0; i<(blockDim.x*blockDim.y); i++)
+      gradBias[k] += sums[i];
   }
 }
 

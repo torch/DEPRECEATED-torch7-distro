@@ -60,6 +60,32 @@ static int cunn_SpatialConvolution_backward(lua_State *L)
   return 1;
 }
 
+__global__ void compute_gradBias(float *gradBias, float *gradOutput, 
+                                 int output_n, int output_h, int output_w)
+{
+  // each block does a plane
+  int k = blockIdx.x;
+  float *gradOutput_k = gradOutput + k*output_h*output_w;
+
+  // offsets
+  int i_start = threadIdx.x;
+  int i_end = output_w*output_h;
+  int i_step = blockDim.x;
+
+  // sum output plane k into partial sum array
+  __shared__ float sums[32];
+  sums[threadIdx.x] = 0;
+  for (int i=i_start; i<i_end; i+=i_step) {
+    sums[threadIdx.x] += gradOutput_k[i];
+  }
+
+  // reduce
+  if (threadIdx.x == 0) {
+    for (int i=0; i<blockDim.x; i++)
+      gradBias[k] += sums[i];
+  }
+}
+
 static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor *)luaT_checkudata(L, 2, torch_CudaTensor_id);
@@ -76,15 +102,14 @@ static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
 
   THArgCheck(nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane");
 
+  float *gradBias_data = THCudaTensor_data(gradBias);
+  float *gradOutput_data = THCudaTensor_data(gradOutput);
+
   /* gradient to bias */
-  long k;
-  THCudaTensor *gradOutSlice = THCudaTensor_new();
-  for(k = 0; k < nOutputPlane; k++) {
-    THCudaTensor_select(gradOutSlice, gradOutput, 0, k);
-    float sum = THCudaTensor_sum(gradOutSlice);
-    THCudaTensor_set1d(gradBias, k, THCudaTensor_get1d(gradBias, k) + sum);
-  }
-  THCudaTensor_free(gradOutSlice);
+  dim3 blocks(nOutputPlane);
+  dim3 threads(32);
+  compute_gradBias <<<blocks, threads>>> (gradBias_data, gradOutput_data, 
+                                          gradOutput->size[0], gradOutput->size[1], gradOutput->size[2]);
 
   /* gradient to kernels */
   THCudaTensor_conv2DRevger(gradWeight, 1.0, input, gradOutput, dH, dW);
