@@ -1,14 +1,23 @@
-FIND_PACKAGE(CUDA 4.0 REQUIRED)
+FIND_PACKAGE(CUDA 4.0)
 
-# bug on Apple
-IF(APPLE)
-  LINK_DIRECTORIES("/usr/local/cuda/lib/")
-ENDIF(APPLE)
+IF (CUDA_FOUND)
 
-FILE(GLOB _all_files *)
+   # bug on Apple
+   IF(APPLE)
+     LINK_DIRECTORIES("/usr/local/cuda/lib/")
+   ENDIF(APPLE)
 
-FOREACH(_file ${_all_files})
-  IF(EXISTS "${_file}/CMakeLists.txt")
-    ADD_SUBDIRECTORY(${_file})
-  ENDIF(EXISTS "${_file}/CMakeLists.txt")
-ENDFOREACH(_file ${_all_files})
+   FILE(GLOB _all_files *)
+
+   FOREACH(_file ${_all_files})
+     IF(EXISTS "${_file}/CMakeLists.txt")
+       ADD_SUBDIRECTORY(${_file})
+     ENDIF(EXISTS "${_file}/CMakeLists.txt")
+   ENDFOREACH(_file ${_all_files})
+
+ELSE (CUDA_FOUND)
+
+    MESSAGE(STATUS "Disabling CUDA (CUDA 4.0 required, and not found)")
+    MESSAGE(STATUS "If CUDA 4.0 is install, then specify CUDA_TOOLKIT_ROOT_DIR")
+
+ENDIF (CUDA_FOUND)
