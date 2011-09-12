@@ -37,6 +37,11 @@ end
 function Tester:assertne (val, condition, message)
    self:assert_sub(val~=condition,string.format('%s\n%s  val=%s, condition=%s',message,' NE(~=) violation ', tostring(val), tostring(condition)))
 end
+function Tester:assertTensorEq(ta, tb, condition, message)
+   local diff = ta-tb
+   local err = diff:abs():max()
+   self:assert_sub(err<condition,string.format('%s\n%s  val=%s, condition=%s',message,' TensorEQ(~=) violation ', tostring(err), tostring(condition)))
+end
 
 function Tester:pcall(f)
    local nerr = #self.errors
