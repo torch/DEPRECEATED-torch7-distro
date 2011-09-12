@@ -8,8 +8,7 @@
  */
 __global__ void subsample(float *input, float *output, float *weight, float *bias,
                           int input_n, int input_h, int input_w,
-                          int kH, int kW, int dH, int dW,
-                          int patch_h, int patch_w)
+                          int kH, int kW, int dH, int dW)
 {
   // iterators
   int xx, yy;
@@ -25,9 +24,9 @@ __global__ void subsample(float *input, float *output, float *weight, float *bia
   int xx_end = output_w;
   int xx_step = blockDim.x;
 
-  int yy_start = threadIdx.y * patch_h;
-  int yy_end = yy_start + patch_h; if (yy_end > output_h) yy_end = output_h;
-  int yy_step = 1;
+  int yy_start = threadIdx.y;
+  int yy_end = output_h;
+  int yy_step = blockDim.y;
 
   // select input/output plane
   output = output + k*output_w*output_h;
@@ -64,8 +63,7 @@ __global__ void subsample(float *input, float *output, float *weight, float *bia
  */
 __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight, float *gradBias,
                               int input_n, int input_h, int input_w,
-                              int kH, int kW, int dH, int dW,
-                              int patch_h, int patch_w)
+                              int kH, int kW, int dH, int dW)
 {
   // iterators
   int xx, yy;
@@ -81,9 +79,9 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
   int xx_end = output_w;
   int xx_step = blockDim.x;
 
-  int yy_start = threadIdx.y * patch_h;
-  int yy_end = yy_start + patch_h; if (yy_end > output_h) yy_end = output_h;
-  int yy_step = 1;
+  int yy_start = threadIdx.y;
+  int yy_end = output_h;
+  int yy_step = blockDim.y;
 
   // select input/output plane
   gradOutput = gradOutput + k*output_w*output_h;
@@ -139,8 +137,7 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
  */
 __global__ void subgradinput(float *gradInput, float *gradOutput, float *weight,
                              int input_n, int input_h, int input_w,
-                             int kH, int kW, int dH, int dW,
-                             int patch_h, int patch_w)
+                             int kH, int kW, int dH, int dW)
 {
   // iterators
   int xx, yy;
@@ -156,9 +153,9 @@ __global__ void subgradinput(float *gradInput, float *gradOutput, float *weight,
   int xx_end = output_w;
   int xx_step = blockDim.x;
 
-  int yy_start = threadIdx.y * patch_h;
-  int yy_end = yy_start + patch_h; if (yy_end > output_h) yy_end = output_h;
-  int yy_step = 1;
+  int yy_start = threadIdx.y;
+  int yy_end = output_h;
+  int yy_step = blockDim.y;
 
   // select input/output plane
   gradOutput = gradOutput + k*output_w*output_h;
@@ -218,24 +215,15 @@ static int cunn_SpatialSubSampling_forward(lua_State *L)
   output_data = THCudaTensor_data(output);
 
   // cuda blocks & threads:
-  // we create one block per input map, and then try to have 256 threads per map
-  // arranged in a 16x16 grid.
-  int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
-  if (patch_w < 2) patch_w = 2;
-  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
-  if (patch_h < 2) patch_h = 2;
   dim3 blocks(nInputPlane);
-  dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
-  if ((nOutputRows % patch_h) != 0) threads.y++;
-  if ((nOutputCols % patch_w) != 0) threads.x++;
+  dim3 threads(32, 8);
 
   // sync
   cudaDeviceSynchronize();
 
   // run subsample kernel
   subsample <<<blocks, threads>>> (input_data, output_data, weight_data, bias_data,
-                                   nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW,
-                                   patch_h, patch_w);
+                                   nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
 
   // sync & clean
   cudaDeviceSynchronize();
@@ -280,24 +268,15 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   gradInput_data = THCudaTensor_data(gradInput);
 
   // cuda blocks & threads:
-  // we create one block per input map, and then try to have 256 threads per map
-  // arranged in a 16x16 grid.
-  int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
-  if (patch_w < 2) patch_w = 2;
-  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
-  if (patch_h < 2) patch_h = 2;
   dim3 blocks(nInputPlane);
-  dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
-  if ((nOutputRows % patch_h) != 0) threads.y++;
-  if ((nOutputCols % patch_w) != 0) threads.x++;
+  dim3 threads(32, 8);
 
   // sync
   cudaDeviceSynchronize();
 
   // run backward kernel
   subgradinput <<<blocks, threads>>> (gradInput_data, gradOutput_data, weight_data,
-                                      nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW,
-                                      patch_h, patch_w);
+                                      nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
 
   // sync & clean
   cudaDeviceSynchronize();
@@ -341,26 +320,15 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
   input_data = THCudaTensor_data(input);
 
   // cuda blocks & threads:
-  // we create one block per input map, and then try to have 256 threads per map
-  // arranged in a 16x16 grid.
-  int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
-  if (patch_w < 2) patch_w = 2;
-  else if (patch_w > 32) patch_w = 32;
-  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
-  if (patch_h < 2) patch_h = 2;
-  else if (patch_h > 32) patch_h = 32;
   dim3 blocks(nInputPlane);
-  dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
-  if ((nOutputRows % patch_h) != 0) threads.y++;
-  if ((nOutputCols % patch_w) != 0) threads.x++;
+  dim3 threads(32, 8);
 
   // sync
   cudaDeviceSynchronize();
 
   // run gradweight kernel
   subgradweight <<<blocks, threads>>> (input_data, gradOutput_data, gradWeight_data, gradBias_data,
-                                       nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW,
-                                       patch_h, patch_w);
+                                       nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
 
   // sync & clean
   cudaDeviceSynchronize();

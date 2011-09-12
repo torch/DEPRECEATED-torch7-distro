@@ -7,13 +7,13 @@
  *   the ones in THLabConv.
  *
  * History:
+ *   Sept 11, 2011, 11:59PM  -  Clement Farabet  -  Optimized RevConv by a good x2
  *   July 22, 2011, 8:38PM   -  Clement Farabet  -  All Valid/Full/XCORR/CONV implemented
  *   July 22, 2011, 4:00PM   -  Clement Farabet  -  Rewrote for loop to insure memory coalescing
  *   July 21, 2011, 11:21PM  -  Clement Farabet  -  Creation, based conv2d routine
  */
 
 #define CUDA_SHARED_MEM_SIZE (4*1024-32) // this is given by nVidia: max shared mem per block
-#define CUDA_ORDER_FOR_COALESCING        // this reorders memory reads to enable coalescing
 
 /*
  * Description:
@@ -28,8 +28,7 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
   __global__ void conv2generic(float *input, float *kernel, float *output,
                                int input_n, int input_h, int input_w,
                                int kernel_n, int kernel_h, int kernel_w,
-                               int stride_h, int stride_w,
-                               int patch_h, int patch_w)
+                               int stride_h, int stride_w)
 {
   // output dimensions
   int output_h = (input_h - kernel_h) / stride_h + 1;
@@ -39,22 +38,23 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
   int koffset = swapkernel ? kernel_w*kernel_h-1 : 0;
 
   // generate offsets according to block/thread ids
-#ifdef CUDA_ORDER_FOR_COALESCING
-  int xx_start = threadIdx.x; // * patch_w;
+  int xx_start = threadIdx.x;
   int xx_end = output_w;
   int xx_step = blockDim.x;
-#else
-  int xx_start = threadIdx.x * patch_w;
-  int xx_end = xx_start + patch_w; if (xx_end > output_w) xx_end = output_w;
-  int xx_step = 1;
-#endif
-  int yy_start = threadIdx.y * patch_h;
-  int yy_end = yy_start + patch_h; if (yy_end > output_h) yy_end = output_h;
-  int yy_step = 1;
+
+  int yy_start = threadIdx.y;
+  int yy_end = output_h;
+  int yy_step = blockDim.y;
+
   int oo_start = blockIdx.x;
   int oo_end = oo_start+1;
+
   int ii_start = 0;
   int ii_end = input_n;
+
+  // nb threads, unique thread id
+  int tid = blockDim.x * threadIdx.y + threadIdx.x;
+  int nthreads = blockDim.x * blockDim.y;
 
   // iterators
   int oo, ii, xx, yy, kx, ky, kk;
@@ -66,13 +66,9 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
     __shared__ float shared_kernel[CUDA_SHARED_MEM_SIZE];
 
     // first thread of each block does the copy
-    if ((threadIdx.x == 0) && (threadIdx.y == 0)) {
-      for (kk = 0; kk < kernel_w*kernel_h*input_n; kk++) {
-        shared_kernel[kk] = kernel[input_n*kernel_w*kernel_h*blockIdx.x + kk];
-      }
+    for (kk = tid; kk < kernel_w*kernel_h*input_n; kk += nthreads) {
+      shared_kernel[kk] = kernel[input_n*kernel_w*kernel_h*blockIdx.x + kk];
     }
-
-    // sync threads
     __syncthreads();
 
     // templated kernel size
@@ -195,56 +191,62 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
 __global__ void conv2genericrev(float *input, float *kernel, float *output,
                                 int input_n, int input_h, int input_w,
                                 int kernel_n, int kernel_h, int kernel_w,
-                                int stride_h, int stride_w,
-                                int patch_h, int patch_w)
+                                int stride_h, int stride_w)
 {
   // output dimensions
   int output_h = input_h - (kernel_h - 1) * stride_h;
   int output_w = input_w - (kernel_w - 1) * stride_w;
 
-  // generate offsets according to block/thread ids
-#ifdef CUDA_ORDER_FOR_COALESCING
-  int xx_start = threadIdx.x; // * patch_w;
-  int xx_end = output_w;
-  int xx_step = blockDim.x;
-#else
-  int xx_start = threadIdx.x * patch_w;
-  int xx_end = xx_start + patch_w; if (xx_end > output_w) xx_end = output_w;
-  int xx_step = 1;
-#endif
-  int yy_start = threadIdx.y * patch_h;
-  int yy_end = yy_start + patch_h; if (yy_end > output_h) yy_end = output_h;
-  int yy_step = 1;
+  // this thread only processes one output, defined by the block Ids
+  int kk = blockIdx.x;
+  int ii = blockIdx.y;
 
-  int kk_start = blockIdx.x;
-  int kk_end = kk_start+1;
+  // thread ID
+  int tid = threadIdx.x;
+  int nthreads = blockDim.x;
 
-  int ii_start = blockIdx.y;
-  int ii_end = ii_start+1;
+  // one thread only sees one output
+  output = output + (kk * input_n + ii) * output_h*output_w;
 
-  // iterators
-  int kk, ii, xx, yy, kx, ky;
+  // put the output in shared memory
+  __shared__ float shared_output[CUDA_SHARED_MEM_SIZE];
+
+  // generate tid outputs in shared memory
+  float *output_s = shared_output + tid*output_w*output_h;
 
   // convolution loop
-  for(kk = kk_start; kk < kk_end; kk++) {
-    for(ii = ii_start; ii < ii_end; ii++) {
-      for(yy = yy_start; yy < yy_end; yy+=yy_step) {
-        for(xx = xx_start; xx < xx_end; xx+=xx_step) {
-          // Dot product in two dimensions... (between input image and kernel)
-          float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
-          float *kernel_p = kernel + kk*kernel_w*kernel_h;
-          float *output_p = output + (kk * input_n + ii)*output_h*output_w + yy*output_w + xx;
-          float sum = 0;
-          for(ky = 0; ky < kernel_h; ky++) {
-#pragma unroll 5
-            for(kx = 0; kx < kernel_w; kx++) {
-              sum += input_p[kx]*(*kernel_p++);
-            }
-            input_p += input_w;
-          }
-          *output_p += sum;
-        }
+  int xx, yy, kx, ky;
+  yy = threadIdx.y;
+  float *output_p = output_s + yy * output_w;
+  for(xx=0; xx<output_w; xx++) {
+    // Dot product in two dimensions... (between input image and kernel)
+    float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
+    float *kernel_p = kernel + kk*kernel_w*kernel_h;
+    float sum = 0;
+    for(ky=0; ky<kernel_h; ky++) {
+      for(kx=tid; kx<kernel_w; kx+=nthreads) {
+        sum += input_p[kx]*kernel_p[kx];
       }
+      input_p += input_w;
+      kernel_p += kernel_w;
+    }
+    *(output_p++) = sum;
+  }
+  __syncthreads();
+
+  // reduce and write back
+  if (yy == 0) {
+    // reduce outputs
+    for (int k=1; k<nthreads; k++) {
+      for (int i=tid; i<output_w*output_h; i+=nthreads) {
+        shared_output[i] += shared_output[k*output_h*output_w + i];
+      }
+    }
+    __syncthreads();
+
+    // add existing output, and write back
+    for (int i=tid; i<output_w*output_h; i+=nthreads) {
+      output[i] += shared_output[i];
     }
   }
 }
@@ -326,23 +328,9 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
   float *weight_data = THCudaTensor_data(kernel);
   float *output_data = THCudaTensor_data(output);
 
-  // auto compute nb of blocks and threads:
-  // this might look a bit arbitrary, but it's not. We want to be in a sweet spot,
-  // where most of the time we'll have 16x16 threads per output map, that is 256 threads
-  // dealing with each map, and one block per map.
-  // example: if we have 16 output maps, each being 256x256, we'll have 16 blocks
-  // with 256 threads, each thread processing a 16x16 suboutput.
-  // call me if it's not clear ;-)
-  int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
-  if (patch_w < 2) patch_w = 2;
-  else if (patch_w > 32) patch_w = 32;
-  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
-  if (patch_h < 2) patch_h = 2;
-  else if (patch_h > 32) patch_h = 32;
+  // cuda blocks & threads:
   dim3 blocks(nOutputPlane);
-  dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
-  if ((nOutputRows % patch_h) != 0) threads.y++;
-  if ((nOutputCols % patch_w) != 0) threads.x++;
+  dim3 threads(32, 8);
 
   // sync any previous kernel exec
   cudaDeviceSynchronize();
@@ -353,128 +341,128 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
       conv2generic <false, 3, 3> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                         nInputPlane, nInputRows, nInputCols,
                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                        srow, scol, patch_h, patch_w);
+                                                        srow, scol);
     else if ((nKernelCols == 5) && (nKernelRows == 5))
       conv2generic <false, 5, 5> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                         nInputPlane, nInputRows, nInputCols,
                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                        srow, scol, patch_h, patch_w);
+                                                        srow, scol);
     else if ((nKernelCols == 7) && (nKernelRows == 7))
       conv2generic <false, 7, 7> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                         nInputPlane, nInputRows, nInputCols,
                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                        srow, scol, patch_h, patch_w);
+                                                        srow, scol);
     else if ((nKernelCols == 9) && (nKernelRows == 9))
       conv2generic <false, 9, 9> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                         nInputPlane, nInputRows, nInputCols,
                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                        srow, scol, patch_h, patch_w);
+                                                        srow, scol);
     else if ((nKernelCols == 11) && (nKernelRows == 11))
       conv2generic <false, 11, 11> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                           nInputPlane, nInputRows, nInputCols,
                                                           nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                          srow, scol, patch_h, patch_w);
+                                                          srow, scol);
     else if ((nKernelCols == 13) && (nKernelRows == 13))
       conv2generic <false, 13, 13> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                           nInputPlane, nInputRows, nInputCols,
                                                           nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                          srow, scol, patch_h, patch_w);
+                                                          srow, scol);
     else if ((nKernelCols == 4) && (nKernelRows == 4))
       conv2generic <false, 4, 4> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                         nInputPlane, nInputRows, nInputCols,
                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                        srow, scol, patch_h, patch_w);
+                                                        srow, scol);
     else if ((nKernelCols == 6) && (nKernelRows == 6))
       conv2generic <false, 6, 6> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                         nInputPlane, nInputRows, nInputCols,
                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                        srow, scol, patch_h, patch_w);
+                                                        srow, scol);
     else if ((nKernelCols == 8) && (nKernelRows == 8))
       conv2generic <false, 8, 8> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                         nInputPlane, nInputRows, nInputCols,
                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                        srow, scol, patch_h, patch_w);
+                                                        srow, scol);
     else if ((nKernelCols == 10) && (nKernelRows == 10))
       conv2generic <false, 10, 10> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                           nInputPlane, nInputRows, nInputCols,
                                                           nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                          srow, scol, patch_h, patch_w);
+                                                          srow, scol);
     else if ((nKernelCols == 12) && (nKernelRows == 12))
       conv2generic <false, 12, 12> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                           nInputPlane, nInputRows, nInputCols,
                                                           nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                          srow, scol, patch_h, patch_w);
+                                                          srow, scol);
     else
       conv2generic <false, 0 , 0> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                         srow, scol, patch_h, patch_w);
+                                                         srow, scol);
   } else { // 'c'
     if ((nKernelCols == 3) && (nKernelRows == 3))
       conv2generic <true, 3, 3> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                        nInputPlane, nInputRows, nInputCols,
                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                       srow, scol, patch_h, patch_w);
+                                                       srow, scol);
     else if ((nKernelCols == 5) && (nKernelRows == 5))
       conv2generic <true, 5, 5> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                        nInputPlane, nInputRows, nInputCols,
                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                       srow, scol, patch_h, patch_w);
+                                                       srow, scol);
     else if ((nKernelCols == 7) && (nKernelRows == 7))
       conv2generic <true, 7, 7> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                        nInputPlane, nInputRows, nInputCols,
                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                       srow, scol, patch_h, patch_w);
+                                                       srow, scol);
     else if ((nKernelCols == 9) && (nKernelRows == 9))
       conv2generic <true, 9, 9> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                        nInputPlane, nInputRows, nInputCols,
                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                       srow, scol, patch_h, patch_w);
+                                                       srow, scol);
     else if ((nKernelCols == 11) && (nKernelRows == 11))
       conv2generic <true, 11, 11> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                         srow, scol, patch_h, patch_w);
+                                                         srow, scol);
     else if ((nKernelCols == 13) && (nKernelRows == 13))
       conv2generic <true, 13, 13> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                         srow, scol, patch_h, patch_w);
+                                                         srow, scol);
     else if ((nKernelCols == 2) && (nKernelRows == 2))
       conv2generic <true, 2, 2> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                        nInputPlane, nInputRows, nInputCols,
                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                       srow, scol, patch_h, patch_w);
+                                                       srow, scol);
     else if ((nKernelCols == 4) && (nKernelRows == 4))
       conv2generic <true, 4, 4> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                        nInputPlane, nInputRows, nInputCols,
                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                       srow, scol, patch_h, patch_w);
+                                                       srow, scol);
     else if ((nKernelCols == 6) && (nKernelRows == 6))
       conv2generic <true, 6, 6> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                        nInputPlane, nInputRows, nInputCols,
                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                       srow, scol, patch_h, patch_w);
+                                                       srow, scol);
     else if ((nKernelCols == 8) && (nKernelRows == 8))
       conv2generic <true, 8, 8> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                        nInputPlane, nInputRows, nInputCols,
                                                        nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                       srow, scol, patch_h, patch_w);
+                                                       srow, scol);
     else if ((nKernelCols == 10) && (nKernelRows == 10))
       conv2generic <true, 10, 10> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                         srow, scol, patch_h, patch_w);
+                                                         srow, scol);
     else if ((nKernelCols == 12) && (nKernelRows == 12))
       conv2generic <true, 12, 12> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                          nInputPlane, nInputRows, nInputCols,
                                                          nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                         srow, scol, patch_h, patch_w);
+                                                         srow, scol);
     else
       conv2generic <true, 0 , 0> <<<blocks, threads>>> (input_data, weight_data, output_data,
                                                         nInputPlane, nInputRows, nInputCols,
                                                         nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
-                                                        srow, scol, patch_h, patch_w);
+                                                        srow, scol);
   }
 
   // sync & clean
@@ -540,23 +528,9 @@ TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, THCudaTe
   float *kernel_data = THCudaTensor_data(kernel);
   float *output_data = THCudaTensor_data(output);
 
-  // auto compute nb of blocks and threads:
-  // this might look a bit arbitrary, but it's not. We want to be in a sweet spot,
-  // where most of the time we'll have 16x16 threads per output map, that is 256 threads
-  // dealing with each map, and one block per map.
-  // example: if we have 16 output maps, each being 256x256, we'll have 16 blocks
-  // with 256 threads, each thread processing a 16x16 suboutput.
-  // call me if it's not clear ;-)
-  int patch_w = (int)(pow(2, ceil(log2((float)nOutputCols))) / 16);
-  if (patch_w < 2) patch_w = 2;
-  else if (patch_w > 32) patch_w = 32;
-  int patch_h = (int)(pow(2, ceil(log2((float)nOutputRows))) / 16);
-  if (patch_h < 2) patch_h = 2;
-  else if (patch_h > 32) patch_h = 32;
+  // auto compute nb of blocks and threads
   dim3 blocks(nKernelPlane, nInputPlane);
-  dim3 threads(nOutputCols / patch_w, nOutputRows / patch_h);
-  if ((nOutputRows % patch_h) != 0) threads.y++;
-  if ((nOutputCols % patch_w) != 0) threads.x++;
+  dim3 threads(128/nOutputRows, nOutputRows);
 
   // sync previous jobs
   cudaDeviceSynchronize();
@@ -565,7 +539,7 @@ TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, THCudaTe
   conv2genericrev <<<blocks, threads>>> (input_data, kernel_data, output_data,
                                          nInputPlane, nInputRows, nInputCols,
                                          nKernelPlane, nKernelRows, nKernelCols,
-                                         srow, scol, patch_h, patch_w);
+                                         srow, scol);
 
   // sync & clean
   cudaDeviceSynchronize();
