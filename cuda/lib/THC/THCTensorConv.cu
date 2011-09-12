@@ -289,12 +289,18 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
     nOutputRows = (nInputRows - 1) * srow + nKernelRows;
     nOutputCols = (nInputCols - 1) * scol + nKernelCols;
 
+    // use temp buffer
+    static THCudaTensor *inputP;
+    static int firstcall = 1;
+    if (firstcall) {
+      inputP = THCudaTensor_new();
+      firstcall = 0;
+    }
+
     // create a zero-padded input
     long nInputRowsPadded = (nOutputRows - 1) * srow + nKernelRows;
     long nInputColsPadded = (nOutputCols - 1) * scol + nKernelCols;
-    THCudaTensor *inputP = THCudaTensor_newWithSize3d(nInputPlane,
-                                                      nInputRowsPadded,
-                                                      nInputColsPadded);
+    THCudaTensor_resize3d(inputP, nInputPlane, nInputRowsPadded, nInputColsPadded);
     THCudaTensor_zero(inputP);
 
     THCudaTensor *centered = THCudaTensor_new();
@@ -467,7 +473,7 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
 
   // sync & clean
   cudaDeviceSynchronize();
-  THCudaTensor_free(input);
+  if (*type != 'f') THCudaTensor_free(input);
   THCudaTensor_free(kernel);
 
   // check for errors
