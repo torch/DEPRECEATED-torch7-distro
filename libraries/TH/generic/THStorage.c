@@ -13,7 +13,7 @@ THStorage* THStorage_(newWithSize)(long size)
   storage->data = THAlloc(sizeof(real)*size);
   storage->size = size;
   storage->refcount = 1;
-  storage->isMapped = 0;
+  storage->flag = TH_STORAGE_REFCOUNTED | TH_STORAGE_RESIZABLE | TH_STORAGE_FREEMEM;
   return storage;
 }
 
@@ -159,7 +159,7 @@ THStorage* THStorage_(newWithMapping)(const char *fileName, int isShared)
 #endif
 
   storage->refcount = 1;
-  storage->isMapped = 1;
+  storage->flag = TH_STORAGE_REFCOUNTED | TH_STORAGE_MAPPED | TH_STORAGE_FREEMEM;;
   return storage;
 }
 
@@ -172,9 +172,19 @@ THStorage* THStorage_(newWithMapping)(const char *fileName, int isShared)
 
 #endif
 
+void THStorage_(setFlag)(THStorage *storage, const char flag)
+{
+  storage->flag |= flag;
+}
+
+void THStorage_(clearFlag)(THStorage *storage, const char flag)
+{
+  storage->flag &= ~flag;
+}
+
 void THStorage_(retain)(THStorage *storage)
 {
-  if(storage)
+  if(storage && (storage->flag & TH_STORAGE_REFCOUNTED))
     ++storage->refcount;
 }
 
@@ -183,32 +193,48 @@ void THStorage_(free)(THStorage *storage)
   if(!storage)
     return;
 
-  if(storage->refcount > 0)
+  if((storage->flag & TH_STORAGE_REFCOUNTED) && (storage->refcount > 0))
   {
     if(--storage->refcount == 0)
     {
-#if defined(_WIN32) || defined(HAVE_MMAP)
-      if(storage->isMapped)
+      if(storage->flag & TH_STORAGE_FREEMEM)
       {
+#if defined(_WIN32) || defined(HAVE_MMAP)
+        if(storage->flag & TH_STORAGE_MAPPED)
+        {
 #ifdef _WIN32
-        if(!UnmapViewOfFile((LPINT)storage->data))
+          if(!UnmapViewOfFile((LPINT)storage->data))
 #else
-        if (munmap(storage->data, storage->size*sizeof(real)))
+            if (munmap(storage->data, storage->size*sizeof(real)))
 #endif
-          THError("could not unmap the shared memory file");
+              THError("could not unmap the shared memory file");
+        }
+        else
+#endif
+          THFree(storage->data);
       }
-      else
-#endif
-        THFree(storage->data);
       THFree(storage);
     }
   }
 }
 
+THStorage* THStorage_(newWithData)(real *data, long size)
+{
+  THStorage *storage = THAlloc(sizeof(THStorage));
+  storage->data = data;
+  storage->size = size;
+  storage->refcount = 1;
+  storage->flag = TH_STORAGE_REFCOUNTED | TH_STORAGE_RESIZABLE | TH_STORAGE_FREEMEM;
+  return storage;
+}
+
 void THStorage_(resize)(THStorage *storage, long size)
 {
-  storage->data = THRealloc(storage->data, sizeof(real)*size);
-  storage->size = size;
+  if(storage->flag & TH_STORAGE_RESIZABLE)
+  {
+    storage->data = THRealloc(storage->data, sizeof(real)*size);
+    storage->size = size;
+  }
 }
 
 void THStorage_(fill)(THStorage *storage, real value)
