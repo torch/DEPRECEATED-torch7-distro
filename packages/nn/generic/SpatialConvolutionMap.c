@@ -95,7 +95,6 @@ static int nn_(SpatialConvolutionMap_backward)(lua_State *L)
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
 
   // contiguous
-  input = THTensor_(newContiguous)(input);
   gradInput = THTensor_(newContiguous)(gradInput);
   gradOutput = THTensor_(newContiguous)(gradOutput);
 
@@ -104,8 +103,69 @@ static int nn_(SpatialConvolutionMap_backward)(lua_State *L)
   THTensor_(zero)(gradInput);
 
   // get raw pointers
-  real *input_data = THTensor_(data)(input);
   real *gradInput_data = THTensor_(data)(gradInput);
+  real *gradOutput_data = THTensor_(data)(gradOutput);
+  real *weight_data = THTensor_(data)(weight);
+  real *gradWeight_data = THTensor_(data)(gradWeight);
+
+  // and dims
+  long input_n = input->size[0];
+  long input_h = input->size[1];
+  long input_w = input->size[2];
+  long output_n = gradOutput->size[0];
+  long output_h = gradOutput->size[1];
+  long output_w = gradOutput->size[2];
+  long weight_n = weight->size[0];
+  long weight_h = weight->size[1];
+  long weight_w = weight->size[2];
+
+  // backward all
+  int k;
+  int nkernel = connTable->size[0];
+  for(k = 0; k < nkernel; k++)
+  {
+    int o = (int)THTensor_(get2d)(connTable,k,1)-1;
+    int i = (int)THTensor_(get2d)(connTable,k,0)-1;
+
+    // gradient to input
+    THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
+                          1.0,
+                          gradOutput_data + o*output_w*output_h,  output_h,  output_w,
+                          weight_data + k*weight_w*weight_h, weight_h, weight_w,
+                          dH, dW);
+  }
+
+  // clean up
+  THTensor_(free)(gradInput);
+  THTensor_(free)(gradOutput);
+  
+  return 1;
+}
+
+static int nn_(SpatialConvolutionMap_accGradParameters)(lua_State *L)
+{
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
+  int kW = luaT_getfieldcheckint(L, 1, "kW");
+  int kH = luaT_getfieldcheckint(L, 1, "kH");
+  int dW = luaT_getfieldcheckint(L, 1, "dW");
+  int dH = luaT_getfieldcheckint(L, 1, "dH");
+  int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
+  int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
+  real scale = luaL_optnumber(L, 4, 1);
+
+  THTensor *connTable = luaT_getfieldcheckudata(L, 1, "connTable", torch_(Tensor_id));
+  THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
+  THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
+  THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
+  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
+
+  // contiguous
+  input = THTensor_(newContiguous)(input);
+  gradOutput = THTensor_(newContiguous)(gradOutput);
+
+  // get raw pointers
+  real *input_data = THTensor_(data)(input);
   real *gradOutput_data = THTensor_(data)(gradOutput);
   real *weight_data = THTensor_(data)(weight);
   real *gradWeight_data = THTensor_(data)(gradWeight);
@@ -127,11 +187,11 @@ static int nn_(SpatialConvolutionMap_backward)(lua_State *L)
   real *gradBias_data = THTensor_(data)(gradBias);
   for(k = 0; k < nOutputPlane; k++) {
     THTensor_(select)(gradOutputPlane, gradOutput, 0, k);
-    gradBias_data[k] += THTensor_(sum)(gradOutputPlane);
+    gradBias_data[k] += scale * THTensor_(sum)(gradOutputPlane);
   }
   THTensor_(free)(gradOutputPlane);
 
-  // backward all
+  // gradients wrt weight
   int nkernel = connTable->size[0];
   for(k = 0; k < nkernel; k++)
   {
@@ -140,30 +200,22 @@ static int nn_(SpatialConvolutionMap_backward)(lua_State *L)
 
     // gradient to kernel
     THLab_(validXCorr2DRevptr)(gradWeight_data + k*weight_w*weight_h,
-                               1.0,
+                               scale,
                                input_data + i*input_w*input_h, input_h, input_w,
                                gradOutput_data + o*output_w*output_h, output_h, output_w,
                                dH, dW);
-    
-    // gradient to input
-    THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
-                          1.0,
-                          gradOutput_data + o*output_w*output_h,  output_h,  output_w,
-                          weight_data + k*weight_w*weight_h, weight_h, weight_w,
-                          dH, dW);
   }
 
   // clean up
   THTensor_(free)(input);
-  THTensor_(free)(gradInput);
   THTensor_(free)(gradOutput);
-  
-  return 1;
+  return 0;
 }
 
 static const struct luaL_Reg nn_(SpatialConvolutionMap__) [] = {
   {"SpatialConvolutionMap_forward", nn_(SpatialConvolutionMap_forward)},
   {"SpatialConvolutionMap_backward", nn_(SpatialConvolutionMap_backward)},
+  {"SpatialConvolutionMap_accGradParameters", nn_(SpatialConvolutionMap_accGradParameters)},
   {NULL, NULL}
 };
 

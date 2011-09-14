@@ -109,14 +109,13 @@ function SpatialConvolutionMap:backward(input, gradOutput)
    return self.gradInput
 end
 
-function SpatialConvolutionMap:zeroGradParameters(momentum)
-   if momentum then
-      self.gradWeight:mul(momentum)
-      self.gradBias:mul(momentum)
-   else
-      self.gradWeight:zero()
-      self.gradBias:zero()
-   end
+function SpatialConvolutionMap:accGradParameters(input, gradOutput, scale)
+   return input.nn.SpatialConvolutionMap_accGradParameters(self, input, gradOutput, scale)
+end
+
+function SpatialConvolutionMap:zeroGradParameters()
+   self.gradWeight:zero()
+   self.gradBias:zero()
 end
 
 function SpatialConvolutionMap:updateParameters(learningRate)
