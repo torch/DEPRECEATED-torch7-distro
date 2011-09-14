@@ -16,12 +16,17 @@
    primitives??
  */
 
+#define TH_STORAGE_REFCOUNTED 1
+#define TH_STORAGE_RESIZABLE  2
+#define TH_STORAGE_MAPPED     4
+#define TH_STORAGE_FREEMEM    8
+
 typedef struct THStorage
 {
     real *data;
     long size;
     int refcount;
-    char isMapped;
+    char flag;
 
 } THStorage;
 
@@ -39,8 +44,11 @@ TH_API THStorage* THStorage_(newWithSize2)(real, real);
 TH_API THStorage* THStorage_(newWithSize3)(real, real, real);
 TH_API THStorage* THStorage_(newWithSize4)(real, real, real, real);
 TH_API THStorage* THStorage_(newWithMapping)(const char *fileName, int isShared);
+TH_API THStorage* THStorage_(newWithData)(real *data, long size);
 
 /* should not differ with API */
+TH_API void THStorage_(setFlag)(THStorage *storage, const char flag);
+TH_API void THStorage_(clearFlag)(THStorage *storage, const char flag);
 TH_API void THStorage_(retain)(THStorage *storage);
 
 /* might differ with other API (like CUDA) */

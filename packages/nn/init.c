@@ -20,9 +20,6 @@ static const void* torch_DoubleTensor_id = NULL;
 #include "generic/LogSoftMax.c"
 #include "THGenerateFloatTypes.h"
 
-#include "generic/TemporalLogSoftMax.c"
-#include "THGenerateFloatTypes.h"
-
 #include "generic/Sigmoid.c"
 #include "THGenerateFloatTypes.h"
 
@@ -91,7 +88,6 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_FloatExp_init(L);
   nn_FloatHardTanh_init(L);
   nn_FloatLogSoftMax_init(L);
-  nn_FloatTemporalLogSoftMax_init(L);
   nn_FloatMSECriterion_init(L);
   nn_FloatAbsCriterion_init(L);
   nn_FloatLogSigmoid_init(L);
@@ -115,7 +111,6 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_DoubleExp_init(L);
   nn_DoubleHardTanh_init(L);
   nn_DoubleLogSoftMax_init(L);
-  nn_DoubleTemporalLogSoftMax_init(L);
   nn_DoubleMSECriterion_init(L);
   nn_DoubleAbsCriterion_init(L);
   nn_DoubleLogSigmoid_init(L);

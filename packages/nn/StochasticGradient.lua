@@ -17,7 +17,7 @@ function StochasticGradient:train(dataset)
    local module = self.module
    local criterion = self.criterion
 
-   local shuffledIndices = lab.randperm(dataset:size())
+   local shuffledIndices = lab.randperm(dataset:size(), 'torch.LongTensor')
    if not self.shuffleIndices then
       for t = 1,dataset:size() do
          shuffledIndices[t] = t
@@ -35,9 +35,8 @@ function StochasticGradient:train(dataset)
 
          currentError = currentError + criterion:forward(module:forward(input), target)
 
-         module:zeroGradParameters()
          module:backward(input, criterion:backward(module.output, target))
-         module:updateParameters(currentLearningRate)
+         module:accUpdateGradParameters(input, criterion.gradInput, currentLearningRate)
 
          if self.hookExample then
             self.hookExample(self, example)

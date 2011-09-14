@@ -31,26 +31,3 @@ function PairwiseDistance:backward(input, gradOutput)
   self.gradInput[2]:zero():add(-1, self.gradInput[1])
   return self.gradInput
 end
-
-
-function PairwiseDistance:zeroGradParameters()
-	-- no weights to adjust
-end
-
-function PairwiseDistance:updateParameters(learningRate)
-	-- no weights to adjust
-end
-
-
-function PairwiseDistance:write(file)
-   parent.write(self, file)
-   file:writeDouble(self.norm)
-end
-
-function PairwiseDistance:read(file)
-   parent.read(self, file)
-   self.norm = file:readDouble()
-end
-
-
-

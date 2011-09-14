@@ -182,7 +182,7 @@ accreal THTensor_(dist)(THTensor *tensor, THTensor *src, real value)
   return pow(sum, 1.0/value);
 }
 
-void THTensor_(addmv)(THTensor *tensor, real alpha, THTensor *mat, THTensor *vec) 
+void THTensor_(addmv)(THTensor *tensor, real beta, real alpha, THTensor *mat, THTensor *vec)
 {
   if( (mat->nDimension != 2) || (vec->nDimension != 1) )
     THError("matrix and vector expected");
@@ -201,14 +201,14 @@ void THTensor_(addmv)(THTensor *tensor, real alpha, THTensor *mat, THTensor *vec
     THBlas_(gemv)('n', mat->size[0], mat->size[1],
                   alpha, THTensor_(data)(mat), mat->stride[1],
                   THTensor_(data)(vec), vec->stride[0],
-                  1, THTensor_(data)(tensor), tensor->stride[0]);
+                  beta, THTensor_(data)(tensor), tensor->stride[0]);
   }
   else if(mat->stride[1] == 1)
   {
     THBlas_(gemv)('t',  mat->size[1], mat->size[0],
                   alpha, THTensor_(data)(mat), mat->stride[0],
                   THTensor_(data)(vec), vec->stride[0],
-                  1, THTensor_(data)(tensor), tensor->stride[0]);
+                  beta, THTensor_(data)(tensor), tensor->stride[0]);
   }
   else
   {
@@ -217,7 +217,7 @@ void THTensor_(addmv)(THTensor *tensor, real alpha, THTensor *mat, THTensor *vec
     THBlas_(gemv)('t',  mat->size[1], mat->size[0],
                   alpha, THTensor_(data)(cmat), cmat->stride[0],
                   THTensor_(data)(vec), vec->stride[0],
-                  1, THTensor_(data)(tensor), tensor->stride[0]);
+                  beta, THTensor_(data)(tensor), tensor->stride[0]);
 
     THTensor_(free)(cmat);
   }
@@ -261,7 +261,7 @@ void THTensor_(addr)(THTensor *tensor, real alpha, THTensor *vec1, THTensor *vec
   }
 }
 
-void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2) 
+void THTensor_(addmm)(THTensor *tensor, real beta, real alpha, THTensor *m1, THTensor *m2)
 { 
   long r, c;
   char transpose, transpose_m1, transpose_m2;
@@ -347,7 +347,7 @@ void THTensor_(addmm)(THTensor *tensor, real alpha, THTensor *m1, THTensor *m2)
                 (transpose_m1 == 'n' ? m1_->stride[1] : m1_->stride[0]),
                 THTensor_(data)(m2_),
                 (transpose_m2 == 'n' ? m2_->stride[1] : m2_->stride[0]),
-                1,
+                beta,
                 THTensor_(data)(tensor_),
                 tensor_->stride[1]);
 

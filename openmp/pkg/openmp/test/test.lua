@@ -21,6 +21,44 @@ function omptest.openmp()
    mytester:assertgt(openmp.getDefaultNumThreads(), 1, 'openmp running on multi-core ')
 end
 
+function omptest.SpatialConvolutionJacobianBatch()
+
+   -- batch
+   
+   --verbose = true
+   local batch = math.random(5,10)
+   local from = math.random(1,10)
+   local to = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(4,8)
+   local outj = math.random(4,8)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.SpatialConvolution(from, to, ki, kj, si, sj)
+   local input = torch.Tensor(batch,from,inj,ini):zero()
+
+   --print(input:nElement())
+   --print(module.weight:nElement())
+
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'batch error on state ')
+   
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
+   mytester:assertlt(err , precision, 'batch error on weight ')
+   
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
+   mytester:assertlt(err , precision, 'batch error on bias ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err , precision, 'batch error on weight [direct update] ')
+   
+   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err , precision, 'batch error on bias [direct update] ')
+end
+
 function omptest.SpatialConvolutionJacobian()
    local from = math.random(1,10)
    local to = math.random(1,10)
@@ -43,7 +81,13 @@ function omptest.SpatialConvolutionJacobian()
    
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err , precision, 'error on weight [direct update] ')
    
+   local err = jac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err , precision, 'error on bias [direct update] ')
+
    local ferr, berr = jac.testIO(module, input)
    mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
    mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
@@ -70,6 +114,34 @@ function omptest.SpatialSubSamplingJacobian()
    
    local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
    mytester:assertlt(err , precision, 'error on bias ')
+   
+   local ferr, berr = jac.testIO(module, input)
+   mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function omptest.SpatialSubSamplingJacobianBatch()
+   local batch = math.random(2,5)
+   local from = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(5,10)
+   local outj = math.random(5,10)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.SpatialSubSampling(from, ki, kj, si, sj)
+   local input = torch.Tensor(batch,from, inj, ini):zero()
+   
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'batch error on state ')
+   
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
+   mytester:assertlt(err , precision, 'batch error on weight ')
+   
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
+   mytester:assertlt(err , precision, 'batch error on bias ')
    
    local ferr, berr = jac.testIO(module, input)
    mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
@@ -122,6 +194,7 @@ local function modtester(module,input,params)
    local goutseq = lab.rand(outseq:size())
    module:zeroGradParameters()
    local ginseq = module:backward(input,goutseq):clone()
+   module:accGradParameters(input,goutseq)
    local gparseq = {}
    for i=1,#params do
       gparseq[i] = module[params[i]]:clone()
@@ -132,6 +205,7 @@ local function modtester(module,input,params)
    local goutomp = goutseq:clone()
    module:zeroGradParameters()
    local ginomp = module:backward(input,goutomp):clone()
+   module:accGradParameters(input,goutomp)
    local gparomp = {}
    for i=1,#params do
       gparomp[i] = module[params[i]]:clone()
@@ -184,6 +258,39 @@ function omptest.SpatialSubSamplingCompare()
    modtester(module,input,{'gradWeight','gradBias'})
 end
 
+function omptest.SpatialConvolutionBatchCompare()
+   local from = math.random(1,10)
+   local to = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(10,20)
+   local outj = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.SpatialConvolution(from, to, ki, kj, si, sj)
+   local input = lab.randn(from,inj,ini)
+
+   batchcompare(module,input, {'weight','bias','gradWeight','gradBias'})
+end
+
+function omptest.SpatialSubSamplingBatchCompare()
+   local from = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(10,20)
+   local outj = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.SpatialSubSampling(from, ki, kj, si, sj)
+   local input = lab.randn(from,inj,ini)--torch.Tensor(from, inj, ini):zero()
+   batchcompare(module,input, {'weight','bias','gradWeight','gradBias'})
+end
+
+
 function omptest.TanhCompare()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
@@ -207,6 +314,9 @@ function omptest.HardTanhCompare()
 end
 
 function openmp.test()
+   -- randomize stuff
+   math.randomseed(os.time())
+   
    jac = nn.Jacobian
    mytester = torch.Tester()
    mytester:add(omptest)

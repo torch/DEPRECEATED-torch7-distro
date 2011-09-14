@@ -54,6 +54,29 @@ function Concat:backward(input, gradOutput)
    return self.gradInput
 end
 
+function Concat:accGradParameters(input, gradOutput, scale)
+   scale = scale or 1
+   local offset = 1
+   for i,module in ipairs(self.modules) do
+      local currentOutput = module.output
+      local currentGradInput = module:accGradParameters(input,
+                                                        gradOutput:narrow(self.dimension, offset, currentOutput:size(self.dimension)),
+                                                        scale)
+      offset = offset + currentOutput:size(self.dimension)
+   end
+end
+
+function Concat:accUpdateGradParameters(input, gradOutput, lr)
+   local offset = 1
+   for i,module in ipairs(self.modules) do
+      local currentOutput = module.output
+      local currentGradInput = module:accUpdateGradParameters(input,
+                                                              gradOutput:narrow(self.dimension, offset, currentOutput:size(self.dimension)),
+                                                              lr)
+      offset = offset + currentOutput:size(self.dimension)
+   end
+end
+
 function Concat:zeroGradParameters()
    for _,module in ipairs(self.modules) do
       module:zeroGradParameters()
@@ -65,27 +88,6 @@ function Concat:updateParameters(learningRate)
       module:updateParameters(learningRate)
    end
 end
-
-function Concat:write(file)
-   parent.write(self, file)
-   file:writeObject(self.modules)
-   file:writeObject(self.size)
-   file:writeInt(self.dimension)
-end
-
-function Concat:read(file, version)
-   parent.read(self, file)
-   self.modules = file:readObject()
-   if version > 0 then
-      self.size = file:readObject()
-   else
-      local size = file:readObject()
-      self.size = torch.LongStorage(size:size())
-      self.size:copy(size)
-   end
-   self.dimension = file:readInt()
-end
-
 
 function Concat:share(mlp,...)
    for i=1,#self.modules do

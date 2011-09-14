@@ -3,8 +3,6 @@ local Linear, parent = torch.class('nn.Linear', 'nn.Module')
 function Linear:__init(inputSize, outputSize)
    parent.__init(self)
 
-   self.weightDecay = 0
-  
    self.weight = torch.Tensor(outputSize, inputSize)
    self.bias = torch.Tensor(outputSize)
    self.gradWeight = torch.Tensor(outputSize, inputSize)
@@ -12,7 +10,6 @@ function Linear:__init(inputSize, outputSize)
    
    self:reset()
 end
-
 
 function Linear:reset(stdv)
    if stdv then
@@ -40,12 +37,8 @@ function Linear:forward(input)
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local bias = input.new(self.bias:storage(), 1,
-                             nframe, 0,
-                             nunit, 1)
-
       self.output:resize(nframe, nunit)
-      self.output:copy(bias)
+      self.output:zero():addr(1, input.new(nframe):fill(1), self.bias)
       self.output:addmm(1, input, self.weight:t())
    else
       error('input must be vector or matrix')
@@ -55,60 +48,32 @@ function Linear:forward(input)
 end
 
 function Linear:backward(input, gradOutput)
-   if input:dim() == 1 then
-      self.gradWeight:addr(1, gradOutput, input)
-      self.gradBias:add(gradOutput)
-      
-      if self.weightDecay ~= 0 then
-         self.gradWeight:add(self.weightDecay, self.weight)
+   if self.gradInput then
+
+      if input:dim() == 1 then
+         self.gradInput:resizeAs(input)
+         self.gradInput:addmv(0, 1, self.weight:t(), gradOutput)
+      elseif input:dim() == 2 then
+         self.gradInput:resizeAs(input)
+         self.gradInput:addmm(0, 1, gradOutput, self.weight)
       end
-      
-      self.gradInput:resizeAs(input)
-      self.gradInput:zero()
-      self.gradInput:addmv(1, self.weight:t(), gradOutput)
+
+      return self.gradInput
+   end
+end
+
+function Linear:accGradParameters(input, gradOutput, scale)
+   scale = scale or 1
+
+   if input:dim() == 1 then
+      self.gradWeight:addr(scale, gradOutput, input)
+      self.gradBias:add(scale, gradOutput)      
    elseif input:dim() == 2 then
       local nframe = input:size(1)
       local nunit = self.bias:size(1)
 
-      local gradBias = input.new(self.gradBias:storage(), 1,
-                                 nframe, 0,
-                                 nunit, 1)
-
-      self.gradWeight:addmm(1, gradOutput:t(), input)
-      gradBias:add(gradOutput)
-
-      self.gradInput:resizeAs(input)
-      self.gradInput:zero()
-      self.gradInput:addmm(1, gradOutput, self.weight)
+      self.gradWeight:addmm(scale, gradOutput:t(), input)
+      self.gradBias:addmv(scale, gradOutput:t(), input.new(nframe):fill(1))
    end
 
-   return self.gradInput
-end
-
-function Linear:zeroGradParameters()
-   self.gradWeight:zero()
-   self.gradBias:zero()
-end
-
-function Linear:updateParameters(learningRate)
-   self.weight:add(-learningRate, self.gradWeight)
-   self.bias:add(-learningRate, self.gradBias)
-end
-
-function Linear:write(file)
-   parent.write(self, file)
-   file:writeDouble(self.weightDecay)
-   file:writeObject(self.weight)
-   file:writeObject(self.bias)
-   file:writeObject(self.gradWeight)
-   file:writeObject(self.gradBias)
-end
-
-function Linear:read(file)
-   parent.read(self, file)
-   self.weightDecay = file:readDouble()
-   self.weight = file:readObject()
-   self.bias = file:readObject()
-   self.gradWeight = file:readObject()
-   self.gradBias = file:readObject()
 end

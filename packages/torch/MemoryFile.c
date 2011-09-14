@@ -27,6 +27,7 @@ static int torch_MemoryFile_new(lua_State *L)
 static int torch_MemoryFile_storage(lua_State *L)
 {
   THFile *self = luaT_checkudata(L, 1, torch_MemoryFile_id);
+  THCharStorage_retain(THMemoryFile_storage(self));
   luaT_pushudata(L, THMemoryFile_storage(self), torch_CharStorage_id);
   return 1;
 }

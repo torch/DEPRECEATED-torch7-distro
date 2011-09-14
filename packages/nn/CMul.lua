@@ -12,12 +12,9 @@ function CMul:__init(inputSize)
 
    self:reset()
 end
-
  
-function CMul:reset(stdv)
-   self.weight:apply(function()
-                                  return 1;
-                        end)
+function CMul:reset()
+   self.weight:fill(1)
 end
 
 function CMul:forward(input)
@@ -27,29 +24,13 @@ function CMul:forward(input)
 end
 
 function CMul:backward(input, gradOutput)
-   self.gradWeight:addcmul(1, input, gradOutput)
-  
-   self.gradInput:zero()
-   self.gradInput:addcmul(1, self.weight, gradOutput)
-   return self.gradInput
+   if self.gradInput then
+      self.gradInput:zero()
+      self.gradInput:addcmul(1, self.weight, gradOutput)
+      return self.gradInput
+   end
 end
 
-function CMul:zeroGradParameters()
-   self.gradWeight:zero()
-end
-
-function CMul:updateParameters(learningRate)
-   self.weight:add(-learningRate, self.gradWeight)
-end
-
-function CMul:write(file)
-   parent.write(self, file)
-   file:writeObject(self.weight)
-   file:writeObject(self.gradWeight)
-end
-
-function CMul:read(file)
-   parent.read(self, file) 
-   self.weight = file:readObject()
-   self.gradWeight = file:readObject()
+function CMul:accGradParameters(input, gradOutput, scale)
+   self.gradWeight:addcmul(scale or 1, input, gradOutput)
 end

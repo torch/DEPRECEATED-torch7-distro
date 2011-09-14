@@ -20,7 +20,7 @@ function LookupTable:__init(nIndex, ...)
 
    self.size[1] = nIndex
    self.weight = torch.Tensor(self.size)
-   self.currentGradWeights = {}
+   self.gradWeight = torch.Tensor(self.size)
    self.currentInputs = {}
 
    self:reset()
@@ -47,14 +47,18 @@ end
 
 function LookupTable:zeroGradParameters()
    for i=1,#self.currentInputs do
+      self.gradWeight:select(1, currentInput[i]):zero()
       self.currentInputs[i] = nil
-      self.currentGradWeights[i] = nil
    end
 end
 
-function LookupTable:backward(input, gradOutput)
+function LookupTable:accGradParameters(input, gradOutput, scale)
    table.insert(self.currentInputs, input.new(input:size()):copy(input))
-   table.insert(self.currentGradWeights, input.new(gradOutput:size()):copy(gradOutput))
+   self.gradWeight:select(1, currentInput[i]):add(scale, gradOutput:select(1, i))
+end
+
+function LookupTable:accUpdateGradParameters(input, gradOutput, lr)
+   self.weight:select(1, currentInput[i]):add(-lr, gradOutput:select(1, i))
 end
 
 function LookupTable:updateParameters(learningRate)
@@ -62,37 +66,7 @@ function LookupTable:updateParameters(learningRate)
       local currentInput = self.currentInputs[i]
       local currentGradWeight = self.currentGradWeights[i]
       for i=1,currentInput:size(1) do
-         self.weight:select(1, currentInput[i]):add(-learningRate, currentGradWeight:select(1, i))
+         self.weight:select(1, currentInput[i]):add(-learningRate, self.gradWeight:select(1, currentInput[i]))
       end
-   end
-end
-
-function LookupTable:write(file)
-   parent.write(self, file)
-   file:writeObject(self.size)
-   file:writeObject(self.weight)
-   file:writeObject(self.currentInputs)
-   file:writeObject(self.currentGradWeights)
-end
-
-function LookupTable:read(file, version)
-   parent.read(self, file)
-   if version > 0 then
-      self.size = file:readObject()
-   else
-      local size = file:readObject()
-      self.size = torch.LongStorage(size:size())
-      self.size:copy(size)
-   end
-   self.weight = file:readObject()
-
-   if version > 1 then
-      self.currentInputs = file:readObject()
-      self.currentGradWeights = file:readObject()
-   else
-      self.currentInputs = {}
-      self.currentGradWeights = {}
-      table.insert(self.currentInputs, file:readObject())
-      table.insert(self.currentGradWeights, file:readObject())
    end
 end

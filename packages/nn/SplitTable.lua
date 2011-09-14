@@ -7,19 +7,18 @@ function SplitTable:__init(dimension)
 end
 
 function SplitTable:forward(input)
-   local currentOutput={}; 
-   local slices=input:size(self.dimension);
+   local currentOutput= {};
+   local slices = input:size(self.dimension)
    for i=1,slices do
       currentOutput[#currentOutput+1] = input:select(self.dimension,i)
    end
-   self.output= currentOutput
+   self.output = currentOutput
    return self.output
 end 
 
 
 function SplitTable:backward(input, gradOutput)
-
-   local slices=input:size(self.dimension)
+   local slices = input:size(self.dimension)
    self.gradInput:resizeAs(input)
 
    local offset = 1
@@ -28,22 +27,4 @@ function SplitTable:backward(input, gradOutput)
       self.gradInput:select(self.dimension,i):copy(currentGradInput)
    end
    return self.gradInput
-end
-
-function SplitTable:zeroGradParameters()
-end
-
-function SplitTable:updateParameters(learningRate)
-end
-
-function SplitTable:write(file)
-   parent.write(self, file)
-   file:writeObject(self.modules)
-   file:writeInt(self.dimension)   
-end
-
-function SplitTable:read(file)
-   parent.read(self, file)
-   self.modules = file:readObject()
-   self.dimension = file:readInt()
 end

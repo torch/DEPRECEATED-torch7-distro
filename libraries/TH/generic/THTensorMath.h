@@ -22,8 +22,8 @@ TH_API real THTensor_(min)(THTensor *self);
 TH_API real THTensor_(max)(THTensor *self);
 TH_API accreal THTensor_(sum)(THTensor *self);
 
-TH_API void THTensor_(addmv)(THTensor *self, real alpha, THTensor *mat, THTensor *vec);
-TH_API void THTensor_(addmm)(THTensor *self, real alpha, THTensor *mat1, THTensor *mat2);
+TH_API void THTensor_(addmv)(THTensor *self, real beta, real alpha, THTensor *mat, THTensor *vec);
+TH_API void THTensor_(addmm)(THTensor *self, real beta, real alpha, THTensor *mat1, THTensor *mat2);
 TH_API void THTensor_(addr)(THTensor *self, real alpha, THTensor *vec1, THTensor *vec2);
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
