@@ -28,13 +28,25 @@ local function spatialConvolutionMap_enable(tensorType)
    tensorType.nn.SpatialConvolutionMap_accGradParameters_ = tensorType.nn.SpatialConvolutionMap_accGradParameters
    tensorType.nn.SpatialConvolutionMap_accGradParameters  = tensorType.nn.SpatialConvolutionMap_accGradParametersOmp
 end
-local function spatialConvolutionMapMap_disable(tensorType)
+local function spatialConvolutionMap_disable(tensorType)
    tensorType.nn.SpatialConvolutionMap_forward  = tensorType.nn.SpatialConvolutionMap_forward_
    tensorType.nn.SpatialConvolutionMap_forward_ = tensorType.nn.SpatialConvolutionMap_forwardOmp
    tensorType.nn.SpatialConvolutionMap_backward = tensorType.nn.SpatialConvolutionMap_backward_
    tensorType.nn.SpatialConvolutionMap_backward_  = tensorType.nn.SpatialConvolutionMap_backwardOmp
    tensorType.nn.SpatialConvolutionMap_accGradParameters = tensorType.nn.SpatialConvolutionMap_accGradParameters_
    tensorType.nn.SpatialConvolutionMap_accGradParameters_  = tensorType.nn.SpatialConvolutionMap_accGradParametersOmp
+end
+local function spatialMaxPooling_enable(tensorType)
+   tensorType.nn.SpatialMaxPooling_forward_ = tensorType.nn.SpatialMaxPooling_forward
+   tensorType.nn.SpatialMaxPooling_forward  = tensorType.nn.SpatialMaxPooling_forwardOmp
+   tensorType.nn.SpatialMaxPooling_backward_ = tensorType.nn.SpatialMaxPooling_backward
+   tensorType.nn.SpatialMaxPooling_backward  = tensorType.nn.SpatialMaxPooling_backwardOmp
+end
+local function spatialMaxPooling_disable(tensorType)
+   tensorType.nn.SpatialMaxPooling_forward  = tensorType.nn.SpatialMaxPooling_forward_
+   tensorType.nn.SpatialMaxPooling_forward_ = tensorType.nn.SpatialMaxPooling_forwardOmp
+   tensorType.nn.SpatialMaxPooling_backward = tensorType.nn.SpatialMaxPooling_backward_
+   tensorType.nn.SpatialMaxPooling_backward_  = tensorType.nn.SpatialMaxPooling_backwardOmp
 end
 local function spatialSubSampling_enable(tensorType)
    tensorType.nn.SpatialSubSampling_forward_ = tensorType.nn.SpatialSubSampling_forward
@@ -80,6 +92,7 @@ end
 local function nn_enable(tensorType)
    spatialConvolution_enable(tensorType)
    spatialConvolutionMap_enable(tensorType)
+   spatialMaxPooling_enable(tensorType)
    spatialSubSampling_enable(tensorType)
    hardTanh_enable(tensorType)
    tanh_enable(tensorType)
@@ -87,6 +100,7 @@ end
 local function nn_disable(tensorType)
    spatialConvolution_disable(tensorType)
    spatialConvolutionMap_disable(tensorType)
+   spatialMaxPooling_disable(tensorType)
    spatialSubSampling_disable(tensorType)
    hardTanh_disable(tensorType)
    tanh_disable(tensorType)
