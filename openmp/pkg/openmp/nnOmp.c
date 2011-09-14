@@ -14,6 +14,9 @@ extern void setompnthread(lua_State *L, int ud, const char *field);
 #include "generic/SpatialConvolutionOmp.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SpatialConvolutionMapOmp.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/SpatialSubSamplingOmp.c"
 #include "THGenerateFloatTypes.h"
 
@@ -34,6 +37,9 @@ DLL_EXPORT int nnOmp_init(lua_State *L)
 
   nnOmp_FloatSpatialConvolution_init(L);
   nnOmp_DoubleSpatialConvolution_init(L);
+
+  nnOmp_FloatSpatialConvolutionMap_init(L);
+  nnOmp_DoubleSpatialConvolutionMap_init(L);
 
   nnOmp_FloatSpatialSubSampling_init(L);
   nnOmp_DoubleSpatialSubSampling_init(L);
