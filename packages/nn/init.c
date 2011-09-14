@@ -29,6 +29,15 @@ static const void* torch_DoubleTensor_id = NULL;
 #include "generic/Tanh.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/Abs.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/HardShrink.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/Threshold.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/SoftMax.c"
 #include "THGenerateFloatTypes.h"
 
@@ -56,7 +65,13 @@ static const void* torch_DoubleTensor_id = NULL;
 #include "generic/SpatialConvolution.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SpatialConvolutionMap.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/SpatialSubSampling.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/SpatialMaxPooling.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/VolumetricConvolution.c"
@@ -83,11 +98,16 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_FloatSoftMax_init(L);
   nn_FloatSoftPlus_init(L);
   nn_FloatTanh_init(L);
+  nn_FloatAbs_init(L);
+  nn_FloatHardShrink_init(L);
+  nn_FloatThreshold_init(L);
   nn_FloatSparseLinear_init(L);
   nn_FloatTemporalConvolution_init(L);
   nn_FloatTemporalSubSampling_init(L);
   nn_FloatSpatialConvolution_init(L);
+  nn_FloatSpatialConvolutionMap_init(L);
   nn_FloatSpatialSubSampling_init(L);
+  nn_FloatSpatialMaxPooling_init(L);
   nn_FloatVolumetricConvolution_init(L);
 
   nn_DoubleMin_init(L);
@@ -102,11 +122,16 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_DoubleSoftMax_init(L);
   nn_DoubleSoftPlus_init(L);
   nn_DoubleTanh_init(L);
+  nn_DoubleAbs_init(L);
+  nn_DoubleHardShrink_init(L);
+  nn_DoubleThreshold_init(L);
   nn_DoubleSparseLinear_init(L);
   nn_DoubleTemporalConvolution_init(L);
   nn_DoubleTemporalSubSampling_init(L);
   nn_DoubleSpatialConvolution_init(L);
+  nn_DoubleSpatialConvolutionMap_init(L);
   nn_DoubleSpatialSubSampling_init(L);
+  nn_DoubleSpatialMaxPooling_init(L);
   nn_DoubleVolumetricConvolution_init(L);
 
   return 1;
