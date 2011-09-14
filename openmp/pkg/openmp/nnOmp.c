@@ -20,6 +20,9 @@ extern void setompnthread(lua_State *L, int ud, const char *field);
 #include "generic/SpatialSubSamplingOmp.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SpatialMaxPoolingOmp.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/HardTanhOmp.c"
 #include "THGenerateFloatTypes.h"
 
@@ -43,6 +46,9 @@ DLL_EXPORT int nnOmp_init(lua_State *L)
 
   nnOmp_FloatSpatialSubSampling_init(L);
   nnOmp_DoubleSpatialSubSampling_init(L);
+
+  nnOmp_FloatSpatialMaxPooling_init(L);
+  nnOmp_DoubleSpatialMaxPooling_init(L);
 
   nnOmp_FloatHardTanh_init(L);
   nnOmp_DoubleHardTanh_init(L);
