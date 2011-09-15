@@ -51,43 +51,37 @@ static int nnOmp_(SpatialConvolutionMap_forwardOmp)(lua_State *L)
   long weight_w = weight->size[2];
 
   // add bias
-  long k;
-#pragma omp parallel for private(k)
-  for (k = 0; k < nOutputPlane; k++) {
-    real *ptr_output = output_data + k*output_w*output_h;
+  long p;
+#pragma omp parallel for private(p)
+  for (p = 0; p < nOutputPlane; p++) {
+    real *ptr_output = output_data + p*output_w*output_h;
     long j;
     for(j = 0; j < output_h*output_w; j++)
-      ptr_output[j] = bias_data[k];
+      ptr_output[j] = bias_data[p];
+  
+    // convolve all maps
+    int nweight = connTable->size[0];
+    long k;
+    for (k = 0; k < nweight; k++) {
+      // get offsets for input/output
+      int o = (int)THTensor_(get2d)(connTable,k,1)-1;
+      int i = (int)THTensor_(get2d)(connTable,k,0)-1;
+      
+      if (o == p)
+      {
+	THLab_(validXCorr2Dptr)(output_data + o*output_w*output_h,
+				1.0,
+				input_data + i*input_w*input_h, input_h, input_w,
+				weight_data + k*weight_w*weight_h, weight_h, weight_w,
+				dH, dW);
+      }
+    }
   }
 
-  // one lock per output
-  omp_lock_t *locks = calloc(sizeof(omp_lock_t), output_n);
-  for (k = 0; k < output_n; k++) omp_init_lock (&locks[k]);
-
-  // convolve all maps
-  int nweight = connTable->size[0];
-#pragma omp parallel for private(k)
-  for (k = 0; k < nweight; k++) {
-    // get offsets for input/output
-    int o = (int)THTensor_(get2d)(connTable,k,1)-1;
-    int i = (int)THTensor_(get2d)(connTable,k,0)-1;
-
-    // protect output, and convolve
-    omp_set_lock(&locks[o]);
-    THLab_(validXCorr2Dptr)(output_data + o*output_w*output_h,
-                            1.0,
-                            input_data + i*input_w*input_h, input_h, input_w,
-                            weight_data + k*weight_w*weight_h, weight_h, weight_w,
-                            dH, dW);
-    omp_unset_lock(&locks[o]);
-  }
-
-  // clean up
+// clean up
   THTensor_(free)(input);
   THTensor_(free)(output);
-  for (k = 0; k < output_n; k++) omp_destroy_lock (&locks[k]);
-  free(locks);
-
+  
   return 1;
 }
 
@@ -133,34 +127,35 @@ static int nnOmp_(SpatialConvolutionMap_backwardOmp)(lua_State *L)
   long weight_h = weight->size[1];
   long weight_w = weight->size[2];
 
-  // one lock per output
-  long k;
-  omp_lock_t *locks = calloc(sizeof(omp_lock_t), input_n);
-  for (k = 0; k < input_n; k++) omp_init_lock (&locks[k]);
 
-  // backward all
-  int nkernel = connTable->size[0];
-#pragma omp parallel for private(k)
-  for(k = 0; k < nkernel; k++) {
-    int o = (int)THTensor_(get2d)(connTable,k,1)-1;
-    int i = (int)THTensor_(get2d)(connTable,k,0)-1;
-
-    // gradient to input
-    omp_set_lock(&locks[i]);
-    THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
-                          1.0,
-                          gradOutput_data + o*output_w*output_h,  output_h,  output_w,
-                          weight_data + k*weight_w*weight_h, weight_h, weight_w,
-                          dH, dW);
-    omp_unset_lock(&locks[i]);
+  long p;
+#pragma omp parallel for private(p)
+  for(p = 0; p < nInputPlane; p++)
+  {
+    long k;
+    // backward all
+    int nkernel = connTable->size[0];
+    for(k = 0; k < nkernel; k++)
+    {
+      int o = (int)THTensor_(get2d)(connTable,k,1)-1;
+      int i = (int)THTensor_(get2d)(connTable,k,0)-1;
+      if (i == p)
+      {
+	
+	// gradient to input
+	THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
+			      1.0,
+			      gradOutput_data + o*output_w*output_h,  output_h,  output_w,
+			      weight_data + k*weight_w*weight_h, weight_h, weight_w,
+			      dH, dW);
+      }
+    }
   }
-
+  
   // clean up
   THTensor_(free)(gradInput);
   THTensor_(free)(gradOutput);
-  for (k = 0; k < input_n; k++) omp_destroy_lock (&locks[k]);
-  free(locks);
-
+    
   return 1;
 }
 
