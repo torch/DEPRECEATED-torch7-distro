@@ -5,9 +5,10 @@ function Sqrt:__init(args)
 end
 
 function Sqrt:forward(input)
-   self.output:resizeAs(input):copy(input)
-   self.output:sqrt()
-   return self.output
+   return input.nn.Sqrt_forward(self,input)
+--    self.output:resizeAs(input):copy(input)
+--    self.output:sqrt()
+--    return self.output
 end
 
 function Sqrt:backward(input, gradOutput)

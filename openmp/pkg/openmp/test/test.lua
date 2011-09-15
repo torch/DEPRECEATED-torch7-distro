@@ -206,7 +206,39 @@ function omptest.HardTanhJacobian()
    local err = jac.testJacobian(module, input)
    mytester:assertlt(err, precision ,  'error on state ')
    
-   local ferr, berr = jac.testIO(module, input, 0.1, 2)
+   local ferr, berr = jac.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function omptest.SqrtJacobian()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+   
+   local module = nn.Sqrt()
+   
+   local err = jac.testJacobian(module, input, 0.1, 2)
+   mytester:assertlt(err, precision ,  'error on state ')
+   
+   local ferr, berr = jac.testIO(module, input, 0, 2)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function omptest.SquareJacobian()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+   
+   local module = nn.Square()
+   
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision ,  'error on state ')
+   
+   local ferr, berr = jac.testIO(module, input)
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
@@ -343,7 +375,7 @@ function omptest.TanhCompare()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
    local ink = math.random(5,10)
-   local input = torch.Tensor(ink, inj, ini):zero()
+   local input = lab.randn(ink, inj, ini)
    
    local module = nn.Tanh()
    
@@ -355,9 +387,29 @@ function omptest.HardTanhCompare()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
    local ink = math.random(5,10)
-   local input = torch.Tensor(ink, inj, ini):zero()
+   local input = lab.randn(ink, inj, ini)
    
    local module = nn.HardTanh()
+   modtester(module,input)
+end
+
+function omptest.SqrtCompare()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = lab.randn(ink, inj, ini):abs()
+   
+   local module = nn.Sqrt()
+   modtester(module,input)
+end
+
+function omptest.SquareCompare()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = lab.randn(ink, inj, ini)
+   
+   local module = nn.Square()
    modtester(module,input)
 end
 

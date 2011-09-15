@@ -88,6 +88,31 @@ local function tanh_disable(tensorType)
    tensorType.nn.Tanh_backward = tensorType.nn.Tanh_backward_
    tensorType.nn.Tanh_backward_  = tensorType.nn.Tanh_backwardOmp
 end
+local function sqrt_enable(tensorType)
+   tensorType.nn.Sqrt_forward_ = tensorType.nn.Sqrt_forward
+   tensorType.nn.Sqrt_forward  = tensorType.nn.Sqrt_forwardOmp
+   tensorType.nn.Sqrt_backward_ = tensorType.nn.Sqrt_backward
+   tensorType.nn.Sqrt_backward  = tensorType.nn.Sqrt_backwardOmp
+end
+local function sqrt_disable(tensorType)
+   tensorType.nn.Sqrt_forward  = tensorType.nn.Sqrt_forward_
+   tensorType.nn.Sqrt_forward_ = tensorType.nn.Sqrt_forwardOmp
+   tensorType.nn.Sqrt_backward = tensorType.nn.Sqrt_backward_
+   tensorType.nn.Sqrt_backward_  = tensorType.nn.Sqrt_backwardOmp
+end
+
+local function square_enable(tensorType)
+   tensorType.nn.Square_forward_ = tensorType.nn.Square_forward
+   tensorType.nn.Square_forward  = tensorType.nn.Square_forwardOmp
+   tensorType.nn.Square_backward_ = tensorType.nn.Square_backward
+   tensorType.nn.Square_backward  = tensorType.nn.Square_backwardOmp
+end
+local function square_disable(tensorType)
+   tensorType.nn.Square_forward  = tensorType.nn.Square_forward_
+   tensorType.nn.Square_forward_ = tensorType.nn.Square_forwardOmp
+   tensorType.nn.Square_backward = tensorType.nn.Square_backward_
+   tensorType.nn.Square_backward_  = tensorType.nn.Square_backwardOmp
+end
 
 local function nn_enable(tensorType)
    spatialConvolution_enable(tensorType)
@@ -96,6 +121,8 @@ local function nn_enable(tensorType)
    spatialSubSampling_enable(tensorType)
    hardTanh_enable(tensorType)
    tanh_enable(tensorType)
+   sqrt_enable(tensorType)
+   square_enable(tensorType)
 end
 local function nn_disable(tensorType)
    spatialConvolution_disable(tensorType)
@@ -104,6 +131,8 @@ local function nn_disable(tensorType)
    spatialSubSampling_disable(tensorType)
    hardTanh_disable(tensorType)
    tanh_disable(tensorType)
+   sqrt_disable(tensorType)
+   square_disable(tensorType)
 end
 
 function openmp.enable ()

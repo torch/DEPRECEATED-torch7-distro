@@ -29,6 +29,13 @@ extern void setompnthread(lua_State *L, int ud, const char *field);
 #include "generic/TanhOmp.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SqrtOmp.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/SquareOmp.c"
+#include "THGenerateFloatTypes.h"
+
+
 DLL_EXPORT int nnOmp_init(lua_State *L)
 {
   torch_FloatTensor_id = luaT_checktypename2id(L, "torch.FloatTensor");
@@ -55,6 +62,12 @@ DLL_EXPORT int nnOmp_init(lua_State *L)
 
   nnOmp_FloatTanh_init(L);
   nnOmp_DoubleTanh_init(L);
+
+  nnOmp_FloatSqrt_init(L);
+  nnOmp_DoubleSqrt_init(L);
+
+  nnOmp_FloatSquare_init(L);
+  nnOmp_DoubleSquare_init(L);
 
   return 1;
 }

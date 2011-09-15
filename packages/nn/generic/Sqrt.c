@@ -2,6 +2,18 @@
 #define TH_GENERIC_FILE "generic/Sqrt.c"
 #else
 
+static int nn_(Sqrt_forward)(lua_State *L)
+{
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
+
+  THTensor_(resizeAs)(output, input);
+
+  TH_TENSOR_APPLY2(real, output, real, input,		\
+		   *output_data = sqrt(*input_data););
+
+  return 1;
+}
 
 static int nn_(Sqrt_backward)(lua_State *L)
 {
@@ -10,24 +22,16 @@ static int nn_(Sqrt_backward)(lua_State *L)
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
 
-  input = THTensor_(newContiguous)(input);
-
   THTensor_(resizeAs)(gradInput, input);
-  real *gradInput_data = THTensor_(data)(gradInput);
-  real *output_data = THTensor_(data)(output);
-  real *gradOutput_data = THTensor_(data)(gradOutput);
 
-  long nelem = THTensor_(nElement)(input);
-
-  long i;
-  for (i = 0; i < nelem; i++)
-    gradInput_data[i] = 0.5 * (gradOutput_data[i] / output_data[i]);
-
-  THTensor_(free)(input);
+  TH_TENSOR_APPLY3(real, gradInput, real, gradOutput, real, output,	\
+		   *gradInput_data  = 0.5 * (*gradOutput_data / *output_data););
+  
   return 1;
 }
 
 static const struct luaL_Reg nn_(Sqrt__) [] = {
+  {"Sqrt_forward", nn_(Sqrt_forward)},
   {"Sqrt_backward", nn_(Sqrt_backward)},
   {NULL, NULL}
 };

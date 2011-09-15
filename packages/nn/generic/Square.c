@@ -7,19 +7,11 @@ static int nn_(Square_forward)(lua_State *L)
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
   
-  input = THTensor_(newContiguous)(input);
-
   THTensor_(resizeAs)(output, input);
 
-  real *input_data = THTensor_(data)(input);
-  real *output_data = THTensor_(data)(output);
-  long nelem = THTensor_(nElement)(input);
+  TH_TENSOR_APPLY2(real, output, real, input,	\
+		   *output_data = *input_data * *input_data;);
 
-  long i;
-  for (i = 0; i < nelem; i++)
-    output_data[i] = input_data[i] * input_data[i];
-
-  THTensor_(free)(input);
   return 1;
 }
 
@@ -30,15 +22,9 @@ static int nn_(Square_backward)(lua_State *L)
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
 
   THTensor_(resizeAs)(gradInput, input);
-  real *gradInput_data = THTensor_(data)(gradInput);
-  real *input_data = THTensor_(data)(input);
-  real *gradOutput_data = THTensor_(data)(gradOutput);
 
-  long nelem = THTensor_(nElement)(input);
-
-  long i;
-  for (i = 0; i < nelem; i++)
-    gradInput_data[i] = 2 * gradOutput_data[i] * input_data[i];
+  TH_TENSOR_APPLY3(real, gradInput, real, gradOutput, real, input, \
+		   *gradInput_data = 2.0 * (*gradOutput_data) * (*input_data););
 
   return 1;
 }
