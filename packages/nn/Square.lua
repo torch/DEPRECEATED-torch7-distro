@@ -5,15 +5,17 @@ function Square:__init(args)
 end
 
 function Square:forward(input)
-   self.output:resizeAs(input):copy(input)
-   self.output:cmul(input)
-   return self.output
+   return input.nn.Square_forward(self, input)
+--    self.output:resizeAs(input):copy(input)
+--    self.output:cmul(input)
+--    return self.output
 end
 
 function Square:backward(input, gradOutput)
-   self.gradInput:resizeAs(input):copy(gradOutput)
-   self.gradInput:cmul(input):mul(2)
-   return self.gradInput
+   return input.nn.Square_backward(self, input, gradOutput)
+--    self.gradInput:resizeAs(input):copy(gradOutput)
+--    self.gradInput:cmul(input):mul(2)
+--    return self.gradInput
 end
    
 

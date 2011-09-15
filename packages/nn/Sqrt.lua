@@ -11,9 +11,10 @@ function Sqrt:forward(input)
 end
 
 function Sqrt:backward(input, gradOutput)
-   self.gradInput:resizeAs(input):copy(gradOutput)
-   self.gradInput:cdiv(self.output):mul(0.5)
-   return self.gradInput
+   return input.nn.Sqrt_backward(self,input,gradOutput)
+--    self.gradInput:resizeAs(input):copy(gradOutput)
+--    self.gradInput:cdiv(self.output):mul(0.5)
+--    return self.gradInput
 end
    
 
