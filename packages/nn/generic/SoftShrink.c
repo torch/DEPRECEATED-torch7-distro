@@ -1,8 +1,8 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/HardShrink.c"
+#define TH_GENERIC_FILE "generic/SoftShrink.c"
 #else
 
-static int nn_(HardShrink_forward)(lua_State *L)
+static int nn_(SoftShrink_forward)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   real lambda = luaT_getfieldchecknumber(L, 1, "lambda");
@@ -11,13 +11,13 @@ static int nn_(HardShrink_forward)(lua_State *L)
   THTensor_(resizeAs)(output, input);
   
   TH_TENSOR_APPLY2(real, output, real, input,				\
-                   if ((*input_data) > lambda) *output_data = *input_data; \
-                   else if ((*input_data) < lambda) *output_data = *input_data; \
+                   if ((*input_data) > lambda) *output_data = *input_data - lambda; \
+                   else if ((*input_data) < lambda) *output_data = *input_data + lambda; \
                    else *output_data = 0;);
   return 1;
 }
 
-static int nn_(HardShrink_backward)(lua_State *L)
+static int nn_(SoftShrink_backward)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   real lambda = luaT_getfieldchecknumber(L, 1, "lambda");
@@ -34,16 +34,16 @@ static int nn_(HardShrink_backward)(lua_State *L)
   return 1;
 }
 
-static const struct luaL_Reg nn_(HardShrink__) [] = {
-  {"HardShrink_forward", nn_(HardShrink_forward)},
-  {"HardShrink_backward", nn_(HardShrink_backward)},
+static const struct luaL_Reg nn_(SoftShrink__) [] = {
+  {"SoftShrink_forward", nn_(SoftShrink_forward)},
+  {"SoftShrink_backward", nn_(SoftShrink_backward)},
   {NULL, NULL}
 };
 
-static void nn_(HardShrink_init)(lua_State *L)
+static void nn_(SoftShrink_init)(lua_State *L)
 {
   luaT_pushmetaclass(L, torch_(Tensor_id));
-  luaT_registeratname(L, nn_(HardShrink__), "nn");
+  luaT_registeratname(L, nn_(SoftShrink__), "nn");
   lua_pop(L,1);
 }
 

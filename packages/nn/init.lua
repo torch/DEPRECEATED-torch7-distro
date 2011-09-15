@@ -48,6 +48,7 @@ torch.include('nn', 'Power.lua')
 torch.include('nn', 'Square.lua')
 torch.include('nn', 'Sqrt.lua')
 torch.include('nn', 'HardShrink.lua')
+torch.include('nn', 'SoftShrink.lua')
 torch.include('nn', 'Threshold.lua')
 
 torch.include('nn', 'LookupTable.lua')
