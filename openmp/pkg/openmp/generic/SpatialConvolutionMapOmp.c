@@ -6,7 +6,7 @@
 
 static int nnOmp_(SpatialConvolutionMap_forwardOmp)(lua_State *L)
 {
-  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   int kW = luaT_getfieldcheckint(L, 1, "kW");
   int kH = luaT_getfieldcheckint(L, 1, "kH");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
@@ -26,7 +26,7 @@ static int nnOmp_(SpatialConvolutionMap_forwardOmp)(lua_State *L)
   luaL_argcheck(L, input->size[2] >= kW && input->size[1] >= kH, 2, "input image smaller than kernel size");
 
   THTensor_(resize3d)(output, nOutputPlane,
-                      (input->size[1] - kH) / dH + 1, 
+                      (input->size[1] - kH) / dH + 1,
                       (input->size[2] - kW) / dW + 1);
 
   // contiguous
@@ -38,6 +38,7 @@ static int nnOmp_(SpatialConvolutionMap_forwardOmp)(lua_State *L)
   real *output_data = THTensor_(data)(output);
   real *weight_data = THTensor_(data)(weight);
   real *bias_data = THTensor_(data)(bias);
+  real *connTable_data = THTensor_(data)(connTable);
 
   // and dims
   long input_n = input->size[0];
@@ -50,45 +51,45 @@ static int nnOmp_(SpatialConvolutionMap_forwardOmp)(lua_State *L)
   long weight_h = weight->size[1];
   long weight_w = weight->size[2];
 
-  // add bias
   long p;
 #pragma omp parallel for private(p)
   for (p = 0; p < nOutputPlane; p++) {
+    // add bias
     real *ptr_output = output_data + p*output_w*output_h;
     long j;
     for(j = 0; j < output_h*output_w; j++)
       ptr_output[j] = bias_data[p];
-  
+
     // convolve all maps
     int nweight = connTable->size[0];
     long k;
     for (k = 0; k < nweight; k++) {
       // get offsets for input/output
-      int o = (int)THTensor_(get2d)(connTable,k,1)-1;
-      int i = (int)THTensor_(get2d)(connTable,k,0)-1;
-      
+      int o = (int)connTable_data[k*2+1]-1;
+      int i = (int)connTable_data[k*2+0]-1;
+
       if (o == p)
-      {
-	THLab_(validXCorr2Dptr)(output_data + o*output_w*output_h,
-				1.0,
-				input_data + i*input_w*input_h, input_h, input_w,
-				weight_data + k*weight_w*weight_h, weight_h, weight_w,
-				dH, dW);
-      }
+        {
+          THLab_(validXCorr2Dptr)(output_data + o*output_w*output_h,
+                                  1.0,
+                                  input_data + i*input_w*input_h, input_h, input_w,
+                                  weight_data + k*weight_w*weight_h, weight_h, weight_w,
+                                  dH, dW);
+        }
     }
   }
 
-// clean up
+  // clean up
   THTensor_(free)(input);
   THTensor_(free)(output);
-  
+
   return 1;
 }
 
 static int nnOmp_(SpatialConvolutionMap_backwardOmp)(lua_State *L)
 {
-  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
-  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
   int kW = luaT_getfieldcheckint(L, 1, "kW");
   int kH = luaT_getfieldcheckint(L, 1, "kH");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
@@ -115,6 +116,7 @@ static int nnOmp_(SpatialConvolutionMap_backwardOmp)(lua_State *L)
   real *gradOutput_data = THTensor_(data)(gradOutput);
   real *weight_data = THTensor_(data)(weight);
   real *gradWeight_data = THTensor_(data)(gradWeight);
+  real *connTable_data = THTensor_(data)(connTable);
 
   // and dims
   long input_n = input->size[0];
@@ -127,42 +129,40 @@ static int nnOmp_(SpatialConvolutionMap_backwardOmp)(lua_State *L)
   long weight_h = weight->size[1];
   long weight_w = weight->size[2];
 
-
   long p;
 #pragma omp parallel for private(p)
   for(p = 0; p < nInputPlane; p++)
-  {
-    long k;
-    // backward all
-    int nkernel = connTable->size[0];
-    for(k = 0; k < nkernel; k++)
     {
-      int o = (int)THTensor_(get2d)(connTable,k,1)-1;
-      int i = (int)THTensor_(get2d)(connTable,k,0)-1;
-      if (i == p)
-      {
-	
-	// gradient to input
-	THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
-			      1.0,
-			      gradOutput_data + o*output_w*output_h,  output_h,  output_w,
-			      weight_data + k*weight_w*weight_h, weight_h, weight_w,
-			      dH, dW);
-      }
+      long k;
+      // backward all
+      int nkernel = connTable->size[0];
+      for(k = 0; k < nkernel; k++)
+        {
+          int o = (int)connTable_data[k*2+1]-1;
+          int i = (int)connTable_data[k*2+0]-1;
+          if (i == p)
+            {
+              // gradient to input
+              THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
+                                    1.0,
+                                    gradOutput_data + o*output_w*output_h,  output_h,  output_w,
+                                    weight_data + k*weight_w*weight_h, weight_h, weight_w,
+                                    dH, dW);
+            }
+        }
     }
-  }
-  
+
   // clean up
   THTensor_(free)(gradInput);
   THTensor_(free)(gradOutput);
-    
+
   return 1;
 }
 
 static int nnOmp_(SpatialConvolutionMap_accGradParametersOmp)(lua_State *L)
 {
-  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
-  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
+  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
   int kW = luaT_getfieldcheckint(L, 1, "kW");
   int kH = luaT_getfieldcheckint(L, 1, "kH");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
@@ -213,17 +213,17 @@ static int nnOmp_(SpatialConvolutionMap_accGradParametersOmp)(lua_State *L)
   int nkernel = connTable->size[0];
 #pragma omp parallel for private(k)
   for(k = 0; k < nkernel; k++)
-  {
-    int o = (int)THTensor_(get2d)(connTable,k,1)-1;
-    int i = (int)THTensor_(get2d)(connTable,k,0)-1;
+    {
+      int o = (int)THTensor_(get2d)(connTable,k,1)-1;
+      int i = (int)THTensor_(get2d)(connTable,k,0)-1;
 
-    // gradient to kernel
-    THLab_(validXCorr2DRevptr)(gradWeight_data + k*weight_w*weight_h,
-                               scale,
-                               input_data + i*input_w*input_h, input_h, input_w,
-                               gradOutput_data + o*output_w*output_h, output_h, output_w,
-                               dH, dW);
-  }
+      // gradient to kernel
+      THLab_(validXCorr2DRevptr)(gradWeight_data + k*weight_w*weight_h,
+                                 scale,
+                                 input_data + i*input_w*input_h, input_h, input_w,
+                                 gradOutput_data + o*output_w*output_h, output_h, output_w,
+                                 dH, dW);
+    }
 
   // clean up
   THTensor_(free)(input);
