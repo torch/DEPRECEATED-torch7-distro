@@ -93,6 +93,36 @@ function omptest.SpatialConvolutionJacobian()
    mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function omptest.SpatialConvolutionMapJacobian()
+   local from = math.random(1,10)
+   local fanin = math.random(1, from)
+   local to = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(10,20)
+   local outj = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+
+   local module = nn.SpatialConvolutionMap(nn.tables.random(from, to, fanin), ki, kj, si, sj)
+   local input = torch.Tensor(from, inj, ini):zero()
+   
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+   
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
+   mytester:assertlt(err , precision, 'error on weight ')
+   
+   local err = jac.testJacobianParameters(module, input, module.bias, module.gradBias)
+   mytester:assertlt(err , precision, 'error on bias ')
+   
+   local ferr, berr = jac.testIO(module, input)
+   mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
+end
+
 function omptest.SpatialSubSamplingJacobian()
    local from = math.random(1,10)
    local ki = math.random(1,10)
@@ -176,7 +206,39 @@ function omptest.HardTanhJacobian()
    local err = jac.testJacobian(module, input)
    mytester:assertlt(err, precision ,  'error on state ')
    
-   local ferr, berr = jac.testIO(module, input, 0.1, 2)
+   local ferr, berr = jac.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function omptest.SqrtJacobian()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+   
+   local module = nn.Sqrt()
+   
+   local err = jac.testJacobian(module, input, 0.1, 2)
+   mytester:assertlt(err, precision ,  'error on state ')
+   
+   local ferr, berr = jac.testIO(module, input, 0, 2)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function omptest.SquareJacobian()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = torch.Tensor(ink, inj, ini):zero()
+   
+   local module = nn.Square()
+   
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision ,  'error on state ')
+   
+   local ferr, berr = jac.testIO(module, input)
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
@@ -242,6 +304,24 @@ function omptest.SpatialConvolutionCompare()
    modtester(module,input,{'gradWeight','gradBias'})
 end
 
+function omptest.SpatialConvolutionMapCompare()
+   local from = math.random(1,10)
+   local fanin = math.random(1, from)
+   local to = math.random(1,10)
+   local ki = math.random(1,10)
+   local kj = math.random(1,10)
+   local si = math.random(1,4)
+   local sj = math.random(1,4)
+   local outi = math.random(10,20)
+   local outj = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local module = nn.SpatialConvolutionMap(nn.tables.random(from,to,fanin), ki, kj, si, sj)
+   local input = lab.rand(from, inj, ini)
+   
+   modtester(module,input,{'gradWeight','gradBias'})
+end
+
 function omptest.SpatialSubSamplingCompare()
    local from = math.random(1,10)
    local ki = math.random(1,10)
@@ -295,7 +375,7 @@ function omptest.TanhCompare()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
    local ink = math.random(5,10)
-   local input = torch.Tensor(ink, inj, ini):zero()
+   local input = lab.randn(ink, inj, ini)
    
    local module = nn.Tanh()
    
@@ -307,9 +387,29 @@ function omptest.HardTanhCompare()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
    local ink = math.random(5,10)
-   local input = torch.Tensor(ink, inj, ini):zero()
+   local input = lab.randn(ink, inj, ini)
    
    local module = nn.HardTanh()
+   modtester(module,input)
+end
+
+function omptest.SqrtCompare()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = lab.randn(ink, inj, ini):abs()
+   
+   local module = nn.Sqrt()
+   modtester(module,input)
+end
+
+function omptest.SquareCompare()
+   local ini = math.random(5,10)
+   local inj = math.random(5,10)
+   local ink = math.random(5,10)
+   local input = lab.randn(ink, inj, ini)
+   
+   local module = nn.Square()
    modtester(module,input)
 end
 

@@ -61,19 +61,20 @@ local function Storage__printformat(self)
 end
 
 local function Storage__tostring(self)
-   local str = ''
+   local strt = {'\n'}
    local format,scale = Storage__printformat(self)
    if scale then
-      str = str .. string.format('%g', scale) .. ' *\n'
+      table.insert(strt, string.format('%g', scale) .. ' *\n')
       for i = 1,self:size() do
-         str = str .. string.format(format, self[i]/scale) .. '\n'
+         table.insert(strt, string.format(format, self[i]/scale) .. '\n')
       end
    else
       for i = 1,self:size() do
-         str = str .. string.format(format, self[i]) .. '\n'
+         table.insert(strt, string.format(format, self[i]) .. '\n')
       end
    end
-   str = str .. '[' .. torch.typename(self) .. ' of size ' .. self:size() .. ']\n'
+   table.insert(strt, '[' .. torch.typename(self) .. ' of size ' .. self:size() .. ']\n')
+   str = table.concat(strt)
    return str
 end
 
@@ -90,7 +91,7 @@ local function Tensor__printMatrix(self, indent)
 --   print('format = ' .. format)
    scale = scale or 1
    indent = indent or ''
-   local str = indent
+   local strt = {indent}
    local nColumnPerLine = math.floor((80-#indent)/(sz+1))
 --   print('sz = ' .. sz .. ' and nColumnPerLine = ' .. nColumnPerLine)
    local firstColumn = 1
@@ -103,39 +104,40 @@ local function Tensor__printMatrix(self, indent)
       end
       if nColumnPerLine < self:size(2) then
          if firstColumn ~= 1 then
-            str = str .. '\n'
+            table.insert(strt, '\n')
          end
-         str = str .. 'Columns ' .. firstColumn .. ' to ' .. lastColumn .. '\n' .. indent
+         table.insert(strt, 'Columns ' .. firstColumn .. ' to ' .. lastColumn .. '\n' .. indent)
       end
       if scale ~= 1 then
-         str = str .. string.format('%g', scale) .. ' *\n ' .. indent
+         table.insert(strt, string.format('%g', scale) .. ' *\n ' .. indent)
       end
       for l=1,self:size(1) do
          local row = self:select(1, l)
          for c=firstColumn,lastColumn do
-            str = str .. string.format(format, row[c]/scale)
+            table.insert(strt, string.format(format, row[c]/scale))
             if c == lastColumn then
-               str = str .. '\n'
+               table.insert(strt, '\n')
                if l~=self:size(1) then
                   if scale ~= 1 then
-                     str = str .. indent .. ' '
+                     table.insert(strt, indent .. ' ')
                   else
-                     str = str .. indent
+                     table.insert(strt, indent)
                   end
                end
             else
-               str = str .. ' '
+               table.insert(strt, ' ')
             end
          end
       end
       firstColumn = lastColumn + 1
    end
+   local str = table.concat(strt)
    return str
 end
 
 local function Tensor__printTensor(self)
    local counter = torch.LongStorage(self:nDimension()-2)
-   local str = ''
+   local strt = {''}
    local finished
    counter:fill(1)
    counter[1] = 0
@@ -156,18 +158,19 @@ local function Tensor__printTensor(self)
          break
       end
 --      print(counter)
-      if str ~= '' then
-         str = str .. '\n'
+      if #strt > 1 then
+         table.insert(strt, '\n')
       end
-      str = str .. '('
+      table.insert(strt, '(')
       local tensor = self
       for i=1,self:nDimension()-2 do
          tensor = tensor:select(1, counter[i])
-         str = str .. counter[i] .. ','
+         table.insert(strt, counter[i] .. ',')
       end
-      str = str .. '.,.) = \n'
-      str = str .. Tensor__printMatrix(tensor, ' ')
+      table.insert(strt, '.,.) = \n')
+      table.insert(strt, Tensor__printMatrix(tensor, ' '))
    end
+   local str = table.concat(strt)
    return str
 end
 
