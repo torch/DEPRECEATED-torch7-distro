@@ -12,12 +12,13 @@ function File:readBool()
    return (self:readInt() == 1)
 end
 
-local TYPE_NIL     = 0
-local TYPE_NUMBER  = 1
-local TYPE_STRING  = 2
-local TYPE_TABLE   = 3
-local TYPE_TORCH   = 4
-local TYPE_BOOLEAN = 5
+local TYPE_NIL      = 0
+local TYPE_NUMBER   = 1
+local TYPE_STRING   = 2
+local TYPE_TABLE    = 3
+local TYPE_TORCH    = 4
+local TYPE_BOOLEAN  = 5
+local TYPE_FUNCTION = 6
 
 function File:writeObject(object)
    -- we use an environment to keep a record of written objects
@@ -43,6 +44,8 @@ function File:writeObject(object)
       type = TYPE_STRING
    elseif type == 'boolean' then
       type = TYPE_BOOLEAN
+   elseif type == 'function' then
+      type = TYPE_FUNCTION
    else
       error('unwritable object')
    end
@@ -54,6 +57,11 @@ function File:writeObject(object)
       self:writeBool(object)
    elseif type == TYPE_STRING then
       local stringStorage = torch.CharStorage():string(object)
+      self:writeInt(#stringStorage)
+      self:writeChar(stringStorage)
+   elseif type == TYPE_FUNCTION then
+      local dumped = string.dump(object)
+      local stringStorage = torch.CharStorage():string(dumped)
       self:writeInt(#stringStorage)
       self:writeChar(stringStorage)
    elseif type == TYPE_TORCH or type == TYPE_TABLE then
@@ -120,6 +128,10 @@ function File:readObject()
    elseif type == TYPE_STRING then
       local size = self:readInt()
       return self:readChar(size):string()
+   elseif type == TYPE_FUNCTION then
+      local size = self:readInt()
+      local dumped = self:readChar(size):string()
+      return loadstring(dumped)
    elseif type == TYPE_TABLE or type == TYPE_TORCH then
       -- read the index
       local index = self:readInt()
