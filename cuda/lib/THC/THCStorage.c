@@ -21,7 +21,7 @@ THCudaStorage* THCudaStorage_new(void)
   storage->data = NULL;
   storage->size = 0;
   storage->refcount = 1;
-  storage->isMapped = 0;
+  storage->flag = TH_STORAGE_REFCOUNTED | TH_STORAGE_RESIZABLE | TH_STORAGE_FREEMEM;
   return storage;
 }
 
@@ -35,7 +35,7 @@ THCudaStorage* THCudaStorage_newWithSize(long size)
     THCudaCheck(cudaMalloc((void**)&(storage->data), size * sizeof(float)));
     storage->size = size;
     storage->refcount = 1;
-    storage->isMapped = 0;
+    storage->flag = TH_STORAGE_REFCOUNTED | TH_STORAGE_RESIZABLE | TH_STORAGE_FREEMEM;
     return storage;
   }
   else
@@ -86,16 +86,21 @@ THCudaStorage* THCudaStorage_newWithMapping(const char *fileName, int isShared)
 
 void THCudaStorage_retain(THCudaStorage *self)
 {
-  if(self)
+  if(self && (self->flag & TH_STORAGE_REFCOUNTED))
     ++self->refcount;
 }
 
 void THCudaStorage_resize(THCudaStorage *self, long size)
 {
   THArgCheck(size >= 0, 2, "invalid size");
+
+  if(!(self->flag & TH_STORAGE_RESIZABLE))
+    return;
+
   if(size == 0)
   {
-    THCudaCheck(cudaFree(self->data));
+    if(self->flag & TH_STORAGE_FREEMEM)
+      THCudaCheck(cudaFree(self->data));
     self->data = NULL;
     self->size = 0;
   }
@@ -112,9 +117,13 @@ void THCudaStorage_resize(THCudaStorage *self, long size)
 
 void THCudaStorage_free(THCudaStorage *self)
 {
+  if(!(self->flag & TH_STORAGE_REFCOUNTED))
+    return;
+
   if (--(self->refcount) <= 0)
   {
-    THCudaCheck(cudaFree(self->data));
+    if(self->flag & TH_STORAGE_FREEMEM)
+      THCudaCheck(cudaFree(self->data));
     THFree(self);
   }
 }
