@@ -64,43 +64,6 @@ function Module:updateParameters(learningRate)
    end
 end
 
-function Module:write(file)
-   local var = {}
-   for k,v in pairs(self) do
-      local tk = type(v)
-      if tk == 'number'
-         or tk == 'string'
-         or tk == 'boolean'
-         or tk == 'table'
-         or (tk == 'userdata' and torch.typename(self))
-      then
-         var[k] = v
-      end
-   end
---    var.__metatable = {}
---    for k,v in pairs(getmetatable(self)) do
---       local tk = type(v)
---       if tk == 'function' then
---          var.__metatable[k] = v
---       end
---    end
-   file:writeObject(var)
-end
-
-function Module:read(file)
-   local var = file:readObject(var)
-   for k,v in pairs(var) do
-      self[k] = v
-   end
---    if self.__metatable then
---       local oldmeta = getmetatable(self)
---       for k,v in pairs(self.__metatable) do
---          oldmeta[k] = v
---       end
---       self.__metatable = nil
---    end
-end
-
 function Module:share(mlp, ...)
    for i,v in ipairs(arg) do
       if self[v] ~= nil then self[v]:set(mlp[v]) end

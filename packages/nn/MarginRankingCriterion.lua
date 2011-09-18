@@ -23,17 +23,3 @@ function MarginRankingCriterion:backward(input, y)
   end
   return self.gradInput 
 end
-
-
-function MarginRankingCriterion:write(file)
-   parent.write(self, file)
-   file:writeDouble(self.margin)
-end
-
-function MarginRankingCriterion:read(file)
-   parent.read(self, file)
-   self.margin = file:readDouble()
-end
-
-
-

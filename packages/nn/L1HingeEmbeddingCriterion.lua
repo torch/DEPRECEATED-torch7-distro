@@ -39,17 +39,3 @@ function L1HingeEmbeddingCriterion:backward(input, y)
   self.gradInput[2]:zero():add(-1, self.gradInput[1])
   return self.gradInput
 end
-
-
-function L1HingeEmbeddingCriterion:write(file)
-   parent.write(self, file)
-   file:writeDouble(self.margin)
-end
-
-function L1HingeEmbeddingCriterion:read(file)
-   parent.read(self, file)
-   self.margin = file:readDouble()
-end
-
-
-

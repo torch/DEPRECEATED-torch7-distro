@@ -32,21 +32,3 @@ function SpatialMaxPooling:empty()
    self.indices:resize()
    self.indices:storage():resize(0)
 end
-
-function SpatialMaxPooling:write(file)
-   parent.write(self, file)
-   file:writeInt(self.kW)
-   file:writeInt(self.kH)
-   file:writeInt(self.dW)
-   file:writeInt(self.dH)
-   file:writeObject(self.indices)
-end
-
-function SpatialMaxPooling:read(file)
-   parent.read(self, file)
-   self.kW = file:readInt()
-   self.kH = file:readInt()
-   self.dW = file:readInt()
-   self.dH = file:readInt()
-   self.indices = file:readObject()
-end

@@ -22,17 +22,3 @@ function Narrow:backward(input, gradOutput)
    self.gradInput:narrow(self.dimension,self.index,self.length):copy(gradOutput)
    return self.gradInput
 end 
-
-function Narrow:write(file) 
-   parent.write(self, file)
-   file:writeInt(self.dimension)
-   file:writeLong(self.index)
-   file:writeLong(self.length)
-end
-
-function Narrow:read(file, version)
-   parent.read(self, file)
-   self.dimension = file:readInt()
-   self.index = file:readLong()
-   self.length = file:readLong()
-end

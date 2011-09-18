@@ -29,15 +29,3 @@ function MultiCriterion:backward(input, target)
    end
    return self.gradInput
 end
-
-function MultiCriterion:write(file)
-   parent.write(self, file)
-   file:writeObject(self.criterions)
-   file:writeObject(self.weights)
-end
-
-function MultiCriterion:read(file)
-   parent.read(self, file)
-   self.criterions = file:readObject()
-   self.weights = file:readObject()
-end

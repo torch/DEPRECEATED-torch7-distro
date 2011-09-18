@@ -18,15 +18,3 @@ function Threshold:backward(input, gradOutput)
    input.nn.Threshold_backward(self, input, gradOutput)
    return self.gradInput
 end
-
-function Threshold:write(file)
-   parent.write(self,file)
-   file:writeDouble(self.threshold)
-   file:writeDouble(self.val)
-end
-
-function Threshold:read(file)
-   parent.read(self,file)
-   self.threshold = file:readDouble()
-   self.val = file:readDouble()
-end
