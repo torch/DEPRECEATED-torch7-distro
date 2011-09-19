@@ -42,9 +42,9 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
   int xx_end = output_w;
   int xx_step = blockDim.x;
 
-  int yy_start = threadIdx.y;
+  int yy_start = blockDim.y*blockIdx.y + threadIdx.y;
   int yy_end = output_h;
-  int yy_step = blockDim.y;
+  int yy_step = blockDim.y*gridDim.y;
 
   int oo_start = blockIdx.x;
   int oo_end = oo_start+1;
@@ -335,8 +335,10 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
   float *output_data = THCudaTensor_data(output);
 
   // cuda blocks & threads:
-  dim3 blocks(nOutputPlane);
-  dim3 threads(32, 8);
+  int yblocks = floor(32 / nOutputPlane);
+  yblocks = yblocks < 1 ? 1 : yblocks;
+  dim3 blocks(nOutputPlane,yblocks);
+  dim3 threads(32,8);
 
   // sync any previous kernel exec
   cudaDeviceSynchronize();

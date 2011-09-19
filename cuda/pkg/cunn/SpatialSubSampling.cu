@@ -24,9 +24,9 @@ __global__ void subsample(float *input, float *output, float *weight, float *bia
   int xx_end = output_w;
   int xx_step = blockDim.x;
 
-  int yy_start = threadIdx.y;
+  int yy_start = blockDim.y*blockIdx.y + threadIdx.y;
   int yy_end = output_h;
-  int yy_step = blockDim.y;
+  int yy_step = blockDim.y*gridDim.y;
 
   // select input/output plane
   output = output + k*output_w*output_h;
@@ -154,9 +154,9 @@ __global__ void subgradinput(float *gradInput, float *gradOutput, float *weight,
   int xx_end = output_w;
   int xx_step = blockDim.x;
 
-  int yy_start = threadIdx.y;
+  int yy_start = blockDim.y*blockIdx.y + threadIdx.y;
   int yy_end = output_h;
-  int yy_step = blockDim.y;
+  int yy_step = blockDim.y*gridDim.y;
 
   // select input/output plane
   gradOutput = gradOutput + k*output_w*output_h;
@@ -216,8 +216,10 @@ static int cunn_SpatialSubSampling_forward(lua_State *L)
   output_data = THCudaTensor_data(output);
 
   // cuda blocks & threads:
-  dim3 blocks(nInputPlane);
-  dim3 threads(32, 8);
+  int yblocks = floor(32 / nInputPlane);
+  yblocks = yblocks < 1 ? 1 : yblocks;
+  dim3 blocks(nInputPlane,yblocks);
+  dim3 threads(32,8);
 
   // sync
   cudaDeviceSynchronize();
@@ -269,8 +271,10 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   gradInput_data = THCudaTensor_data(gradInput);
 
   // cuda blocks & threads:
-  dim3 blocks(nInputPlane);
-  dim3 threads(32, 8);
+  int yblocks = floor(32 / nInputPlane);
+  yblocks = yblocks < 1 ? 1 : yblocks;
+  dim3 blocks(nInputPlane,yblocks);
+  dim3 threads(32,8);
 
   // sync
   cudaDeviceSynchronize();
@@ -323,7 +327,7 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
 
   // cuda blocks & threads:
   dim3 blocks(nInputPlane);
-  dim3 threads(32, 8);
+  dim3 threads(32,8);
 
   // sync
   cudaDeviceSynchronize();
