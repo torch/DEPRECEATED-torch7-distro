@@ -216,7 +216,7 @@ static int cunn_SpatialSubSampling_forward(lua_State *L)
   output_data = THCudaTensor_data(output);
 
   // cuda blocks & threads:
-  int yblocks = floor(32 / nInputPlane);
+  int yblocks = floor(16 / nInputPlane);
   yblocks = yblocks < 1 ? 1 : yblocks;
   dim3 blocks(nInputPlane,yblocks);
   dim3 threads(32,8);
@@ -271,7 +271,7 @@ static int cunn_SpatialSubSampling_backward(lua_State *L)
   gradInput_data = THCudaTensor_data(gradInput);
 
   // cuda blocks & threads:
-  int yblocks = floor(32 / nInputPlane);
+  int yblocks = floor(16 / nInputPlane);
   yblocks = yblocks < 1 ? 1 : yblocks;
   dim3 blocks(nInputPlane,yblocks);
   dim3 threads(32,8);

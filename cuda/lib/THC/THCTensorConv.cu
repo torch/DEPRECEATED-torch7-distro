@@ -335,7 +335,7 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
   float *output_data = THCudaTensor_data(output);
 
   // cuda blocks & threads:
-  int yblocks = floor(32 / nOutputPlane);
+  int yblocks = floor(16 / nOutputPlane);
   yblocks = yblocks < 1 ? 1 : yblocks;
   dim3 blocks(nOutputPlane,yblocks);
   dim3 threads(32,8);
