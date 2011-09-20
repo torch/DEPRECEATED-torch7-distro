@@ -78,6 +78,7 @@ torch.include('nn', 'L1HingeEmbeddingCriterion.lua')
 torch.include('nn', 'HingeEmbeddingCriterion.lua')
 torch.include('nn', 'CosineEmbeddingCriterion.lua')
 torch.include('nn', 'MarginRankingCriterion.lua')
+torch.include('nn', 'MultiMarginCriterion.lua')
 
 
 torch.include('nn', 'StochasticGradient.lua')
