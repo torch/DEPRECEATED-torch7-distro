@@ -54,11 +54,15 @@ end
 
 function LookupTable:accGradParameters(input, gradOutput, scale)
    table.insert(self.currentInputs, input.new(input:size()):copy(input))
-   self.gradWeight:select(1, currentInput[i]):add(scale, gradOutput:select(1, i))
+   for i=1,input:size(1) do
+      self.gradWeight:select(1, input[i]):add(scale, gradOutput:select(1, i))
+   end
 end
 
 function LookupTable:accUpdateGradParameters(input, gradOutput, lr)
-   self.weight:select(1, currentInput[i]):add(-lr, gradOutput:select(1, i))
+   for i=1,input:size(1) do
+      self.weight:select(1, input[i]):add(-lr, gradOutput:select(1, i))
+   end
 end
 
 function LookupTable:updateParameters(learningRate)
