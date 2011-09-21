@@ -5,37 +5,68 @@
 static int nn_(MultiMarginCriterion_forward)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
-  long target = luaL_checklong(L, 3)-1;  
   int sizeAverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
-  real sum, input_target, *input_data;
-  long input_size, i;
-  
-  THArgCheck(input->nDimension == 1, 2, "vector expected");
-  THArgCheck((target >= 0) && (target < input->size[0]), 3, "target out of range");
+  real *input_data, *target_data;
+  long nframe, dim;
+  long t, d;
+  real target_;
+  THTensor *target;
+  real sum;
+
+  THArgCheck((input->nDimension == 1) || (input->nDimension == 2), 2, "vector or matrix expected");
+
+  if(input->nDimension == 1)
+  {
+    nframe = 1;
+    dim = input->size[0]; 
+    target_ = luaL_checknumber(L, 3);
+    target = THTensor_(newWithSize1d)(1);
+    THTensor_(fill)(target, target_);
+  }
+  else
+  {
+    nframe = input->size[0];
+    dim = input->size[1];
+    target = luaT_checkudata(L, 3, torch_(Tensor_id));
+    THArgCheck((target->nDimension == 1) && (target->size[0] == nframe), 3, "inconsistent target size");
+    target = THTensor_(newContiguous)(target);
+  }
+
+  for(t = 0; t < nframe; t++)
+  {
+    real idx = THTensor_(get1d)(target, t);
+    THArgCheck((idx >= 1) && (idx <= input->size[0]), 3, "target out of range");
+  }
 
   input = THTensor_(newContiguous)(input);
   input_data = THTensor_(data)(input);
-  input_size = input->size[0];
-  input_target = input_data[target];
+  target_data = THTensor_(data)(target);
 
   sum = 0;
-  for(i = 0; i < input_size; i++)
+  for(t = 0; t < nframe; t++)
   {
-    real z = 1 - input_target + input_data[i];
-    if(i == target)
-      continue;
+    long target_idx = (long)(target_data[t]-1);
+    real input_target = input_data[target_idx];
+    for(d = 0; d < dim; d++)
+    {
+      real z = 1 - input_target + input_data[d];
+      if(d == target_idx)
+        continue;
     
-    if(z > 0)
-      sum += z;
+      if(z > 0)
+        sum += z;
+    }
+    input_data += dim;
   }
 
   if(sizeAverage)
-    sum /= input_size;
+    sum /= dim;
 
   lua_pushnumber(L, sum);
   lua_setfield(L, 1, "output");
 
   THTensor_(free)(input);
+  THTensor_(free)(target);
   lua_pushnumber(L, sum);
   return 1;
 }
@@ -43,43 +74,75 @@ static int nn_(MultiMarginCriterion_forward)(lua_State *L)
 static int nn_(MultiMarginCriterion_backward)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
-  long target = luaL_checklong(L, 3)-1;
   int sizeAverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
   real *input_data;
-  real input_target;
   real *gradInput_data;
-  long input_size = input->size[0];
-  long i;
-  real gradInput_target = 0;
+  real *target_data;
+  THTensor *target;
+  long nframe, dim;
+  long t, d;
+  real target_;
+  real g;
+  real sum;
+
+  THArgCheck((input->nDimension == 1) || (input->nDimension == 2), 2, "vector or matrix expected");
+
+  if(input->nDimension == 1)
+  {
+    nframe = 1;
+    dim = input->size[0]; 
+    target_ = luaL_checknumber(L, 3);
+    target = THTensor_(newWithSize1d)(1);
+    THTensor_(fill)(target, target_);
+  }
+  else
+  {
+    nframe = input->size[0];
+    dim = input->size[1];
+    target = luaT_checkudata(L, 3, torch_(Tensor_id));
+    THArgCheck((target->nDimension == 1) && (target->size[0] == nframe), 3, "inconsistent target size");
+    target = THTensor_(newContiguous)(target);
+  }
+
+  g = (sizeAverage ? 1. : 1./((real)dim));
 
   input = THTensor_(newContiguous)(input);
   input_data = THTensor_(data)(input);
-  input_target = input_data[target];
 
   THTensor_(resizeAs)(gradInput, input);
   gradInput_data = THTensor_(data)(gradInput);
-  
-  for(i = 0; i < input_size; i++)
-  {
-    real z = 1 - input_target + input_data[i];
-    if(i == target)
-      continue;
-    
-    if(z > 0)
-    {
-      gradInput_target -= 1;
-      gradInput_data[i] = 1;
-    }
-    else
-      gradInput_data[i] = 0;
-  }
-  gradInput_data[target] = gradInput_target;
 
-  if(sizeAverage)
-    THTensor_(mul)(gradInput, 1./((real)input_size));
+  target_data = THTensor_(data)(target);
+    
+  for(t = 0; t < nframe; t++)
+  {
+    long target_idx = (long)(target_data[t])-1;
+    real input_target = input_data[target_idx];
+    real gradInput_target = 0;
+    for(d = 0; d < dim; d++)
+    {
+      real z = 1 - input_target + input_data[d];
+      if(d == target_idx)
+        continue;
+    
+      if(z > 0)
+      {
+        gradInput_target -= g;
+        gradInput_data[d] = g;
+      }
+      else
+        gradInput_data[d] = 0;
+    }
+    gradInput_data[target_idx] = gradInput_target;
+    
+    input_data += dim;
+    gradInput_data += dim;
+  }
+
 
   THTensor_(free)(input);  
+  THTensor_(free)(target);
   return 1;
 }
 
