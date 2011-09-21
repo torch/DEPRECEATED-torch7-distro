@@ -57,21 +57,3 @@ function StochasticGradient:train(dataset)
       end
    end
 end
-
-function StochasticGradient:write(file)
-   file:writeDouble(self.learningRate)
-   file:writeDouble(self.learningRateDecay)
-   file:writeInt(self.maxIteration)
-   file:writeBool(self.shuffleIndices)
-   file:writeObject(self.module)
-   file:writeObject(self.criterion)
-end
-
-function StochasticGradient:read(file)
-   self.learningRate = file:readDouble()
-   self.learningRateDecay = file:readDouble()
-   self.maxIteration = file:readInt()
-   self.shuffleIndices = file:readBool()
-   self.module = file:readObject()
-   self.criterion = file:readObject()
-end

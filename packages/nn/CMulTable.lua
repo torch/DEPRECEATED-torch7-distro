@@ -24,12 +24,3 @@ function CMulTable:backward(input, gradOutput)
    end
    return self.gradInput
 end
-
-function CMulTable:write(file)
-   parent.write(self, file)
-end
-
-function CMulTable:read(file)
-   parent.read(self, file)
-   self.gradInput = {}
-end

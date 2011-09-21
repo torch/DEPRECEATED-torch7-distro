@@ -19,12 +19,3 @@ function CSubTable:backward(input, gradOutput)
    self.gradInput[2]:resizeAs(input[1]):copy(gradOutput):mul(-1)
    return self.gradInput
 end
-
-function CSubTable:write(file)
-   parent.write(self, file)
-end
-
-function CSubTable:read(file)
-   parent.read(self, file)
-   self.gradInput = {}
-end

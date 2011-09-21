@@ -24,17 +24,3 @@ function HingeEmbeddingCriterion:backward(input, y)
   end
   return self.gradInput 
 end
-
-
-function HingeEmbeddingCriterion:write(file)
-   parent.write(self, file)
-   file:writeDouble(self.margin)
-end
-
-function HingeEmbeddingCriterion:read(file)
-   parent.read(self, file)
-   self.margin = file:readDouble()
-end
-
-
-

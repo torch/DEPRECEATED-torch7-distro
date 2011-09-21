@@ -38,11 +38,3 @@ function CosineDistance:backward(input, gradOutput)
    self.gradInput = {gw1, gw2}
    return self.gradInput
 end
-
-function CosineDistance:write(file)
-   parent.write(self, file)
-end
-
-function CosineDistance:read(file)
-   parent.read(self, file)
-end

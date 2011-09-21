@@ -19,12 +19,3 @@ function CDivTable:backward(input, gradOutput)
    self.gradInput[2]:resizeAs(input[2]):zero():addcdiv(-1,self.gradInput[1],input[2]):cmul(input[1])
    return self.gradInput
 end
-
-function CDivTable:write(file)
-   parent.write(self, file)
-end
-
-function CDivTable:read(file)
-   parent.read(self, file)
-   self.gradInput = {}
-end

@@ -19,14 +19,3 @@ function Power:backward(input, gradOutput)
    self.gradInput:cmul(self.output):cdiv(input):mul(self.pow)
    return self.gradInput
 end
-   
-
-function Power:write(file)
-   parent.write(self,file)
-   file:writeDouble(self.pow)
-end
-
-function Power:read(file)
-   parent.read(self,file)
-   self.pow = file:readDouble()
-end

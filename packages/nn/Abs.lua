@@ -13,11 +13,3 @@ function Abs:backward(input, gradOutput)
    input.nn.Abs_backward(self, input, gradOutput)
    return self.gradInput
 end
-
-function Abs:write(file)
-   parent.write(self, file)
-end
-
-function Abs:read(file)
-   parent.read(self, file)
-end

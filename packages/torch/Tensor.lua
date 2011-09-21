@@ -176,38 +176,40 @@ end
 
 local function Tensor__tostring(self)
    local str = '\n'
+   local strt = {''}
    if self:nDimension() == 0 then
-      str = str .. '[' .. torch.typename(self) .. ' with no dimension]\n'
+      table.insert(strt, '[' .. torch.typename(self) .. ' with no dimension]\n')
    else
       local tensor = torch.DoubleTensor():resize(self:size()):copy(self)
       if tensor:nDimension() == 1 then
          local format,scale,sz = Storage__printformat(tensor:storage())
          if scale then
-            str = str .. string.format('%g', scale) .. ' *\n'
+            table.insert(strt, string.format('%g', scale) .. ' *\n')
             for i = 1,tensor:size(1) do
-               str = str .. string.format(format, tensor[i]/scale) .. '\n'
+               table.insert(strt, string.format(format, tensor[i]/scale) .. '\n')
             end
          else
             for i = 1,tensor:size(1) do
-               str = str .. string.format(format, tensor[i]) .. '\n'
+               table.insert(strt, string.format(format, tensor[i]) .. '\n')
             end
          end
-         str = str .. '[' .. torch.typename(self) .. ' of dimension ' .. tensor:size(1) .. ']\n'
+         table.insert(strt, '[' .. torch.typename(self) .. ' of dimension ' .. tensor:size(1) .. ']\n')
       elseif tensor:nDimension() == 2 then
-         str = str .. Tensor__printMatrix(tensor)
-         str = str .. '[' .. torch.typename(self) .. ' of dimension ' .. tensor:size(1) .. 'x' .. tensor:size(2) .. ']\n'
+         table.insert(strt, Tensor__printMatrix(tensor))
+         table.insert(strt, '[' .. torch.typename(self) .. ' of dimension ' .. tensor:size(1) .. 'x' .. tensor:size(2) .. ']\n')
       else
-         str = str .. Tensor__printTensor(tensor)
-         str = str .. '[' .. torch.typename(self) .. ' of dimension '
+         table.insert(strt, Tensor__printTensor(tensor))
+         table.insert(strt, '[' .. torch.typename(self) .. ' of dimension ')
          for i=1,tensor:nDimension() do
-            str = str .. tensor:size(i) 
+            table.insert(strt, tensor:size(i))
             if i ~= tensor:nDimension() then
-               str = str .. 'x'
+               table.insert(strt, 'x')
             end
          end
-         str = str .. ']\n'
+         table.insert(strt, ']\n')
       end
    end
+   local str = table.concat(strt)
    return str
 end
 rawset(torch.getmetatable('torch.ByteTensor'), '__tostring__', Tensor__tostring)

@@ -27,13 +27,3 @@ function Replicate:backward(input, gradOutput)
    end
    return self.gradInput
 end
-
-function Replicate:write(file)
-   parent.write(self,file)
-   file:writeInt(self.nfeatures)
-end
-
-function Replicate:read(file)
-   parent.read(self,file)
-   self.nfeatures = file:readInt()
-end
