@@ -15,6 +15,7 @@ const void *torch_CudaTensor_id = NULL;
 #include "TemporalConvolution.cu"
 #include "SpatialConvolution.cu"
 #include "SpatialSubSampling.cu"
+#include "MultiMarginCriterion.cu"
 
 DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
 {
@@ -28,6 +29,7 @@ DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
   cunn_TemporalConvolution_init(L);
   cunn_SpatialConvolution_init(L);
   cunn_SpatialSubSampling_init(L);
+  cunn_MultiMarginCriterion_init(L);
 
   return 1;
 }
