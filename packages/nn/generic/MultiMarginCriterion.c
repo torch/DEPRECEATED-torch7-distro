@@ -35,7 +35,7 @@ static int nn_(MultiMarginCriterion_forward)(lua_State *L)
   for(t = 0; t < nframe; t++)
   {
     real idx = THTensor_(get1d)(target, t);
-    THArgCheck((idx >= 1) && (idx <= input->size[0]), 3, "target out of range");
+    THArgCheck((idx >= 1) && (idx <= dim), 3, "target out of range");
   }
 
   input = THTensor_(newContiguous)(input);
@@ -105,7 +105,7 @@ static int nn_(MultiMarginCriterion_backward)(lua_State *L)
     target = THTensor_(newContiguous)(target);
   }
 
-  g = (sizeAverage ? 1. : 1./((real)dim));
+  g = (sizeAverage ? 1./((real)dim) : 1.);
 
   input = THTensor_(newContiguous)(input);
   input_data = THTensor_(data)(input);
