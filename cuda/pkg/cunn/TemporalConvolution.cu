@@ -122,6 +122,7 @@ static int cunn_TemporalConvolution_accGradParameters(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);  
   THCudaTensor *gradOutput = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);  
+  float scale = luaL_optnumber(L, 4, 1);
   int kW = luaT_getfieldcheckint(L, 1, "kW");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   long nInputFrame = input->size[0];
@@ -144,7 +145,7 @@ static int cunn_TemporalConvolution_accGradParameters(lua_State *L)
   for(k = 0; k < nOutputFrame; k++)
   {
     THCudaTensor_select(gradOutputWindow, gradOutput, 0, k);
-    THCudaTensor_cadd(gradBias, 1, gradOutputWindow);
+    THCudaTensor_cadd(gradBias, scale, gradOutputWindow);
   }
 
   /* ouch */
@@ -166,7 +167,7 @@ static int cunn_TemporalConvolution_accGradParameters(lua_State *L)
                             gradOutput->size[1], 1);
 
     THCudaTensor_transpose(gradOutputWindow, NULL, 0, 1);
-    THCudaTensor_addmm(gradWeight, 1, 1, gradOutputWindow, inputWindow);
+    THCudaTensor_addmm(gradWeight, 1, scale, gradOutputWindow, inputWindow);
     THCudaTensor_transpose(gradOutputWindow, NULL, 0, 1);
   }
 

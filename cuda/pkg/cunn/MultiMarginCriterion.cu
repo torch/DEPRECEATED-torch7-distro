@@ -5,7 +5,7 @@ __global__ void cunn_MultiMarginCriterion_forward_kernel(float *output, float *i
   __shared__ float buffer[MULTIMARGIN_THREADS];
   int k = blockIdx.x;
   float *input_k = input + k*dim;
-  float *output_k = output + k*dim;
+  float *output_k = output + k;
   int target_k = ((int)target[k])-1;
   float input_target_k = input_k[target_k];
 
@@ -99,7 +99,11 @@ static int cunn_MultiMarginCriterion_forward(lua_State *L)
 
     THCudaStorage_fill(target, target_);
 
-    cunn_MultiMarginCriterion_forward_kernel<<<blocks,threads>>>(output->data, THCudaTensor_data(input), target->data, 1, input->size[0], sizeaverage);
+    cunn_MultiMarginCriterion_forward_kernel<<<blocks,threads>>>(output->data,
+                                                                 THCudaTensor_data(input),
+                                                                 target->data,
+                                                                 1, input->size[0],
+                                                                 sizeaverage);
     lua_pushnumber(L, THCudaStorage_get(output, 0));
 
     THCudaStorage_free(output);
@@ -111,7 +115,11 @@ static int cunn_MultiMarginCriterion_forward(lua_State *L)
     THCudaTensor *output = THCudaTensor_newWithSize1d(input->size[0]);
     dim3 blocks(input->size[0]);
     dim3 threads(MULTIMARGIN_THREADS);
-    cunn_MultiMarginCriterion_forward_kernel<<<blocks,threads>>>(THCudaTensor_data(output), THCudaTensor_data(input), THCudaTensor_data(target), input->size[0], input->size[1], sizeaverage);
+    cunn_MultiMarginCriterion_forward_kernel<<<blocks,threads>>>(THCudaTensor_data(output),
+                                                                 THCudaTensor_data(input),
+                                                                 THCudaTensor_data(target),
+                                                                 input->size[0], input->size[1],
+                                                                 sizeaverage);
     lua_pushnumber(L, THCudaTensor_sum(output));
     THCudaTensor_free(output);
   }
