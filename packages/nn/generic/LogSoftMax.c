@@ -21,7 +21,7 @@ static int nn_(LogSoftMax_forward)(lua_State *L)
     dim = input->size[1];
   }
   else
-    THError("vector or matrix expected");
+    THArgCheck(0, 2, "vector or matrix expected");
 
   input = THTensor_(newContiguous)(input);
   THTensor_(resizeAs)(output, input);

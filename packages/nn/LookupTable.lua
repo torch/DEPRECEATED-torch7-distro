@@ -47,7 +47,10 @@ end
 
 function LookupTable:zeroGradParameters()
    for i=1,#self.currentInputs do
-      self.gradWeight:select(1, currentInput[i]):zero()
+      local currentInput = self.currentInputs[i]
+      for i=1,currentInput:size(1) do
+         self.gradWeight:select(1, currentInput[i]):zero()
+      end
       self.currentInputs[i] = nil
    end
 end
@@ -68,7 +71,6 @@ end
 function LookupTable:updateParameters(learningRate)
    for i=1,#self.currentInputs do
       local currentInput = self.currentInputs[i]
-      local currentGradWeight = self.currentGradWeights[i]
       for i=1,currentInput:size(1) do
          self.weight:select(1, currentInput[i]):add(-learningRate, self.gradWeight:select(1, currentInput[i]))
       end
