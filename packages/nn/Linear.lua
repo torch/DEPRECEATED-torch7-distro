@@ -77,3 +77,6 @@ function Linear:accGradParameters(input, gradOutput, scale)
    end
 
 end
+
+-- we do not need to accumulate parameters when sharing
+Linear.sharedAccUpdateGradParameters = Linear.accUpdateGradParameters
