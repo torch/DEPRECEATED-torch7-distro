@@ -20,8 +20,8 @@ function LookupTable:__init(nIndex, ...)
 
    self.size[1] = nIndex
    self.weight = torch.Tensor(self.size)
-   self.gradWeight = torch.Tensor(self.size)
-   self.currentInputs = {}
+   self.gradWeight = torch.Tensor(self.size):zero()
+   self.inputs = {}
 
    self:reset()
 end
@@ -46,19 +46,17 @@ function LookupTable:forward(input)
 end
 
 function LookupTable:zeroGradParameters()
-   for i=1,#self.currentInputs do
-      local currentInput = self.currentInputs[i]
-      for i=1,currentInput:size(1) do
-         self.gradWeight:select(1, currentInput[i]):zero()
-      end
-      self.currentInputs[i] = nil
+   for k,_ in pairs(self.inputs) do
+      self.gradWeight:select(1, k):zero()
    end
+   self.inputs = {}
 end
 
 function LookupTable:accGradParameters(input, gradOutput, scale)
-   table.insert(self.currentInputs, input.new(input:size()):copy(input))
    for i=1,input:size(1) do
-      self.gradWeight:select(1, input[i]):add(scale, gradOutput:select(1, i))
+      local k = input[i]
+      self.inputs[k] = true
+      self.gradWeight:select(1, k):add(scale, gradOutput:select(1, i))
    end
 end
 
@@ -69,10 +67,10 @@ function LookupTable:accUpdateGradParameters(input, gradOutput, lr)
 end
 
 function LookupTable:updateParameters(learningRate)
-   for i=1,#self.currentInputs do
-      local currentInput = self.currentInputs[i]
-      for i=1,currentInput:size(1) do
-         self.weight:select(1, currentInput[i]):add(-learningRate, self.gradWeight:select(1, currentInput[i]))
-      end
+   for k,_ in pairs(self.inputs) do
+      self.weight:select(1, k):add(-learningRate, self.gradWeight:select(1, k))
    end
 end
+
+-- we do not need to accumulate parameters when sharing
+LookupTable.sharedAccUpdateGradParameters = LookupTable.accUpdateGradParameters
