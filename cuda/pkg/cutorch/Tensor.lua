@@ -17,7 +17,9 @@ local function Tensor__type(self,type)
       return self
    end
 end
-
+local function Tensor__typeAs(self,tensor)
+   return self:type(tensor:type())
+end
 local function Tensor__cuda(self,type)
    return self:type('torch.CudaTensor')
 end
@@ -33,5 +35,6 @@ rawset(torch.getmetatable('torch.FloatTensor'), 'cuda', Tensor__cuda)
 rawset(torch.getmetatable('torch.CudaTensor'), 'cuda', Tensor__cuda)
 
 rawset(torch.getmetatable('torch.CudaTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.CudaTensor'), 'typeAs', Tensor__typeAs)
 rawset(torch.getmetatable('torch.CudaTensor'), 'double', Tensor__double)
 rawset(torch.getmetatable('torch.CudaTensor'), 'float', Tensor__float)
