@@ -124,7 +124,9 @@ function Module:type(type)
    for key,param in pairs(self) do
       if torch.typename(param) and torch.typename(param):find('torch%..+Tensor') then
          local new = torch.getmetatable(type).new()
-         new:resize(param:size()):copy(param)
+         if param:nElement() > 0 then
+            new:resize(param:size()):copy(param)
+         end
          self[key] = new
       end
    end
