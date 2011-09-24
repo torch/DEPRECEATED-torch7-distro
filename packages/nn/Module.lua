@@ -123,11 +123,7 @@ function Module:type(type)
    -- find all tensors and convert them
    for key,param in pairs(self) do
       if torch.typename(param) and torch.typename(param):find('torch%..+Tensor') then
-         local new = torch.getmetatable(type).new()
-         if param:nElement() > 0 then
-            new:resize(param:size()):copy(param)
-         end
-         self[key] = new
+         self[key] = param:type(type)
       end
    end
    -- find submodules in classic containers 'modules'

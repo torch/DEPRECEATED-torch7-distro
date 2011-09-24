@@ -219,3 +219,35 @@ rawset(torch.getmetatable('torch.IntTensor'), '__tostring__', Tensor__tostring)
 rawset(torch.getmetatable('torch.LongTensor'), '__tostring__', Tensor__tostring)
 rawset(torch.getmetatable('torch.FloatTensor'), '__tostring__', Tensor__tostring)
 rawset(torch.getmetatable('torch.DoubleTensor'), '__tostring__', Tensor__tostring)
+
+local function Tensor__type(self,type)
+   local current = torch.typename(self)
+   if not type then return current end
+   if type ~= current then
+      local new = torch.getmetatable(type).new()
+      if self:nElement() > 0 then
+         new:resize(self:size()):copy(self)
+      end
+      return new
+   else
+      return self
+   end
+end
+local function Tensor__double(self,type)
+   return self:type('torch.DoubleTensor')
+end
+local function Tensor__float(self,type)
+   return self:type('torch.FloatTensor')
+end
+rawset(torch.getmetatable('torch.DoubleTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.DoubleTensor'), 'double', Tensor__double)
+rawset(torch.getmetatable('torch.DoubleTensor'), 'float', Tensor__float)
+rawset(torch.getmetatable('torch.FloatTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.FloatTensor'), 'double', Tensor__double)
+rawset(torch.getmetatable('torch.FloatTensor'), 'float', Tensor__float)
+
+rawset(torch.getmetatable('torch.ByteTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.CharTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.ShortTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.IntTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.LongTensor'), 'type', Tensor__type)
