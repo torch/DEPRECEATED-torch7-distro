@@ -233,6 +233,9 @@ local function Tensor__type(self,type)
       return self
    end
 end
+local function Tensor__typeAs(self,tensor)
+   return self:type(tensor:type())
+end
 local function Tensor__double(self,type)
    return self:type('torch.DoubleTensor')
 end
@@ -240,9 +243,11 @@ local function Tensor__float(self,type)
    return self:type('torch.FloatTensor')
 end
 rawset(torch.getmetatable('torch.DoubleTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.DoubleTensor'), 'typeAs', Tensor__typeAs)
 rawset(torch.getmetatable('torch.DoubleTensor'), 'double', Tensor__double)
 rawset(torch.getmetatable('torch.DoubleTensor'), 'float', Tensor__float)
 rawset(torch.getmetatable('torch.FloatTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.FloatTensor'), 'typeAs', Tensor__typeAs)
 rawset(torch.getmetatable('torch.FloatTensor'), 'double', Tensor__double)
 rawset(torch.getmetatable('torch.FloatTensor'), 'float', Tensor__float)
 
@@ -251,3 +256,9 @@ rawset(torch.getmetatable('torch.CharTensor'), 'type', Tensor__type)
 rawset(torch.getmetatable('torch.ShortTensor'), 'type', Tensor__type)
 rawset(torch.getmetatable('torch.IntTensor'), 'type', Tensor__type)
 rawset(torch.getmetatable('torch.LongTensor'), 'type', Tensor__type)
+
+rawset(torch.getmetatable('torch.ByteTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.CharTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.ShortTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.IntTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.LongTensor'), 'typeAs', Tensor__typeAs)
