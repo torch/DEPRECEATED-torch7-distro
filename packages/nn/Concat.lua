@@ -9,6 +9,7 @@ end
 
 function Concat:add(module)
    table.insert(self.modules, module)
+   return self
 end
 
 function Concat:get(index)

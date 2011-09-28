@@ -9,6 +9,7 @@ end
 
 function ParallelTable:add(module)
    table.insert(self.modules, module)
+   return self
 end
 
 function ParallelTable:get(index)
