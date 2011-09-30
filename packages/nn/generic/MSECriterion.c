@@ -28,11 +28,10 @@ static int nn_(MSECriterion_backward)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *target = luaT_checkudata(L, 3, torch_(Tensor_id));
+  THTensor *gradInput = luaT_checkudata(L, 4, torch_(Tensor_id));
   int sizeAverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
-  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
   real norm = (sizeAverage ? 2./((real)THTensor_(nElement)(input)) : 2.);
 
-  THTensor_(resizeAs)(gradInput, input);
   TH_TENSOR_APPLY3(real, gradInput, real, input, real, target,
                    *gradInput_data = norm * (*input_data - *target_data);)
   return 1;
