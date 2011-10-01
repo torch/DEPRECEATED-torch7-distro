@@ -195,7 +195,10 @@ static const luaL_Reg qtuiloader_lib[] = {
 };
 
 
-LUA_EXTERNC QTUILOADER_API int 
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTUILOADER_API int 
 luaopen_libqtuiloader(lua_State *L)
 {
   // load module 'qt'

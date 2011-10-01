@@ -7,8 +7,12 @@
 #include "qtluapainter.h"
 #include "qtluaprinter.h"
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lauxlib.h"
 #include "lualib.h"
+#endif
 
 #include <QAction>
 #include <QApplication>
@@ -748,7 +752,10 @@ static int qtluaprinter_hook(lua_State *L)
 // REGISTER
 
 
-LUA_EXTERNC QTWIDGET_API 
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTWIDGET_API 
 int luaopen_libqtwidget(lua_State *L)
 { 
   // load module 'qt'

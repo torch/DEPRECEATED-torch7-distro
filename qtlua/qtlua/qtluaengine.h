@@ -14,10 +14,14 @@
 #include <QStringList>
 #include <QVariant>
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
-#include "qtluaconf.h"
+#endif
 
+#include "qtluaconf.h"
 
 typedef QPointer<QObject> QObjectPointer;
 

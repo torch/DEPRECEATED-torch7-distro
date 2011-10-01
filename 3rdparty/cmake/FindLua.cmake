@@ -27,10 +27,16 @@ FIND_LIBRARY(LUA_LIBRARIES
   NO_DEFAULT_PATH
 )
 
-FIND_PATH(LUA_INCLUDE_DIR lua.h
-  ${LUA_DIR}/../include
-  NO_DEFAULT_PATH
-)
+IF (USE_LUAJIT)
+   FIND_PATH(LUA_INCLUDE_DIR lua.hpp
+     ${LUA_DIR}/../include/${LUABIN}/
+     ${LUA_DIR}/../include/${LUABIN}-2.0/
+     NO_DEFAULT_PATH)
+ELSE (USE_LUAJIT)
+   FIND_PATH(LUA_INCLUDE_DIR lua.h
+     ${LUA_DIR}/../include/ 
+     NO_DEFAULT_PATH)
+ENDIF (USE_LUAJIT)
 
 SET(LUA_PACKAGE_PATH "${LUA_DIR}/../share/lua/5.1" CACHE PATH "where Lua searches for Lua packages")
 SET(LUA_PACKAGE_CPATH "${LUA_DIR}/../lib/lua/5.1" CACHE PATH "where Lua searches for library packages")
