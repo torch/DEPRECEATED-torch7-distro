@@ -254,6 +254,51 @@ local function getsplotvars(t)
    return legend,x,y,z
 end
 
+local function getimagescvars(t)
+   local palette  = nil
+   local x = nil
+
+   local function istensor(v)
+      return type(v) == 'userdata' and torch.typename(v):sub(-6) == 'Tensor'
+   end
+
+   local function isstring(v)
+      return type(v) == 'string'
+   end
+
+   if #t == 0 then
+      error('empty argument list')
+   end
+
+   if #t >= 1 then
+      if istensor(t[1]) then
+	 x = t[1]
+      else
+	 error('expecting tensor [,string]')
+      end
+   end
+   if #t == 2 then
+      if x and isstring(t[2]) then
+	 palette = t[2]
+      else
+	 error('expecting tensor [,string]' )
+      end
+   elseif #t > 2 then
+      error('expecting tensor [,string]')
+   end
+   legend = legend or ''
+   if not x then
+      error('expecting tensor [,string]')
+   end
+   if not palette then
+      palette = 'gray'
+   end
+   if x:nDimension() ~= 2 then
+      error('x is expected to be matrices x = ' .. x:nDimension() .. 'D')
+   end
+   return x,palette
+end
+
 local function gnuplot_string(legend,x,y,format)
    local hstr = 'plot '
    local dstr = ''
@@ -316,6 +361,24 @@ local function gnu_splot_string(legend,x,y,z)
       end
       dstr = string.format('%se\n',dstr)
    end
+   return hstr,dstr
+end
+
+local function gnu_imagesc_string(x,palette)
+   local hstr = string.format('%s\n','set view map')
+   hstr = string.format('%s%s %s\n',hstr,'set palette',palette)
+   hstr = string.format('%s%s\n',hstr,'set style data linespoints')
+   hstr = string.format('%s%s%g%s\n',hstr,"set xrange [ -0.5 : ",x:size(2)-0.5,"] noreverse nowriteback")
+   hstr = string.format('%s%s%g%s\n',hstr,"set yrange [ -0.5 : ",x:size(1)-0.5,"] reverse nowriteback")
+   hstr = string.format('%s%s\n',hstr,"splot '-' matrix with image")
+   local dstr = ''
+   for i=1,x:size(1) do
+      for j=1,x:size(2) do
+	 dstr =  string.format('%s%g ',dstr,x[i][j])
+      end
+      dstr = string.format('%s\n',dstr)
+   end
+   dstr = string.format('%se\ne\n',dstr)
    return hstr,dstr
 end
 
@@ -388,6 +451,12 @@ function plot.gnuplot(legend,x,y,format)
 end
 function plot.gnusplot(legend,x,y,z)
    local hdr,data = gnu_splot_string(legend,x,y,z)
+   --writeToCurrent('set pointsize 2')
+   writeToCurrent(hdr)
+   writeToCurrent(data)
+end
+function plot.gnuimagesc(x,palette)
+   local hdr,data = gnu_imagesc_string(x,palette)
    --writeToCurrent('set pointsize 2')
    writeToCurrent(hdr)
    writeToCurrent(data)
@@ -507,6 +576,15 @@ function plot.splot(...)
       zdata[#zdata+1] = z
    end
    plot.gnusplot(legends,xdata,ydata,zdata)
+end
+
+-- imagesc(x) -- x 2D tensor [0 .. 1]
+function plot.imagesc(...)
+   local arg = {...}
+   if select('#',...) == 0 then
+      error('no inputs, expecting at least a matrix')
+   end
+   plot.gnuimagesc(getimagescvars(arg))
 end
 
 -- bar(y)
