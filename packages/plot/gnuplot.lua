@@ -193,6 +193,67 @@ local function getvars(t)
    return legend,x,y,format
 end
 
+-- t is the arguments for one plot at a time
+local function getsplotvars(t)
+   local legend = nil
+   local x = nil
+   local y = nil
+   local z = nil
+
+   local function istensor(v)
+      return type(v) == 'userdata' and torch.typename(v):sub(-6) == 'Tensor'
+   end
+
+   local function isstring(v)
+      return type(v) == 'string'
+   end
+
+   if #t == 0 then
+      error('empty argument list')
+   end
+
+   if #t >= 1 then
+      if isstring(t[1]) then
+	 legend = t[1]
+      elseif istensor(t[1]) then
+	 x = t[1]
+      else
+	 error('expecting [string,] tensor [,tensor] [,tensor]')
+      end
+   end
+   if #t >= 2 and #t <= 4 then
+      if x and istensor(t[2]) and istensor(t[3]) then
+	 y = t[2]
+	 z = t[3]
+      elseif legend and istensor(t[2]) and istensor(t[3]) and istensor(t[4]) then
+	 x = t[2]
+	 y = t[3]
+	 z = t[4]
+      elseif legend and istensor(t[2]) then
+	 x = t[2]
+      else
+	 error('expecting [string,] tensor [,tensor] [,tensor]')
+      end
+   elseif #t > 4 then
+      error('expecting [string,] tensor [,tensor] [,tensor]')
+   end
+   legend = legend or ''
+   if not x then
+      error('expecting [string,] tensor [,tensor] [,tensor]')
+   end
+   if not z then
+      z = x
+      x = torch.Tensor(z:size())
+      y = torch.Tensor(z:size())
+      for i=1,x:size(1) do x:select(1,i):fill(i) end
+      for i=1,y:size(2) do y:select(2,i):fill(i) end
+   end
+   if x:nDimension() ~= 2 or y:nDimension() ~= 2 or z:nDimension() ~= 2 then
+      error('x and y and z are expected to be matrices x = ' .. x:nDimension() .. 'D y = ' .. y:nDimension() .. 'D z = '.. z:nDimension() .. 'D' )
+   end
+   return legend,x,y,z
+end
+
 local function gnuplot_string(legend,x,y,format)
    local hstr = 'plot '
    local dstr = ''
@@ -226,6 +287,32 @@ local function gnuplot_string(legend,x,y,format)
          else
             dstr = dstr .. string.format('%g %g\n',x[i][j],y[i][j])
          end
+      end
+      dstr = string.format('%se\n',dstr)
+   end
+   return hstr,dstr
+end
+local function gnu_splot_string(legend,x,y,z)
+   local hstr = string.format('%s\n','set contour base')
+   hstr = string.format('%s%s\n',hstr,'set cntrparam bspline\n')
+   hstr = string.format('%s%s\n',hstr,'set cntrparam levels auto\n')
+   hstr = string.format('%s%s\n',hstr,'set style data lines\n')
+   hstr = string.format('%s%s\n',hstr,'set hidden3d\n')
+
+   hstr = hstr .. 'splot '
+   local dstr = ''
+   local coef
+   for i=1,#legend do
+      if i > 1 then hstr = hstr .. ' , ' end
+      hstr = hstr .. " '-'title '" .. legend[i] .. "' " .. 'with lines'
+   end
+   hstr = hstr .. '\n'
+   for i=1,#legend do
+      for j=1,x[i]:size(1) do
+	 for k=1,x[i]:size(2) do
+            dstr =  string.format('%s%g %g %g\n',dstr,x[i][j][k],y[i][j][k],z[i][j][k])
+         end
+	 dstr = string.format('%s\n',dstr)
       end
       dstr = string.format('%se\n',dstr)
    end
@@ -270,7 +357,7 @@ function plot.print(fname)
    writeToCurrent('set term ' .. term)
    writeToCurrent('set output \''.. fname .. '\'')
    writeToCurrent('refresh')
-   writeToCurrent('set term ' .. _gptable.term .. ' ' .. _gptable.current .. '\n')   
+   writeToCurrent('set term ' .. _gptable.term .. ' ' .. _gptable.current .. '\n')
 end
 
 function plot.figure(n)
@@ -295,6 +382,12 @@ end
 
 function plot.gnuplot(legend,x,y,format)
    local hdr,data = gnuplot_string(legend,x,y,format)
+   --writeToCurrent('set pointsize 2')
+   writeToCurrent(hdr)
+   writeToCurrent(data)
+end
+function plot.gnusplot(legend,x,y,z)
+   local hdr,data = gnu_splot_string(legend,x,y,z)
    --writeToCurrent('set pointsize 2')
    writeToCurrent(hdr)
    writeToCurrent(data)
@@ -379,6 +472,41 @@ function plot.plot(...)
       ydata[#ydata+1] = y
    end
    plot.gnuplot(legends,xdata,ydata,formats)
+end
+
+-- splot(z)
+-- splot({x1,y1,z1},{x2,y2,z2})
+-- splot({'name1',x1,y1,z1},{'name2',x2,y2,z2})
+function plot.splot(...)
+   local arg = {...}
+   if select('#',...) == 0 then
+      error('no inputs, expecting at least a matrix')
+   end
+
+   local xdata = {}
+   local ydata = {}
+   local zdata = {}
+   local legends = {}
+
+   if type(arg[1]) == "table" then
+      if type(arg[1][1]) == "table" then
+         arg = arg[1]
+      end
+      for i,v in ipairs(arg) do
+         local l,x,y,z = getsplotvars(v)
+         legends[#legends+1] = l
+         xdata[#xdata+1] = x
+         ydata[#ydata+1] = y
+         zdata[#zdata+1] = z
+      end
+   else
+      local l,x,y,z = getsplotvars(arg)
+      legends[#legends+1] = l
+      xdata[#xdata+1] = x
+      ydata[#ydata+1] = y
+      zdata[#zdata+1] = z
+   end
+   plot.gnusplot(legends,xdata,ydata,zdata)
 end
 
 -- bar(y)
