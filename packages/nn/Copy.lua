@@ -11,6 +11,7 @@ function Copy:__init(intype, outtype)
    if intype == outtype then
 
       self.forward = function(self, input)
+                        self.output = input
                         return input
                      end
 
