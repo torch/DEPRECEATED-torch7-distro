@@ -36,14 +36,14 @@ function Module:accUpdateGradParameters(input, gradOutput, lr)
    self:accGradParameters(input, gradOutput, -lr)
    self.gradWeight = gradWeight
    self.gradBias = gradBias
---    if self:parameters() then
---       self:zeroGradParameters()
---       self:backward(input, gradOutput)
---       self:accGradParameters(input, gradOutput, 1)
---       self:updateParameters(lr)
---    else
---       self:backward(input, gradOutput)
---    end
+end
+
+function Module:sharedAccUpdateGradParameters(input, gradOutput, lr)
+   if self:parameters() then
+      self:zeroGradParameters()
+      self:accGradParameters(input, gradOutput, 1)
+      self:updateParameters(lr)
+   end
 end
 
 function Module:zeroGradParameters()
@@ -64,48 +64,15 @@ function Module:updateParameters(learningRate)
    end
 end
 
-function Module:write(file)
-   local var = {}
-   for k,v in pairs(self) do
-      local tk = type(v)
-      if tk == 'number'
-         or tk == 'string'
-         or tk == 'boolean'
-         or tk == 'table'
-         or (tk == 'userdata' and torch.typename(self))
-      then
-         var[k] = v
-      end
-   end
---    var.__metatable = {}
---    for k,v in pairs(getmetatable(self)) do
---       local tk = type(v)
---       if tk == 'function' then
---          var.__metatable[k] = v
---       end
---    end
-   file:writeObject(var)
-end
-
-function Module:read(file)
-   local var = file:readObject(var)
-   for k,v in pairs(var) do
-      self[k] = v
-   end
---    if self.__metatable then
---       local oldmeta = getmetatable(self)
---       for k,v in pairs(self.__metatable) do
---          oldmeta[k] = v
---       end
---       self.__metatable = nil
---    end
-end
-
 function Module:share(mlp, ...)
    for i,v in ipairs(arg) do
-      if self[v] ~= nil then self[v]:set(mlp[v]) end
+      if self[v] ~= nil then
+         self[v]:set(mlp[v])
+         self.accUpdateGradParameters = self.sharedAccUpdateGradParameters
+         mlp.accUpdateGradParameters = mlp.sharedAccUpdateGradParameters
+      end
    end
-   return self
+   return self      
 end
 
 function Module:clone(...)
