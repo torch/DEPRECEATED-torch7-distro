@@ -147,6 +147,20 @@ static int torch_Storage_(string)(lua_State *L)
 }
 #endif
 
+static int torch_Storage_(totable)(lua_State *L)
+{
+  THStorage *storage = luaT_checkudata(L, 1, torch_Storage_id);
+  long i;
+
+  lua_newtable(L);
+  for(i = 0; i < storage->size; i++)
+  {
+    lua_pushnumber(L, (lua_Number)storage->data[i]);
+    lua_rawseti(L, -2, i+1);
+  }
+  return 1;
+}
+
 static int torch_Storage_(factory)(lua_State *L)
 {
   THStorage *storage = THStorage_(new)();
@@ -185,6 +199,7 @@ static const struct luaL_Reg torch_Storage_(_) [] = {
   {"resize", torch_Storage_(resize)},
   {"fill", torch_Storage_(fill)},
   {"copy", torch_Storage_(copy)},
+  {"totable", torch_Storage_(totable)},
   {"write", torch_Storage_(write)},
   {"read", torch_Storage_(read)},
 #if defined(TH_REAL_IS_CHAR) || defined(TH_REAL_IS_BYTE)

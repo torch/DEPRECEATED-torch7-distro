@@ -8,6 +8,7 @@ end
 
 function ConcatTable:add(module)
    table.insert(self.modules, module)
+   return self
 end
 
 function ConcatTable:get(index)

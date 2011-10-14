@@ -64,7 +64,10 @@ static int qluaide_hook(lua_State *L)
 
 
 
-LUA_EXTERNC QTIDE_API 
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTIDE_API 
 int luaopen_libqtide(lua_State *L)
 { 
   // load module 'qt'

@@ -89,6 +89,9 @@ static const void* torch_DoubleTensor_id = NULL;
 #include "generic/MultiMarginCriterion.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/MultiLabelMarginCriterion.c"
+#include "THGenerateFloatTypes.h"
+
 DLL_EXPORT int luaopen_libnn(lua_State *L)
 {
   torch_FloatTensor_id = luaT_checktypename2id(L, "torch.FloatTensor");
@@ -125,6 +128,7 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_FloatSpatialMaxPooling_init(L);
   nn_FloatVolumetricConvolution_init(L);
   nn_FloatMultiMarginCriterion_init(L);
+  nn_FloatMultiLabelMarginCriterion_init(L);
 
   nn_DoubleMin_init(L);
   nn_DoubleMax_init(L);
@@ -153,6 +157,7 @@ DLL_EXPORT int luaopen_libnn(lua_State *L)
   nn_DoubleSpatialMaxPooling_init(L);
   nn_DoubleVolumetricConvolution_init(L);
   nn_DoubleMultiMarginCriterion_init(L);
+  nn_DoubleMultiLabelMarginCriterion_init(L);
 
   return 1;
 }

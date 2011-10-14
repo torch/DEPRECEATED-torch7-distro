@@ -141,7 +141,10 @@ qsvgwidget_hook(lua_State *L)
 // ====================================
 
 
-LUA_EXTERNC QTSVG_API int 
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTSVG_API int 
 luaopen_libqtsvg(lua_State *L)
 {
   // load module 'qt'

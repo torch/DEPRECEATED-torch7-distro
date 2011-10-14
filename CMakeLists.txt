@@ -17,6 +17,15 @@ ENDIF(COMMAND CMAKE_POLICY)
 SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/scripts 
 		      ${CMAKE_BINARY_DIR}/cmake ${CMAKE_MODULE_PATH})
 
+SET(USE_LUAJIT FALSE CACHE BOOL "Build against LuaJIT (for better performance")
+IF (USE_LUAJIT)
+   SET(LUABIN "luajit" CACHE INTERNAL "")
+   SET(OWN_LUA OFF CACHE BOOL "3rd party software: install our own Lua")
+ELSE (USE_LUAJIT)
+   SET(LUABIN "lua" CACHE INTERNAL "")
+   SET(OWN_LUA ON CACHE BOOL "3rd party software: install our own Lua")
+ENDIF (USE_LUAJIT)
+
 INCLUDE(TorchPaths)
 
 IF(UNIX)
@@ -88,7 +97,6 @@ IF(EXISTS "${Torch_SOURCE_DIR}/milde/CMakeLists.txt")
   ADD_SUBDIRECTORY(milde)
 ENDIF(EXISTS "${Torch_SOURCE_DIR}/milde/CMakeLists.txt")
 
-
 # Cuda
 IF(EXISTS "${Torch_SOURCE_DIR}/cuda/CMakeLists.txt")
   ADD_SUBDIRECTORY(cuda)
@@ -99,7 +107,6 @@ IF(EXISTS "${Torch_SOURCE_DIR}/openmp/CMakeLists.txt")
   ADD_SUBDIRECTORY(openmp)
 ENDIF(EXISTS "${Torch_SOURCE_DIR}/openmp/CMakeLists.txt")
 
-
 # Dev Packages
 ADD_SUBDIRECTORY(dev)
 
@@ -109,4 +116,3 @@ IF(EXISTS "${Torch_SOURCE_DIR}/milde/CPackLists.txt")
 ELSE(EXISTS "${Torch_SOURCE_DIR}/milde/CPackLists.txt")
   INCLUDE(TorchCPack)
 ENDIF(EXISTS "${Torch_SOURCE_DIR}/milde/CPackLists.txt")
-

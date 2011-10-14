@@ -3,8 +3,13 @@
 #ifndef QTCORE_H
 #define QTCORE_H
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
+#endif
+
 #include "qtluaengine.h"
 #include "qtluautils.h"
 
@@ -19,7 +24,10 @@
 # define QTCORE_API /**/
 #endif
 
-LUA_EXTERNC QTCORE_API int luaopen_libqtcore(lua_State *L);
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTCORE_API int luaopen_libqtcore(lua_State *L);
 
 
 #endif

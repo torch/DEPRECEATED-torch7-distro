@@ -13,13 +13,14 @@ function Mean:forward(input)
 end
 
 function Mean:backward(input, gradOutput)
-   local size = input:size()
-   local stride = input:stride()
-   stride[self.dimension] = 0
+   local size = gradOutput:size():totable()
+   local stride = gradOutput:stride():totable()
+   table.insert(size, self.dimension, input:size(self.dimension))
+   table.insert(stride, self.dimension, 0)
 
    self.gradInput:resizeAs(gradOutput):copy(gradOutput)
    self.gradInput:mul(1/input:size(self.dimension))
-   self.gradInput:resize(size, stride)
+   self.gradInput:resize(torch.LongStorage(size), torch.LongStorage(stride))
 
    return self.gradInput
 end

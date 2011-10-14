@@ -10,6 +10,7 @@ qt.QImage.toTensor = function(self, tensor, scale)
                         if type(tensor) == 'userdata' then
                            return tensor.qttorch.QImageToTensor(self, tensor, scale)
                         else
-                           error('tensor expected')
+                           local t = torch.getmetatable(torch.getdefaulttensortype())
+                           return t.qttorch.QImageToTensor(self, tensor, scale)
                         end
                      end

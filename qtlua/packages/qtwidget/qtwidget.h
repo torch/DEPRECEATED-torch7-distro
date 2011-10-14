@@ -3,8 +3,13 @@
 #ifndef QTWIDGET_H
 #define QTWIDGET_H
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
+#endif
+
 #include "qtluaengine.h"
 #include "qtluautils.h"
 
@@ -20,7 +25,10 @@
 #endif
 
 
-LUA_EXTERNC QTWIDGET_API int luaopen_libqtwidget(lua_State *L);
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTWIDGET_API int luaopen_libqtwidget(lua_State *L);
 
 
 #endif

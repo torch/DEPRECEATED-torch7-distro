@@ -19,3 +19,25 @@ function Criterion:clone()
    f:close()
    return clone
 end
+
+function Criterion:type(type)
+   -- find all tensors and convert them
+   for key,param in pairs(self) do
+      if torch.typename(param) and torch.typename(param):find('torch%..+Tensor') then
+         self[key] = param:type(type)
+      end
+   end
+   return self
+end
+
+function Criterion:float()
+   return self:type('torch.FloatTensor')
+end
+
+function Criterion:double()
+   return self:type('torch.DoubleTensor')
+end
+
+function Criterion:cuda()
+   return self:type('torch.CudaTensor')
+end

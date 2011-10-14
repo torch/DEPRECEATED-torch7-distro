@@ -105,6 +105,7 @@ function Module:share(mlp, ...)
    for i,v in ipairs(arg) do
       if self[v] ~= nil then self[v]:set(mlp[v]) end
    end
+   return self
 end
 
 function Module:clone(...)

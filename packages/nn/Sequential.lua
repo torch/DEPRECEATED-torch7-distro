@@ -10,6 +10,7 @@ function Sequential:add(module)
    end
    table.insert(self.modules, module)
    self.output = module.output
+   return self
 end
 
 function Sequential:size()

@@ -3,8 +3,13 @@
 #ifndef UILOADER_H
 #define UILOADER_H
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
+#endif
+
 #include "qtluaengine.h"
 #include "qtluautils.h"
 
@@ -19,7 +24,10 @@
 # define QTUILOADER_API /**/
 #endif
 
-LUA_EXTERNC QTUILOADER_API int luaopen_libqtuiloader(lua_State *L);
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTUILOADER_API int luaopen_libqtuiloader(lua_State *L);
 
 
 #endif

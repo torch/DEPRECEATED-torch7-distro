@@ -10,6 +10,7 @@ end
 
 function Parallel:add(module)
    table.insert(self.modules, module)
+   return self
 end
 
 function Parallel:get(index)

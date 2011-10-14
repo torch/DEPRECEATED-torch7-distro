@@ -3,8 +3,13 @@
 #ifndef QTLUAPAINTER_H
 #define QTLUAPAINTER_H
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
+#endif
+
 #include "qtluaengine.h"
 #include "qtluautils.h"
 

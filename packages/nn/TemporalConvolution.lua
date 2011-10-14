@@ -47,9 +47,5 @@ function TemporalConvolution:accGradParameters(input, gradOutput, scale)
    input.nn.TemporalConvolution_accGradParameters(self, input, gradOutput, scale)
 end
 
--- function TemporalConvolution:accUpdateGradParameters(input, gradOutput, lr)
---    print('using slow version')
---    self:zeroGradParameters()
---    self:accGradParameters(input, gradOutput)
---    self:updateParameters(lr)
--- end
+-- we do not need to accumulate parameters when sharing
+TemporalConvolution.sharedAccUpdateGradParameters = TemporalConvolution.accUpdateGradParameters

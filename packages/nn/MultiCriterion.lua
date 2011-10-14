@@ -11,6 +11,7 @@ function MultiCriterion:add(criterion, weight)
    table.insert(self.criterions, criterion)
    self.weights:resize(#self.criterions, true)
    self.weights[#self.criterions] = weight
+   return self
 end
 
 function MultiCriterion:forward(input, target)

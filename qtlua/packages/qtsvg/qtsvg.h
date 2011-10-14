@@ -3,8 +3,13 @@
 #ifndef QTSVG_H
 #define QTSVG_H
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
+#endif
+
 #include "qtluaengine.h"
 #include "qtluautils.h"
 
@@ -19,7 +24,10 @@
 # define QTSVG_API /**/
 #endif
 
-LUA_EXTERNC QTSVG_API int luaopen_libqtsvg(lua_State *L);
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTSVG_API int luaopen_libqtsvg(lua_State *L);
 
 
 #endif

@@ -29,8 +29,12 @@
 #include <QTimer>
 #include <QWaitCondition>
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
+#endif
 
 #include "qluaconsole.h"
 #include "qtluaengine.h"
