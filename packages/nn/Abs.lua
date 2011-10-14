@@ -9,7 +9,7 @@ function Abs:forward(input)
    return self.output
 end
 
-function Abs:backward(input, gradOutput)
-   input.nn.Abs_backward(self, input, gradOutput)
+function Abs:updateGradInput(input, gradOutput)
+   input.nn.Abs_updateGradInput(self, input, gradOutput)
    return self.gradInput
 end

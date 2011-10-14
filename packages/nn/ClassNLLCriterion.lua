@@ -23,7 +23,7 @@ function ClassNLLCriterion:forward(input, target)
    return self.output
 end
 
-function ClassNLLCriterion:backward(input, target)
+function ClassNLLCriterion:updateGradInput(input, target)
    self.gradInput:resizeAs(input)
    self.gradInput:zero()
 

@@ -30,7 +30,7 @@ function Mul:forward(input)
    return self.output 
 end
 
-function Mul:backward(input, gradOutput) 
+function Mul:updateGradInput(input, gradOutput) 
    self.gradInput:zero()
    self.gradInput:add(self.weight[1], gradOutput)
    return self.gradInput

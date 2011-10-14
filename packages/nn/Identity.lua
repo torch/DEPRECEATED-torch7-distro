@@ -6,7 +6,7 @@ function Identity:forward(input)
 end
 
 
-function Identity:backward(input, gradOutput)
+function Identity:updateGradInput(input, gradOutput)
    self.gradInput = gradOutput
    return self.gradInput
 end

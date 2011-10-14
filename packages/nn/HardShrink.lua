@@ -10,7 +10,7 @@ function HardShrink:forward(input)
    return self.output
 end
 
-function HardShrink:backward(input, gradOutput)
-   input.nn.HardShrink_backward(self, input, gradOutput)
+function HardShrink:updateGradInput(input, gradOutput)
+   input.nn.HardShrink_updateGradInput(self, input, gradOutput)
    return self.gradInput
 end

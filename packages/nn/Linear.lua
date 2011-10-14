@@ -47,7 +47,7 @@ function Linear:forward(input)
    return self.output
 end
 
-function Linear:backward(input, gradOutput)
+function Linear:updateGradInput(input, gradOutput)
    if self.gradInput then
 
       if input:dim() == 1 then

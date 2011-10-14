@@ -15,7 +15,7 @@ function Copy:__init(intype, outtype)
                         return input
                      end
 
-      self.backward = function(self, input, gradOutput)
+      self.updateGradInput = function(self, input, gradOutput)
                          self.gradInput = gradOutput
                          return gradOutput
                       end
@@ -27,7 +27,7 @@ function Copy:forward(input)
    return self.output
 end
 
-function Copy:backward(input, gradOutput)
+function Copy:updateGradInput(input, gradOutput)
    self.gradInput:resize(gradOutput:size()):copy(gradOutput)
    return self.gradInput
 end

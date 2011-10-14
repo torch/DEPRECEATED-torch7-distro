@@ -36,9 +36,9 @@ function TemporalConvolution:forward(input)
    return input.nn.TemporalConvolution_forward(self, input)
 end
 
-function TemporalConvolution:backward(input, gradOutput)
+function TemporalConvolution:updateGradInput(input, gradOutput)
    if self.gradInput then
-      return input.nn.TemporalConvolution_backward(self, input, gradOutput)
+      return input.nn.TemporalConvolution_updateGradInput(self, input, gradOutput)
    end
 end
 

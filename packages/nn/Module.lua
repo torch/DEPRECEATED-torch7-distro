@@ -22,6 +22,18 @@ function Module:forward(input)
 end
 
 function Module:backward(input, gradOutput)
+   self:updateGradInput(input, gradOutput)
+   self:accGradParameters(input, gradOutput)
+   return self.gradInput
+end
+
+function Module:backwardUpdate(input, gradOutput, lr)
+   self:updateGradInput(input, gradOutput)
+   self:accUpdateGradParameters(input, gradOutput, lr)
+   return self.gradInput
+end
+
+function Module:updateGradInput(input, gradOutput)
    return self.gradInput
 end
 

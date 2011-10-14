@@ -15,7 +15,7 @@ static int nn_(Sqrt_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(Sqrt_backward)(lua_State *L)
+static int nn_(Sqrt_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
@@ -32,7 +32,7 @@ static int nn_(Sqrt_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(Sqrt__) [] = {
   {"Sqrt_forward", nn_(Sqrt_forward)},
-  {"Sqrt_backward", nn_(Sqrt_backward)},
+  {"Sqrt_updateGradInput", nn_(Sqrt_updateGradInput)},
   {NULL, NULL}
 };
 

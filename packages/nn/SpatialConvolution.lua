@@ -39,9 +39,9 @@ function SpatialConvolution:forward(input)
    return input.nn.SpatialConvolution_forward(self, input)
 end
 
-function SpatialConvolution:backward(input, gradOutput)
+function SpatialConvolution:updateGradInput(input, gradOutput)
    if self.gradInput then
-      return input.nn.SpatialConvolution_backward(self, input, gradOutput)
+      return input.nn.SpatialConvolution_updateGradInput(self, input, gradOutput)
    end
 end
 

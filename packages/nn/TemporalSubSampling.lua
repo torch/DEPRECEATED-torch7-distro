@@ -37,9 +37,9 @@ function TemporalSubSampling:forward(input)
    return input.nn.TemporalSubSampling_forward(self, input)
 end
 
-function TemporalSubSampling:backward(input, gradOutput)
+function TemporalSubSampling:updateGradInput(input, gradOutput)
    if self.gradInput then
-      return input.nn.TemporalSubSampling_backward(self, input, gradOutput)
+      return input.nn.TemporalSubSampling_updateGradInput(self, input, gradOutput)
    end
 end
 

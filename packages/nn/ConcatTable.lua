@@ -26,9 +26,9 @@ function ConcatTable:forward(input)
    return self.output
 end
 
-function ConcatTable:backward(input, gradOutput)
+function ConcatTable:updateGradInput(input, gradOutput)
    for i,module in ipairs(self.modules) do
-      local currentGradInput = module:backward(input, gradOutput[i])
+      local currentGradInput = module:updateGradInput(input, gradOutput[i])
       if i == 1 then
          self.gradInput:resizeAs(currentGradInput):copy(currentGradInput)
       else

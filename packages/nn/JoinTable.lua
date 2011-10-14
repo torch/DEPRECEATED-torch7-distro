@@ -30,7 +30,7 @@ function JoinTable:forward(input)
 
 end
 
-function JoinTable:backward(input, gradOutput)
+function JoinTable:updateGradInput(input, gradOutput)
    for i=1,#input do 
       if self.gradInput[i] == nil then
          self.gradInput[i] = input[i].new()

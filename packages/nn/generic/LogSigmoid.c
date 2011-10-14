@@ -19,7 +19,7 @@ static int nn_(LogSigmoid_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(LogSigmoid_backward)(lua_State *L)
+static int nn_(LogSigmoid_updateGradInput)(lua_State *L)
 {
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
   THTensor *buffer = luaT_getfieldcheckudata(L, 1, "buffer", torch_(Tensor_id));
@@ -35,7 +35,7 @@ static int nn_(LogSigmoid_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(LogSigmoid__) [] = {
   {"LogSigmoid_forward", nn_(LogSigmoid_forward)},
-  {"LogSigmoid_backward", nn_(LogSigmoid_backward)},
+  {"LogSigmoid_updateGradInput", nn_(LogSigmoid_updateGradInput)},
   {NULL, NULL}
 };
 

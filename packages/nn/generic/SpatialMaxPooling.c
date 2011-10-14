@@ -87,7 +87,7 @@ static int nn_(SpatialMaxPooling_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(SpatialMaxPooling_backward)(lua_State *L)
+static int nn_(SpatialMaxPooling_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
@@ -149,7 +149,7 @@ static int nn_(SpatialMaxPooling_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(SpatialMaxPooling__) [] = {
   {"SpatialMaxPooling_forward", nn_(SpatialMaxPooling_forward)},
-  {"SpatialMaxPooling_backward", nn_(SpatialMaxPooling_backward)},
+  {"SpatialMaxPooling_updateGradInput", nn_(SpatialMaxPooling_updateGradInput)},
   {NULL, NULL}
 };
 

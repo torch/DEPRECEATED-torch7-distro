@@ -15,7 +15,7 @@ static int nn_(Exp_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(Exp_backward)(lua_State *L)
+static int nn_(Exp_updateGradInput)(lua_State *L)
 {
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
@@ -29,7 +29,7 @@ static int nn_(Exp_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(Exp__) [] = {
   {"Exp_forward", nn_(Exp_forward)},
-  {"Exp_backward", nn_(Exp_backward)},
+  {"Exp_updateGradInput", nn_(Exp_updateGradInput)},
   {NULL, NULL}
 };
 

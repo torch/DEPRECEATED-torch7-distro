@@ -19,8 +19,8 @@ function SpatialMaxPooling:forward(input)
    return self.output
 end
 
-function SpatialMaxPooling:backward(input, gradOutput)
-   input.nn.SpatialMaxPooling_backward(self, input, gradOutput)
+function SpatialMaxPooling:updateGradInput(input, gradOutput)
+   input.nn.SpatialMaxPooling_updateGradInput(self, input, gradOutput)
    return self.gradInput
 end
 

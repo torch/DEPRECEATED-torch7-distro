@@ -11,6 +11,6 @@ function Max:forward(input)
    return input.nn.Max_forward(self, input)
 end
 
-function Max:backward(input, gradOutput)
-   return input.nn.Max_backward(self, input, gradOutput)
+function Max:updateGradInput(input, gradOutput)
+   return input.nn.Max_updateGradInput(self, input, gradOutput)
 end

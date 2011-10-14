@@ -52,7 +52,7 @@ static int nn_(LogSoftMax_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(LogSoftMax_backward)(lua_State *L)
+static int nn_(LogSoftMax_updateGradInput)(lua_State *L)
 {
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
@@ -97,7 +97,7 @@ static int nn_(LogSoftMax_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(LogSoftMax__) [] = {
   {"LogSoftMax_forward", nn_(LogSoftMax_forward)},
-  {"LogSoftMax_backward", nn_(LogSoftMax_backward)},
+  {"LogSoftMax_updateGradInput", nn_(LogSoftMax_updateGradInput)},
   {NULL, NULL}
 };
 

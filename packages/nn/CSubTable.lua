@@ -12,7 +12,7 @@ function CSubTable:forward(input)
    return self.output
 end
 
-function CSubTable:backward(input, gradOutput)
+function CSubTable:updateGradInput(input, gradOutput)
    self.gradInput[1] = self.gradInput[1] or torch.Tensor()
    self.gradInput[2] = self.gradInput[2] or torch.Tensor()
    self.gradInput[1]:resizeAs(input[1]):copy(gradOutput)

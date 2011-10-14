@@ -4,6 +4,6 @@ function LogSoftMax:forward(input)
    return input.nn.LogSoftMax_forward(self, input)
 end
 
-function LogSoftMax:backward(input, gradOutput)
-   return input.nn.LogSoftMax_backward(self, input, gradOutput)
+function LogSoftMax:updateGradInput(input, gradOutput)
+   return input.nn.LogSoftMax_updateGradInput(self, input, gradOutput)
 end

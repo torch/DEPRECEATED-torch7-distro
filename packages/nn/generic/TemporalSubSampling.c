@@ -46,7 +46,7 @@ static int nn_(TemporalSubSampling_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(TemporalSubSampling_backward)(lua_State *L)
+static int nn_(TemporalSubSampling_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
@@ -124,7 +124,7 @@ static int nn_(TemporalSubSampling_accGradParameters)(lua_State *L)
 
 static const struct luaL_Reg nn_(TemporalSubSampling__) [] = {
   {"TemporalSubSampling_forward", nn_(TemporalSubSampling_forward)},
-  {"TemporalSubSampling_backward", nn_(TemporalSubSampling_backward)},
+  {"TemporalSubSampling_updateGradInput", nn_(TemporalSubSampling_updateGradInput)},
   {"TemporalSubSampling_accGradParameters", nn_(TemporalSubSampling_accGradParameters)},
   {NULL, NULL}
 };

@@ -4,6 +4,6 @@ function Sigmoid:forward(input)
    return input.nn.Sigmoid_forward(self, input)
 end
 
-function Sigmoid:backward(input, gradOutput)
-   return input.nn.Sigmoid_backward(self, input, gradOutput)
+function Sigmoid:updateGradInput(input, gradOutput)
+   return input.nn.Sigmoid_updateGradInput(self, input, gradOutput)
 end

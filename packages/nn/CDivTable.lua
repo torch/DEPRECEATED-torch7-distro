@@ -12,7 +12,7 @@ function CDivTable:forward(input)
    return self.output
 end
 
-function CDivTable:backward(input, gradOutput)
+function CDivTable:updateGradInput(input, gradOutput)
    self.gradInput[1] = self.gradInput[1] or torch.Tensor()
    self.gradInput[2] = self.gradInput[2] or torch.Tensor()
    self.gradInput[1]:resizeAs(input[1]):copy(gradOutput):cdiv(input[2])

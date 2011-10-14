@@ -13,7 +13,7 @@ function MarginCriterion:forward(input,y)
    return self.output
 end
 
-function MarginCriterion:backward(input, y)
+function MarginCriterion:updateGradInput(input, y)
   if (y*input[1])<self.margin then
      self.gradInput[1]=-y		
   else

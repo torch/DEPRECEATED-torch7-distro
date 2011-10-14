@@ -19,7 +19,7 @@ local function mathsign(x)
    if x>0 then return 1; else return -1; end
 end
 
-function PairwiseDistance:backward(input, gradOutput)
+function PairwiseDistance:updateGradInput(input, gradOutput)
   self.gradInput[1]:resizeAs(input[1]) 
   self.gradInput[2]:resizeAs(input[2]) 
   self.gradInput[1]:copy(input[1])

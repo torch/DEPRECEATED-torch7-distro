@@ -45,7 +45,7 @@ static int nn_(VolumetricConvolution_forward)(lua_State *L)
 }
 
 
-static int nn_(VolumetricConvolution_backward)(lua_State *L)
+static int nn_(VolumetricConvolution_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
@@ -103,7 +103,7 @@ static int nn_(VolumetricConvolution_accGradParameters)(lua_State *L)
 
 static const struct luaL_Reg nn_(VolumetricConvolution__) [] = {
   {"VolumetricConvolution_forward", nn_(VolumetricConvolution_forward)},
-  {"VolumetricConvolution_backward", nn_(VolumetricConvolution_backward)},
+  {"VolumetricConvolution_updateGradInput", nn_(VolumetricConvolution_updateGradInput)},
   {"VolumetricConvolution_accGradParameters", nn_(VolumetricConvolution_accGradParameters)},
   {NULL, NULL}
 };

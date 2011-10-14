@@ -14,7 +14,7 @@ function Power:forward(input)
    return self.output
 end
 
-function Power:backward(input, gradOutput)
+function Power:updateGradInput(input, gradOutput)
    self.gradInput:resizeAs(input):copy(gradOutput)
    self.gradInput:cmul(self.output):cdiv(input):mul(self.pow)
    return self.gradInput

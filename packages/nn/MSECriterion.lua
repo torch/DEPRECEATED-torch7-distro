@@ -9,6 +9,6 @@ function MSECriterion:forward(input, target)
    return input.nn.MSECriterion_forward(self, input, target)
 end
 
-function MSECriterion:backward(input, target)
-   return input.nn.MSECriterion_backward(self, input, target)
+function MSECriterion:updateGradInput(input, target)
+   return input.nn.MSECriterion_updateGradInput(self, input, target)
 end

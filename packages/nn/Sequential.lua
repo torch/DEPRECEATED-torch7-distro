@@ -30,15 +30,15 @@ function Sequential:forward(input)
    return currentOutput
 end
 
-function Sequential:backward(input, gradOutput)
+function Sequential:updateGradInput(input, gradOutput)
    local currentGradOutput = gradOutput
    local currentModule = self.modules[#self.modules]
    for i=#self.modules-1,1,-1 do
       local previousModule = self.modules[i]
-      currentGradOutput = currentModule:backward(previousModule.output, currentGradOutput)
+      currentGradOutput = currentModule:updateGradInput(previousModule.output, currentGradOutput)
       currentModule = previousModule
    end
-   currentGradOutput = currentModule:backward(input, currentGradOutput)
+   currentGradOutput = currentModule:updateGradInput(input, currentGradOutput)
    self.gradInput = currentGradOutput
    return currentGradOutput
 end

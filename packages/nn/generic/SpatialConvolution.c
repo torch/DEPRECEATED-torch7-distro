@@ -87,7 +87,7 @@ static int nn_(SpatialConvolution_forward)(lua_State *L)
 }
 
 
-static int nn_(SpatialConvolution_backward)(lua_State *L)
+static int nn_(SpatialConvolution_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
@@ -186,7 +186,7 @@ static int nn_(SpatialConvolution_accGradParameters)(lua_State *L)
 
 static const struct luaL_Reg nn_(SpatialConvolution__) [] = {
   {"SpatialConvolution_forward", nn_(SpatialConvolution_forward)},
-  {"SpatialConvolution_backward", nn_(SpatialConvolution_backward)},
+  {"SpatialConvolution_updateGradInput", nn_(SpatialConvolution_updateGradInput)},
   {"SpatialConvolution_accGradParameters", nn_(SpatialConvolution_accGradParameters)},
   {NULL, NULL}
 };

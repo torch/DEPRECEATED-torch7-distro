@@ -16,7 +16,7 @@ function Narrow:forward(input)
    return self.output:copy(output)
 end
 
-function Narrow:backward(input, gradOutput)
+function Narrow:updateGradInput(input, gradOutput)
    self.gradInput:resizeAs(input)  
    self.gradInput:zero();
    self.gradInput:narrow(self.dimension,self.index,self.length):copy(gradOutput)

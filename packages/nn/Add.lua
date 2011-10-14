@@ -37,7 +37,7 @@ function Add:forward(input)
    return self.output
 end 
 
-function Add:backward(input, gradOutput)
+function Add:updateGradInput(input, gradOutput)
    if self.gradInput then
       self.gradInput:copy(gradOutput) 
       return self.gradInput
