@@ -14,7 +14,7 @@ function Threshold:forward(input)
    return self.output
 end
 
-function Threshold:backward(input, gradOutput)
-   input.nn.Threshold_backward(self, input, gradOutput)
+function Threshold:updateGradInput(input, gradOutput)
+   input.nn.Threshold_updateGradInput(self, input, gradOutput)
    return self.gradInput
 end

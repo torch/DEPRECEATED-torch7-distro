@@ -83,7 +83,7 @@ static int nn_(MultiLabelMarginCriterion_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(MultiLabelMarginCriterion_backward)(lua_State *L)
+static int nn_(MultiLabelMarginCriterion_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   int sizeAverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
@@ -172,7 +172,7 @@ static int nn_(MultiLabelMarginCriterion_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(MultiLabelMarginCriterion__) [] = {
   {"MultiLabelMarginCriterion_forward", nn_(MultiLabelMarginCriterion_forward)},
-  {"MultiLabelMarginCriterion_backward", nn_(MultiLabelMarginCriterion_backward)},
+  {"MultiLabelMarginCriterion_updateGradInput", nn_(MultiLabelMarginCriterion_updateGradInput)},
   {NULL, NULL}
 };
 

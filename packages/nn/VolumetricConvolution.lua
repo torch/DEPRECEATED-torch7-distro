@@ -42,8 +42,8 @@ function VolumetricConvolution:forward(input)
    return input.nn.VolumetricConvolution_forward(self, input)
 end
 
-function VolumetricConvolution:backward(input, gradOutput)
-   return input.nn.VolumetricConvolution_backward(self, input, gradOutput)
+function VolumetricConvolution:updateGradInput(input, gradOutput)
+   return input.nn.VolumetricConvolution_updateGradInput(self, input, gradOutput)
 end
 
 function VolumetricConvolution:accGradParameters(input, gradOutput, scale)

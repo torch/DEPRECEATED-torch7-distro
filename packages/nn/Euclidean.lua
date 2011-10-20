@@ -35,7 +35,7 @@ function Euclidean:forward(input)
    return self.output
 end
 
-function Euclidean:backward(input, gradOutput)
+function Euclidean:updateGradInput(input, gradOutput)
   if self.gradInput then
      self.gradInput:zero()
      for i=1,self.weight:size(2) do

@@ -14,7 +14,7 @@ function CAddTable:forward(input)
    return self.output
 end
 
-function CAddTable:backward(input, gradOutput)
+function CAddTable:updateGradInput(input, gradOutput)
    for i=1,#input do
       self.gradInput[i] = self.gradInput[i] or torch.Tensor()
       self.gradInput[i]:resizeAs(input[i])

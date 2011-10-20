@@ -4,6 +4,6 @@ function Exp:forward(input)
    return input.nn.Exp_forward(self, input)
 end
 
-function Exp:backward(input, gradOutput)
-   return input.nn.Exp_backward(self, input, gradOutput)
+function Exp:updateGradInput(input, gradOutput)
+   return input.nn.Exp_updateGradInput(self, input, gradOutput)
 end

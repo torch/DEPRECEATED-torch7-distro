@@ -9,6 +9,6 @@ function MultiLabelMarginCriterion:forward(input, target)
    return input.nn.MultiLabelMarginCriterion_forward(self, input, target)
 end
 
-function MultiLabelMarginCriterion:backward(input, target)
-   return input.nn.MultiLabelMarginCriterion_backward(self, input, target)
+function MultiLabelMarginCriterion:updateGradInput(input, target)
+   return input.nn.MultiLabelMarginCriterion_updateGradInput(self, input, target)
 end

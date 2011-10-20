@@ -11,7 +11,7 @@ function DotProduct:forward(input,y)
    return self.output
 end
 
-function DotProduct:backward(input, gradOutput)
+function DotProduct:updateGradInput(input, gradOutput)
    local v1 = input[1]
    local v2 = input[2]
    local gw1=self.gradInput[1];

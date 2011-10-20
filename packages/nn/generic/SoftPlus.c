@@ -15,7 +15,7 @@ static int nn_(SoftPlus_forward)(lua_State *L)
     return 1;
 }
 
-static int nn_(SoftPlus_backward)(lua_State *L)
+static int nn_(SoftPlus_updateGradInput)(lua_State *L)
 {
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
@@ -30,7 +30,7 @@ static int nn_(SoftPlus_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(SoftPlus__) [] = {
   {"SoftPlus_forward", nn_(SoftPlus_forward)},
-  {"SoftPlus_backward", nn_(SoftPlus_backward)},
+  {"SoftPlus_updateGradInput", nn_(SoftPlus_updateGradInput)},
   {NULL, NULL}
 };
 

@@ -104,23 +104,13 @@ function SpatialConvolutionMap:forward(input)
    return self.output
 end
 
-function SpatialConvolutionMap:backward(input, gradOutput)
-   input.nn.SpatialConvolutionMap_backward(self, input, gradOutput)
+function SpatialConvolutionMap:updateGradInput(input, gradOutput)
+   input.nn.SpatialConvolutionMap_updateGradInput(self, input, gradOutput)
    return self.gradInput
 end
 
 function SpatialConvolutionMap:accGradParameters(input, gradOutput, scale)
    return input.nn.SpatialConvolutionMap_accGradParameters(self, input, gradOutput, scale)
-end
-
-function SpatialConvolutionMap:zeroGradParameters()
-   self.gradWeight:zero()
-   self.gradBias:zero()
-end
-
-function SpatialConvolutionMap:updateParameters(learningRate)
-   self.weight:add(-learningRate, self.gradWeight)
-   self.bias:add(-learningRate, self.gradBias)
 end
 
 function SpatialConvolutionMap:decayParameters(decay)

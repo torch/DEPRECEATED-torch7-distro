@@ -18,7 +18,7 @@ function nn.Jacobian.backward (module, input, param, dparam)
       dout:zero()
       sdout[i] = 1
       module:zeroGradParameters()
-      local din = module:backward(input, dout)
+      local din = module:updateGradInput(input, dout)
       module:accGradParameters(input, dout)
       if doparam == 1 then
 	 jacobian:select(2,i):copy(dparam)
@@ -46,7 +46,7 @@ function nn.Jacobian.backwardUpdate (module, input, param)
       param:copy(origparam)
       dout:zero()
       sdout[i] = 1
-      local din = module:backward(input, dout)
+      local din = module:updateGradInput(input, dout)
       module:accUpdateGradParameters(input, dout, 1)
       jacobian:select(2,i):copy(param)
    end
@@ -154,7 +154,7 @@ function nn.Jacobian.testIO(module,input, minval, maxval)
    -- run module
    module:forward(input)
    local go = module.output:clone():copy(lab.rand(module.output:nElement()):mul(inrange):add(minval))
-   module:backward(input,go)
+   module:updateGradInput(input,go)
    module:accGradParameters(input,go)
 
    local fo = module.output:clone()
@@ -167,7 +167,7 @@ function nn.Jacobian.testIO(module,input, minval, maxval)
    -- read module
    local m = torch.DiskFile('tmp.bin'):binary():readObject()
    m:forward(input)
-   m:backward(input,go)
+   m:updateGradInput(input,go)
    m:accGradParameters(input,go)
    -- cleanup
    os.remove('tmp.bin')
@@ -178,4 +178,62 @@ function nn.Jacobian.testIO(module,input, minval, maxval)
    local errf = fo - fo2
    local errb = bo - bo2
    return errf:abs():max(), errb:abs():max()
+end
+
+function nn.Jacobian.testAllUpdate(module, input, weight, gradWeight)
+   local gradOutput
+   local lr = random.uniform(0.1, 1)
+   local errors = {}
+
+   -- accGradParameters
+   local maccgp = module:clone()
+   local weightc = maccgp[weight]:clone()
+   maccgp:forward(input)
+   gradOutput = lab.rand(maccgp.output:size())
+   maccgp:zeroGradParameters()
+   maccgp:updateGradInput(input, gradOutput)
+   maccgp:accGradParameters(input, gradOutput)
+   maccgp:updateParameters(lr)
+   errors["accGradParameters"] = (weightc-maccgp[gradWeight]*lr-maccgp[weight]):norm()
+   
+   -- accUpdateGradParameters
+   local maccugp = module:clone()
+   maccugp:forward(input)
+   maccugp:updateGradInput(input, gradOutput)
+   maccugp:accUpdateGradParameters(input, gradOutput, lr)
+   errors["accUpdateGradParameters"] = (maccugp[weight]-maccgp[weight]):norm()
+
+   -- shared, accGradParameters
+   local macsh1 = module:clone()
+   local macsh2 = module:clone()
+   macsh2:share(macsh1, weight)
+   macsh1:forward(input)
+   macsh2:forward(input)
+   macsh1:zeroGradParameters()
+   macsh2:zeroGradParameters()
+   macsh1:updateGradInput(input, gradOutput)
+   macsh2:updateGradInput(input, gradOutput)
+   macsh1:accGradParameters(input, gradOutput)
+   macsh2:accGradParameters(input, gradOutput)
+   macsh1:updateParameters(lr)
+   macsh2:updateParameters(lr)
+   local err = (weightc-maccgp[gradWeight]*(lr*2)-macsh1[weight]):norm()
+   err = err + (weightc-maccgp[gradWeight]*(lr*2)-macsh2[weight]):norm()
+   errors["accGradParameters [shared]"] = err
+   
+   -- shared, accUpdateGradParameters
+   local macshu1 = module:clone()
+   local macshu2 = module:clone()
+   macshu2:share(macshu1, weight)
+   macshu1:forward(input)
+   macshu2:forward(input)
+   macshu1:updateGradInput(input, gradOutput)
+   macshu2:updateGradInput(input, gradOutput)
+   macshu1:accUpdateGradParameters(input, gradOutput, lr)
+   macshu2:accUpdateGradParameters(input, gradOutput, lr)
+   local err = (weightc-maccgp[gradWeight]*(lr*2)-macshu1[weight]):norm()
+   err = err + (weightc-maccgp[gradWeight]*(lr*2)-macshu2[weight]):norm()
+   errors["accUpdateGradParameters [shared]"] = err
+
+   return errors
 end

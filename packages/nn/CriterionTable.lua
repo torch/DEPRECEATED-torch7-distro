@@ -10,7 +10,7 @@ function CriterionTable:forward(input)
    return self.output
 end
     
-function CriterionTable:backward(input, gradOutput)
-  self.criterion:backward(unpack(input))
+function CriterionTable:updateGradInput(input, gradOutput)
+  self.criterion:updateGradInput(unpack(input))
   return self.gradInput
 end 

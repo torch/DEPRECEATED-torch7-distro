@@ -31,7 +31,7 @@ function Reshape:forward(input)
    return self.output
 end
 
-function Reshape:backward(input, gradOutput)
+function Reshape:updateGradInput(input, gradOutput)
    self.gradInput:set(gradOutput):resizeAs(input)
    return self.gradInput
 end

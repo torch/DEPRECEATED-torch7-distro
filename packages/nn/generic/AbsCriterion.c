@@ -23,7 +23,7 @@ static int nn_(AbsCriterion_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(AbsCriterion_backward)(lua_State *L)
+static int nn_(AbsCriterion_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *target = luaT_checkudata(L, 3, torch_(Tensor_id));
@@ -40,7 +40,7 @@ static int nn_(AbsCriterion_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(AbsCriterion__) [] = {
   {"AbsCriterion_forward", nn_(AbsCriterion_forward)},
-  {"AbsCriterion_backward", nn_(AbsCriterion_backward)},
+  {"AbsCriterion_updateGradInput", nn_(AbsCriterion_updateGradInput)},
   {NULL, NULL}
 };
 

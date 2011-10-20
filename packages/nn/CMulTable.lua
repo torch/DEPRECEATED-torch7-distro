@@ -14,7 +14,7 @@ function CMulTable:forward(input)
    return self.output
 end
 
-function CMulTable:backward(input, gradOutput)
+function CMulTable:updateGradInput(input, gradOutput)
    local tout = torch.Tensor():resizeAs(self.output)
    for i=1,#input do
       self.gradInput[i] = self.gradInput[i] or torch.Tensor()

@@ -9,6 +9,10 @@ function Criterion:forward(input, target)
 end
 
 function Criterion:backward(input, target)
+   return self:updateGradInput(input, target)
+end
+
+function Criterion:updateGradInput(input, target)
 end
 
 function Criterion:clone()

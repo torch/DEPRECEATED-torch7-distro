@@ -23,7 +23,7 @@ function CMul:forward(input)
    return self.output
 end
 
-function CMul:backward(input, gradOutput)
+function CMul:updateGradInput(input, gradOutput)
    if self.gradInput then
       self.gradInput:zero()
       self.gradInput:addcmul(1, self.weight, gradOutput)

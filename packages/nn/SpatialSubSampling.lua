@@ -38,9 +38,9 @@ function SpatialSubSampling:forward(input)
    return input.nn.SpatialSubSampling_forward(self, input)
 end
 
-function SpatialSubSampling:backward(input, gradOutput)
+function SpatialSubSampling:updateGradInput(input, gradOutput)
    if self.gradInput then
-      return input.nn.SpatialSubSampling_backward(self, input, gradOutput)
+      return input.nn.SpatialSubSampling_updateGradInput(self, input, gradOutput)
    end
 end
 

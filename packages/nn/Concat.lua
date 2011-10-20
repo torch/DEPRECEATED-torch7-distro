@@ -37,13 +37,13 @@ function Concat:forward(input)
    return self.output
 end
 
-function Concat:backward(input, gradOutput)
+function Concat:updateGradInput(input, gradOutput)
    self.gradInput:resizeAs(input)
 
    local offset = 1
    for i,module in ipairs(self.modules) do
       local currentOutput = module.output
-      local currentGradInput = module:backward(input, gradOutput:narrow(self.dimension, offset, currentOutput:size(self.dimension)))
+      local currentGradInput = module:updateGradInput(input, gradOutput:narrow(self.dimension, offset, currentOutput:size(self.dimension)))
         
       if i==1 then
          self.gradInput:copy(currentGradInput)

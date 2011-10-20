@@ -16,7 +16,7 @@ function HingeEmbeddingCriterion:forward(input,y)
    return self.output
 end
 
-function HingeEmbeddingCriterion:backward(input, y)
+function HingeEmbeddingCriterion:updateGradInput(input, y)
   self.gradInput[1]=y
   local dist = input[1]
   if y == -1 and  dist > self.margin then

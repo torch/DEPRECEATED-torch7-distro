@@ -70,7 +70,7 @@ static int nn_(TemporalConvolution_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(TemporalConvolution_backward)(lua_State *L)
+static int nn_(TemporalConvolution_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
@@ -179,7 +179,7 @@ static int nn_(TemporalConvolution_accGradParameters)(lua_State *L)
 
 static const struct luaL_Reg nn_(TemporalConvolution__) [] = {
   {"TemporalConvolution_forward", nn_(TemporalConvolution_forward)},
-  {"TemporalConvolution_backward", nn_(TemporalConvolution_backward)},
+  {"TemporalConvolution_updateGradInput", nn_(TemporalConvolution_updateGradInput)},
   {"TemporalConvolution_accGradParameters", nn_(TemporalConvolution_accGradParameters)},
   {NULL, NULL}
 };

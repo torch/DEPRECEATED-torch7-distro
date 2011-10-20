@@ -17,7 +17,7 @@ static int nn_(HardShrink_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(HardShrink_backward)(lua_State *L)
+static int nn_(HardShrink_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   real lambda = luaT_getfieldchecknumber(L, 1, "lambda");
@@ -36,7 +36,7 @@ static int nn_(HardShrink_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(HardShrink__) [] = {
   {"HardShrink_forward", nn_(HardShrink_forward)},
-  {"HardShrink_backward", nn_(HardShrink_backward)},
+  {"HardShrink_updateGradInput", nn_(HardShrink_updateGradInput)},
   {NULL, NULL}
 };
 

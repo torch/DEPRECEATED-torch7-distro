@@ -17,7 +17,7 @@ function SplitTable:forward(input)
 end 
 
 
-function SplitTable:backward(input, gradOutput)
+function SplitTable:updateGradInput(input, gradOutput)
    local slices = input:size(self.dimension)
    self.gradInput:resizeAs(input)
 

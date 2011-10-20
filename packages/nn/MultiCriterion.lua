@@ -22,11 +22,11 @@ function MultiCriterion:forward(input, target)
    return self.output
 end
 
-function MultiCriterion:backward(input, target)
+function MultiCriterion:updateGradInput(input, target)
    self.gradInput:resizeAs(input)
    self.gradInput:zero()
    for i=1,#self.criterions do
-      self.gradInput:add(self.weights[i], self.criterions[i]:backward(input, target))
+      self.gradInput:add(self.weights[i], self.criterions[i]:updateGradInput(input, target))
    end
    return self.gradInput
 end

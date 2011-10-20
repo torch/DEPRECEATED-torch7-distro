@@ -9,6 +9,6 @@ function MultiMarginCriterion:forward(input, target)
    return input.nn.MultiMarginCriterion_forward(self, input, target)
 end
 
-function MultiMarginCriterion:backward(input, target)
-   return input.nn.MultiMarginCriterion_backward(self, input, target)
+function MultiMarginCriterion:updateGradInput(input, target)
+   return input.nn.MultiMarginCriterion_updateGradInput(self, input, target)
 end

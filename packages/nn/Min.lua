@@ -11,6 +11,6 @@ function Min:forward(input)
    return input.nn.Min_forward(self, input)
 end
 
-function Min:backward(input, gradOutput)
-   return input.nn.Min_backward(self, input, gradOutput)
+function Min:updateGradInput(input, gradOutput)
+   return input.nn.Min_updateGradInput(self, input, gradOutput)
 end

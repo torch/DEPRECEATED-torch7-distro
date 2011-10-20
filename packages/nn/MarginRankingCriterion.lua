@@ -12,7 +12,7 @@ function MarginRankingCriterion:forward(input,y)
    return self.output
 end
 
-function MarginRankingCriterion:backward(input, y)
+function MarginRankingCriterion:updateGradInput(input, y)
   local dist = -y*(input[1][1]-input[2][1]) + self.margin
   if dist < 0 then
      self.gradInput[1][1]=0;

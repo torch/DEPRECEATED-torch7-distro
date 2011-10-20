@@ -10,7 +10,7 @@ function SoftShrink:forward(input)
    return self.output
 end
 
-function SoftShrink:backward(input, gradOutput)
-   input.nn.SoftShrink_backward(self, input, gradOutput)
+function SoftShrink:updateGradInput(input, gradOutput)
+   input.nn.SoftShrink_updateGradInput(self, input, gradOutput)
    return self.gradInput
 end

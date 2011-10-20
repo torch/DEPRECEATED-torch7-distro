@@ -12,7 +12,7 @@ function Mean:forward(input)
    return self.output
 end
 
-function Mean:backward(input, gradOutput)
+function Mean:updateGradInput(input, gradOutput)
    local size = gradOutput:size():totable()
    local stride = gradOutput:stride():totable()
    table.insert(size, self.dimension, input:size(self.dimension))

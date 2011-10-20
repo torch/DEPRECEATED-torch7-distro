@@ -77,7 +77,7 @@ static int nn_(SpatialConvolutionMap_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(SpatialConvolutionMap_backward)(lua_State *L)
+static int nn_(SpatialConvolutionMap_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));  
@@ -119,7 +119,7 @@ static int nn_(SpatialConvolutionMap_backward)(lua_State *L)
   long weight_h = weight->size[1];
   long weight_w = weight->size[2];
 
-  // backward all
+  // updateGradInput all
   int k;
   int nkernel = connTable->size[0];
   for(k = 0; k < nkernel; k++)
@@ -214,7 +214,7 @@ static int nn_(SpatialConvolutionMap_accGradParameters)(lua_State *L)
 
 static const struct luaL_Reg nn_(SpatialConvolutionMap__) [] = {
   {"SpatialConvolutionMap_forward", nn_(SpatialConvolutionMap_forward)},
-  {"SpatialConvolutionMap_backward", nn_(SpatialConvolutionMap_backward)},
+  {"SpatialConvolutionMap_updateGradInput", nn_(SpatialConvolutionMap_updateGradInput)},
   {"SpatialConvolutionMap_accGradParameters", nn_(SpatialConvolutionMap_accGradParameters)},
   {NULL, NULL}
 };

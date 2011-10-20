@@ -45,7 +45,7 @@ function Parallel:forward(input)
    return self.output
 end
 
-function Parallel:backward(input, gradOutput)
+function Parallel:updateGradInput(input, gradOutput)
    local nModule=input:size(self.inputDimension)
    self.gradInput:resizeAs(input)
 
@@ -54,7 +54,7 @@ function Parallel:backward(input, gradOutput)
       local module=self.modules[i];
       local currentOutput = module.output
       local currentGradInput = 
-	module:backward(input:select(self.inputDimension,i),
+	module:updateGradInput(input:select(self.inputDimension,i),
                         gradOutput:narrow(self.outputDimension, 
                                           offset, currentOutput:size(self.outputDimension)))
         

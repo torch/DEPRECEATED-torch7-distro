@@ -12,7 +12,7 @@ function Select:forward(input)
    return self.output:copy(output)
 end
 
-function Select:backward(input, gradOutput)
+function Select:updateGradInput(input, gradOutput)
    self.gradInput:resizeAs(input)  
    self.gradInput:zero()
    self.gradInput:select(self.dimension,self.index):copy(gradOutput) 

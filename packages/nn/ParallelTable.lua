@@ -28,9 +28,9 @@ function ParallelTable:forward(input)
 end
 
 
-function ParallelTable:backward(input, gradOutput)
+function ParallelTable:updateGradInput(input, gradOutput)
    for i,module in ipairs(self.modules) do
-      self.gradInput[i]= module:backward(input[i], gradOutput[i])
+      self.gradInput[i]= module:updateGradInput(input[i], gradOutput[i])
    end
    return self.gradInput
 end

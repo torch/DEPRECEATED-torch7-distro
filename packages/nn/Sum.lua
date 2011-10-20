@@ -12,7 +12,7 @@ function Sum:forward(input)
    return self.output
 end
 
-function Sum:backward(input, gradOutput)
+function Sum:updateGradInput(input, gradOutput)
    local size = gradOutput:size():totable()
    local stride = gradOutput:stride():totable()
    table.insert(size, self.dimension, input:size(self.dimension))
