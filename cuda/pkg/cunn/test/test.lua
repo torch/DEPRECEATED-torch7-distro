@@ -234,7 +234,7 @@ function cunntest.SpatialSubSampling_backward()
    mytester:assertlt(berror:abs():max(), precision_backward, 'error on bias (backward) ')
 end
 
-function cunntestx.mse()
+function cunntest.mse()
    local size = math.random(300000,500000)
    torch.setdefaulttensortype('torch.FloatTensor')
    local input = lab.randn(size,1,1)
@@ -290,7 +290,7 @@ function nn.testcuda()
    math.randomseed(os.time())
    jac = nn.Jacobian
    mytester = torch.Tester()
-   mytester:add(cunntestx)
+   mytester:add(cunntest)
    mytester:run()
    print ''
    for module,tm in pairs(times) do
