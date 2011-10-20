@@ -233,6 +233,37 @@ function cunntest.SpatialSubSampling_backward()
    mytester:assertlt(berror:abs():max(), precision_backward, 'error on bias (backward) ')
 end
 
+function cunntest.mse()
+   local size = math.random(3000,5000)
+   torch.setdefaulttensortype('torch.FloatTensor')
+   local input = lab.randn(size)
+   local target = lab.randn(size)
+   local mod = nn.MSECriterion()
+
+   local tm = {}
+   local title = string.format('MSECriterion %d ',size)
+   times[title] = tm
+   local a = torch.Timer()
+   local fout = mod:forward(input,target)
+   local fgin = mod:backward(input,target):clone()
+   tm.cpu = a:time().real
+
+   torch.setdefaulttensortype('torch.CudaTensor')
+   input = torch.Tensor(size):copy(input)
+   target = torch.Tensor(size):copy(target)
+   local cmod = nn.MSECriterion()
+   a:reset()
+   local cout = cmod:forward(input,target)
+   local cgin = cmod:backward(input,target)
+   tm.gpu = a:time().real
+
+   torch.setdefaulttensortype('torch.FloatTensor')
+   local fcgin = torch.Tensor():resizeAs(fgin):copy(cgin)
+   local gerr = fcgin - fgin
+   mytester:assertlt(gerr:abs():max(), precision_forward, 'error  on gradInput')
+   mytester:assertlt(math.abs(fout-cout), precision_forward, 'error  on output')
+end
+
 function nn.testcuda()
    math.randomseed(os.time())
    jac = nn.Jacobian
