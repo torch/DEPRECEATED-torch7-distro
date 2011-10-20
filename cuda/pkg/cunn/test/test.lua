@@ -235,7 +235,7 @@ function cunntest.SpatialSubSampling_backward()
 end
 
 function cunntest.mse()
-   local size = math.random(300000,500000)
+   local size = math.random(3000,5000)
    torch.setdefaulttensortype('torch.FloatTensor')
    local input = lab.randn(size,1,1)
    local target = lab.randn(size)
