@@ -1,57 +1,83 @@
-
+-- 
 -- rudimentary histogram diplay on the command line.
-local function histc__tostring(h, barHeight)
+--
+-- Author: Marco Scoffier
+-- Date  : 
+-- Mod   : Oct 21, 2011
+--  + made 80 columns default
+--  + save index of max bin in h.max not pointer to bin
+--
+function lab.histc__tostring(h, barHeight)
    barHeight = barHeight or 10
-   local m =  h.max.nb + h.max.nb * 0.1
-   local tl = torch.Tensor(#h):fill(0)
-   local incr = (m/barHeight)
-   local top = '+-+'
-   local bar = '| |'
-   local blank = '   '
-   local str = 'nsamples|'
-   str = str .. string.format('  minbin: %d val %2.2f maxbin: %d val %2.2f\n',
-                          h.min.nb,h.min.val,
-                          h.max.nb,h.max.val)
-   str = str .. '--------+\n'
+   local lastm = h[h.max].nb
+   local incr  = lastm/(barHeight+1)
+   local m     = lastm - incr
+   local tl    = torch.Tensor(#h):fill(0)
+   local toph  = '|'
+   local topm  = ':'
+   local topl  = '.'
+   local bar   = '|'
+   local blank = ' '
+   local yaxis = '--------:' 
+   local str = 'nsamples:'
+   str = str .. 
+      string.format('  min:(bin:%d/#%d/cntr:%2.2f)  max:(bin:%d/#%d/cntr:%2.2f)\n',
+                    h.min,h[h.min].nb,h[h.min].val, 
+                    h.max,h[h.max].nb,h[h.max].val)
+   
+   str = str .. yaxis
+   for j = 1,#h do 
+      str = str .. '-'
+   end
+   str = str .. '\n'
+
    for i = 1,barHeight do
       -- y axis
       if i%1==0 then
-         str = str .. string.format('%7d |',m)
+         str = str .. string.format('%1.2e:',m)
       end
       for j = 1,#h do
          if tl[j] == 1 then
             str = str .. bar
-         elseif h[j].nb > m then
-            tl[j] = 1
-            str = str .. top
-         else
+         elseif h[j].nb < m then
             str = str .. blank
+         else
+            -- in the bracket
+            tl[j] = 1
+            -- find 1/3rds
+            local p = (lastm - h[j].nb) / incr
+            if p > 0.66 then
+               str = str .. toph
+            elseif p > 0.33 then
+               str = str .. topm
+            else
+               str = str .. topl
+            end
          end
       end
       str = str .. '\n'
-      m = m - incr
+      lastm = m 
+      m     = m - incr
    end
    -- x axis
-   str = str .. string.format('--------+-^-')
-   for j = 1,#h,2 do
-      str = str .. string.format('----^-')
+   str = str .. yaxis 
+   for j = 1,#h do
+      if ((j - 2) % 6 == 0)then
+         str = str .. '^'
+      else
+         str = str .. '-'
+      end
    end
    str = str .. '\ncenters '
-   for j = 1,#h,2 do
-      if h[j].val < 0 then
-         str = str .. '-'
-      else
-         str = str .. ' '
+   for j = 1,#h do
+      if ((j - 2) % 6 == 0)then
+         if h[j].val < 0 then
+            str = str .. '-'
+         else
+            str = str .. '+'
+         end
+         str = str .. string.format('%1.2f ',math.abs(h[j].val))
       end
-      str = str .. string.format('%2.2f ',math.abs(h[j].val))
-   end
-   if #h%2==0 then
-      if h[#h].val < 0 then
-         str = str .. '-'
-      else
-         str = str .. ' '
-      end
-      str = str .. string.format('%2.2f ',math.abs(h[#h].val))
    end
    return str
 end
@@ -61,7 +87,7 @@ function lab.histc(...)
    -- get args
    local args = {...}
    local tensor = args[1] or error('usage: lab.histc (tensor [, nBins] [, min] [, max]')
-   local bins = args[2] or 10
+   local bins = args[2] or 80 - 8
    local min = args[3] or tensor:min()
    local max = args[4] or tensor:max()
    local raw = args[5] or false
@@ -87,11 +113,11 @@ function lab.histc(...)
       cleanhist[i].val = min + (i-0.5)*cleanhist.binwidth
       cleanhist[i].nb = hist[i]
    end
-   cleanhist.max = cleanhist[mx[1]]
-   cleanhist.min = cleanhist[mn[1]]
+   cleanhist.max = mx[1]
+   cleanhist.min = mn[1]
 
    -- print function
-   setmetatable(cleanhist, {__tostring=histc__tostring})
+   setmetatable(cleanhist, {__tostring=lab.histc__tostring})
    return cleanhist
 end
 
