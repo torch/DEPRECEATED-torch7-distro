@@ -13,6 +13,7 @@ static int nnOmp_(SpatialMaxPooling_forwardOmp)(lua_State *L)
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   THTensor *indices = luaT_getfieldcheckudata(L, 1, "indices", torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
+  setompnthread(L,1,"nThread");
 
   luaL_argcheck(L, input->nDimension == 3, 2, "3D tensor expected");
   luaL_argcheck(L, input->size[2] >= kW && input->size[1] >= kH, 2, "input image smaller than kernel size");
@@ -98,6 +99,7 @@ static int nnOmp_(SpatialMaxPooling_backwardOmp)(lua_State *L)
   int kH = luaT_getfieldcheckint(L, 1, "kH");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
+  setompnthread(L,1,"nThread");
 
   THTensor *indices = luaT_getfieldcheckudata(L, 1, "indices", torch_(Tensor_id));
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
