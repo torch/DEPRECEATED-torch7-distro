@@ -417,9 +417,8 @@ end
 
 function nntest.Softmax()
    local ini = math.random(10,20)
-   local inj = math.random(10,20)
    local ink = math.random(10,20)
-   local input = torch.Tensor(ini,inj,ink):zero()
+   local input = torch.Tensor(ink, ini):zero()
    local module = nn.SoftMax()
 
    local err = jac.testJacobian(module,input)
