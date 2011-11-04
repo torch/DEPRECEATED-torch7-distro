@@ -444,11 +444,27 @@ function nntest.SoftPlus()
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
 
-function nntest.SpatialSubtractiveNormalization()
+function nntest.SpatialSubtractiveNormalization_2dkernel()
    local inputSize = math.random(11,20)
    local kersize = 9
    local nbfeatures = math.random(5,10)
    local kernel = torch.Tensor(kersize,kersize):fill(1)
+   local module = nn.SpatialSubtractiveNormalization(nbfeatures,kernel)
+   local input = lab.rand(nbfeatures,inputSize,inputSize)
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.SpatialSubtractiveNormalization_1dkernel()
+   local inputSize = math.random(11,20)
+   local kersize = 9
+   local nbfeatures = math.random(5,10)
+   local kernel = torch.Tensor(kersize):fill(1)
    local module = nn.SpatialSubtractiveNormalization(nbfeatures,kernel)
    local input = lab.rand(nbfeatures,inputSize,inputSize)
 

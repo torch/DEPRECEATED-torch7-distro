@@ -6,12 +6,13 @@ function SpatialSubtractiveNormalization:__init(nInputPlane, kernel)
    -- get args
    self.nInputPlane = nInputPlane or 1
    self.kernel = kernel or torch.Tensor(9,9):fill(1)
+   local kdim = self.kernel:nDimension()
 
    -- check args
-   if self.kernel:nDimension() ~= 2 then
-      error('<SpatialSubtractiveNormalization> averaging kernel must be 2D')
+   if kdim ~= 2 and kdim ~= 1 then
+      error('<SpatialSubtractiveNormalization> averaging kernel must be 2D or 1D')
    end
-   if (self.kernel:size(1) % 2) == 0 or (self.kernel:size(2) % 2) == 0 then
+   if (self.kernel:size(1) % 2) == 0 or (kdim == 2 and (self.kernel:size(2) % 2) == 0) then
       error('<SpatialSubtractiveNormalization> averaging kernel must have ODD dimensions')
    end
 
@@ -19,22 +20,41 @@ function SpatialSubtractiveNormalization:__init(nInputPlane, kernel)
    self.kernel:div(self.kernel:sum() * self.nInputPlane)
 
    -- padding values
-   local padW = math.floor(self.kernel:size(2)/2)
    local padH = math.floor(self.kernel:size(1)/2)
+   local padW = padH
+   if kdim == 2 then
+      padW = math.floor(self.kernel:size(2)/2)
+   end
 
    -- create convolutional mean extractor
    self.meanestimator = nn.Sequential()
    self.meanestimator:add(nn.SpatialZeroPadding(padW, padW, padH, padH))
-   self.meanestimator:add(nn.SpatialConvolutionMap(nn.tables.oneToOne(self.nInputPlane),
-                                                   self.kernel:size(2), self.kernel:size(1)))
+   if kdim == 2 then
+      self.meanestimator:add(nn.SpatialConvolutionMap(nn.tables.oneToOne(self.nInputPlane),
+                                                      self.kernel:size(2), self.kernel:size(1)))
+   else
+      self.meanestimator:add(nn.SpatialConvolutionMap(nn.tables.oneToOne(self.nInputPlane),
+                                                      self.kernel:size(1), 1))
+      self.meanestimator:add(nn.SpatialConvolutionMap(nn.tables.oneToOne(self.nInputPlane),
+                                                      1, self.kernel:size(1)))
+   end
    self.meanestimator:add(nn.Sum(1))
    self.meanestimator:add(nn.Replicate(self.nInputPlane))
 
    -- set kernel and bias
-   for i = 1,self.nInputPlane do 
-      self.meanestimator.modules[2].weight[i] = self.kernel
+   if kdim == 2 then
+      for i = 1,self.nInputPlane do 
+         self.meanestimator.modules[2].weight[i] = self.kernel
+      end
+      self.meanestimator.modules[2].bias:zero()
+   else
+      for i = 1,self.nInputPlane do 
+         self.meanestimator.modules[2].weight[i]:copy(self.kernel)
+         self.meanestimator.modules[3].weight[i]:copy(self.kernel)
+      end
+      self.meanestimator.modules[2].bias:zero()
+      self.meanestimator.modules[3].bias:zero()
    end
-   self.meanestimator.modules[2].bias:zero()
 
    -- other operation
    self.subtractor = nn.CSubTable()
