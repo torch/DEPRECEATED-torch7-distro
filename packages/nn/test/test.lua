@@ -429,6 +429,20 @@ function nntest.Softmax()
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.Softsign()
+   local ini = math.random(10,20)
+   local ink = math.random(10,20)
+   local input = torch.Tensor(ink, ini):zero()
+   local module = nn.SoftSign()
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
 function nntest.SoftPlus()
    local ini = math.random(10,20)
    local inj = math.random(10,20)
