@@ -288,6 +288,23 @@ function nntest.Linear()
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.Euclidean()
+   local ini = math.random(50,70)
+   local inj = math.random(50,70)
+   local input = torch.Tensor(ini):zero()
+   local module = nn.Euclidean(ini,inj)
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
+   mytester:assertlt(err,precision, 'error on weight ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
 function nntest.LogSigmoid()
    local ini = math.random(10,20)
    local inj = math.random(10,20)
