@@ -46,7 +46,7 @@ function Euclidean:updateGradInput(input, gradOutput)
   end
 end
 
-function Euclidean:accGradParameters(input, gradOuput, scale)
+function Euclidean:accGradParameters(input, gradOutput, scale)
    for i=1,self.weight:size(2) do
       local gW=self.gradWeight:select(2,i) 
       gW:add(2*gradOutput[i]*scale,self.weight:select(2,i));
