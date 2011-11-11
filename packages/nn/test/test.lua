@@ -288,6 +288,23 @@ function nntest.Linear()
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.Euclidean()
+   local ini = math.random(50,70)
+   local inj = math.random(50,70)
+   local input = torch.Tensor(ini):zero()
+   local module = nn.Euclidean(ini,inj)
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight)
+   mytester:assertlt(err,precision, 'error on weight ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
 function nntest.LogSigmoid()
    local ini = math.random(10,20)
    local inj = math.random(10,20)
@@ -417,10 +434,37 @@ end
 
 function nntest.Softmax()
    local ini = math.random(10,20)
-   local inj = math.random(10,20)
    local ink = math.random(10,20)
-   local input = torch.Tensor(ini,inj,ink):zero()
+   local input = torch.Tensor(ink, ini):zero()
    local module = nn.SoftMax()
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.Softmin()
+   local ini = math.random(10,20)
+   local ink = math.random(10,20)
+   local input = torch.Tensor(ink, ini):zero()
+   local module = nn.SoftMin()
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.Softsign()
+   local ini = math.random(10,20)
+   local ink = math.random(10,20)
+   local input = torch.Tensor(ink, ini):zero()
+   local module = nn.SoftSign()
 
    local err = jac.testJacobian(module,input)
    mytester:assertlt(err,precision, 'error on state ')
@@ -436,6 +480,38 @@ function nntest.SoftPlus()
    local ink = math.random(10,20)
    local input = torch.Tensor(ini,inj,ink):zero()
    local module = nn.SoftPlus()
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.SpatialSubtractiveNormalization_2dkernel()
+   local inputSize = math.random(11,20)
+   local kersize = 9
+   local nbfeatures = math.random(5,10)
+   local kernel = torch.Tensor(kersize,kersize):fill(1)
+   local module = nn.SpatialSubtractiveNormalization(nbfeatures,kernel)
+   local input = lab.rand(nbfeatures,inputSize,inputSize)
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
+function nntest.SpatialSubtractiveNormalization_1dkernel()
+   local inputSize = math.random(11,20)
+   local kersize = 9
+   local nbfeatures = math.random(5,10)
+   local kernel = torch.Tensor(kersize):fill(1)
+   local module = nn.SpatialSubtractiveNormalization(nbfeatures,kernel)
+   local input = lab.rand(nbfeatures,inputSize,inputSize)
 
    local err = jac.testJacobian(module,input)
    mytester:assertlt(err,precision, 'error on state ')
