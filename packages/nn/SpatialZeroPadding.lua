@@ -32,7 +32,7 @@ function SpatialZeroPadding:forward(input)
    return self.output
 end
 
-function SpatialZeroPadding:backward(input, gradOutput)
+function SpatialZeroPadding:updateGradInput(input, gradOutput)
    if input:dim() ~= 3 then error('input must be 3-dimensional') end
    self.gradInput:resizeAs(input):zero()
    -- crop gradInput if necessary

@@ -6,10 +6,10 @@ function SoftMin:forward(input)
    return input.nn.SoftMax_forward(self, self.mininput)
 end
 
-function SoftMin:backward(input, gradOutput)
+function SoftMin:updateGradInput(input, gradOutput)
    self.mininput = self.mininput or input.new()
    self.mininput:resizeAs(input):copy(input):mul(-1)
-   self.gradInput = input.nn.SoftMax_backward(self, self.mininput, gradOutput)
+   self.gradInput = input.nn.SoftMax_updateGradInput(self, self.mininput, gradOutput)
    self.gradInput:mul(-1)
    return self.gradInput
 end

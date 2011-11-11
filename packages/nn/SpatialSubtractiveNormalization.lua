@@ -81,14 +81,14 @@ function SpatialSubtractiveNormalization:forward(input)
    return self.output
 end
 
-function SpatialSubtractiveNormalization:backward(input, gradOutput)
+function SpatialSubtractiveNormalization:updateGradInput(input, gradOutput)
    -- resize grad
    self.gradInput:resizeAs(input):zero()
 
    -- backprop through all modules
-   local gradsub = self.subtractor:backward({input, self.adjustedsums}, gradOutput)
-   local graddiv = self.divider:backward({self.localsums, self.coef}, gradsub[2])
-   self.gradInput:add(self.meanestimator:backward(input, graddiv[1]))
+   local gradsub = self.subtractor:updateGradInput({input, self.adjustedsums}, gradOutput)
+   local graddiv = self.divider:updateGradInput({self.localsums, self.coef}, gradsub[2])
+   self.gradInput:add(self.meanestimator:updateGradInput(input, graddiv[1]))
    self.gradInput:add(gradsub[1])
 
    -- done
