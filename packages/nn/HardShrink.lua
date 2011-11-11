@@ -5,8 +5,8 @@ function HardShrink:__init(lam)
    self.lambda = lam or 0.5
 end
 
-function HardShrink:forward(input)
-   input.nn.HardShrink_forward(self, input)
+function HardShrink:updateOutput(input)
+   input.nn.HardShrink_updateOutput(self, input)
    return self.output
 end
 

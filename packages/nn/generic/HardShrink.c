@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/HardShrink.c"
 #else
 
-static int nn_(HardShrink_forward)(lua_State *L)
+static int nn_(HardShrink_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   real lambda = luaT_getfieldchecknumber(L, 1, "lambda");
@@ -35,7 +35,7 @@ static int nn_(HardShrink_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(HardShrink__) [] = {
-  {"HardShrink_forward", nn_(HardShrink_forward)},
+  {"HardShrink_updateOutput", nn_(HardShrink_updateOutput)},
   {"HardShrink_updateGradInput", nn_(HardShrink_updateGradInput)},
   {NULL, NULL}
 };

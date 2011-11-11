@@ -17,7 +17,7 @@ function CMul:reset()
    self.weight:fill(1)
 end
 
-function CMul:forward(input)
+function CMul:updateOutput(input)
    self.output:copy(input);
    self.output:cmul(self.weight);
    return self.output

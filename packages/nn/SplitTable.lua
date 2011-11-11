@@ -6,7 +6,7 @@ function SplitTable:__init(dimension)
    self.dimension = dimension
 end
 
-function SplitTable:forward(input)
+function SplitTable:updateOutput(input)
    local currentOutput= {};
    local slices = input:size(self.dimension)
    for i=1,slices do

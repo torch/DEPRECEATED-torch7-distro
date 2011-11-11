@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/TemporalConvolution.c"
 #else
 
-static int nn_(TemporalConvolution_forward)(lua_State *L)
+static int nn_(TemporalConvolution_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   int kW = luaT_getfieldcheckint(L, 1, "kW");
@@ -178,7 +178,7 @@ static int nn_(TemporalConvolution_accGradParameters)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(TemporalConvolution__) [] = {
-  {"TemporalConvolution_forward", nn_(TemporalConvolution_forward)},
+  {"TemporalConvolution_updateOutput", nn_(TemporalConvolution_updateOutput)},
   {"TemporalConvolution_updateGradInput", nn_(TemporalConvolution_updateGradInput)},
   {"TemporalConvolution_accGradParameters", nn_(TemporalConvolution_accGradParameters)},
   {NULL, NULL}

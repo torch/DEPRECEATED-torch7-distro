@@ -33,8 +33,8 @@ function TemporalSubSampling:reset(stdv)
                    end)   
 end
 
-function TemporalSubSampling:forward(input)
-   return input.nn.TemporalSubSampling_forward(self, input)
+function TemporalSubSampling:updateOutput(input)
+   return input.nn.TemporalSubSampling_updateOutput(self, input)
 end
 
 function TemporalSubSampling:updateGradInput(input, gradOutput)

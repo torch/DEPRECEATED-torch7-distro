@@ -1,7 +1,7 @@
 local SoftPlus = torch.class('nn.SoftPlus', 'nn.Module')
 
-function SoftPlus:forward(input)
-   return input.nn.SoftPlus_forward(self, input)
+function SoftPlus:updateOutput(input)
+   return input.nn.SoftPlus_updateOutput(self, input)
 end
 
 function SoftPlus:updateGradInput(input, gradOutput)

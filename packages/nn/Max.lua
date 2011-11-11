@@ -7,8 +7,8 @@ function Max:__init(dimension)
    self.indices = torch.Tensor()
 end
 
-function Max:forward(input)
-   return input.nn.Max_forward(self, input)
+function Max:updateOutput(input)
+   return input.nn.Max_updateOutput(self, input)
 end
 
 function Max:updateGradInput(input, gradOutput)

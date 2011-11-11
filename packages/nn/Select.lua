@@ -6,7 +6,7 @@ function Select:__init(dimension,index)
    self.index = index 
 end
 
-function Select:forward(input)
+function Select:updateOutput(input)
    local output = input:select(self.dimension,self.index);
    self.output:resizeAs(output)
    return self.output:copy(output)

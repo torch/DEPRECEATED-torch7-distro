@@ -1,7 +1,7 @@
 local LogSoftMax = torch.class('nn.LogSoftMax', 'nn.Module')
 
-function LogSoftMax:forward(input)
-   return input.nn.LogSoftMax_forward(self, input)
+function LogSoftMax:updateOutput(input)
+   return input.nn.LogSoftMax_updateOutput(self, input)
 end
 
 function LogSoftMax:updateGradInput(input, gradOutput)

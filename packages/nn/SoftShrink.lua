@@ -5,8 +5,8 @@ function SoftShrink:__init(lam)
    self.lambda = lam or 0.5
 end
 
-function SoftShrink:forward(input)
-   input.nn.SoftShrink_forward(self, input)
+function SoftShrink:updateOutput(input)
+   input.nn.SoftShrink_updateOutput(self, input)
    return self.output
 end
 

@@ -5,7 +5,11 @@ function Criterion:__init()
    self.output = 0
 end
 
+function Criterion:updateOutput(input, target)
+end
+
 function Criterion:forward(input, target)
+   return self:updateOutput(input, target)
 end
 
 function Criterion:backward(input, target)

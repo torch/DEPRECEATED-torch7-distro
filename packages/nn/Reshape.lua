@@ -19,7 +19,7 @@ function Reshape:__init(...)
    end
 end
 
-function Reshape:forward(input)
+function Reshape:updateOutput(input)
    input = input:contiguous()
    local nelement = input:nElement()
    if nelement == self.nelement then

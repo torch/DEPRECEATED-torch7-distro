@@ -33,8 +33,8 @@ function SparseLinear:reset(stdv)
    end
 end
 
-function SparseLinear:forward(input)
-   return input.nn.SparseLinear_forward(self, input)
+function SparseLinear:updateOutput(input)
+   return input.nn.SparseLinear_updateOutput(self, input)
 end
 
 function SparseLinear:accGradParameters(input, gradOutput, scale)

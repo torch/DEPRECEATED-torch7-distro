@@ -21,10 +21,10 @@ function Sequential:get(index)
    return self.modules[index]
 end
 
-function Sequential:forward(input)
+function Sequential:updateOutput(input)
    local currentOutput = input
    for i=1,#self.modules do 
-      currentOutput = self.modules[i]:forward(currentOutput)
+      currentOutput = self.modules[i]:updateOutput(currentOutput)
    end 
    self.output = currentOutput
    return currentOutput

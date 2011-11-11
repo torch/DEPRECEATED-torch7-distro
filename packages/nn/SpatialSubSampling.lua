@@ -34,8 +34,8 @@ function SpatialSubSampling:reset(stdv)
                    end)   
 end
 
-function SpatialSubSampling:forward(input)
-   return input.nn.SpatialSubSampling_forward(self, input)
+function SpatialSubSampling:updateOutput(input)
+   return input.nn.SpatialSubSampling_updateOutput(self, input)
 end
 
 function SpatialSubSampling:updateGradInput(input, gradOutput)

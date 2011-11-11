@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SpatialConvolutionMap.c"
 #else
 
-static int nn_(SpatialConvolutionMap_forward)(lua_State *L)
+static int nn_(SpatialConvolutionMap_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   int kW = luaT_getfieldcheckint(L, 1, "kW");
@@ -213,7 +213,7 @@ static int nn_(SpatialConvolutionMap_accGradParameters)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(SpatialConvolutionMap__) [] = {
-  {"SpatialConvolutionMap_forward", nn_(SpatialConvolutionMap_forward)},
+  {"SpatialConvolutionMap_updateOutput", nn_(SpatialConvolutionMap_updateOutput)},
   {"SpatialConvolutionMap_updateGradInput", nn_(SpatialConvolutionMap_updateGradInput)},
   {"SpatialConvolutionMap_accGradParameters", nn_(SpatialConvolutionMap_accGradParameters)},
   {NULL, NULL}

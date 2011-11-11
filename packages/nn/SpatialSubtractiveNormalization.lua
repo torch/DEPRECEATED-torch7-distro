@@ -64,18 +64,18 @@ function SpatialSubtractiveNormalization:__init(nInputPlane, kernel)
    self.coef = torch.Tensor(1,1,1)
 end
 
-function SpatialSubtractiveNormalization:forward(input)
+function SpatialSubtractiveNormalization:updateOutput(input)
    -- compute side coefficients
    if (input:size(3) ~= self.coef:size(2)) or (input:size(2) ~= self.coef:size(1)) then
       local ones = input.new():resizeAs(input):fill(1)
-      self.coef = self.meanestimator:forward(ones)
+      self.coef = self.meanestimator:updateOutput(ones)
       self.coef = self.coef:clone()
    end
 
    -- compute mean
-   self.localsums = self.meanestimator:forward(input)
-   self.adjustedsums = self.divider:forward{self.localsums, self.coef}
-   self.output = self.subtractor:forward{input, self.adjustedsums}
+   self.localsums = self.meanestimator:updateOutput(input)
+   self.adjustedsums = self.divider:updateOutput{self.localsums, self.coef}
+   self.output = self.subtractor:updateOutput{input, self.adjustedsums}
 
    -- done
    return self.output

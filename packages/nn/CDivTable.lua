@@ -6,7 +6,7 @@ function CDivTable:__init()
    self.gradInput = {}
 end
 
-function CDivTable:forward(input)
+function CDivTable:updateOutput(input)
    self.output:resizeAs(input[1]):copy(input[1])
    self.output:cdiv(input[2])
    return self.output

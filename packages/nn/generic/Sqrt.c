@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/Sqrt.c"
 #else
 
-static int nn_(Sqrt_forward)(lua_State *L)
+static int nn_(Sqrt_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
@@ -31,7 +31,7 @@ static int nn_(Sqrt_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(Sqrt__) [] = {
-  {"Sqrt_forward", nn_(Sqrt_forward)},
+  {"Sqrt_updateOutput", nn_(Sqrt_updateOutput)},
   {"Sqrt_updateGradInput", nn_(Sqrt_updateGradInput)},
   {NULL, NULL}
 };

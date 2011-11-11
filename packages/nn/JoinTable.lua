@@ -7,7 +7,7 @@ function JoinTable:__init(dimension)
    self.gradInput = {}
 end 
 
-function JoinTable:forward(input) 
+function JoinTable:updateOutput(input) 
    for i=1,#input do
       local currentOutput = input[i]
       if i == 1 then

@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/MultiMarginCriterion.c"
 #else
 
-static int nn_(MultiMarginCriterion_forward)(lua_State *L)
+static int nn_(MultiMarginCriterion_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   int sizeAverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
@@ -147,7 +147,7 @@ static int nn_(MultiMarginCriterion_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(MultiMarginCriterion__) [] = {
-  {"MultiMarginCriterion_forward", nn_(MultiMarginCriterion_forward)},
+  {"MultiMarginCriterion_updateOutput", nn_(MultiMarginCriterion_updateOutput)},
   {"MultiMarginCriterion_updateGradInput", nn_(MultiMarginCriterion_updateGradInput)},
   {NULL, NULL}
 };

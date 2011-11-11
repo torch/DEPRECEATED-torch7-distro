@@ -1,6 +1,6 @@
 local Identity, parent = torch.class('nn.Identity', 'nn.Module')
 
-function Identity:forward(input)
+function Identity:updateOutput(input)
    self.output = input
    return self.output
 end

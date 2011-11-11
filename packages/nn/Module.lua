@@ -17,8 +17,12 @@ function Module:parameters()
    end
 end
 
-function Module:forward(input)
+function Module:updateOutput(input)
    return self.output
+end
+
+function Module:forward(input)
+   return self:updateOutput(input, target)
 end
 
 function Module:backward(input, gradOutput)

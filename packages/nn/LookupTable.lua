@@ -33,7 +33,7 @@ function LookupTable:reset(stdv)
                      end)
 end
 
-function LookupTable:forward(input)
+function LookupTable:updateOutput(input)
    local nIndex = input:size(1)
    self.size[1] = nIndex
    self.output:resize(self.size)

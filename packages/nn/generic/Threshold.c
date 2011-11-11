@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/Threshold.c"
 #else
 
-static int nn_(Threshold_forward)(lua_State *L)
+static int nn_(Threshold_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   real val = luaT_getfieldchecknumber(L, 1, "val");
@@ -32,7 +32,7 @@ static int nn_(Threshold_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(Threshold__) [] = {
-  {"Threshold_forward", nn_(Threshold_forward)},
+  {"Threshold_updateOutput", nn_(Threshold_updateOutput)},
   {"Threshold_updateGradInput", nn_(Threshold_updateGradInput)},
   {NULL, NULL}
 };

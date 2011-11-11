@@ -7,7 +7,7 @@ function MarginRankingCriterion:__init(margin)
    self.gradInput = {torch.Tensor(1), torch.Tensor(1)}
 end 
  
-function MarginRankingCriterion:forward(input,y)
+function MarginRankingCriterion:updateOutput(input,y)
    self.output=math.max(0, -y*(input[1][1]-input[2][1]) + self.margin  ) 
    return self.output
 end

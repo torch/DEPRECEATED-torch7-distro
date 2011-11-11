@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SpatialConvolution.c"
 #else
 
-static void nn_(convolution_forward_)(THTensor *input, THTensor *output, THTensor *weight, THTensor *bias, int dH, int dW)
+static void nn_(convolution_updateOutput_)(THTensor *input, THTensor *output, THTensor *weight, THTensor *bias, int dH, int dW)
 {
   /* add bias */
   long i;
@@ -17,7 +17,7 @@ static void nn_(convolution_forward_)(THTensor *input, THTensor *output, THTenso
   THLab_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
 }
 
-static int nn_(SpatialConvolution_forward)(lua_State *L)
+static int nn_(SpatialConvolution_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   int dW = luaT_getfieldcheckint(L, 1, "dW");
@@ -52,7 +52,7 @@ static int nn_(SpatialConvolution_forward)(lua_State *L)
 /*     printf("no=%d\n",output->nDimension); */
 /*     printf("no=%ld,%ld,%ld\n",nOutputPlane,outputHeight,outputWidth); */
 /*     printf("ni=%d\n",input->nDimension); */
-    nn_(convolution_forward_)(input,output,weight,bias,dH,dW);
+    nn_(convolution_updateOutput_)(input,output,weight,bias,dH,dW);
 /*    printf("stochastic\n");*/
   }
   else
@@ -65,7 +65,7 @@ static int nn_(SpatialConvolution_forward)(lua_State *L)
     {
       THTensor_(select)(outn,output,0,i);
       THTensor_(select)(inpn,input,0,i);
-      nn_(convolution_forward_)(inpn,outn,weight,bias,dH,dW);
+      nn_(convolution_updateOutput_)(inpn,outn,weight,bias,dH,dW);
     }
     THTensor_(free)(outn);
     THTensor_(free)(inpn);
@@ -185,7 +185,7 @@ static int nn_(SpatialConvolution_accGradParameters)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(SpatialConvolution__) [] = {
-  {"SpatialConvolution_forward", nn_(SpatialConvolution_forward)},
+  {"SpatialConvolution_updateOutput", nn_(SpatialConvolution_updateOutput)},
   {"SpatialConvolution_updateGradInput", nn_(SpatialConvolution_updateGradInput)},
   {"SpatialConvolution_accGradParameters", nn_(SpatialConvolution_accGradParameters)},
   {NULL, NULL}

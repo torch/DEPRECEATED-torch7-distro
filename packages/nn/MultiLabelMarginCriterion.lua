@@ -5,8 +5,8 @@ function MultiLabelMarginCriterion:__init()
    self.sizeAverage = true
 end
 
-function MultiLabelMarginCriterion:forward(input, target)
-   return input.nn.MultiLabelMarginCriterion_forward(self, input, target)
+function MultiLabelMarginCriterion:updateOutput(input, target)
+   return input.nn.MultiLabelMarginCriterion_updateOutput(self, input, target)
 end
 
 function MultiLabelMarginCriterion:updateGradInput(input, target)

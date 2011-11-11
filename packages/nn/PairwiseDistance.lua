@@ -9,7 +9,7 @@ function PairwiseDistance:__init(p)
    self.norm=p
 end 
   
-function PairwiseDistance:forward(input)
+function PairwiseDistance:updateOutput(input)
    self.output[1]=input[1]:dist(input[2],self.norm);
    return self.output
 end

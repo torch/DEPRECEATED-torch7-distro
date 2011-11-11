@@ -5,8 +5,8 @@ function AbsCriterion:__init()
    self.sizeAverage = true
 end
 
-function AbsCriterion:forward(input, target)
-   return input.nn.AbsCriterion_forward(self, input, target)
+function AbsCriterion:updateOutput(input, target)
+   return input.nn.AbsCriterion_updateOutput(self, input, target)
 end
 
 function AbsCriterion:updateGradInput(input, target)

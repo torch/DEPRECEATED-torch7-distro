@@ -8,7 +8,7 @@ function Power:__init(p)
    end
 end
 
-function Power:forward(input)
+function Power:updateOutput(input)
    self.output:resizeAs(input):copy(input)
    self.output:pow(self.pow)
    return self.output

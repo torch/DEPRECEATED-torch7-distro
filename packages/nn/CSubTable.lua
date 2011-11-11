@@ -6,7 +6,7 @@ function CSubTable:__init()
    self.gradInput = {}
 end
 
-function CSubTable:forward(input)
+function CSubTable:updateOutput(input)
    self.output:resizeAs(input[1]):copy(input[1])
    self.output:add(-1,input[2])
    return self.output

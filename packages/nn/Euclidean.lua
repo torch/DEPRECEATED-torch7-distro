@@ -28,7 +28,7 @@ function Euclidean:reset(stdv)
    end
 end
 
-function Euclidean:forward(input)
+function Euclidean:updateOutput(input)
    self.output:zero()
    for o = 1,self.weight:size(2) do
       self.output[o] = input:dist(self.weight:select(2,o))
@@ -37,7 +37,7 @@ function Euclidean:forward(input)
 end
 
 function Euclidean:updateGradInput(input, gradOutput)
-   self:forward(input)
+   self:updateOutput(input)
    if self.gradInput then
       self.gradInput:zero()
       for o = 1,self.weight:size(2) do
@@ -52,7 +52,7 @@ function Euclidean:updateGradInput(input, gradOutput)
 end
 
 function Euclidean:accGradParameters(input, gradOutput, scale)
-   self:forward(input)
+   self:updateOutput(input)
    scale = scale or 1
    for o = 1,self.weight:size(2) do
       if self.output[o] ~= 0 then

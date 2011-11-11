@@ -5,7 +5,7 @@ function ClassNLLCriterion:__init()
    self.sizeAverage = true
 end
 
-function ClassNLLCriterion:forward(input, target)
+function ClassNLLCriterion:updateOutput(input, target)
    if input:dim() == 1 then
       self.output = -input[target]
    elseif input:dim() == 2 then

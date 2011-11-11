@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SoftPlus.c"
 #else
 
-static int nn_(SoftPlus_forward)(lua_State *L)
+static int nn_(SoftPlus_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
@@ -29,7 +29,7 @@ static int nn_(SoftPlus_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(SoftPlus__) [] = {
-  {"SoftPlus_forward", nn_(SoftPlus_forward)},
+  {"SoftPlus_updateOutput", nn_(SoftPlus_updateOutput)},
   {"SoftPlus_updateGradInput", nn_(SoftPlus_updateGradInput)},
   {NULL, NULL}
 };

@@ -17,13 +17,13 @@ function Parallel:get(index)
    return self.modules[index]
 end
 
-function Parallel:forward(input)
+function Parallel:updateOutput(input)
    
    local modules=input:size(self.inputDimension)
 
    for i=1,modules do
       local currentOutput = 
-	self.modules[i]:forward(input:select(self.inputDimension,i))
+	self.modules[i]:updateOutput(input:select(self.inputDimension,i))
       
       if i == 1 then
          self.size:resize(currentOutput:dim()):copy(currentOutput:size())
@@ -36,7 +36,7 @@ function Parallel:forward(input)
    
    local offset = 1
    for i=1,modules do
-      local currentOutput = self.modules[i]:forward(input:select(self.inputDimension,i))
+      local currentOutput = self.modules[i]:updateOutput(input:select(self.inputDimension,i))
 
       self.output:narrow(self.outputDimension, offset, 
 	                 currentOutput:size(self.outputDimension)):copy(currentOutput)

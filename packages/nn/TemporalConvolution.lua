@@ -32,8 +32,8 @@ function TemporalConvolution:reset(stdv)
                    end)   
 end
 
-function TemporalConvolution:forward(input)
-   return input.nn.TemporalConvolution_forward(self, input)
+function TemporalConvolution:updateOutput(input)
+   return input.nn.TemporalConvolution_updateOutput(self, input)
 end
 
 function TemporalConvolution:updateGradInput(input, gradOutput)

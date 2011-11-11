@@ -35,8 +35,8 @@ function SpatialConvolution:reset(stdv)
                    end)   
 end
 
-function SpatialConvolution:forward(input)
-   return input.nn.SpatialConvolution_forward(self, input)
+function SpatialConvolution:updateOutput(input)
+   return input.nn.SpatialConvolution_updateOutput(self, input)
 end
 
 function SpatialConvolution:updateGradInput(input, gradOutput)

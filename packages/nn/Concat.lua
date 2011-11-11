@@ -16,9 +16,9 @@ function Concat:get(index)
    return self.modules[index]
 end
 
-function Concat:forward(input)
+function Concat:updateOutput(input)
    for i=1,#self.modules do
-      local currentOutput = self.modules[i]:forward(input)
+      local currentOutput = self.modules[i]:updateOutput(input)
       
       if i == 1 then
          self.size:resize(currentOutput:dim()):copy(currentOutput:size())
@@ -30,7 +30,7 @@ function Concat:forward(input)
    
    local offset = 1
    for _,module in ipairs(self.modules) do
-      local currentOutput = module:forward(input)
+      local currentOutput = module:updateOutput(input)
       self.output:narrow(self.dimension, offset, currentOutput:size(self.dimension)):copy(currentOutput)
       offset = offset + currentOutput:size(self.dimension)
    end

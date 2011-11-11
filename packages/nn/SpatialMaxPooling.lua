@@ -14,8 +14,8 @@ function SpatialMaxPooling:__init(kW, kH, dW, dH)
    self.indices = torch.Tensor()
 end
 
-function SpatialMaxPooling:forward(input)
-   input.nn.SpatialMaxPooling_forward(self, input)
+function SpatialMaxPooling:updateOutput(input)
+   input.nn.SpatialMaxPooling_updateOutput(self, input)
    return self.output
 end
 

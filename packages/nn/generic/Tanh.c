@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/Tanh.c"
 #else
 
-static int nn_(Tanh_forward)(lua_State *L)
+static int nn_(Tanh_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
@@ -29,7 +29,7 @@ static int nn_(Tanh_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(Tanh__) [] = {
-  {"Tanh_forward", nn_(Tanh_forward)},
+  {"Tanh_updateOutput", nn_(Tanh_updateOutput)},
   {"Tanh_updateGradInput", nn_(Tanh_updateGradInput)},
   {NULL, NULL}
 };

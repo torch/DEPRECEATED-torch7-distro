@@ -6,7 +6,7 @@ function DotProduct:__init()
    self.output=torch.Tensor(1)
 end 
  
-function DotProduct:forward(input,y)
+function DotProduct:updateOutput(input,y)
    self.output[1] = input[1]:dot(input[2])
    return self.output
 end

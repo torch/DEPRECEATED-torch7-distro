@@ -28,7 +28,7 @@ function Linear:reset(stdv)
    end
 end
 
-function Linear:forward(input)
+function Linear:updateOutput(input)
    if input:dim() == 1 then
       self.output:resize(self.bias:size(1))
       self.output:copy(self.bias)

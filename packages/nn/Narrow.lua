@@ -10,7 +10,7 @@ function Narrow:__init(dimension,offset,length)
    end
 end
 
-function Narrow:forward(input)
+function Narrow:updateOutput(input)
    local output=input:narrow(self.dimension,self.index,self.length);
    self.output:resizeAs(output)
    return self.output:copy(output)

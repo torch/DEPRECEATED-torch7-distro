@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SoftShrink.c"
 #else
 
-static int nn_(SoftShrink_forward)(lua_State *L)
+static int nn_(SoftShrink_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   real lambda = luaT_getfieldchecknumber(L, 1, "lambda");
@@ -35,7 +35,7 @@ static int nn_(SoftShrink_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(SoftShrink__) [] = {
-  {"SoftShrink_forward", nn_(SoftShrink_forward)},
+  {"SoftShrink_updateOutput", nn_(SoftShrink_updateOutput)},
   {"SoftShrink_updateGradInput", nn_(SoftShrink_updateGradInput)},
   {NULL, NULL}
 };

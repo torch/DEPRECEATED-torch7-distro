@@ -6,7 +6,7 @@ function CAddTable:__init()
    self.gradInput = {}
 end
 
-function CAddTable:forward(input)
+function CAddTable:updateOutput(input)
    self.output:resizeAs(input[1]):copy(input[1])
    for i=2,#input do
       self.output:add(input[i])

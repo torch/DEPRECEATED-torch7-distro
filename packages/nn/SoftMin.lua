@@ -1,9 +1,9 @@
 local SoftMin, parent = torch.class('nn.SoftMin', 'nn.Module')
 
-function SoftMin:forward(input)
+function SoftMin:updateOutput(input)
    self.mininput = self.mininput or input.new()
    self.mininput:resizeAs(input):copy(input):mul(-1)
-   return input.nn.SoftMax_forward(self, self.mininput)
+   return input.nn.SoftMax_updateOutput(self, self.mininput)
 end
 
 function SoftMin:updateGradInput(input, gradOutput)

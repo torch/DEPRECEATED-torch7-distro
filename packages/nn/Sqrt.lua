@@ -4,8 +4,8 @@ function Sqrt:__init(args)
    parent.__init(self)
 end
 
-function Sqrt:forward(input)
-   return input.nn.Sqrt_forward(self,input)
+function Sqrt:updateOutput(input)
+   return input.nn.Sqrt_updateOutput(self,input)
 end
 
 function Sqrt:updateGradInput(input, gradOutput)

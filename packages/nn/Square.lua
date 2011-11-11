@@ -4,8 +4,8 @@ function Square:__init(args)
    parent.__init(self)
 end
 
-function Square:forward(input)
-   return input.nn.Square_forward(self, input)
+function Square:updateOutput(input)
+   return input.nn.Square_updateOutput(self, input)
 end
 
 function Square:updateGradInput(input, gradOutput)

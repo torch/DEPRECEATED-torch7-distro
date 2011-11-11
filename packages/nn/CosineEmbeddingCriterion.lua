@@ -7,7 +7,7 @@ function CosineEmbeddingCriterion:__init(margin)
    self.gradInput = {torch.Tensor(), torch.Tensor()}
 end 
  
-function CosineEmbeddingCriterion:forward(input,y)
+function CosineEmbeddingCriterion:updateOutput(input,y)
    local input1, input2 = input[1], input[2]
    self.w1 = input1:dot(input2)
    self.w22 = input1:dot(input1)

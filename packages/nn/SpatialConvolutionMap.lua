@@ -99,8 +99,8 @@ function SpatialConvolutionMap:reset(stdv)
    end
 end
 
-function SpatialConvolutionMap:forward(input)
-   input.nn.SpatialConvolutionMap_forward(self, input)
+function SpatialConvolutionMap:updateOutput(input)
+   input.nn.SpatialConvolutionMap_updateOutput(self, input)
    return self.output
 end
 

@@ -6,7 +6,7 @@ function CosineDistance:__init()
    self.output=torch.Tensor(1)
 end 
  
-function CosineDistance:forward(input)
+function CosineDistance:updateOutput(input)
    local input1, input2 = input[1], input[2]
    self.w1 = input1:dot(input2)
    self.w22 = input1:dot(input1)

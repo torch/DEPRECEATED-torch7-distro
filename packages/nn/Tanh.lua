@@ -1,7 +1,7 @@
 local Tanh = torch.class('nn.Tanh', 'nn.Module')
 
-function Tanh:forward(input)
-   return input.nn.Tanh_forward(self, input)
+function Tanh:updateOutput(input)
+   return input.nn.Tanh_updateOutput(self, input)
 end
 
 function Tanh:updateGradInput(input, gradOutput)

@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SpatialMaxPooling.c"
 #else
 
-static int nn_(SpatialMaxPooling_forward)(lua_State *L)
+static int nn_(SpatialMaxPooling_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   int kW = luaT_getfieldcheckint(L, 1, "kW");
@@ -148,7 +148,7 @@ static int nn_(SpatialMaxPooling_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(SpatialMaxPooling__) [] = {
-  {"SpatialMaxPooling_forward", nn_(SpatialMaxPooling_forward)},
+  {"SpatialMaxPooling_updateOutput", nn_(SpatialMaxPooling_updateOutput)},
   {"SpatialMaxPooling_updateGradInput", nn_(SpatialMaxPooling_updateGradInput)},
   {NULL, NULL}
 };

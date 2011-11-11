@@ -7,7 +7,7 @@ function L1HingeEmbeddingCriterion:__init(margin)
    self.gradInput = {torch.Tensor(), torch.Tensor()}
 end 
  
-function L1HingeEmbeddingCriterion:forward(input,y)
+function L1HingeEmbeddingCriterion:updateOutput(input,y)
    self.output=input[1]:dist(input[2],1);
    if y==-1 then
 	 self.output = math.max(0,self.margin - self.output);

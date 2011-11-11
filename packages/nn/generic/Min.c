@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/Min.c"
 #else
 
-static int nn_(Min_forward)(lua_State *L)
+static int nn_(Min_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   int dimension = luaT_getfieldcheckint(L, 1, "dimension")-1;
@@ -85,7 +85,7 @@ static int nn_(Min_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(Min__) [] = {
-  {"Min_forward", nn_(Min_forward)},
+  {"Min_updateOutput", nn_(Min_updateOutput)},
   {"Min_updateGradInput", nn_(Min_updateGradInput)},
   {NULL, NULL}
 };

@@ -5,8 +5,8 @@ function CriterionTable:__init(criterion)
    self.gradInput = {criterion.gradInput}
 end
 
-function CriterionTable:forward(input) 
-   self.output = self.criterion:forward(unpack(input))
+function CriterionTable:updateOutput(input) 
+   self.output = self.criterion:updateOutput(unpack(input))
    return self.output
 end
     

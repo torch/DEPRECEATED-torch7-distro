@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/TemporalSubSampling.c"
 #else
 
-static int nn_(TemporalSubSampling_forward)(lua_State *L)
+static int nn_(TemporalSubSampling_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   int kW = luaT_getfieldcheckint(L, 1, "kW");
@@ -123,7 +123,7 @@ static int nn_(TemporalSubSampling_accGradParameters)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(TemporalSubSampling__) [] = {
-  {"TemporalSubSampling_forward", nn_(TemporalSubSampling_forward)},
+  {"TemporalSubSampling_updateOutput", nn_(TemporalSubSampling_updateOutput)},
   {"TemporalSubSampling_updateGradInput", nn_(TemporalSubSampling_updateGradInput)},
   {"TemporalSubSampling_accGradParameters", nn_(TemporalSubSampling_accGradParameters)},
   {NULL, NULL}

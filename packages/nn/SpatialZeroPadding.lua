@@ -8,7 +8,7 @@ function SpatialZeroPadding:__init(pad_l, pad_r, pad_t, pad_b)
    self.pad_b = pad_b or self.pad_l
 end
 
-function SpatialZeroPadding:forward(input)
+function SpatialZeroPadding:updateOutput(input)
    if input:dim() ~= 3 then error('input must be 3-dimensional') end
    local h = input:size(2) + self.pad_t + self.pad_b
    local w = input:size(3) + self.pad_l + self.pad_r

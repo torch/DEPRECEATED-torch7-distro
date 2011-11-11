@@ -7,8 +7,8 @@ function Min:__init(dimension)
    self.indices = torch.Tensor()
 end
 
-function Min:forward(input)
-   return input.nn.Min_forward(self, input)
+function Min:updateOutput(input)
+   return input.nn.Min_updateOutput(self, input)
 end
 
 function Min:updateGradInput(input, gradOutput)

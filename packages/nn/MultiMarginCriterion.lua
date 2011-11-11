@@ -5,8 +5,8 @@ function MultiMarginCriterion:__init()
    self.sizeAverage = true
 end
 
-function MultiMarginCriterion:forward(input, target)
-   return input.nn.MultiMarginCriterion_forward(self, input, target)
+function MultiMarginCriterion:updateOutput(input, target)
+   return input.nn.MultiMarginCriterion_updateOutput(self, input, target)
 end
 
 function MultiMarginCriterion:updateGradInput(input, target)

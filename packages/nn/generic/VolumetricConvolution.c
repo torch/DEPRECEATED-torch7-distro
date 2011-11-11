@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/VolumetricConvolution.c"
 #else
 
-static int nn_(VolumetricConvolution_forward)(lua_State *L)
+static int nn_(VolumetricConvolution_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   int dT = luaT_getfieldcheckint(L, 1, "dT");
@@ -102,7 +102,7 @@ static int nn_(VolumetricConvolution_accGradParameters)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(VolumetricConvolution__) [] = {
-  {"VolumetricConvolution_forward", nn_(VolumetricConvolution_forward)},
+  {"VolumetricConvolution_updateOutput", nn_(VolumetricConvolution_updateOutput)},
   {"VolumetricConvolution_updateGradInput", nn_(VolumetricConvolution_updateGradInput)},
   {"VolumetricConvolution_accGradParameters", nn_(VolumetricConvolution_accGradParameters)},
   {NULL, NULL}

@@ -1,7 +1,7 @@
 local Exp = torch.class('nn.Exp', 'nn.Module')
 
-function Exp:forward(input)
-   return input.nn.Exp_forward(self, input)
+function Exp:updateOutput(input)
+   return input.nn.Exp_updateOutput(self, input)
 end
 
 function Exp:updateGradInput(input, gradOutput)

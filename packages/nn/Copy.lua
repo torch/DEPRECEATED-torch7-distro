@@ -10,7 +10,7 @@ function Copy:__init(intype, outtype)
 
    if intype == outtype then
 
-      self.forward = function(self, input)
+      self.updateOutput = function(self, input)
                         self.output = input
                         return input
                      end
@@ -22,7 +22,7 @@ function Copy:__init(intype, outtype)
    end
 end
 
-function Copy:forward(input)
+function Copy:updateOutput(input)
    self.output:resize(input:size()):copy(input)
    return self.output
 end

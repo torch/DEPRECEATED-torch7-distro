@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/Max.c"
 #else
 
-static int nn_(Max_forward)(lua_State *L)
+static int nn_(Max_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   int dimension = luaT_getfieldcheckint(L, 1, "dimension")-1;
@@ -85,7 +85,7 @@ static int nn_(Max_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(Max__) [] = {
-  {"Max_forward", nn_(Max_forward)},
+  {"Max_updateOutput", nn_(Max_updateOutput)},
   {"Max_updateGradInput", nn_(Max_updateGradInput)},
   {NULL, NULL}
 };

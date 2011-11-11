@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SoftMax.c"
 #else
 
-static int nn_(SoftMax_forward)(lua_State *L)
+static int nn_(SoftMax_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
@@ -99,7 +99,7 @@ static int nn_(SoftMax_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(SoftMax__) [] = {
-  {"SoftMax_forward", nn_(SoftMax_forward)},
+  {"SoftMax_updateOutput", nn_(SoftMax_updateOutput)},
   {"SoftMax_updateGradInput", nn_(SoftMax_updateGradInput)},
   {NULL, NULL}
 };

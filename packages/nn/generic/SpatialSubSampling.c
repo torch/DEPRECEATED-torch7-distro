@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SpatialSubSampling.c"
 #else
 
-static int nn_(SpatialSubSampling_forward)(lua_State *L)
+static int nn_(SpatialSubSampling_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   int kW = luaT_getfieldcheckint(L, 1, "kW");
@@ -262,7 +262,7 @@ static int nn_(SpatialSubSampling_accGradParameters)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(SpatialSubSampling__) [] = {
-  {"SpatialSubSampling_forward", nn_(SpatialSubSampling_forward)},
+  {"SpatialSubSampling_updateOutput", nn_(SpatialSubSampling_updateOutput)},
   {"SpatialSubSampling_updateGradInput", nn_(SpatialSubSampling_updateGradInput)},
   {"SpatialSubSampling_accGradParameters", nn_(SpatialSubSampling_accGradParameters)},
   {NULL, NULL}

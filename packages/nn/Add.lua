@@ -27,7 +27,7 @@ function Add:reset(stdv)
    end
 end
 
-function Add:forward(input)
+function Add:updateOutput(input)
    self.output:copy(input);
    if self.gradBias:size(1)==1 then
      self.output:add(self.bias[1]);

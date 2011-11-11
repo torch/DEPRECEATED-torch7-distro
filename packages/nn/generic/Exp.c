@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/Exp.c"
 #else
 
-static int nn_(Exp_forward)(lua_State *L)
+static int nn_(Exp_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
@@ -28,7 +28,7 @@ static int nn_(Exp_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(Exp__) [] = {
-  {"Exp_forward", nn_(Exp_forward)},
+  {"Exp_updateOutput", nn_(Exp_updateOutput)},
   {"Exp_updateGradInput", nn_(Exp_updateGradInput)},
   {NULL, NULL}
 };

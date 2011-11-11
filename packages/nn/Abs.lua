@@ -4,8 +4,8 @@ function Abs:__init()
    parent.__init(self)
 end
 
-function Abs:forward(input)
-   input.nn.Abs_forward(self, input)
+function Abs:updateOutput(input)
+   input.nn.Abs_updateOutput(self, input)
    return self.output
 end
 

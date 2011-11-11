@@ -1,6 +1,6 @@
 local SoftSign = torch.class('nn.SoftSign', 'nn.Module')
 
-function SoftSign:forward(input)
+function SoftSign:updateOutput(input)
    self.temp = self.temp or input.new()
    self.temp:resizeAs(input):copy(input):abs():add(1)
    self.output:resizeAs(input):copy(input):cdiv(self.temp)

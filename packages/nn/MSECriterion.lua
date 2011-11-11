@@ -5,8 +5,8 @@ function MSECriterion:__init()
    self.sizeAverage = true
 end
 
-function MSECriterion:forward(input, target)
-   return input.nn.MSECriterion_forward(self, input, target)
+function MSECriterion:updateOutput(input, target)
+   return input.nn.MSECriterion_updateOutput(self, input, target)
 end
 
 function MSECriterion:updateGradInput(input, target)

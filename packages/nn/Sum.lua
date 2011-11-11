@@ -6,7 +6,7 @@ function Sum:__init(dimension)
    self.dimension = dimension
 end
 
-function Sum:forward(input)
+function Sum:updateOutput(input)
    input.lab.sum_(self.output, input, self.dimension)
    self.output = self.output:select(self.dimension, 1)
    return self.output

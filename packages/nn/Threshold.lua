@@ -9,8 +9,8 @@ function Threshold:__init(th,v)
    end
 end
 
-function Threshold:forward(input)
-   input.nn.Threshold_forward(self, input)
+function Threshold:updateOutput(input)
+   input.nn.Threshold_updateOutput(self, input)
    return self.output
 end
 

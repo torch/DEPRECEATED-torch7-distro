@@ -5,8 +5,8 @@ function LogSigmoid:__init()
    self.buffer = torch.Tensor()
 end
 
-function LogSigmoid:forward(input)
-   return input.nn.LogSigmoid_forward(self, input)
+function LogSigmoid:updateOutput(input)
+   return input.nn.LogSigmoid_updateOutput(self, input)
 end
 
 function LogSigmoid:updateGradInput(input, gradOutput)

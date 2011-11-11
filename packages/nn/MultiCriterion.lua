@@ -14,10 +14,10 @@ function MultiCriterion:add(criterion, weight)
    return self
 end
 
-function MultiCriterion:forward(input, target)
+function MultiCriterion:updateOutput(input, target)
    self.output = 0
    for i=1,#self.criterions do
-      self.output = self.output + self.weights[i]*self.criterions[i]:forward(input, target)
+      self.output = self.output + self.weights[i]*self.criterions[i]:updateOutput(input, target)
    end
    return self.output
 end

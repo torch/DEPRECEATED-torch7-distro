@@ -5,7 +5,7 @@ function Replicate:__init(nf)
    self.nfeatures = nf
 end
 
-function Replicate:forward(input)
+function Replicate:updateOutput(input)
    local sz = torch.LongStorage(input:dim()+1)
    sz[1] = self.nfeatures
    for i = 1,input:dim() do

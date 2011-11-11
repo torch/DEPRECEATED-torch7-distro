@@ -20,9 +20,9 @@ function ParallelTable:size()
    return #self.modules 
 end
 
-function ParallelTable:forward(input)
+function ParallelTable:updateOutput(input)
    for i=1,#self.modules do
-      self.output[i] = self.modules[i]:forward(input[i])
+      self.output[i] = self.modules[i]:updateOutput(input[i])
    end
    return self.output
 end

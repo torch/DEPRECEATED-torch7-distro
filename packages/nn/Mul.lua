@@ -24,7 +24,7 @@ function Mul:reset(stdv)
    self.weight[1] = random.uniform(-stdv, stdv);
 end
 
-function Mul:forward(input)
+function Mul:updateOutput(input)
    self.output:copy(input);
    self.output:mul(self.weight[1]);
    return self.output 

@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/Sigmoid.c"
 #else
 
-static int nn_(Sigmoid_forward)(lua_State *L)
+static int nn_(Sigmoid_updateOutput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
@@ -29,7 +29,7 @@ static int nn_(Sigmoid_updateGradInput)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(Sigmoid__) [] = {
-  {"Sigmoid_forward", nn_(Sigmoid_forward)},
+  {"Sigmoid_updateOutput", nn_(Sigmoid_updateOutput)},
   {"Sigmoid_updateGradInput", nn_(Sigmoid_updateGradInput)},
   {NULL, NULL}
 };

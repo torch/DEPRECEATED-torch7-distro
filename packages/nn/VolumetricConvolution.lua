@@ -38,8 +38,8 @@ function VolumetricConvolution:reset(stdv)
                    end)   
 end
 
-function VolumetricConvolution:forward(input)
-   return input.nn.VolumetricConvolution_forward(self, input)
+function VolumetricConvolution:updateOutput(input)
+   return input.nn.VolumetricConvolution_updateOutput(self, input)
 end
 
 function VolumetricConvolution:updateGradInput(input, gradOutput)

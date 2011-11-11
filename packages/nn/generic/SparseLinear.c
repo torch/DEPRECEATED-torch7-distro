@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SparseLinear.c"
 #else
 
-static int nn_(SparseLinear_forward)(lua_State *L)
+static int nn_(SparseLinear_updateOutput)(lua_State *L)
 {
   long i;
   THTensor * input = luaT_checkudata(L, 2, torch_(Tensor_id));
@@ -115,7 +115,7 @@ int nn_(SparseLinear_updateParameters)(lua_State *L)
 }
 
 static const struct luaL_Reg nn_(SparseLinear__) [] = {
-  {"SparseLinear_forward", nn_(SparseLinear_forward)},
+  {"SparseLinear_updateOutput", nn_(SparseLinear_updateOutput)},
   {"SparseLinear_updateParameters", nn_(SparseLinear_updateParameters)},
   {NULL, NULL}
 };

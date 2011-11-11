@@ -8,7 +8,7 @@ function MarginCriterion:__init(margin)
    self.gradInput = torch.Tensor(1)
 end 
  
-function MarginCriterion:forward(input,y)
+function MarginCriterion:updateOutput(input,y)
    self.output=math.max(0, self.margin- y* input[1])
    return self.output
 end

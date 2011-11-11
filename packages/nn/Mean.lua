@@ -6,7 +6,7 @@ function Mean:__init(dimension)
    self.dimension = dimension
 end
 
-function Mean:forward(input)
+function Mean:updateOutput(input)
    input.lab.mean_(self.output, input, self.dimension)
    self.output = self.output:select(self.dimension, 1)
    return self.output

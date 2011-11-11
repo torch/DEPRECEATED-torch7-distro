@@ -19,9 +19,9 @@ function ConcatTable:size()
    return #self.modules 
 end
 
-function ConcatTable:forward(input)
+function ConcatTable:updateOutput(input)
    for i=1,#self.modules do
-      self.output[i] = self.modules[i]:forward(input)
+      self.output[i] = self.modules[i]:updateOutput(input)
    end
    return self.output
 end
