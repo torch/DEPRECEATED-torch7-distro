@@ -4,6 +4,6 @@ function Tanh:forward(input)
    return input.nn.Tanh_forward(self, input)
 end
 
-function Tanh:backward(input, gradOutput)
-   return input.nn.Tanh_backward(self, input, gradOutput)
+function Tanh:updateGradInput(input, gradOutput)
+   return input.nn.Tanh_updateGradInput(self, input, gradOutput)
 end

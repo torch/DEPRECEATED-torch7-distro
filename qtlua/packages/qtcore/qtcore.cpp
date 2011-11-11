@@ -686,8 +686,10 @@ qvariantmap_hook(lua_State *L)
 
 // ====================================
 
-
-LUA_EXTERNC QTCORE_API int 
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC 
+#endif
+QTCORE_API int 
 luaopen_libqtcore(lua_State *L)
 {
   // load module 'qt'

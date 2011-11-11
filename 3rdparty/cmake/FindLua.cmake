@@ -10,27 +10,46 @@
 
 INCLUDE(FindCygwin)
 
-FIND_PROGRAM(LUA_EXECUTABLE
-  lua
-  ${CYGWIN_INSTALL_PATH}/bin
-  PATH
-  )
+#IF (USE_LUAJIT)
+#  FIND_PROGRAM(LUA_EXECUTABLE
+#    luajit
+#    ${CYGWIN_INSTALL_PATH}/bin
+#    PATH)
+#ELSE (USE_LUAJIT)
+  FIND_PROGRAM(LUA_EXECUTABLE
+    lua
+    ${CYGWIN_INSTALL_PATH}/bin
+    PATH)
+#ENDIF (USE_LUAJIT)
 
 IF(LUA_EXECUTABLE)
   GET_FILENAME_COMPONENT(LUA_DIR ${LUA_EXECUTABLE} PATH)
 ENDIF(LUA_EXECUTABLE)
 
-FIND_LIBRARY(LUA_LIBRARIES
-  NAMES lua liblua
-  PATHS ${LUA_DIR}/../lib
-  ${LUA_DIR}
-  NO_DEFAULT_PATH
-)
+#IF (USE_LUAJIT)
+#   FIND_LIBRARY(LUA_LIBRARIES
+#     NAMES libluajit-51
+#     PATHS ${LUA_DIR}/../lib
+#     ${LUA_DIR}
+#     NO_DEFAULT_PATH)
+#ELSE (USE_LUAJIT)
+   FIND_LIBRARY(LUA_LIBRARIES
+     NAMES lua liblua
+     PATHS ${LUA_DIR}/../lib
+     ${LUA_DIR}
+     NO_DEFAULT_PATH)
+#ENDIF (USE_LUAJIT)
 
-FIND_PATH(LUA_INCLUDE_DIR lua.h
-  ${LUA_DIR}/../include
-  NO_DEFAULT_PATH
-)
+IF (USE_LUAJIT)
+   FIND_PATH(LUA_INCLUDE_DIR lua.hpp
+     ${LUA_DIR}/../include/${LUABIN}/
+     ${LUA_DIR}/../include/${LUABIN}-2.0/
+     NO_DEFAULT_PATH)
+ELSE (USE_LUAJIT)
+   FIND_PATH(LUA_INCLUDE_DIR lua.h
+     ${LUA_DIR}/../include/ 
+     NO_DEFAULT_PATH)
+ENDIF (USE_LUAJIT)
 
 SET(LUA_PACKAGE_PATH "${LUA_DIR}/../share/lua/5.1" CACHE PATH "where Lua searches for Lua packages")
 SET(LUA_PACKAGE_CPATH "${LUA_DIR}/../lib/lua/5.1" CACHE PATH "where Lua searches for library packages")

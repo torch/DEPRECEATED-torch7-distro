@@ -7,6 +7,19 @@ function Copy:__init(intype, outtype)
    parent.__init(self)
    self.gradInput = torch.getmetatable(intype).new()
    self.output = torch.getmetatable(outtype).new()
+
+   if intype == outtype then
+
+      self.forward = function(self, input)
+                        self.output = input
+                        return input
+                     end
+
+      self.updateGradInput = function(self, input, gradOutput)
+                         self.gradInput = gradOutput
+                         return gradOutput
+                      end
+   end
 end
 
 function Copy:forward(input)
@@ -14,7 +27,7 @@ function Copy:forward(input)
    return self.output
 end
 
-function Copy:backward(input, gradOutput)
+function Copy:updateGradInput(input, gradOutput)
    self.gradInput:resize(gradOutput:size()):copy(gradOutput)
    return self.gradInput
 end

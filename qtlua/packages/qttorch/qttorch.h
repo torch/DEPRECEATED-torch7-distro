@@ -3,8 +3,13 @@
 #ifndef QTTORCH_H
 #define QTTORCH_H
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
+#endif
+
 #include "qtluaengine.h"
 #include "qtluautils.h"
 
@@ -19,7 +24,10 @@
 # define QTTORCH_API /**/
 #endif
 
-LUA_EXTERNC QTTORCH_API int luaopen_libqttorch(lua_State *L);
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTTORCH_API int luaopen_libqttorch(lua_State *L);
 
 
 #endif

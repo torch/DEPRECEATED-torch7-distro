@@ -13,7 +13,7 @@ function MarginCriterion:forward(input,y)
    return self.output
 end
 
-function MarginCriterion:backward(input, y)
+function MarginCriterion:updateGradInput(input, y)
   if (y*input[1])<self.margin then
      self.gradInput[1]=-y		
   else
@@ -21,17 +21,3 @@ function MarginCriterion:backward(input, y)
   end
   return self.gradInput 
 end
-
-
-function MarginCriterion:write(file)
-   parent.write(self, file)
-   file:writeDouble(self.margin)
-end
-
-function MarginCriterion:read(file)
-   parent.read(self, file)
-   self.margin = file:readDouble()
-end
-
-
-

@@ -61,19 +61,20 @@ local function Storage__printformat(self)
 end
 
 local function Storage__tostring(self)
-   local str = ''
+   local strt = {'\n'}
    local format,scale = Storage__printformat(self)
    if scale then
-      str = str .. string.format('%g', scale) .. ' *\n'
+      table.insert(strt, string.format('%g', scale) .. ' *\n')
       for i = 1,self:size() do
-         str = str .. string.format(format, self[i]/scale) .. '\n'
+         table.insert(strt, string.format(format, self[i]/scale) .. '\n')
       end
    else
       for i = 1,self:size() do
-         str = str .. string.format(format, self[i]) .. '\n'
+         table.insert(strt, string.format(format, self[i]) .. '\n')
       end
    end
-   str = str .. '[' .. torch.typename(self) .. ' of size ' .. self:size() .. ']\n'
+   table.insert(strt, '[' .. torch.typename(self) .. ' of size ' .. self:size() .. ']\n')
+   str = table.concat(strt)
    return str
 end
 
@@ -90,7 +91,7 @@ local function Tensor__printMatrix(self, indent)
 --   print('format = ' .. format)
    scale = scale or 1
    indent = indent or ''
-   local str = indent
+   local strt = {indent}
    local nColumnPerLine = math.floor((80-#indent)/(sz+1))
 --   print('sz = ' .. sz .. ' and nColumnPerLine = ' .. nColumnPerLine)
    local firstColumn = 1
@@ -103,39 +104,40 @@ local function Tensor__printMatrix(self, indent)
       end
       if nColumnPerLine < self:size(2) then
          if firstColumn ~= 1 then
-            str = str .. '\n'
+            table.insert(strt, '\n')
          end
-         str = str .. 'Columns ' .. firstColumn .. ' to ' .. lastColumn .. '\n' .. indent
+         table.insert(strt, 'Columns ' .. firstColumn .. ' to ' .. lastColumn .. '\n' .. indent)
       end
       if scale ~= 1 then
-         str = str .. string.format('%g', scale) .. ' *\n ' .. indent
+         table.insert(strt, string.format('%g', scale) .. ' *\n ' .. indent)
       end
       for l=1,self:size(1) do
          local row = self:select(1, l)
          for c=firstColumn,lastColumn do
-            str = str .. string.format(format, row[c]/scale)
+            table.insert(strt, string.format(format, row[c]/scale))
             if c == lastColumn then
-               str = str .. '\n'
+               table.insert(strt, '\n')
                if l~=self:size(1) then
                   if scale ~= 1 then
-                     str = str .. indent .. ' '
+                     table.insert(strt, indent .. ' ')
                   else
-                     str = str .. indent
+                     table.insert(strt, indent)
                   end
                end
             else
-               str = str .. ' '
+               table.insert(strt, ' ')
             end
          end
       end
       firstColumn = lastColumn + 1
    end
+   local str = table.concat(strt)
    return str
 end
 
 local function Tensor__printTensor(self)
    local counter = torch.LongStorage(self:nDimension()-2)
-   local str = ''
+   local strt = {''}
    local finished
    counter:fill(1)
    counter[1] = 0
@@ -156,55 +158,58 @@ local function Tensor__printTensor(self)
          break
       end
 --      print(counter)
-      if str ~= '' then
-         str = str .. '\n'
+      if #strt > 1 then
+         table.insert(strt, '\n')
       end
-      str = str .. '('
+      table.insert(strt, '(')
       local tensor = self
       for i=1,self:nDimension()-2 do
          tensor = tensor:select(1, counter[i])
-         str = str .. counter[i] .. ','
+         table.insert(strt, counter[i] .. ',')
       end
-      str = str .. '.,.) = \n'
-      str = str .. Tensor__printMatrix(tensor, ' ')
+      table.insert(strt, '.,.) = \n')
+      table.insert(strt, Tensor__printMatrix(tensor, ' '))
    end
+   local str = table.concat(strt)
    return str
 end
 
 local function Tensor__tostring(self)
    local str = '\n'
+   local strt = {''}
    if self:nDimension() == 0 then
-      str = str .. '[' .. torch.typename(self) .. ' with no dimension]\n'
+      table.insert(strt, '[' .. torch.typename(self) .. ' with no dimension]\n')
    else
       local tensor = torch.DoubleTensor():resize(self:size()):copy(self)
       if tensor:nDimension() == 1 then
          local format,scale,sz = Storage__printformat(tensor:storage())
          if scale then
-            str = str .. string.format('%g', scale) .. ' *\n'
+            table.insert(strt, string.format('%g', scale) .. ' *\n')
             for i = 1,tensor:size(1) do
-               str = str .. string.format(format, tensor[i]/scale) .. '\n'
+               table.insert(strt, string.format(format, tensor[i]/scale) .. '\n')
             end
          else
             for i = 1,tensor:size(1) do
-               str = str .. string.format(format, tensor[i]) .. '\n'
+               table.insert(strt, string.format(format, tensor[i]) .. '\n')
             end
          end
-         str = str .. '[' .. torch.typename(self) .. ' of dimension ' .. tensor:size(1) .. ']\n'
+         table.insert(strt, '[' .. torch.typename(self) .. ' of dimension ' .. tensor:size(1) .. ']\n')
       elseif tensor:nDimension() == 2 then
-         str = str .. Tensor__printMatrix(tensor)
-         str = str .. '[' .. torch.typename(self) .. ' of dimension ' .. tensor:size(1) .. 'x' .. tensor:size(2) .. ']\n'
+         table.insert(strt, Tensor__printMatrix(tensor))
+         table.insert(strt, '[' .. torch.typename(self) .. ' of dimension ' .. tensor:size(1) .. 'x' .. tensor:size(2) .. ']\n')
       else
-         str = str .. Tensor__printTensor(tensor)
-         str = str .. '[' .. torch.typename(self) .. ' of dimension '
+         table.insert(strt, Tensor__printTensor(tensor))
+         table.insert(strt, '[' .. torch.typename(self) .. ' of dimension ')
          for i=1,tensor:nDimension() do
-            str = str .. tensor:size(i) 
+            table.insert(strt, tensor:size(i))
             if i ~= tensor:nDimension() then
-               str = str .. 'x'
+               table.insert(strt, 'x')
             end
          end
-         str = str .. ']\n'
+         table.insert(strt, ']\n')
       end
    end
+   local str = table.concat(strt)
    return str
 end
 rawset(torch.getmetatable('torch.ByteTensor'), '__tostring__', Tensor__tostring)
@@ -214,3 +219,46 @@ rawset(torch.getmetatable('torch.IntTensor'), '__tostring__', Tensor__tostring)
 rawset(torch.getmetatable('torch.LongTensor'), '__tostring__', Tensor__tostring)
 rawset(torch.getmetatable('torch.FloatTensor'), '__tostring__', Tensor__tostring)
 rawset(torch.getmetatable('torch.DoubleTensor'), '__tostring__', Tensor__tostring)
+
+local function Tensor__type(self,type)
+   local current = torch.typename(self)
+   if not type then return current end
+   if type ~= current then
+      local new = torch.getmetatable(type).new()
+      if self:nElement() > 0 then
+         new:resize(self:size()):copy(self)
+      end
+      return new
+   else
+      return self
+   end
+end
+local function Tensor__typeAs(self,tensor)
+   return self:type(tensor:type())
+end
+local function Tensor__double(self,type)
+   return self:type('torch.DoubleTensor')
+end
+local function Tensor__float(self,type)
+   return self:type('torch.FloatTensor')
+end
+rawset(torch.getmetatable('torch.DoubleTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.DoubleTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.DoubleTensor'), 'double', Tensor__double)
+rawset(torch.getmetatable('torch.DoubleTensor'), 'float', Tensor__float)
+rawset(torch.getmetatable('torch.FloatTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.FloatTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.FloatTensor'), 'double', Tensor__double)
+rawset(torch.getmetatable('torch.FloatTensor'), 'float', Tensor__float)
+
+rawset(torch.getmetatable('torch.ByteTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.CharTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.ShortTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.IntTensor'), 'type', Tensor__type)
+rawset(torch.getmetatable('torch.LongTensor'), 'type', Tensor__type)
+
+rawset(torch.getmetatable('torch.ByteTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.CharTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.ShortTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.IntTensor'), 'typeAs', Tensor__typeAs)
+rawset(torch.getmetatable('torch.LongTensor'), 'typeAs', Tensor__typeAs)

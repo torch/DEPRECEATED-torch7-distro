@@ -19,7 +19,7 @@ static int nn_(HardTanh_forward)(lua_State *L)
   return 1;
 }
 
-static int nn_(HardTanh_backward)(lua_State *L)
+static int nn_(HardTanh_updateGradInput)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
@@ -36,7 +36,7 @@ static int nn_(HardTanh_backward)(lua_State *L)
 
 static const struct luaL_Reg nn_(HardTanh__) [] = {
   {"HardTanh_forward", nn_(HardTanh_forward)},
-  {"HardTanh_backward", nn_(HardTanh_backward)},
+  {"HardTanh_updateGradInput", nn_(HardTanh_updateGradInput)},
   {NULL, NULL}
 };
 

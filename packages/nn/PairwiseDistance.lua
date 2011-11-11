@@ -19,7 +19,7 @@ local function mathsign(x)
    if x>0 then return 1; else return -1; end
 end
 
-function PairwiseDistance:backward(input, gradOutput)
+function PairwiseDistance:updateGradInput(input, gradOutput)
   self.gradInput[1]:resizeAs(input[1]) 
   self.gradInput[2]:resizeAs(input[2]) 
   self.gradInput[1]:copy(input[1])
@@ -31,26 +31,3 @@ function PairwiseDistance:backward(input, gradOutput)
   self.gradInput[2]:zero():add(-1, self.gradInput[1])
   return self.gradInput
 end
-
-
-function PairwiseDistance:zeroGradParameters()
-	-- no weights to adjust
-end
-
-function PairwiseDistance:updateParameters(learningRate)
-	-- no weights to adjust
-end
-
-
-function PairwiseDistance:write(file)
-   parent.write(self, file)
-   file:writeDouble(self.norm)
-end
-
-function PairwiseDistance:read(file)
-   parent.read(self, file)
-   self.norm = file:readDouble()
-end
-
-
-

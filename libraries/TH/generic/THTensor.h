@@ -4,6 +4,8 @@
 
 /* a la lua? dim, storageoffset, ...  et les methodes ? */
 
+#define TH_TENSOR_REFCOUNTED 1
+
 typedef struct THTensor
 {
     long *size;
@@ -13,6 +15,8 @@ typedef struct THTensor
     THStorage *storage;
     long storageOffset;
     int refcount;
+
+    char flag;
 
 } THTensor;
 
@@ -26,6 +30,9 @@ TH_API long THTensor_(stride)(THTensor *self, int dim);
 TH_API THLongStorage *THTensor_(newSizeOf)(THTensor *self);
 TH_API THLongStorage *THTensor_(newStrideOf)(THTensor *self);
 TH_API real *THTensor_(data)(THTensor *self);
+
+TH_API void THTensor_(setFlag)(THTensor *self, const char flag);
+TH_API void THTensor_(clearFlag)(THTensor *self, const char flag);
 
 
 /**** creation methods ****/
@@ -68,6 +75,7 @@ TH_API void THTensor_(resize1d)(THTensor *tensor, long size0_);
 TH_API void THTensor_(resize2d)(THTensor *tensor, long size0_, long size1_);
 TH_API void THTensor_(resize3d)(THTensor *tensor, long size0_, long size1_, long size2_);
 TH_API void THTensor_(resize4d)(THTensor *tensor, long size0_, long size1_, long size2_, long size3_);
+TH_API void THTensor_(resize5d)(THTensor *tensor, long size0_, long size1_, long size2_, long size3_, long size4_);
 
 TH_API void THTensor_(set)(THTensor *self, THTensor *src);
 TH_API void THTensor_(setStorage)(THTensor *self, THStorage *storage_, long storageOffset_, THLongStorage *size_, THLongStorage *stride_);

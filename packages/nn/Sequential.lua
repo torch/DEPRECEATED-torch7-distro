@@ -10,6 +10,7 @@ function Sequential:add(module)
    end
    table.insert(self.modules, module)
    self.output = module.output
+   return self
 end
 
 function Sequential:size()
@@ -29,17 +30,45 @@ function Sequential:forward(input)
    return currentOutput
 end
 
-function Sequential:backward(input, gradOutput)
+function Sequential:updateGradInput(input, gradOutput)
    local currentGradOutput = gradOutput
    local currentModule = self.modules[#self.modules]
    for i=#self.modules-1,1,-1 do
       local previousModule = self.modules[i]
-      currentGradOutput = currentModule:backward(previousModule.output, currentGradOutput)
+      currentGradOutput = currentModule:updateGradInput(previousModule.output, currentGradOutput)
       currentModule = previousModule
    end
-   currentGradOutput = currentModule:backward(input, currentGradOutput)
+   currentGradOutput = currentModule:updateGradInput(input, currentGradOutput)
    self.gradInput = currentGradOutput
    return currentGradOutput
+end
+
+function Sequential:accGradParameters(input, gradOutput, scale)
+   scale = scale or 1
+
+   local currentGradOutput = gradOutput
+   local currentModule = self.modules[#self.modules]
+   for i=#self.modules-1,1,-1 do
+      local previousModule = self.modules[i]
+      currentModule:accGradParameters(previousModule.output, currentGradOutput, scale)
+      currentGradOutput = currentModule.gradInput
+      currentModule = previousModule
+   end
+   
+   currentModule:accGradParameters(input, currentGradOutput, scale)
+end
+
+function Sequential:accUpdateGradParameters(input, gradOutput, lr)
+   local currentGradOutput = gradOutput
+   local currentModule = self.modules[#self.modules]
+   for i=#self.modules-1,1,-1 do
+      local previousModule = self.modules[i]
+      currentModule:accUpdateGradParameters(previousModule.output, currentGradOutput, lr)
+      currentGradOutput = currentModule.gradInput
+      currentModule = previousModule
+   end
+   
+   currentModule:accUpdateGradParameters(input, currentGradOutput, lr)
 end
 
 function Sequential:zeroGradParameters()
@@ -52,16 +81,6 @@ function Sequential:updateParameters(learningRate)
    for i=1,#self.modules do
       self.modules[i]:updateParameters(learningRate)
    end
-end
-
-function Sequential:write(file)
-   parent.write(self, file)
-   file:writeObject(self.modules)
-end
-
-function Sequential:read(file)
-   parent.read(self, file)
-   self.modules = file:readObject()
 end
 
 function Sequential:share(mlp,...)

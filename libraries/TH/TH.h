@@ -2,6 +2,7 @@
 #define TH_INC
 
 #include "THBlas.h"
+#include "THVector.h"
 #include "THGeneral.h"
 #include "THLogAdd.h"
 #include "THLab.h"

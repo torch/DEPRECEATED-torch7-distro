@@ -4,9 +4,9 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 SET(hdr 
   THGeneral.h THStorage.h THTensor.h THTensorApply.h 
-  THBlas.h THTensorMath.h THLogAdd.h THRandom.h)
+  THBlas.h THTensorMath.h THLogAdd.h THRandom.h THVector.h)
 SET(src 
-  THGeneral.c THStorage.c THTensor.c THBlas.c 
+  THGeneral.c THStorage.c THTensor.c THBlas.c
   THTensorMath.c THLogAdd.c THRandom.c
   THTensorRandom.c
   THLab.c
@@ -27,6 +27,21 @@ ADD_LIBRARY(TH SHARED ${src})
 
 FIND_PACKAGE(BLAS)
 
+FIND_PACKAGE(SSE)
+
+IF (SSE2_FOUND)
+  SET(CMAKE_C_FLAGS "-msse2 -D__SSE2__ ${CMAKE_C_FLAGS}")
+ENDIF (SSE2_FOUND)
+IF (SSE3_FOUND)
+  SET(CMAKE_C_FLAGS "-msse3 -D__SSE3__ ${CMAKE_C_FLAGS}")
+ENDIF (SSE3_FOUND)
+IF (SSSE3_FOUND)
+  SET(CMAKE_C_FLAGS "-mssse3 -D__SSSE3__ ${CMAKE_C_FLAGS}")
+ENDIF (SSSE3_FOUND)
+IF (SSE4.1_FOUND)
+  SET(CMAKE_C_FLAGS "-msse4.1 -D__SSE4_1__ ${CMAKE_C_FLAGS}")
+ENDIF (SSE4.1_FOUND)
+
 IF(BLAS_FOUND)
   ADD_DEFINITIONS(-DUSE_LAPACK)
 #  INCLUDE_DIRECTORIES(${CBLAS_INCLUDE_DIR})
@@ -46,16 +61,45 @@ INSTALL(TARGETS TH
 INSTALL(FILES
           TH.h
           THBlas.h
+          THVector.h
+          THLab.h
           THGeneral.h
           THLogAdd.h
           THRandom.h
           THStorage.h
-          generic/THStorage.h
+          THTensorMacros.h
           THTensor.h
-          generic/THTensor.h
           THTensorApply.h
           THTensorDimApply.h
+          THGenerateAllTypes.h
+          THGenerateFloatTypes.h
+          THGenerateIntTypes.h
+          THFile.h
+          THDiskFile.h
+          THFilePrivate.h
+          THMemoryFile.h
+          THTensorMath.h
+          THTensorRandom.h
         DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}/TH")
+
+INSTALL(FILES
+          generic/THBlas.h
+          generic/THLab.h
+          generic/THLabConv.h
+          generic/THStorage.h
+          generic/THTensor.h
+          generic/THTensorMath.h
+          generic/THTensorRandom.h
+          generic/THBlas.c
+          generic/THStorageCopy.h
+          generic/THTensorCopy.h
+          generic/THLab.c
+          generic/THVector.c
+          generic/THStorage.c
+          generic/THTensor.c
+          generic/THTensorMath.c
+          generic/THTensorRandom.c
+        DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}/TH/generic")
 
 # Create THConfig.cmake
 GET_TARGET_PROPERTY(TH_OUTPUT_NAME TH LOCATION)

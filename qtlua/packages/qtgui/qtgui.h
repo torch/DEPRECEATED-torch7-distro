@@ -3,8 +3,13 @@
 #ifndef QTGUI_H
 #define QTGUI_H
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
+#endif
+
 #include "qtluaengine.h"
 #include "qtluautils.h"
 
@@ -19,7 +24,10 @@
 # define QTGUI_API /**/
 #endif
 
-LUA_EXTERNC QTGUI_API int luaopen_libqtgui(lua_State *L);
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTGUI_API int luaopen_libqtgui(lua_State *L);
 
 
 #endif

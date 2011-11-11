@@ -11,6 +11,7 @@ function MultiCriterion:add(criterion, weight)
    table.insert(self.criterions, criterion)
    self.weights:resize(#self.criterions, true)
    self.weights[#self.criterions] = weight
+   return self
 end
 
 function MultiCriterion:forward(input, target)
@@ -21,23 +22,11 @@ function MultiCriterion:forward(input, target)
    return self.output
 end
 
-function MultiCriterion:backward(input, target)
+function MultiCriterion:updateGradInput(input, target)
    self.gradInput:resizeAs(input)
    self.gradInput:zero()
    for i=1,#self.criterions do
-      self.gradInput:add(self.weights[i], self.criterions[i]:backward(input, target))
+      self.gradInput:add(self.weights[i], self.criterions[i]:updateGradInput(input, target))
    end
    return self.gradInput
-end
-
-function MultiCriterion:write(file)
-   parent.write(self, file)
-   file:writeObject(self.criterions)
-   file:writeObject(self.weights)
-end
-
-function MultiCriterion:read(file)
-   parent.read(self, file)
-   self.criterions = file:readObject()
-   self.weights = file:readObject()
 end

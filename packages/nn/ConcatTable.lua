@@ -8,6 +8,7 @@ end
 
 function ConcatTable:add(module)
    table.insert(self.modules, module)
+   return self
 end
 
 function ConcatTable:get(index)
@@ -25,9 +26,9 @@ function ConcatTable:forward(input)
    return self.output
 end
 
-function ConcatTable:backward(input, gradOutput)
+function ConcatTable:updateGradInput(input, gradOutput)
    for i,module in ipairs(self.modules) do
-      local currentGradInput = module:backward(input, gradOutput[i])
+      local currentGradInput = module:updateGradInput(input, gradOutput[i])
       if i == 1 then
          self.gradInput:resizeAs(currentGradInput):copy(currentGradInput)
       else
@@ -35,6 +36,19 @@ function ConcatTable:backward(input, gradOutput)
       end
    end
    return self.gradInput
+end
+
+function ConcatTable:accGradParameters(input, gradOutput, scale)
+   scale = scale or 1
+   for i,module in ipairs(self.modules) do
+      module:accGradParameters(input, gradOutput[i], scale)
+   end
+end
+
+function ConcatTable:accUpdateGradParameters(input, gradOutput, lr)
+   for i,module in ipairs(self.modules) do
+      module:accUpdateGradParameters(input, gradOutput[i], lr)
+   end
 end
 
 function ConcatTable:zeroGradParameters()
@@ -47,16 +61,6 @@ function ConcatTable:updateParameters(learningRate)
    for _,module in ipairs(self.modules) do
       module:updateParameters(learningRate)
    end
-end
-
-function ConcatTable:write(file)
-   parent.write(self, file)
-   file:writeObject(self.modules)
-end
-
-function ConcatTable:read(file)
-   parent.read(self, file)
-   self.modules = file:readObject()
 end
 
 function ConcatTable:share(mlp,...)

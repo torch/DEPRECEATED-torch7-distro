@@ -12,23 +12,16 @@ function Sum:forward(input)
    return self.output
 end
 
-function Sum:backward(input, gradOutput)
-   local size = input:size()
-   local stride = input:stride()
-   stride[self.dimension] = 0
+function Sum:updateGradInput(input, gradOutput)
+   local size = gradOutput:size():totable()
+   local stride = gradOutput:stride():totable()
+   table.insert(size, self.dimension, input:size(self.dimension))
+   table.insert(stride, self.dimension, 0)
 
-   self.gradInput:resizeAs(gradOutput):copy(gradOutput)
-   self.gradInput:resize(size, stride)
-
+   self.gradInput:set(gradOutput:storage(),
+                      1,
+                      torch.LongStorage(size),
+                      torch.LongStorage(stride))
+                      
    return self.gradInput
-end
-
-function Sum:write(file)
-   parent.write(self, file)
-   file:writeInt(self.dimension)
-end
-
-function Sum:read(file)
-   parent.read(self, file)
-   self.dimension = file:readInt()
 end

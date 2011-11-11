@@ -14,7 +14,13 @@ extern void setompnthread(lua_State *L, int ud, const char *field);
 #include "generic/SpatialConvolutionOmp.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SpatialConvolutionMapOmp.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/SpatialSubSamplingOmp.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/SpatialMaxPoolingOmp.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/HardTanhOmp.c"
@@ -22,6 +28,13 @@ extern void setompnthread(lua_State *L, int ud, const char *field);
 
 #include "generic/TanhOmp.c"
 #include "THGenerateFloatTypes.h"
+
+#include "generic/SqrtOmp.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/SquareOmp.c"
+#include "THGenerateFloatTypes.h"
+
 
 DLL_EXPORT int nnOmp_init(lua_State *L)
 {
@@ -35,14 +48,26 @@ DLL_EXPORT int nnOmp_init(lua_State *L)
   nnOmp_FloatSpatialConvolution_init(L);
   nnOmp_DoubleSpatialConvolution_init(L);
 
+  nnOmp_FloatSpatialConvolutionMap_init(L);
+  nnOmp_DoubleSpatialConvolutionMap_init(L);
+
   nnOmp_FloatSpatialSubSampling_init(L);
   nnOmp_DoubleSpatialSubSampling_init(L);
+
+  nnOmp_FloatSpatialMaxPooling_init(L);
+  nnOmp_DoubleSpatialMaxPooling_init(L);
 
   nnOmp_FloatHardTanh_init(L);
   nnOmp_DoubleHardTanh_init(L);
 
   nnOmp_FloatTanh_init(L);
   nnOmp_DoubleTanh_init(L);
+
+  nnOmp_FloatSqrt_init(L);
+  nnOmp_DoubleSqrt_init(L);
+
+  nnOmp_FloatSquare_init(L);
+  nnOmp_DoubleSquare_init(L);
 
   return 1;
 }

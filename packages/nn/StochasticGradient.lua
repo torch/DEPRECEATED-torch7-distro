@@ -35,9 +35,8 @@ function StochasticGradient:train(dataset)
 
          currentError = currentError + criterion:forward(module:forward(input), target)
 
-         module:zeroGradParameters()
-         module:backward(input, criterion:backward(module.output, target))
-         module:updateParameters(currentLearningRate)
+         module:updateGradInput(input, criterion:updateGradInput(module.output, target))
+         module:accUpdateGradParameters(input, criterion.gradInput, currentLearningRate)
 
          if self.hookExample then
             self.hookExample(self, example)
@@ -57,22 +56,4 @@ function StochasticGradient:train(dataset)
          break
       end
    end
-end
-
-function StochasticGradient:write(file)
-   file:writeDouble(self.learningRate)
-   file:writeDouble(self.learningRateDecay)
-   file:writeInt(self.maxIteration)
-   file:writeBool(self.shuffleIndices)
-   file:writeObject(self.module)
-   file:writeObject(self.criterion)
-end
-
-function StochasticGradient:read(file)
-   self.learningRate = file:readDouble()
-   self.learningRateDecay = file:readDouble()
-   self.maxIteration = file:readInt()
-   self.shuffleIndices = file:readBool()
-   self.module = file:readObject()
-   self.criterion = file:readObject()
 end

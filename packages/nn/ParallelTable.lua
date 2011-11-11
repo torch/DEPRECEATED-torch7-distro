@@ -9,6 +9,7 @@ end
 
 function ParallelTable:add(module)
    table.insert(self.modules, module)
+   return self
 end
 
 function ParallelTable:get(index)
@@ -27,11 +28,25 @@ function ParallelTable:forward(input)
 end
 
 
-function ParallelTable:backward(input, gradOutput)
+function ParallelTable:updateGradInput(input, gradOutput)
    for i,module in ipairs(self.modules) do
-      self.gradInput[i]= module:backward(input[i], gradOutput[i])
+      self.gradInput[i]= module:updateGradInput(input[i], gradOutput[i])
    end
    return self.gradInput
+end
+
+function ParallelTable:accGradParameters(input, gradOutput, scale)
+   scale = scale or 1
+   for i,module in ipairs(self.modules) do
+      module:accGradParameters(input[i], gradOutput[i], scale)
+   end
+end
+
+function ParallelTable:accUpdateGradParameters(input, gradOutput, lr)
+   lr = lr or 1
+   for i,module in ipairs(self.modules) do
+      module:accUpdateGradParameters(input[i], gradOutput[i], lr)
+   end
 end
 
 function ParallelTable:zeroGradParameters()
@@ -44,16 +59,6 @@ function ParallelTable:updateParameters(learningRate)
    for _,module in ipairs(self.modules) do
       module:updateParameters(learningRate)
    end
-end
-
-function ParallelTable:write(file)
-   parent.write(self, file)
-   file:writeObject(self.modules)
-end
-
-function ParallelTable:read(file)
-   parent.read(self, file)
-   self.modules = file:readObject()
 end
 
 function ParallelTable:share(mlp,...)

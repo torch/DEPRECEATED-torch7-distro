@@ -6,38 +6,101 @@ static int nn_(SoftMax_forward)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));  
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
-  real inputMax = THTensor_(max)(input);
-  real sum = 0;
+  real *input_data, *output_data;
+  long nframe = 0, dim = 0;
+  long t, d;
 
+  if(input->nDimension == 1)
+  {
+    nframe = 1;
+    dim = input->size[0];
+  }
+  else if(input->nDimension == 2)
+  {
+    nframe = input->size[0];
+    dim = input->size[1];
+  }
+  else
+    THArgCheck(0, 2, "vector or matrix expected");
+
+  input = THTensor_(newContiguous)(input);
   THTensor_(resizeAs)(output, input);
 
-  TH_TENSOR_APPLY2(real, output, real, input,                         \
-                   real z = THExpMinusApprox(inputMax - *input_data); \
-                   *output_data = z;                                  \
-                   sum += z;)
+  input_data = THTensor_(data)(input);
+  output_data = THTensor_(data)(output);
+  for(t = 0; t < nframe; t++)
+  {
+    real inputMax = -THInf;
+    for(d = 0; d < dim; d++) {
+      if (input_data[d] >= inputMax) inputMax = input_data[d];
+    }
 
-  THTensor_(mul)(output, 1/sum);
+    accreal sum = 0;
+    for(d = 0; d < dim; d++) {
+      real z = THExpMinusApprox(inputMax - input_data[d]);
+      output_data[d] = z;
+      sum += z;
+    }
+
+    for(d = 0; d < dim; d++) {
+      output_data[d] *= 1/sum;
+    }
+
+    input_data += dim;
+    output_data += dim;
+  }
+
+  THTensor_(free)(input);
 
   return 1;
 }
 
-static int nn_(SoftMax_backward)(lua_State *L)
+static int nn_(SoftMax_updateGradInput)(lua_State *L)
 {
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
-  real sum;
+  real *gradInput_data, *gradOutput_data, *output_data;
+  long nframe = 0, dim = 0;
+  long t, d;
 
-  sum = THTensor_(dot)(gradOutput, output);
+  if(output->nDimension == 1)
+  {
+    nframe = 1;
+    dim = output->size[0];
+  }
+  else if(output->nDimension == 2)
+  {
+    nframe = output->size[0];
+    dim = output->size[1];
+  }
+  else
+    THError("vector or matrix expected");
+
   THTensor_(resizeAs)(gradInput, output);
-  TH_TENSOR_APPLY3(real, gradInput, real, gradOutput, real, output,     \
-                   *gradInput_data = *output_data * (*gradOutput_data - sum);)
+  gradInput_data = THTensor_(data)(gradInput);
+  output_data = THTensor_(data)(output);
+  gradOutput_data = THTensor_(data)(gradOutput);
+  for(t = 0; t < nframe; t++)
+  {
+    accreal sum = 0;
+    for(d = 0; d < dim; d++)
+      sum += (accreal)gradOutput_data[d] * output_data[d];
+
+    for(d = 0; d < dim; d++)
+      gradInput_data[d] = output_data[d] * (gradOutput_data[d] - sum);
+
+    gradInput_data += dim;
+    output_data += dim;
+    gradOutput_data += dim;
+  }
+
   return 1;
 }
 
 static const struct luaL_Reg nn_(SoftMax__) [] = {
   {"SoftMax_forward", nn_(SoftMax_forward)},
-  {"SoftMax_backward", nn_(SoftMax_backward)},
+  {"SoftMax_updateGradInput", nn_(SoftMax_updateGradInput)},
   {NULL, NULL}
 };
 

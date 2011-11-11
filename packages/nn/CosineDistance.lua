@@ -17,7 +17,7 @@ function CosineDistance:forward(input)
    return self.output
 end
 
-function CosineDistance:backward(input, gradOutput)
+function CosineDistance:updateGradInput(input, gradOutput)
    local v1  = input[1]
    local v2  = input[2]
    local gw1 = input[1].new()
@@ -37,12 +37,4 @@ function CosineDistance:backward(input, gradOutput)
    gw2:mul(gradOutput[1])
    self.gradInput = {gw1, gw2}
    return self.gradInput
-end
-
-function CosineDistance:write(file)
-   parent.write(self, file)
-end
-
-function CosineDistance:read(file)
-   parent.read(self, file)
 end

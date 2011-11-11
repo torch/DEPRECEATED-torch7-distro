@@ -29,7 +29,7 @@ local function mathsign(t)
    return 2*math.random(2)-3;
 end
 
-function CosineEmbeddingCriterion:backward(input, y)
+function CosineEmbeddingCriterion:updateGradInput(input, y)
    local v1  = input[1]
    local v2  = input[2]
    local gw1 = input[1].new()
@@ -51,14 +51,4 @@ function CosineEmbeddingCriterion:backward(input, y)
    end
    self.gradInput = {gw1, gw2}
    return self.gradInput
-end
-
-function CosineEmbeddingCriterion:write(file)
-   parent.write(self, file)
-   file:writeDouble(self.margin)
-end
-
-function CosineEmbeddingCriterion:read(file)
-   parent.read(self, file)
-   self.margin = file:readDouble()
 end

@@ -30,11 +30,10 @@ function JoinTable:forward(input)
 
 end
 
-
-function JoinTable:backward(input, gradOutput)
+function JoinTable:updateGradInput(input, gradOutput)
    for i=1,#input do 
       if self.gradInput[i] == nil then
-         self.gradInput[i] = input.new()
+         self.gradInput[i] = input[i].new()
       end
       self.gradInput[i]:resizeAs(input[i])
    end
@@ -48,28 +47,4 @@ function JoinTable:backward(input, gradOutput)
       offset = offset + currentOutput:size(self.dimension)
    end
    return self.gradInput
-end
-
-function JoinTable:zeroGradParameters()
-end
-
-function JoinTable:updateParameters(learningRate)
-end
-
-function JoinTable:write(file)
-   parent.write(self, file)
-   file:writeObject(self.size)
-   file:writeInt(self.dimension)
-end
-
-function JoinTable:read(file, version)
-   parent.read(self, file)
-   if version > 0 then
-      self.size = file:readObject()
-   else
-      local size = file:readObject()
-      self.size = torch.LongStorage(size:size())
-      self.size:copy(size)
-   end
-   self.dimension = file:readInt()
 end

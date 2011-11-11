@@ -30,29 +30,13 @@ function Mul:forward(input)
    return self.output 
 end
 
-function Mul:backward(input, gradOutput) 
-   self.gradWeight[1] =   self.gradWeight[1] + input:dot(gradOutput);
+function Mul:updateGradInput(input, gradOutput) 
    self.gradInput:zero()
    self.gradInput:add(self.weight[1], gradOutput)
    return self.gradInput
 end
 
-function Mul:zeroGradParameters()
-   self.gradWeight:zero()
-end
-
-function Mul:updateParameters(learningRate)
-   self.weight:add(-learningRate, self.gradWeight)
-end
-
-function Mul:write(file)
-   parent.write(self, file)
-   file:writeObject(self.weight)
-   file:writeObject(self.gradWeight)
-end
-
-function Mul:read(file)
-   parent.read(self, file) 
-   self.weight = file:readObject()
-   self.gradWeight = file:readObject()
+function Mul:accGradParameters(input, gradOutput, scale) 
+   scale = scale or 1
+   self.gradWeight[1] = self.gradWeight[1] + scale*input:dot(gradOutput);
 end

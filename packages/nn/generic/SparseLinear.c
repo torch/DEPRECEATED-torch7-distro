@@ -32,21 +32,19 @@ static int nn_(SparseLinear_forward)(lua_State *L)
   return 1;
 }
 
-
-static int nn_(SparseLinear_backward)(lua_State *L)
+static int nn_(SparseLinear_accGradParameters)(lua_State *L)
 {
   long i;
   THTensor * input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor * gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
+  real scale = luaL_optnumber(L, 4, 1);
   THTensor * weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor * output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
-  THTensor * bias = luaT_getfieldcheckudata(L, 1, "bias", torch_(Tensor_id));
   THTensor * gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
   THTensor * gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
   THTensor * lastInput = luaT_getfieldcheckudata(L, 1, "lastInput", torch_(Tensor_id));
   real weightDecay = luaT_getfieldchecknumber(L, 1, "weightDecay");
-  THTensor * gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
-  long dim = weight->size[0]; /* number of weights.. */
+  long dim = gradWeight->size[0]; /* number of weights.. */
 
   for(i = 0; i < input->size[1]; i++)
   {
@@ -54,7 +52,7 @@ static int nn_(SparseLinear_backward)(lua_State *L)
 
     if(offset >= 0 && offset < dim) /* make sure indices are in bounds.. */
     {
-      real val = THTensor_(get2d)(input, 1, i);
+      real val = scale*THTensor_(get2d)(input, 1, i);
       THBlas_(scal)(gradOutput->size[0],
                     0, 
                     THTensor_(data)(gradWeight)+offset*gradWeight->stride[0],
@@ -79,7 +77,7 @@ static int nn_(SparseLinear_backward)(lua_State *L)
   THTensor_(resizeAs)(lastInput, input);
   THTensor_(copy)(lastInput, input);
   
-  return 1;
+  return 0;
 }
 
 int nn_(SparseLinear_updateParameters)(lua_State *L)
@@ -118,7 +116,6 @@ int nn_(SparseLinear_updateParameters)(lua_State *L)
 
 static const struct luaL_Reg nn_(SparseLinear__) [] = {
   {"SparseLinear_forward", nn_(SparseLinear_forward)},
-  {"SparseLinear_backward", nn_(SparseLinear_backward)},
   {"SparseLinear_updateParameters", nn_(SparseLinear_updateParameters)},
   {NULL, NULL}
 };

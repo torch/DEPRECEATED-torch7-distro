@@ -3,8 +3,13 @@
 #ifndef QTLUAUTILS_H
 #define QTLUAUTILS_H
 
+#ifdef LUA_NOT_CXX
+#include "lua.hpp"
+#else
 #include "lua.h"
 #include "lauxlib.h"
+#endif
+
 #include "qtluaconf.h"
 
 #ifdef WIN32

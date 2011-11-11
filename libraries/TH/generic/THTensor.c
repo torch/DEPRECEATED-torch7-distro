@@ -52,6 +52,16 @@ real *THTensor_(data)(THTensor *self)
     return NULL;
 }
 
+void THTensor_(setFlag)(THTensor *self, const char flag)
+{
+  self->flag |= flag;
+}
+
+void THTensor_(clearFlag)(THTensor *self, const char flag)
+{
+  self->flag &= ~flag;
+}
+
 /**** creation methods ****/
 
 static void THTensor_(rawInit)(THTensor *self);
@@ -266,6 +276,13 @@ void THTensor_(resize4d)(THTensor *self, long size0, long size1, long size2, lon
   THTensor_(rawResize)(self, 4, size, NULL);
 }
 
+void THTensor_(resize5d)(THTensor *self, long size0, long size1, long size2, long size3, long size4)
+{
+    long size[5] = {size0, size1, size2, size3, size4};
+
+  THTensor_(rawResize)(self, 5, size, NULL);
+}
+
 void THTensor_(set)(THTensor *self, THTensor *src)
 {
   if(self != src)
@@ -474,7 +491,8 @@ long THTensor_(nElement)(THTensor *self)
 
 void THTensor_(retain)(THTensor *self)
 {
-  ++self->refcount;
+  if(self->flag & TH_TENSOR_REFCOUNTED)
+    ++self->refcount;
 }
 
 void THTensor_(free)(THTensor *self)
@@ -482,13 +500,16 @@ void THTensor_(free)(THTensor *self)
   if(!self)
     return;
 
-  if(--self->refcount == 0)
+  if(self->flag & TH_TENSOR_REFCOUNTED)
   {
-    THFree(self->size);
-    THFree(self->stride);
-    if(self->storage)
-      THStorage_(free)(self->storage);
-    THFree(self);
+    if(--self->refcount == 0)
+    {
+      THFree(self->size);
+      THFree(self->stride);
+      if(self->storage)
+        THStorage_(free)(self->storage);
+      THFree(self);
+    }
   }
 }
 
@@ -510,6 +531,7 @@ static void THTensor_(rawInit)(THTensor *self)
   self->size = NULL;
   self->stride = NULL;
   self->nDimension = 0;    
+  self->flag = TH_TENSOR_REFCOUNTED;
 }
 
 static void THTensor_(rawSet)(THTensor *self, THStorage *storage, long storageOffset, int nDimension, long *size, long *stride)

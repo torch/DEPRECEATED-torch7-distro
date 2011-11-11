@@ -2343,8 +2343,10 @@ do_qhook(qwidget)
 
 // ====================================
 
-
-LUA_EXTERNC QTGUI_API int 
+#ifndef LUA_NOT_CXX
+LUA_EXTERNC
+#endif
+QTGUI_API int 
 luaopen_libqtgui(lua_State *L)
 {
   // load module 'qt'

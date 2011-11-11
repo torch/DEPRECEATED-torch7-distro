@@ -11,7 +11,7 @@ function DotProduct:forward(input,y)
    return self.output
 end
 
-function DotProduct:backward(input, gradOutput)
+function DotProduct:updateGradInput(input, gradOutput)
    local v1 = input[1]
    local v2 = input[2]
    local gw1=self.gradInput[1];
@@ -26,12 +26,4 @@ function DotProduct:backward(input, gradOutput)
    gw2:mul(gradOutput[1])
 
    return self.gradInput
-end
-
-function DotProduct:write(file)
-   parent.write(self, file)
-end
-
-function DotProduct:read(file)
-   parent.read(self, file)
 end
