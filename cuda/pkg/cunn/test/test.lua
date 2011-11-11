@@ -6,6 +6,7 @@ local precision_forward = 1e-4
 local precision_backward = 1e-2
 local nloop = 1
 local times = {}
+local cunntestx = {}
 
 function cunntest.SpatialConvolution_forward()
    local from = math.random(1,64)
@@ -236,32 +237,53 @@ end
 function cunntest.mse()
    local size = math.random(3000,5000)
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(size)
+   local input = lab.randn(size,1,1)
    local target = lab.randn(size)
    local mod = nn.MSECriterion()
 
    local tm = {}
    local title = string.format('MSECriterion %d ',size)
    times[title] = tm
+
    local a = torch.Timer()
    local fout = mod:forward(input,target)
    local fgin = mod:backward(input,target):clone()
    tm.cpu = a:time().real
 
    torch.setdefaulttensortype('torch.CudaTensor')
-   input = torch.Tensor(size):copy(input)
-   target = torch.Tensor(size):copy(target)
+   local cinput = torch.Tensor(size):copy(input)
+   local ctarget = torch.Tensor(size):copy(target)
    local cmod = nn.MSECriterion()
    a:reset()
-   local cout = cmod:forward(input,target)
-   local cgin = cmod:backward(input,target)
+   local cout = cmod:forward(cinput,ctarget)
+   local cgin = cmod:backward(cinput,ctarget)
    tm.gpu = a:time().real
 
+   local tm2 = {}
+   local title = string.format('MSECriterion2 %d ',size)
+   times[title] = tm2
+   tm2.cpu = tm.cpu
+   torch.setdefaulttensortype('torch.CudaTensor')
+   local cinput2 = torch.Tensor(size):copy(input)
+   local ctarget2 = torch.Tensor(size):copy(target)
+   local cmod2 = nn.MSECriterion()
+   a:reset()
+   local cout2 = cinput2.nn.MSECriterion_forward2(cmod,cinput2,ctarget2)
+   local cgin2 = cinput2.nn.MSECriterion_backward2(cmod,cinput2,ctarget2)
+   tm2.gpu = a:time().real
+
    torch.setdefaulttensortype('torch.FloatTensor')
+
+   mytester:assertlt(math.abs(fout-cout), precision_forward, 'error  on output')
    local fcgin = torch.Tensor():resizeAs(fgin):copy(cgin)
    local gerr = fcgin - fgin
    mytester:assertlt(gerr:abs():max(), precision_forward, 'error  on gradInput')
-   mytester:assertlt(math.abs(fout-cout), precision_forward, 'error  on output')
+
+   mytester:assertlt(math.abs(fout-cout2), precision_forward, 'error  on output - 2')
+   local fcgin2 = torch.Tensor():resizeAs(fgin):copy(cgin2)
+   local gerr2 = fcgin2 - fgin
+   mytester:assertlt(gerr2:abs():max(), precision_forward, 'error  on gradInput -2')
+
 end
 
 function nn.testcuda()
