@@ -216,3 +216,21 @@ function File:readObject()
       error('unknown object')
    end
 end
+
+-- simple helpers to save/load arbitrary objects/tables
+function torch.save(filename, object, mode)
+   mode = mode or 'binary'
+   local file = torch.DiskFile(filename, 'w')
+   file[mode](file)
+   file:writeObject(object)
+   file:close()
+end
+
+function torch.load(filename, mode)
+   mode = mode or 'binary'
+   local file = torch.DiskFile(filename, 'r')
+   file[mode](file)
+   local object = file:readObject()
+   file:close()
+   return object
+end
