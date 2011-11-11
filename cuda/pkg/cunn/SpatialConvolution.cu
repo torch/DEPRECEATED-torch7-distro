@@ -36,7 +36,7 @@ static int cunn_SpatialConvolution_forward(lua_State *L)
   return 1;
 }
 
-static int cunn_SpatialConvolution_backward(lua_State *L)
+static int cunn_SpatialConvolution_updateGradInput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor *)luaT_checkudata(L, 2, torch_CudaTensor_id);
   THCudaTensor *gradOutput = (THCudaTensor *)luaT_checkudata(L, 3, torch_CudaTensor_id);
@@ -121,7 +121,7 @@ static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
 
 static const struct luaL_Reg cunn_SpatialConvolution__ [] = {
   {"SpatialConvolution_forward", cunn_SpatialConvolution_forward},
-  {"SpatialConvolution_backward", cunn_SpatialConvolution_backward},
+  {"SpatialConvolution_updateGradInput", cunn_SpatialConvolution_updateGradInput},
   {"SpatialConvolution_accGradParameters", cunn_SpatialConvolution_accGradParameters},
   {NULL, NULL}
 };

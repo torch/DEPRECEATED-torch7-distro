@@ -24,7 +24,7 @@ static int cunn_Tanh_forward(lua_State *L)
   return 1;
 }
 
-struct tanhbackward_functor
+struct tanhupdateGradInput_functor
 {
   __host__ __device__ float operator()(const float& output, const float& gradOutput) const
   {
@@ -32,7 +32,7 @@ struct tanhbackward_functor
   }
 };
 
-static int cunn_Tanh_backward(lua_State *L)
+static int cunn_Tanh_updateGradInput(lua_State *L)
 {
   THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
   THCudaTensor *gradOutput = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
@@ -46,7 +46,7 @@ static int cunn_Tanh_backward(lua_State *L)
   thrust::device_ptr<float> output_data(THCudaTensor_data(output));
   thrust::device_ptr<float> gradOutput_data(THCudaTensor_data(gradOutput));
   thrust::device_ptr<float> gradInput_data(THCudaTensor_data(gradInput));
-  thrust::transform(output_data, output_data+size, gradOutput_data, gradInput_data, tanhbackward_functor());
+  thrust::transform(output_data, output_data+size, gradOutput_data, gradInput_data, tanhupdateGradInput_functor());
 
   THCudaTensor_free(gradOutput);
   return 1;
@@ -54,7 +54,7 @@ static int cunn_Tanh_backward(lua_State *L)
 
 static const struct luaL_Reg cunn_Tanh__ [] = {
   {"Tanh_forward", cunn_Tanh_forward},
-  {"Tanh_backward", cunn_Tanh_backward},
+  {"Tanh_updateGradInput", cunn_Tanh_updateGradInput},
   {NULL, NULL}
 };
 

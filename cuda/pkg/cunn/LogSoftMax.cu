@@ -75,7 +75,7 @@ __global__ void cunn_LogSoftMax_forward_kernel(float *output, float *input, int 
 }
 
 
-__global__ void cunn_LogSoftMax_backward_kernel(float *gradInput, float *output, float *gradOutput, int nframe, int dim)
+__global__ void cunn_LogSoftMax_updateGradInput_kernel(float *gradInput, float *output, float *gradOutput, int nframe, int dim)
 {
   __shared__ float buffer[LOGSOFTMAX_THREADS];
   int k = blockIdx.x;
@@ -142,11 +142,11 @@ static int cunn_LogSoftMax_forward(lua_State *L)
   return 1;
 }
 
-struct logsoftmaxbackward_functor
+struct logsoftmaxupdateGradInput_functor
 {
   float value;
 
-  logsoftmaxbackward_functor(float value_) : value(value_) {}
+  logsoftmaxupdateGradInput_functor(float value_) : value(value_) {}
 
   __host__ __device__ float operator()(const float& output, const float& gradOutput) const
   {
@@ -154,7 +154,7 @@ struct logsoftmaxbackward_functor
   }
 };
 
-static int cunn_LogSoftMax_backward(lua_State *L)
+static int cunn_LogSoftMax_updateGradInput(lua_State *L)
 {
   THCudaTensor *gradOutput = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
   THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
@@ -171,7 +171,7 @@ static int cunn_LogSoftMax_backward(lua_State *L)
     dim3 blocks(1);
     dim3 threads(LOGSOFTMAX_THREADS);
 
-    cunn_LogSoftMax_backward_kernel<<<blocks,threads>>>(THCudaTensor_data(gradInput),
+    cunn_LogSoftMax_updateGradInput_kernel<<<blocks,threads>>>(THCudaTensor_data(gradInput),
                                                         THCudaTensor_data(output),
                                                         THCudaTensor_data(gradOutput),
                                                         1, gradInput->size[0]);
@@ -181,7 +181,7 @@ static int cunn_LogSoftMax_backward(lua_State *L)
     dim3 blocks(gradInput->size[0]);
     dim3 threads(LOGSOFTMAX_THREADS);
 
-    cunn_LogSoftMax_backward_kernel<<<blocks,threads>>>(THCudaTensor_data(gradInput),
+    cunn_LogSoftMax_updateGradInput_kernel<<<blocks,threads>>>(THCudaTensor_data(gradInput),
                                                         THCudaTensor_data(output),
                                                         THCudaTensor_data(gradOutput),
                                                         gradInput->size[0], gradInput->size[1]);
@@ -200,7 +200,7 @@ static int cunn_LogSoftMax_backward(lua_State *L)
 
 static const struct luaL_Reg cunn_LogSoftMax__ [] = {
   {"LogSoftMax_forward", cunn_LogSoftMax_forward},
-  {"LogSoftMax_backward", cunn_LogSoftMax_backward},
+  {"LogSoftMax_updateGradInput", cunn_LogSoftMax_updateGradInput},
   {NULL, NULL}
 };
 

@@ -46,11 +46,11 @@ static int cunn_MSECriterion_forward(lua_State *L)
 }
 
 
-struct mse_backward_functor
+struct mse_updateGradInput_functor
 {
   const float norm;
 
-  mse_backward_functor(float norm_) : norm(norm_) {}
+  mse_updateGradInput_functor(float norm_) : norm(norm_) {}
 
   __host__ __device__ float operator()(const float& x, const float& y) const
     {
@@ -58,7 +58,7 @@ struct mse_backward_functor
   }
 };
 
-static int cunn_MSECriterion_backward(lua_State *L)
+static int cunn_MSECriterion_updateGradInput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
   THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
@@ -77,7 +77,7 @@ static int cunn_MSECriterion_backward(lua_State *L)
   thrust::device_ptr<float> target_data(THCudaTensor_data(target));
   thrust::device_ptr<float> gradInput_data(THCudaTensor_data(gradInput));
 
-  thrust::transform(input_data, input_data+size, target_data, gradInput_data, mse_backward_functor(norm));
+  thrust::transform(input_data, input_data+size, target_data, gradInput_data, mse_updateGradInput_functor(norm));
 
   THCudaTensor_free(input);
   THCudaTensor_free(target);
@@ -86,7 +86,7 @@ static int cunn_MSECriterion_backward(lua_State *L)
 
 static const struct luaL_Reg cunn_MSECriterion__ [] = {
   {"MSECriterion_forward", cunn_MSECriterion_forward},
-  {"MSECriterion_backward", cunn_MSECriterion_backward},
+  {"MSECriterion_updateGradInput", cunn_MSECriterion_updateGradInput},
   {NULL, NULL}
 };
 
