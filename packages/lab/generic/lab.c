@@ -30,15 +30,12 @@ static int lab_(max_)(lua_State *L)
 static int lab_(max)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2)
+  if (n == 1 || ( n == 2 && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
     luaT_pushudata(L, THLongTensor_new(), torch_LongTensor_id);
     lua_insert(L, 2);
-  } else if (n != 4)
-  {
-    return luaL_error(L, "bad arguments: [values , indices, ] tensor [, dim]");
   }
   return lab_(max_)(L);
 }
@@ -60,15 +57,12 @@ static int lab_(min_)(lua_State *L)
 static int lab_(min)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2)
+  if (n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
     luaT_pushudata(L, THLongTensor_new(), torch_LongTensor_id);
     lua_insert(L, 2);
-  } else if (n != 4)
-  {
-    return luaL_error(L, "bad arguments: [values , indices, ] tensor [, dim]");
   }
   return lab_(min_)(L);
 }
@@ -88,14 +82,10 @@ static int lab_(sum_)(lua_State *L)
 static int lab_(sum)(lua_State *L)
 {  
   int n = lua_gettop(L);
-  if (n == 1 || n == 2)
+  if (n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 3)
-  {
-    return luaL_error(L, "bad arguments: [result, ] tensor, [, dim]");
   }
   return lab_(sum_)(L);
 }
@@ -115,14 +105,10 @@ static int lab_(prod_)(lua_State *L)
 static int lab_(prod)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2)
+  if (n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 3)
-  {
-    return luaL_error(L, "bad arguments: [result, ] tensor [, dim]");
   }
   return lab_(prod_)(L);
 }
@@ -142,14 +128,10 @@ static int lab_(cumsum_)(lua_State *L)
 static int lab_(cumsum)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2)
+  if (n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER)) 
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 3)
-  {
-    return luaL_error(L, "bad arguments: [result, ] tensor [, dim]");
   }
   return lab_(cumsum_)(L);
 }
@@ -169,14 +151,10 @@ static int lab_(cumprod_)(lua_State *L)
 static int lab_(cumprod)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2)
+  if (n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 3)
-  {
-    return luaL_error(L, "bad arguments: [result, ] tensor [, dim]");
   }
   return lab_(cumprod_)(L);
 }
@@ -208,14 +186,10 @@ static int lab_(cross_)(lua_State *L)
 static int lab_(cross)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2 || n == 3)
+  if (n == 2 || (n == 3 && lua_type(L,3) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 4)
-  {
-    return luaL_error(L, "bad arguments: [result, ] tensor, tensor [, dim]");
   }
   return lab_(cross_)(L);
 }
@@ -234,8 +208,11 @@ static int lab_(zeros_)(lua_State *L)
 
 static int lab_(zeros)(lua_State *L)
 {
-  luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-  lua_insert(L, 1);
+  if (lua_type(L,1) == LUA_TNUMBER)
+  {
+    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
+    lua_insert(L, 1);
+  }
   return lab_(zeros_)(L);
 }
 
@@ -253,8 +230,11 @@ static int lab_(ones_)(lua_State *L)
 
 static int lab_(ones)(lua_State *L)
 {
-  luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-  lua_insert(L, 1);
+  if (lua_type(L,1) == LUA_TNUMBER)
+  {
+    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
+    lua_insert(L, 1);
+  }
   return lab_(ones_)(L);
 }
 
@@ -273,14 +253,10 @@ static int lab_(diag_)(lua_State *L)
 static int lab_(diag)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2)
+  if (n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n > 3)
-  {
-    return luaL_error(L, "bad arguments: [result, ] tensor [, dim]");
   }
   return lab_(diag_)(L);
 }
@@ -300,14 +276,10 @@ static int lab_(eye_)(lua_State *L)
 static int lab_(eye)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2)
+  if (n == 1 || (n == 2 && lua_type(L,1) == LUA_TNUMBER && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 3 )
-  {
-    return luaL_error(L, "bad arguments: [result, ] m [, n]");
   }
   return lab_(eye_)(L);
 }
@@ -328,14 +300,10 @@ static int lab_(range_)(lua_State *L)
 static int lab_(range)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 2 || n == 3)
+  if (n == 2 || (n == 3 && lua_type(L,1) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 4 )
-  {
-    return luaL_error(L, "bad arguments: [result, ] min, max [, step]");
   }
   return lab_(range_)(L);
 }
@@ -382,8 +350,11 @@ static int lab_(reshape_)(lua_State *L)
 
 static int lab_(reshape)(lua_State *L)
 {
-  luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-  lua_insert(L, 1);
+  if (lua_type(L,2) == LUA_TNUMBER)
+  {
+    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
+    lua_insert(L, 1);
+  }
   return lab_(reshape_)(L);
 }
 
@@ -405,16 +376,12 @@ static int lab_(sort_)(lua_State *L)
 static int lab_(sort)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if ( n == 1 || n == 2 || n == 3)
+  if ( n == 1 || n == 2 || (n == 3 && lua_type(L,3) == LUA_TBOOLEAN))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
     luaT_pushudata(L, THLongTensor_new(), torch_LongTensor_id);
     lua_insert(L, 2);
-  }
-  else if (n != 5)
-  {
-    luaL_error(L, "bad arguments: [sorted, sortindex, ] tensor [, dim] [, order]");
   }
   return lab_(sort_)(L);
 }
@@ -434,14 +401,10 @@ static int lab_(tril_)(lua_State *L)
 static int lab_(tril)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if ( n == 1 || n == 2)
+  if ( n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 3)
-  {
-    luaL_error(L, "bad arguments: [tensor, ] tensor [, dim]");
   }
   return lab_(tril_)(L);
 }
@@ -461,14 +424,10 @@ static int lab_(triu_)(lua_State *L)
 static int lab_(triu)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if ( n == 1 || n == 2)
+  if ( n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 3)
-  {
-    luaL_error(L, "bad arguments: [tensor, ] tensor [, dim]");
   }
   return lab_(triu_)(L);
 }
@@ -489,14 +448,10 @@ static int lab_(cat_)(lua_State *L)
 static int lab_(cat)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if ( n == 2 || n == 3)
+  if ( n == 2 || (n == 3 && lua_type(L,3) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 4)
-  {
-    luaL_error(L, "bad arguments: [tensor, ] tensor, temsor [, dim]");
   }
   return lab_(cat_)(L);
 }
@@ -852,14 +807,10 @@ static int lab_(mean_)(lua_State *L)
 static int lab_(mean)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2)
+  if (n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 3)
-  {
-    luaL_error(L, "bad arguments: [tensor, ] tensor [, dim]");
   }
   return lab_(mean_)(L);
 }
@@ -880,14 +831,12 @@ static int lab_(std_)(lua_State *L)
 static int lab_(std)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2 || n == 3)
+  if (n == 1 || 
+      (n == 2 && lua_type(L,2) == LUA_TNUMBER) || 
+      (n == 3 && lua_type(L,2) == LUA_TNUMBER && lua_type(L,3) == LUA_TBOOLEAN))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 4)
-  {
-    luaL_error(L, "bad arguments: [tensor, ] tensor [, dim] [, flag]");
   }
   return lab_(std_)(L);
 }
@@ -908,14 +857,12 @@ static int lab_(var_)(lua_State *L)
 static int lab_(var)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 1 || n == 2 || n == 3)
+  if (n == 1 || 
+      (n == 2 && lua_type(L,2) == LUA_TNUMBER) || 
+      (n == 3 && lua_type(L,2) == LUA_TNUMBER && lua_type(L,3) == LUA_TBOOLEAN))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 4)
-  {
-    luaL_error(L, "bad arguments: [tensor, ] tensor [, dim] [, flag]");
   }
   return lab_(var_)(L);
 }
@@ -961,14 +908,10 @@ static int lab_(linspace_)(lua_State *L)
 static int lab_(linspace)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 2 || n == 3)
+  if (n == 2 || (n == 3 && lua_type(L,1) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 4)
-  {
-    luaL_error(L, "bad arguments: [tensor, ] a, b [, n]");
   }
   return lab_(linspace_)(L);
 }
@@ -989,14 +932,10 @@ static int lab_(logspace_)(lua_State *L)
 static int lab_(logspace)(lua_State *L)
 {
   int n = lua_gettop(L);
-  if (n == 2 || n == 3)
+  if (n == 2 || (n == 3 && lua_type(L,1) == LUA_TNUMBER))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
-  }
-  else if (n != 4)
-  {
-    luaL_error(L, "bad arguments: [tensor, ] a, b [, n]");
   }
   return lab_(logspace_)(L);
 }
@@ -1015,8 +954,11 @@ static int lab_(rand_)(lua_State *L)
 
 static int lab_(rand)(lua_State *L)
 {
-  luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-  lua_insert(L, 1);
+  if (lua_type(L,1) == LUA_TNUMBER)
+  {
+    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
+    lua_insert(L, 1);
+  }
   return lab_(rand_)(L);
 }
 
@@ -1034,8 +976,11 @@ static int lab_(randn_)(lua_State *L)
 
 static int lab_(randn)(lua_State *L)
 {
-  luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-  lua_insert(L, 1);
+  if (lua_type(L,1) == LUA_TNUMBER)
+  {
+    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
+    lua_insert(L, 1);
+  }
   return lab_(randn_)(L);
 }
 
@@ -1128,9 +1073,9 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"trace", lab_(trace)},
   //{"cross_", lab_(cross_)},
   {"cross", lab_(cross)},
-  //{"zeros_", lab_(zeros_)},
+  {"zeros_", lab_(zeros_)},
   {"zeros", lab_(zeros)},
-  //{"ones_", lab_(ones_)},
+  {"ones_", lab_(ones_)},
   {"ones", lab_(ones)},
   //{"diag_", lab_(diag_)},
   {"diag", lab_(diag)},
@@ -1149,7 +1094,7 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   //{"triu_", lab_(triu_)},
   {"triu", lab_(triu)},
   {"_histc", lab_(histc)},
-  {"cat_", lab_(cat_)},
+  //{"cat_", lab_(cat_)},
   {"cat", lab_(cat)},
   {"conv2", lab_(conv2)},
   {"xcorr2", lab_(xcorr2)},
