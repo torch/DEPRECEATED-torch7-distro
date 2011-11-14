@@ -792,6 +792,49 @@ static int lab_(xcorr3)(lua_State *L)
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 
+static int lab_(gesv)(lua_State *L)
+{
+  THTensor *a_ = luaT_checkudata(L,1,torch_(Tensor_id));
+  THTensor *b_ = luaT_checkudata(L,2,torch_(Tensor_id));
+  int n = lua_gettop(L);
+  if (n == 2 || (n == 3 && luaT_optboolean(L,3,1)))
+  {
+    // we want new stuff
+    THTensor *ta = THTensor_(newClone)(a_);
+    THTensor *tb = THTensor_(newClone)(b_);
+    THLab_(gesv)(ta,tb);
+    // clean ta
+    THTensor_(free)(ta);
+    // return tb
+    luaT_pushudata(L, tb, torch_(Tensor_id));
+    lua_insert(L,1);
+    lua_settop(L,1);
+  }
+  else if (n == 3)
+  {
+    // just run like this
+    THLab_(gesv)(a_,b_);
+    lua_settop(L,2);
+  }
+  else if (n == 4)
+  {
+    THTensor *ta = luaT_checkudata(L,3,torch_(Tensor_id));
+    THTensor *tb = luaT_checkudata(L,4,torch_(Tensor_id));
+    THTensor_(resizeAs)(b_,tb);
+    THTensor_(resizeAs)(a_,ta);
+    THTensor_(copy)(b_,tb);
+    THTensor_(copy)(a_,ta);
+    THLab_(gesv)(a_,b_);
+    // do not free anything, because user passed everything
+    lua_settop(L,2);
+  }
+  else
+  {
+    luaL_error(L, " bad arguments: [TA,TB,] a,b or a,b [,flag] ");
+  }
+  return 1;
+}
+
 static int lab_(mean_)(lua_State *L)
 {
   THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
@@ -1101,6 +1144,7 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"conv3", lab_(conv3)},
   {"xcorr3", lab_(xcorr3)},
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+  {"gesv", lab_(gesv)},
   //{"log_", lab_(log_)},
   {"log", lab_(log)},
   //{"log1p_", lab_(log1p_)},

@@ -12,3 +12,6 @@
 
 #include "generic/THLabConv.h"
 #include "THGenerateAllTypes.h"
+
+#include "generic/THLabLapack.h"
+#include "THGenerateFloatTypes.h"
