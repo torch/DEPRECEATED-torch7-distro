@@ -835,6 +835,126 @@ static int lab_(gesv)(lua_State *L)
   return 1;
 }
 
+static int lab_(gels)(lua_State *L)
+{
+  THTensor *a_ = luaT_checkudata(L,1,torch_(Tensor_id));
+  THTensor *b_ = luaT_checkudata(L,2,torch_(Tensor_id));
+  int n = lua_gettop(L);
+  if (n == 2 || (n == 3 && luaT_optboolean(L,3,1)))
+  {
+    // we want new stuff
+    THTensor *ta = THTensor_(newClone)(a_);
+    THTensor *tb = THTensor_(newClone)(b_);
+    THLab_(gels)(ta,tb);
+    // clean ta
+    THTensor_(free)(ta);
+    // return tb
+    luaT_pushudata(L, tb, torch_(Tensor_id));
+    lua_insert(L,1);
+    lua_settop(L,1);
+  }
+  else if (n == 3)
+  {
+    // just run like this
+    THLab_(gels)(a_,b_);
+    lua_settop(L,2);
+  }
+  else if (n == 4)
+  {
+    THTensor *ta = luaT_checkudata(L,3,torch_(Tensor_id));
+    THTensor *tb = luaT_checkudata(L,4,torch_(Tensor_id));
+    THTensor_(resizeAs)(b_,tb);
+    THTensor_(resizeAs)(a_,ta);
+    THTensor_(copy)(b_,tb);
+    THTensor_(copy)(a_,ta);
+    THLab_(gels)(a_,b_);
+    // do not free anything, because user passed everything
+    lua_settop(L,2);
+  }
+  else
+  {
+    luaL_error(L, " bad arguments: [TA,TB,] a,b or a,b [,flag] ");
+  }
+  return 1;
+}
+
+static int lab_(eig)(lua_State *L)
+{
+  THTensor *a_, *e_;
+
+  //e=(a), e,v=(a,'v'), e=(e,a), e,v=(e,v,a)
+  int n = lua_gettop(L);
+  if (n == 1)
+  {
+    THTensor *ta = luaT_checkudata(L,1,torch_(Tensor_id));
+    a_ = THTensor_(newClone)(ta);
+    e_ = THTensor_(new)();
+    luaT_pushudata(L, e_, torch_(Tensor_id));
+    lua_insert(L,1);
+    lua_settop(L,1);
+    THLab_(syev)(a_,e_,"N","U");
+    THTensor_(free)(a_);
+    return 1;
+  }
+  else if (n == 2 && lua_type(L,2) != LUA_TSTRING)//e=(e,a)
+  {
+    e_ = luaT_checkudata(L,1,torch_(Tensor_id));
+    THTensor *ta = luaT_checkudata(L,2,torch_(Tensor_id));
+    a_ = THTensor_(newClone)(ta);
+    lua_settop(L,1);
+    THLab_(syev)(a_,e_,"N","U");
+    THTensor_(free)(a_);
+    return 1;
+  }
+  else if (n == 2 && lua_type(L,2) == LUA_TSTRING)//e,v=(a,'v')
+  {
+    const char *type = luaL_checkstring(L,2);
+    luaL_argcheck(L, (type[0] == 'v' || type[0] == 'V' || type[0] == 'n' || type[0] == 'N'),
+		  2, "expected 'n' or 'v' for (eigenvals or vals+vectors)");
+    if (type[0] == 'v' || type[0] == 'V')
+    {
+      THTensor *ta = luaT_checkudata(L,1,torch_(Tensor_id));
+      a_ = THTensor_(newClone)(ta);
+      e_ = THTensor_(new)();
+      luaT_pushudata(L, e_, torch_(Tensor_id));
+      lua_insert(L,1);
+      luaT_pushudata(L, a_, torch_(Tensor_id));
+      lua_insert(L,2);
+      lua_settop(L,2);
+      THLab_(syev)(a_,e_,"V","U");
+      return 2;
+    }
+    else
+    {
+      THTensor *ta = luaT_checkudata(L,1,torch_(Tensor_id));
+      a_ = THTensor_(newClone)(ta);
+      e_ = THTensor_(new)();
+      luaT_pushudata(L, e_, torch_(Tensor_id));
+      lua_insert(L,1);
+      lua_settop(L,1);
+      THLab_(syev)(a_,e_,"N","U");
+      THTensor_(free)(a_);
+      return 1;
+    }
+  }
+  else if (n == 3)//e,v=(e,v,a)
+  {
+    e_ = luaT_checkudata(L,1,torch_(Tensor_id));
+    a_ = luaT_checkudata(L,2,torch_(Tensor_id));
+    THTensor *ta = luaT_checkudata(L,3,torch_(Tensor_id));
+    THTensor_(resizeAs)(a_,ta);
+    THTensor_(copy)(a_,ta);
+    lua_settop(L,2);
+    THLab_(syev)(a_,e_,"V","U");
+    return 2;
+  }
+  else
+  {
+    luaL_error(L, " bad arguments: [e,v,] a");
+  }
+  return 0;
+}
+
 static int lab_(mean_)(lua_State *L)
 {
   THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
@@ -1145,6 +1265,8 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"xcorr3", lab_(xcorr3)},
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
   {"gesv", lab_(gesv)},
+  {"gels", lab_(gels)},
+  {"eig", lab_(eig)},
   //{"log_", lab_(log_)},
   {"log", lab_(log)},
   //{"log1p_", lab_(log1p_)},
