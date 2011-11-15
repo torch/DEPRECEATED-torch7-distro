@@ -955,6 +955,64 @@ static int lab_(eig)(lua_State *L)
   return 0;
 }
 
+static int lab_(svd)(lua_State *L)
+{
+  THTensor *a_, *u_, *s_, *vt_;
+
+  //u,s,v=(a), u,s,v=(a,'A'), u,s,v=(a,'S') 
+  //u,s,v=(u,s,v,a), u,s,v=(u,s,v,a,'A'), u,s,v=(u,s,v,a,'S')
+  int n = lua_gettop(L);
+  char type = 'S';
+  if (lua_type(L,n) == LUA_TSTRING)
+  {
+    const char *tt = luaL_checkstring(L,2);
+    type = *tt;
+    //printf("type= %c\n",type);
+    luaL_argcheck(L, (type == 'a' || type == 'A' || type == 's' || type == 'S'),
+		  n, "expected 'a' or 's' for (All or Some)");
+    if (type == 'a') type = 'A';
+    if (type == 's') type = 'S';
+  }
+  //printf("type = %c\n",type);
+  if (n == 1 || n == 2)
+  {
+    THTensor *ta = luaT_checkudata(L,1,torch_(Tensor_id));
+    a_ = THTensor_(newClone)(ta);
+    u_ = THTensor_(new)();
+    luaT_pushudata(L, u_, torch_(Tensor_id));
+    lua_insert(L,1);
+    s_ = THTensor_(new)();
+    luaT_pushudata(L, s_, torch_(Tensor_id));
+    lua_insert(L,2);
+    vt_ = THTensor_(new)();
+    luaT_pushudata(L, vt_, torch_(Tensor_id));
+    lua_insert(L,3);
+    lua_settop(L,3);
+
+    THLab_(gesvd)(a_,s_,u_,vt_,type);
+    THTensor_(free)(a_);
+    return 3;
+  }
+  else if (n == 4 || n == 5)//u,s,v=(u,s,v,a)
+  {
+    u_ = luaT_checkudata(L,1,torch_(Tensor_id));
+    s_ = luaT_checkudata(L,2,torch_(Tensor_id));
+    vt_ = luaT_checkudata(L,3,torch_(Tensor_id));
+    THTensor *ta = luaT_checkudata(L,4,torch_(Tensor_id));
+    a_ = THTensor_(newClone)(ta);
+    lua_settop(L,3);
+
+    THLab_(gesvd)(a_,s_,u_,vt_,type);
+    THTensor_(free)(a_);
+    return 3;
+  }
+  else
+  {
+    luaL_error(L, " bad arguments: [u,s,v,] a ,[type]");
+  }
+  return 0;
+}
+
 static int lab_(mean_)(lua_State *L)
 {
   THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
@@ -1267,6 +1325,7 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"gesv", lab_(gesv)},
   {"gels", lab_(gels)},
   {"eig", lab_(eig)},
+  {"svd", lab_(svd)},
   //{"log_", lab_(log_)},
   {"log", lab_(log)},
   //{"log1p_", lab_(log1p_)},

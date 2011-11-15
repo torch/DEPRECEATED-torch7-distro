@@ -28,11 +28,22 @@ void THLapack_(gels)(char trans, int m, int n, int nrhs, real *a, int lda, real 
 void THLapack_(syev)(char jobz, char uplo, int n, real *a, int lda, real *w, real *work, int lwork, int *info)
 {
 #if defined(TH_REAL_IS_DOUBLE)
-  extern void dsyev_(char *jobz, char *uplo, int *n, real *a, int *lda, real *w, real *work, int *lwork, int *info);
+  extern void dsyev_(char *jobz, char *uplo, int *n, double *a, int *lda, double *w, double *work, int *lwork, int *info);
   dsyev_(&jobz, &uplo, &n, a, &lda, w, work, &lwork, info);
 #else
   extern void ssyev_(char *jobz, char *uplo, int *n, float *a, int *lda, float *w, float *work, int *lwork, int *info);
   ssyev_(&jobz, &uplo, &n, a, &lda, w, work, &lwork, info);
+#endif
+}
+
+void THLapack_(gesvd)(char jobu, char jobvt, int m, int n, real *a, int lda, real *s, real *u, int ldu, real *vt, int ldvt, real *work, int lwork, int *info)
+{
+#if defined(TH_REAL_IS_DOUBLE)
+  extern void dgesvd_(char *jobu, char *jobvt, int *m, int *n, double *a, int *lda, double *s, double *u, int *ldu, double *vt, int *ldvt, double *work, int *lwork, int *info);
+  dgesvd_( &jobu,  &jobvt,  &m,  &n,  a,  &lda,  s,  u,  &ldu,  vt,  &ldvt,  work,  &lwork,  info);
+#else
+  extern void sgesvd_(char *jobu, char *jobvt, int *m, int *n, float *a, int *lda, float *s, float *u, int *ldu, float *vt, int *ldvt, float *work, int *lwork, int *info);
+  sgesvd_( &jobu,  &jobvt,  &m,  &n,  a,  &lda,  s,  u,  &ldu,  vt,  &ldvt,  work,  &lwork,  info);
 #endif
 }
 
