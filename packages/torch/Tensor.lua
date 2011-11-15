@@ -63,6 +63,7 @@ end
 local function Storage__tostring(self)
    local strt = {'\n'}
    local format,scale = Storage__printformat(self)
+   if format:sub(2,4) == 'nan' then format = '%f' end
    if scale then
       table.insert(strt, string.format('%g', scale) .. ' *\n')
       for i = 1,self:size() do
@@ -88,6 +89,7 @@ rawset(torch.getmetatable('torch.DoubleStorage'), '__tostring__', Storage__tostr
 
 local function Tensor__printMatrix(self, indent)
    local format,scale,sz = Storage__printformat(self:storage())
+   if format:sub(2,4) == 'nan' then format = '%f' end
 --   print('format = ' .. format)
    scale = scale or 1
    indent = indent or ''
@@ -183,6 +185,7 @@ local function Tensor__tostring(self)
       local tensor = torch.DoubleTensor():resize(self:size()):copy(self)
       if tensor:nDimension() == 1 then
          local format,scale,sz = Storage__printformat(tensor:storage())
+	 if format:sub(2,4) == 'nan' then format = '%f' end
          if scale then
             table.insert(strt, string.format('%g', scale) .. ' *\n')
             for i = 1,tensor:size(1) do
