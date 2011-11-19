@@ -15,7 +15,7 @@ struct mse_functor
 };
 
 
-static int cunn_MSECriterion_forward(lua_State *L)
+static int cunn_MSECriterion_updateOutput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
   THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
@@ -86,7 +86,7 @@ static int cunn_MSECriterion_updateGradInput(lua_State *L)
 
 #define MSECRITERION_THREADS 128
 
-__global__ void cunn_MSECriterion_forward_kernel(float* output, float *input, float *target, int nframe, int dim, int sizeAverage)
+__global__ void cunn_MSECriterion_updateOutput_kernel(float* output, float *input, float *target, int nframe, int dim, int sizeAverage)
 {
   __shared__ float buffer[MSECRITERION_THREADS];
   int k = blockIdx.x;
@@ -137,7 +137,7 @@ __global__ void cunn_MSECriterion_updateGradInput_kernel(float *gradInput, float
     gradInput_k[i] = norm*(input_k[i] - target_k[i]);
 }
 
-static int cunn_MSECriterion_forward2(lua_State *L)
+static int cunn_MSECriterion_updateOutput2(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
   THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
@@ -152,7 +152,7 @@ static int cunn_MSECriterion_forward2(lua_State *L)
   dim3 blocks(1);
   dim3 threads(MSECRITERION_THREADS);
 
-  cunn_MSECriterion_forward_kernel<<<blocks,threads>>>(output->data,
+  cunn_MSECriterion_updateOutput_kernel<<<blocks,threads>>>(output->data,
 						       THCudaTensor_data(input), 
 						       THCudaTensor_data(target), 
 						       1, size,
@@ -209,9 +209,9 @@ static int cunn_MSECriterion_updateGradInput2(lua_State *L)
 
 
 static const struct luaL_Reg cunn_MSECriterion__ [] = {
-  {"MSECriterion_forward", cunn_MSECriterion_forward},
+  {"MSECriterion_updateOutput", cunn_MSECriterion_updateOutput},
   {"MSECriterion_updateGradInput", cunn_MSECriterion_updateGradInput},
-  {"MSECriterion_forward2", cunn_MSECriterion_forward2},
+  {"MSECriterion_updateOutput2", cunn_MSECriterion_updateOutput2},
   {"MSECriterion_updateGradInput2", cunn_MSECriterion_updateGradInput2},
   {NULL, NULL}
 };

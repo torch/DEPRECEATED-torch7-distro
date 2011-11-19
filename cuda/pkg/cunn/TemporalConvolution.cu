@@ -1,4 +1,4 @@
-static int cunn_TemporalConvolution_forward(lua_State *L)
+static int cunn_TemporalConvolution_updateOutput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);  
   int kW = luaT_getfieldcheckint(L, 1, "kW");
@@ -179,7 +179,7 @@ static int cunn_TemporalConvolution_accGradParameters(lua_State *L)
 }
 
 static const struct luaL_Reg cunn_TemporalConvolution__ [] = {
-  {"TemporalConvolution_forward", cunn_TemporalConvolution_forward},
+  {"TemporalConvolution_updateOutput", cunn_TemporalConvolution_updateOutput},
   {"TemporalConvolution_updateGradInput", cunn_TemporalConvolution_updateGradInput},
   {"TemporalConvolution_accGradParameters", cunn_TemporalConvolution_accGradParameters},
   {NULL, NULL}

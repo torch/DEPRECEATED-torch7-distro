@@ -1,6 +1,6 @@
 #define MULTIMARGIN_THREADS 128
 
-__global__ void cunn_MultiMarginCriterion_forward_kernel(float *output, float *input, float *target, int nframe, int dim, int sizeaverage)
+__global__ void cunn_MultiMarginCriterion_updateOutput_kernel(float *output, float *input, float *target, int nframe, int dim, int sizeaverage)
 {
   __shared__ float buffer[MULTIMARGIN_THREADS];
   int k = blockIdx.x;
@@ -82,7 +82,7 @@ __global__ void cunn_MultiMarginCriterion_updateGradInput_kernel(float *gradInpu
   }
 }
 
-static int cunn_MultiMarginCriterion_forward(lua_State *L)
+static int cunn_MultiMarginCriterion_updateOutput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
   int sizeaverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
@@ -99,7 +99,7 @@ static int cunn_MultiMarginCriterion_forward(lua_State *L)
 
     THCudaStorage_fill(target, target_);
 
-    cunn_MultiMarginCriterion_forward_kernel<<<blocks,threads>>>(output->data,
+    cunn_MultiMarginCriterion_updateOutput_kernel<<<blocks,threads>>>(output->data,
                                                                  THCudaTensor_data(input),
                                                                  target->data,
                                                                  1, input->size[0],
@@ -115,7 +115,7 @@ static int cunn_MultiMarginCriterion_forward(lua_State *L)
     THCudaTensor *output = THCudaTensor_newWithSize1d(input->size[0]);
     dim3 blocks(input->size[0]);
     dim3 threads(MULTIMARGIN_THREADS);
-    cunn_MultiMarginCriterion_forward_kernel<<<blocks,threads>>>(THCudaTensor_data(output),
+    cunn_MultiMarginCriterion_updateOutput_kernel<<<blocks,threads>>>(THCudaTensor_data(output),
                                                                  THCudaTensor_data(input),
                                                                  THCudaTensor_data(target),
                                                                  input->size[0], input->size[1],
@@ -186,7 +186,7 @@ static int cunn_MultiMarginCriterion_updateGradInput(lua_State *L)
 }
 
 static const struct luaL_Reg cunn_MultiMarginCriterion__ [] = {
-  {"MultiMarginCriterion_forward", cunn_MultiMarginCriterion_forward},
+  {"MultiMarginCriterion_updateOutput", cunn_MultiMarginCriterion_updateOutput},
   {"MultiMarginCriterion_updateGradInput", cunn_MultiMarginCriterion_updateGradInput},
   {NULL, NULL}
 };

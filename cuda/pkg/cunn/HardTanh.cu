@@ -1,4 +1,4 @@
-struct hardtanhforward_functor
+struct hardtanhupdateOutput_functor
 {
   __host__ __device__ float operator()(const float& input) const
   {
@@ -11,7 +11,7 @@ struct hardtanhforward_functor
   }
 };
 
-static int cunn_HardTanh_forward(lua_State *L)
+static int cunn_HardTanh_updateOutput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
   THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
@@ -23,7 +23,7 @@ static int cunn_HardTanh_forward(lua_State *L)
 
   thrust::device_ptr<float> output_data(THCudaTensor_data(output));
   thrust::device_ptr<float> input_data(THCudaTensor_data(input));
-  thrust::transform(input_data, input_data+size, output_data, hardtanhforward_functor());
+  thrust::transform(input_data, input_data+size, output_data, hardtanhupdateOutput_functor());
 
   THCudaTensor_free(input);
   return 1;
@@ -63,7 +63,7 @@ static int cunn_HardTanh_updateGradInput(lua_State *L)
 }
 
 static const struct luaL_Reg cunn_HardTanh__ [] = {
-  {"HardTanh_forward", cunn_HardTanh_forward},
+  {"HardTanh_updateOutput", cunn_HardTanh_updateOutput},
   {"HardTanh_updateGradInput", cunn_HardTanh_updateGradInput},
   {NULL, NULL}
 };

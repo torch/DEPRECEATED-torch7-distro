@@ -268,8 +268,8 @@ function cunntest.mse()
    local ctarget2 = torch.Tensor(size):copy(target)
    local cmod2 = nn.MSECriterion()
    a:reset()
-   local cout2 = cinput2.nn.MSECriterion_forward2(cmod,cinput2,ctarget2)
-   local cgin2 = cinput2.nn.MSECriterion_backward2(cmod,cinput2,ctarget2)
+   local cout2 = cinput2.nn.MSECriterion_updateOutput2(cmod,cinput2,ctarget2)
+   local cgin2 = cinput2.nn.MSECriterion_updateGradInput2(cmod,cinput2,ctarget2)
    tm2.gpu = a:time().real
 
    torch.setdefaulttensortype('torch.FloatTensor')

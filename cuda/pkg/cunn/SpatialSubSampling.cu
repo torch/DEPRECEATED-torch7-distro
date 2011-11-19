@@ -181,7 +181,7 @@ __global__ void subgradinput(float *gradInput, float *gradOutput, float *weight,
   }
 }
 
-static int cunn_SpatialSubSampling_forward(lua_State *L)
+static int cunn_SpatialSubSampling_updateOutput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor *)luaT_checkudata(L, 2, torch_CudaTensor_id);
   int kW = luaT_getfieldcheckint(L, 1, "kW");
@@ -235,7 +235,7 @@ static int cunn_SpatialSubSampling_forward(lua_State *L)
   // check for errors
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
-    printf("error in SpatialSubsampling.forward: %s\n", cudaGetErrorString(err));
+    printf("error in SpatialSubsampling.updateOutput: %s\n", cudaGetErrorString(err));
     THError("aborting");
   }
   return 1;
@@ -350,7 +350,7 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
 }
 
 static const struct luaL_Reg cunn_SpatialSubSampling__ [] = {
-  {"SpatialSubSampling_forward", cunn_SpatialSubSampling_forward},
+  {"SpatialSubSampling_updateOutput", cunn_SpatialSubSampling_updateOutput},
   {"SpatialSubSampling_updateGradInput", cunn_SpatialSubSampling_updateGradInput},
   {"SpatialSubSampling_accGradParameters", cunn_SpatialSubSampling_accGradParameters},
   {NULL, NULL}

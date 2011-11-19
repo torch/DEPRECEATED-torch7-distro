@@ -13,7 +13,7 @@ struct addvalue_functor
   }
 };
 
-__global__ void cunn_LogSoftMax_forward_kernel(float *output, float *input, int nframe, int dim)
+__global__ void cunn_LogSoftMax_updateOutput_kernel(float *output, float *input, int nframe, int dim)
 {
   __shared__ float buffer[LOGSOFTMAX_THREADS+1];
   int k = blockIdx.x;
@@ -110,7 +110,7 @@ __global__ void cunn_LogSoftMax_updateGradInput_kernel(float *gradInput, float *
     gradInput_k[i] = gradOutput_k[i] - __expf(output_k[i])*sum_k;
 }
 
-static int cunn_LogSoftMax_forward(lua_State *L)
+static int cunn_LogSoftMax_updateOutput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
   THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
@@ -123,13 +123,13 @@ static int cunn_LogSoftMax_forward(lua_State *L)
   {
     dim3 blocks(1);
     dim3 threads(LOGSOFTMAX_THREADS);
-    cunn_LogSoftMax_forward_kernel<<<blocks,threads>>>(THCudaTensor_data(output), THCudaTensor_data(input), 1, input->size[0]);
+    cunn_LogSoftMax_updateOutput_kernel<<<blocks,threads>>>(THCudaTensor_data(output), THCudaTensor_data(input), 1, input->size[0]);
   }
   else if(input->nDimension == 2)
   {
     dim3 blocks(input->size[0]);
     dim3 threads(LOGSOFTMAX_THREADS);
-    cunn_LogSoftMax_forward_kernel<<<blocks,threads>>>(THCudaTensor_data(output), THCudaTensor_data(input), input->size[0], input->size[1]);
+    cunn_LogSoftMax_updateOutput_kernel<<<blocks,threads>>>(THCudaTensor_data(output), THCudaTensor_data(input), input->size[0], input->size[1]);
   }
   else
     THError("vector or matrix expected");
@@ -199,7 +199,7 @@ static int cunn_LogSoftMax_updateGradInput(lua_State *L)
 }
 
 static const struct luaL_Reg cunn_LogSoftMax__ [] = {
-  {"LogSoftMax_forward", cunn_LogSoftMax_forward},
+  {"LogSoftMax_updateOutput", cunn_LogSoftMax_updateOutput},
   {"LogSoftMax_updateGradInput", cunn_LogSoftMax_updateGradInput},
   {NULL, NULL}
 };
