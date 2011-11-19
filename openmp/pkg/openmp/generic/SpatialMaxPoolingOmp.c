@@ -4,7 +4,7 @@
 
 #include "omp.h"
 
-static int nnOmp_(SpatialMaxPooling_forwardOmp)(lua_State *L)
+static int nnOmp_(SpatialMaxPooling_updateOutputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   int kW = luaT_getfieldcheckint(L, 1, "kW");
@@ -91,7 +91,7 @@ static int nnOmp_(SpatialMaxPooling_forwardOmp)(lua_State *L)
   return 1;
 }
 
-static int nnOmp_(SpatialMaxPooling_backwardOmp)(lua_State *L)
+static int nnOmp_(SpatialMaxPooling_updateGradInputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
@@ -148,8 +148,8 @@ static int nnOmp_(SpatialMaxPooling_backwardOmp)(lua_State *L)
 }
 
 static const struct luaL_Reg nnOmp_(SpatialMaxPooling__) [] = {
-  {"SpatialMaxPooling_forwardOmp", nnOmp_(SpatialMaxPooling_forwardOmp)},
-  {"SpatialMaxPooling_backwardOmp", nnOmp_(SpatialMaxPooling_backwardOmp)},
+  {"SpatialMaxPooling_updateOutputOmp", nnOmp_(SpatialMaxPooling_updateOutputOmp)},
+  {"SpatialMaxPooling_updateGradInputOmp", nnOmp_(SpatialMaxPooling_updateGradInputOmp)},
   {NULL, NULL}
 };
 

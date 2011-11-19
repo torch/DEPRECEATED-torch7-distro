@@ -4,7 +4,7 @@
 
 #include "omp.h"
 
-static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
+static int nnOmp_(SpatialConvolution_updateOutputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   int dW = luaT_getfieldcheckint(L, 1, "dW");
@@ -85,7 +85,7 @@ static int nnOmp_(SpatialConvolution_forwardOmp)(lua_State *L)
 }
 
 
-static int nnOmp_(SpatialConvolution_backwardOmp)(lua_State *L)
+static int nnOmp_(SpatialConvolution_updateGradInputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
@@ -186,8 +186,8 @@ static int nnOmp_(SpatialConvolution_accGradParametersOmp)(lua_State *L)
 }
 
 static const struct luaL_Reg nnOmp_(SpatialConvolutionstuff__) [] = {
-  {"SpatialConvolution_forwardOmp", nnOmp_(SpatialConvolution_forwardOmp)},
-  {"SpatialConvolution_backwardOmp", nnOmp_(SpatialConvolution_backwardOmp)},
+  {"SpatialConvolution_updateOutputOmp", nnOmp_(SpatialConvolution_updateOutputOmp)},
+  {"SpatialConvolution_updateGradInputOmp", nnOmp_(SpatialConvolution_updateGradInputOmp)},
   {"SpatialConvolution_accGradParametersOmp", nnOmp_(SpatialConvolution_accGradParametersOmp)},
   {NULL, NULL}
 };

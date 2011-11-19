@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/TanhOmp.c"
 #else
 
-static int nnOmp_(Tanh_forwardOmp)(lua_State *L)
+static int nnOmp_(Tanh_updateOutputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   setompnthread(L,1,"nThread");
@@ -35,7 +35,7 @@ static int nnOmp_(Tanh_forwardOmp)(lua_State *L)
   return 1;
 }
 
-static int nnOmp_(Tanh_backwardOmp)(lua_State *L)
+static int nnOmp_(Tanh_updateGradInputOmp)(lua_State *L)
 {
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
   setompnthread(L,1,"nThread");
@@ -78,8 +78,8 @@ static int nnOmp_(Tanh_backwardOmp)(lua_State *L)
 }
 
 static const struct luaL_Reg nnOmp_(Tanh__) [] = {
-  {"Tanh_forwardOmp", nnOmp_(Tanh_forwardOmp)},
-  {"Tanh_backwardOmp", nnOmp_(Tanh_backwardOmp)},
+  {"Tanh_updateOutputOmp", nnOmp_(Tanh_updateOutputOmp)},
+  {"Tanh_updateGradInputOmp", nnOmp_(Tanh_updateGradInputOmp)},
   {NULL, NULL}
 };
 

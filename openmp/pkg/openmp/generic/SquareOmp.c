@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SquareOmp.c"
 #else
 
-static int nnOmp_(Square_forwardOmp)(lua_State *L)
+static int nnOmp_(Square_updateOutputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   setompnthread(L,1,"nThread");
@@ -36,7 +36,7 @@ static int nnOmp_(Square_forwardOmp)(lua_State *L)
   return 1;
 }
 
-static int nnOmp_(Square_backwardOmp)(lua_State *L)
+static int nnOmp_(Square_updateGradInputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   setompnthread(L,1,"nThread");
@@ -77,8 +77,8 @@ static int nnOmp_(Square_backwardOmp)(lua_State *L)
 }
 
 static const struct luaL_Reg nnOmp_(Square__) [] = {
-  {"Square_forwardOmp", nnOmp_(Square_forwardOmp)},
-  {"Square_backwardOmp", nnOmp_(Square_backwardOmp)},
+  {"Square_updateOutputOmp", nnOmp_(Square_updateOutputOmp)},
+  {"Square_updateGradInputOmp", nnOmp_(Square_updateGradInputOmp)},
   {NULL, NULL}
 };
 

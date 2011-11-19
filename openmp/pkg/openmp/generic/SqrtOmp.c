@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/SqrtOmp.c"
 #else
 
-static int nnOmp_(Sqrt_forwardOmp)(lua_State *L)
+static int nnOmp_(Sqrt_updateOutputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   setompnthread(L,1,"nThread");
@@ -36,7 +36,7 @@ static int nnOmp_(Sqrt_forwardOmp)(lua_State *L)
   return 1;
 }
 
-static int nnOmp_(Sqrt_backwardOmp)(lua_State *L)
+static int nnOmp_(Sqrt_updateGradInputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   setompnthread(L,1,"nThread");
@@ -79,8 +79,8 @@ static int nnOmp_(Sqrt_backwardOmp)(lua_State *L)
 }
 
 static const struct luaL_Reg nnOmp_(Sqrt__) [] = {
-  {"Sqrt_forwardOmp", nnOmp_(Sqrt_forwardOmp)},
-  {"Sqrt_backwardOmp", nnOmp_(Sqrt_backwardOmp)},
+  {"Sqrt_updateOutputOmp", nnOmp_(Sqrt_updateOutputOmp)},
+  {"Sqrt_updateGradInputOmp", nnOmp_(Sqrt_updateGradInputOmp)},
   {NULL, NULL}
 };
 
