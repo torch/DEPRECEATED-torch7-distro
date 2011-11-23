@@ -208,7 +208,7 @@ static int lab_(zeros_)(lua_State *L)
 
 static int lab_(zeros)(lua_State *L)
 {
-  if (lua_type(L,1) == LUA_TNUMBER)
+  if (lua_type(L,1) == LUA_TNUMBER || ( lua_gettop(L) == 1 && luaT_isudata(L,1, torch_LongStorage_id)))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
@@ -230,7 +230,7 @@ static int lab_(ones_)(lua_State *L)
 
 static int lab_(ones)(lua_State *L)
 {
-  if (lua_type(L,1) == LUA_TNUMBER)
+  if (lua_type(L,1) == LUA_TNUMBER || ( lua_gettop(L) == 1 && luaT_isudata(L,1, torch_LongStorage_id)))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
@@ -1175,7 +1175,7 @@ static int lab_(rand_)(lua_State *L)
 
 static int lab_(rand)(lua_State *L)
 {
-  if (lua_type(L,1) == LUA_TNUMBER)
+  if (lua_type(L,1) == LUA_TNUMBER || ( lua_gettop(L) == 1 && luaT_isudata(L,1, torch_LongStorage_id)))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
@@ -1197,7 +1197,7 @@ static int lab_(randn_)(lua_State *L)
 
 static int lab_(randn)(lua_State *L)
 {
-  if (lua_type(L,1) == LUA_TNUMBER)
+  if (lua_type(L,1) == LUA_TNUMBER || ( lua_gettop(L) == 1 && luaT_isudata(L,1, torch_LongStorage_id)))
   {
     luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
     lua_insert(L, 1);
