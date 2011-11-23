@@ -40,7 +40,7 @@ function WeightedEuclidean:reset(stdv)
    self.diagCov:fill(1)
 end
 
-function WeightedEuclidean:forward(input)
+function WeightedEuclidean:updateOutput(input)
    self.output:zero()
    for o = 1,self.templates:size(2) do
       self.temp:copy(input):add(-1,self.templates:select(2,o))
@@ -51,7 +51,7 @@ function WeightedEuclidean:forward(input)
    return self.output
 end
 
-function WeightedEuclidean:backward(input, gradOutput)
+function WeightedEuclidean:updateGradInput(input, gradOutput)
    self:forward(input)
    self.gradInput:zero()
    for o = 1,self.templates:size(2) do
