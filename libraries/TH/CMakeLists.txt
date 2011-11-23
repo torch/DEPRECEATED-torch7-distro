@@ -68,6 +68,7 @@ INSTALL(FILES
           THLogAdd.h
           THRandom.h
           THStorage.h
+          THLapack.h
           THTensorMacros.h
           THTensor.h
           THTensorApply.h
@@ -88,6 +89,8 @@ INSTALL(FILES
           generic/THLab.h
           generic/THLabConv.h
           generic/THStorage.h
+          generic/THLapack.h
+          generic/THLabLapack.h
           generic/THTensor.h
           generic/THTensorMath.h
           generic/THTensorRandom.h
