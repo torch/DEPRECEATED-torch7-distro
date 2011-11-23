@@ -276,10 +276,12 @@ static const struct luaL_Reg lab_stuff__ [] = {
   {"conv3", lab_conv3},
   {"xcorr3", lab_xcorr3},
 
+#ifdef __LAPACK__
   {"svd",  lab_svd},
   {"eig",  lab_eig},
   {"gels", lab_gels},
   {"gesv", lab_gesv},
+#endif
   //{"log_", lab_log_},
   {"log", lab_log},
   //{"log1p_", lab_log1p_},

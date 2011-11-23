@@ -2,7 +2,11 @@
 #define TH_INC
 
 #include "THBlas.h"
+
+#ifdef __LAPACK__
 #include "THLapack.h"
+#endif
+
 #include "THVector.h"
 #include "THGeneral.h"
 #include "THLogAdd.h"

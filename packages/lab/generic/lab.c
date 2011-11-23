@@ -1322,10 +1322,12 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"conv3", lab_(conv3)},
   {"xcorr3", lab_(xcorr3)},
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
+#ifdef __LAPACK__
   {"gesv", lab_(gesv)},
   {"gels", lab_(gels)},
   {"eig", lab_(eig)},
   {"svd", lab_(svd)},
+#endif
   //{"log_", lab_(log_)},
   {"log", lab_(log)},
   //{"log1p_", lab_(log1p_)},
