@@ -32,6 +32,7 @@ function Reshape:updateOutput(input)
 end
 
 function Reshape:updateGradInput(input, gradOutput)
+   gradOutput = gradOutput:contiguous()
    self.gradInput:set(gradOutput):resizeAs(input)
    return self.gradInput
 end
