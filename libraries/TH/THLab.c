@@ -9,3 +9,6 @@
 
 #include "generic/THLabConv.c"
 #include "THGenerateAllTypes.h"
+
+#include "generic/THLabLapack.c"
+#include "THGenerateFloatTypes.h"

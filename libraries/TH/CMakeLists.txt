@@ -4,9 +4,9 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 SET(hdr 
   THGeneral.h THStorage.h THTensor.h THTensorApply.h 
-  THBlas.h THTensorMath.h THLogAdd.h THRandom.h THVector.h)
+  THBlas.h THLapack.h THTensorMath.h THLogAdd.h THRandom.h THVector.h)
 SET(src 
-  THGeneral.c THStorage.c THTensor.c THBlas.c
+  THGeneral.c THStorage.c THTensor.c THBlas.c THLapack.c
   THTensorMath.c THLogAdd.c THRandom.c
   THTensorRandom.c
   THLab.c
@@ -26,6 +26,7 @@ ENDIF(UNIX)
 ADD_LIBRARY(TH SHARED ${src})
 
 FIND_PACKAGE(BLAS)
+FIND_PACKAGE(LAPACK)
 
 FIND_PACKAGE(SSE)
 

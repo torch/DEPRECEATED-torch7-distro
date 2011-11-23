@@ -10,6 +10,7 @@
 #  LAPACK_LIBRARIES - list of libraries (using full path name) for LAPACK
 
 SET(LAPACK_LIBRARIES)
+SET(LAPACK_INFO)
 
 IF(LAPACK_FIND_QUIETLY OR NOT LAPACK_FIND_REQUIRED)
   FIND_PACKAGE(BLAS)
@@ -93,6 +94,9 @@ if(BLAS_FOUND)
       "acml"
       "${BLAS_LIBRARIES}"
       )
+    if(LAPACK_LIBRARIES)
+      SET(LAPACK_INFO "acml")
+    endif(LAPACK_LIBRARIES)
   endif(NOT LAPACK_LIBRARIES)
 
   # Apple LAPACK library?
@@ -105,6 +109,9 @@ if(BLAS_FOUND)
       "Accelerate"
       "${BLAS_LIBRARIES}"
       )
+    if(LAPACK_LIBRARIES)
+      SET(LAPACK_INFO "Accelerate")
+    endif(LAPACK_LIBRARIES)
   endif(NOT LAPACK_LIBRARIES)
 
   if ( NOT LAPACK_LIBRARIES )
@@ -116,6 +123,9 @@ if(BLAS_FOUND)
       "vecLib"
       "${BLAS_LIBRARIES}"
       )
+    if(LAPACK_LIBRARIES)
+      SET(LAPACK_INFO "veclib")
+    endif(LAPACK_LIBRARIES)
   endif ( NOT LAPACK_LIBRARIES )
 
   # Generic LAPACK library?
@@ -128,6 +138,9 @@ if(BLAS_FOUND)
       "lapack"
       "${BLAS_LIBRARIES}"
       )
+    if(LAPACK_LIBRARIES)
+      SET(LAPACK_INFO "generic")
+    endif(LAPACK_LIBRARIES)
   endif ( NOT LAPACK_LIBRARIES )
 
 else(BLAS_FOUND)
@@ -145,7 +158,7 @@ IF (NOT LAPACK_FOUND AND LAPACK_FIND_REQUIRED)
 ENDIF (NOT LAPACK_FOUND AND LAPACK_FIND_REQUIRED)
 IF(NOT LAPACK_FIND_QUIETLY)
   IF(LAPACK_FOUND)
-    MESSAGE(STATUS "Found a library with LAPACK API.")
+    MESSAGE(STATUS "Found a library with LAPACK API. (${LAPACK_INFO})")
   ELSE(LAPACK_FOUND)
     MESSAGE(STATUS "Cannot find a library with LAPACK API. Not using LAPACK.")
   ENDIF(LAPACK_FOUND)
