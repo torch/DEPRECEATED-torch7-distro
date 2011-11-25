@@ -1,0 +1,19 @@
+#!/bin/bash
+
+PREFIX=@Torch_INSTALL_BIN@
+
+IMPORTF="function import(package) require(package) for k,v in pairs(_G[package]) do if not _G[k] then _G[k] = v end end end"
+IMPORT_TORCH="import 'torch'"
+IMPORT_LAB="import 'lab'"
+PROMPT="_PROMPT='torch> ' _PROMPT2=' ... > '"
+
+INIT="$PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB"
+
+if [ -f $PREFIX/qlua ]; 
+then 
+    echo Try the IDE: torch -ide; 
+    $PREFIX/qlua -e "$INIT" -i $*;
+else 
+    echo Install Qt4 and rebuild Torch7 for graphics capability
+    $PREFIX/lua -e "$INIT" -i $*;
+fi
