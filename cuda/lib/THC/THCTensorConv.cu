@@ -1,5 +1,6 @@
 #include "THCTensorConv.h"
 #include "THCGeneral.h"
+#include <stdio.h>
 
 /*
  * Description:
@@ -46,15 +47,15 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
   int yy_end = output_h;
   int yy_step = blockDim.y*gridDim.y;
 
-  int oo_start = blockIdx.x;
+  int oo_start = blockIdx.x;// + blockIdx.z * gridDim.x;
   int oo_end = oo_start+1;
 
-  int ii_start = 0;
-  int ii_end = input_n;
+  int ii_start = 0;//blockIdx.z * input_n;
+  int ii_end = input_n;//ii_start + input_n;
 
   // nb threads, unique thread id
-  int tid = blockDim.x * threadIdx.y + threadIdx.x;
-  int nthreads = blockDim.x * blockDim.y;
+  int tid = blockDim.x*blockDim.y*threadIdx.z + blockDim.x * threadIdx.y + threadIdx.x;
+  int nthreads = blockDim.x * blockDim.y * blockDim.z;
 
   // iterators
   int oo, ii, xx, yy, kx, ky, kk;
@@ -79,8 +80,8 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
           for(yy = yy_start; yy < yy_end; yy+=yy_step) {
             for(xx = xx_start; xx < xx_end; xx+=xx_step) {
               // Dot product in two dimensions... (between input image and the mask)
-              float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
-              float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
+              float *input_p = input + (ii+blockIdx.z*input_n)*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
+              float *output_p = output + (oo+blockIdx.z*gridDim.x)*output_h*output_w + yy*output_w + xx;
               float *kernel_p = shared_kernel + ii * kernel_w * kernel_h + koffset;
               float sum = 0;
               if (swapkernel) {
@@ -114,8 +115,8 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
           for(yy = yy_start; yy < yy_end; yy+=yy_step) {
             for(xx = xx_start; xx < xx_end; xx+=xx_step) {
               // Dot product in two dimensions... (between input image and the mask)
-              float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
-              float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
+              float *input_p = input + (ii+blockIdx.z*input_n)*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
+              float *output_p = output + (oo+blockIdx.z*gridDim.x)*output_h*output_w + yy*output_w + xx;
               float *kernel_p = shared_kernel + ii * kernel_w * kernel_h + koffset;
               float sum = 0;
               if (swapkernel) {
@@ -150,8 +151,8 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
         for(yy = yy_start; yy < yy_end; yy+=yy_step) {
           for(xx = xx_start; xx < xx_end; xx+=xx_step) {
             // Dot product in two dimensions... (between input image and the mask)
-            float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
-            float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
+            float *input_p = input + (ii+blockIdx.z*input_n)*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
+            float *output_p = output + (oo+blockIdx.z*gridDim.x)*output_h*output_w + yy*output_w + xx;
             float *kernel_p = kernel + (oo * input_n + ii) * kernel_w * kernel_h + koffset;
             float sum = 0;
             if (swapkernel) {
@@ -250,6 +251,7 @@ __global__ void conv2genericrev(float *input, float *kernel, float *output,
     }
   }
 }
+
 
 /*
  * API-compatible with THRealTensor_conv2Dmv
@@ -482,6 +484,242 @@ TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
     printf("error in conv2Dmv: %s\n", cudaGetErrorString(err));
+    THError("aborting");
+  }
+}
+
+/*
+ * API-compatible with THRealTensor_conv2Dmm
+ * 4D input, 4D kernel, 4D output
+ * matrix vector product like: y <- Ax + beta*y
+ */
+TH_API void THCudaTensor_conv2Dmm(THCudaTensor *output, float beta, THCudaTensor *input,
+                                  THCudaTensor *kernel, long srow, long scol, const char *type)
+{
+  long nbatch, nInputPlane, nInputRows, nInputCols;
+  long nKernelRows, nKernelCols;
+  long nOutputPlane, nOutputRows, nOutputCols;
+
+  THArgCheck(kernel->nDimension == 4 , 4, "kernel: 4D Tensor expected");
+  THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
+  THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
+  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
+  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
+
+  input = THCudaTensor_newContiguous(input);
+  kernel = THCudaTensor_newContiguous(kernel);
+
+  nbatch      = input->size[0];
+  nInputPlane = input->size[1];
+  nInputRows  = input->size[2];
+  nInputCols  = input->size[3];
+
+  nKernelRows  = kernel->size[2];
+  nKernelCols  = kernel->size[3];
+  nOutputPlane = kernel->size[0];
+  THArgCheck(kernel->size[1] == nInputPlane, 2, "invalid number of input planes");
+
+  THArgCheck( (nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2,
+              "conv2Dmm : Input image is smaller than kernel");
+
+  if (*type == 'f') {
+    // output dims
+    nOutputRows = (nInputRows - 1) * srow + nKernelRows;
+    nOutputCols = (nInputCols - 1) * scol + nKernelCols;
+
+    // use temp buffer
+    static THCudaTensor *inputP;
+    static int firstcall = 1;
+    if (firstcall) {
+      inputP = THCudaTensor_new();
+      firstcall = 0;
+    }
+
+    // create a zero-padded input
+    long nInputRowsPadded = (nOutputRows - 1) * srow + nKernelRows;
+    long nInputColsPadded = (nOutputCols - 1) * scol + nKernelCols;
+    THCudaTensor_resize4d(inputP, nbatch, nInputPlane, nInputRowsPadded, nInputColsPadded);
+    THCudaTensor_zero(inputP);
+
+    THCudaTensor *centered = THCudaTensor_new();
+    THCudaTensor_narrow(centered, inputP, 2, nKernelCols-1, nInputCols);
+    THCudaTensor_narrow(centered, NULL, 1, nKernelRows-1, nInputRows);
+    THCudaTensor_copy(centered, input);
+    THCudaTensor_free(centered);
+
+    // remap input to newly created tensor
+    THCudaTensor_free(input);
+    input = inputP;
+    nInputRows = nInputRowsPadded;
+    nInputCols = nInputColsPadded;
+
+  } else { // 'v'
+    // output dims
+    nOutputRows = (nInputRows - nKernelRows) / srow + 1;
+    nOutputCols = (nInputCols - nKernelCols) / scol + 1;
+  }
+
+  long nelem = THCudaTensor_nElement(output);
+  THCudaTensor_resize4d(output, nbatch, nOutputPlane, nOutputRows, nOutputCols);
+
+  if (beta == 0 || nelem != THCudaTensor_nElement(output)) {
+    THCudaTensor_zero(output);
+  } else if (beta != 1) {
+    THCudaTensor_mul(output, beta);
+  }
+
+  float *input_data = THCudaTensor_data(input);
+  float *weight_data = THCudaTensor_data(kernel);
+  float *output_data = THCudaTensor_data(output);
+
+  // cuda blocks & threads:
+  int yblocks = floor(16 / nOutputPlane);
+  yblocks = yblocks < 1 ? 1 : yblocks;
+  dim3 blocks(nOutputPlane,yblocks,nbatch);
+  dim3 threads(32,8);
+
+  // sync any previous kernel exec
+  cudaDeviceSynchronize();
+
+  // convolution: xcorr2 or conv2
+  if (type[1] == 'x') {
+    if ((nKernelCols == 3) && (nKernelRows == 3))
+      conv2generic <false, 3, 3> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							     nInputPlane, nInputRows, nInputCols,
+							     nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							     srow, scol);
+    else if ((nKernelCols == 5) && (nKernelRows == 5))
+      conv2generic <false, 5, 5> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							     nInputPlane, nInputRows, nInputCols,
+							     nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							     srow, scol);
+    else if ((nKernelCols == 7) && (nKernelRows == 7))
+      conv2generic <false, 7, 7> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							     nInputPlane, nInputRows, nInputCols,
+							     nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							     srow, scol);
+    else if ((nKernelCols == 9) && (nKernelRows == 9))
+      conv2generic <false, 9, 9> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							     nInputPlane, nInputRows, nInputCols,
+							     nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							     srow, scol);
+    else if ((nKernelCols == 11) && (nKernelRows == 11))
+      conv2generic <false, 11, 11> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							       nInputPlane, nInputRows, nInputCols,
+							       nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							       srow, scol);
+    else if ((nKernelCols == 13) && (nKernelRows == 13))
+      conv2generic <false, 13, 13> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							       nInputPlane, nInputRows, nInputCols,
+							       nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							       srow, scol);
+    else if ((nKernelCols == 4) && (nKernelRows == 4))
+      conv2generic <false, 4, 4> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							     nInputPlane, nInputRows, nInputCols,
+							     nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							     srow, scol);
+    else if ((nKernelCols == 6) && (nKernelRows == 6))
+      conv2generic <false, 6, 6> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							     nInputPlane, nInputRows, nInputCols,
+							     nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							     srow, scol);
+    else if ((nKernelCols == 8) && (nKernelRows == 8))
+      conv2generic <false, 8, 8> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							     nInputPlane, nInputRows, nInputCols,
+							     nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							     srow, scol);
+    else if ((nKernelCols == 10) && (nKernelRows == 10))
+      conv2generic <false, 10, 10> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							       nInputPlane, nInputRows, nInputCols,
+							       nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							       srow, scol);
+    else if ((nKernelCols == 12) && (nKernelRows == 12))
+      conv2generic <false, 12, 12> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							       nInputPlane, nInputRows, nInputCols,
+							       nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							       srow, scol);
+    else
+      conv2generic <false, 0 , 0> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							      nInputPlane, nInputRows, nInputCols,
+							      nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							      srow, scol);
+  } else { // 'c'
+    if ((nKernelCols == 3) && (nKernelRows == 3))
+      conv2generic <true, 3, 3> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							    nInputPlane, nInputRows, nInputCols,
+							    nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							    srow, scol);
+    else if ((nKernelCols == 5) && (nKernelRows == 5))
+      conv2generic <true, 5, 5> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							    nInputPlane, nInputRows, nInputCols,
+							    nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							    srow, scol);
+    else if ((nKernelCols == 7) && (nKernelRows == 7))
+      conv2generic <true, 7, 7> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							    nInputPlane, nInputRows, nInputCols,
+							    nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							    srow, scol);
+    else if ((nKernelCols == 9) && (nKernelRows == 9))
+      conv2generic <true, 9, 9> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							    nInputPlane, nInputRows, nInputCols,
+							    nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							    srow, scol);
+    else if ((nKernelCols == 11) && (nKernelRows == 11))
+      conv2generic <true, 11, 11> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							      nInputPlane, nInputRows, nInputCols,
+							      nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							      srow, scol);
+    else if ((nKernelCols == 13) && (nKernelRows == 13))
+      conv2generic <true, 13, 13> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							      nInputPlane, nInputRows, nInputCols,
+							      nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							      srow, scol);
+    else if ((nKernelCols == 2) && (nKernelRows == 2))
+      conv2generic <true, 2, 2> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							    nInputPlane, nInputRows, nInputCols,
+							    nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							    srow, scol);
+    else if ((nKernelCols == 4) && (nKernelRows == 4))
+      conv2generic <true, 4, 4> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							    nInputPlane, nInputRows, nInputCols,
+							    nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							    srow, scol);
+    else if ((nKernelCols == 6) && (nKernelRows == 6))
+      conv2generic <true, 6, 6> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							    nInputPlane, nInputRows, nInputCols,
+							    nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							    srow, scol);
+    else if ((nKernelCols == 8) && (nKernelRows == 8))
+      conv2generic <true, 8, 8> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							    nInputPlane, nInputRows, nInputCols,
+							    nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							    srow, scol);
+    else if ((nKernelCols == 10) && (nKernelRows == 10))
+      conv2generic <true, 10, 10> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							      nInputPlane, nInputRows, nInputCols,
+							      nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							      srow, scol);
+    else if ((nKernelCols == 12) && (nKernelRows == 12))
+      conv2generic <true, 12, 12> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							      nInputPlane, nInputRows, nInputCols,
+							      nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							      srow, scol);
+    else
+      conv2generic <true, 0 , 0> <<<blocks, threads>>> (input_data, weight_data, output_data,
+							     nInputPlane, nInputRows, nInputCols,
+							     nOutputPlane*nInputPlane, nKernelRows, nKernelCols,
+							     srow, scol);
+  }
+
+  // sync & clean
+  cudaDeviceSynchronize();
+  if (*type != 'f') THCudaTensor_free(input);
+  THCudaTensor_free(kernel);
+
+  // check for errors
+  cudaError_t err = cudaGetLastError();
+  if (err != cudaSuccess) {
+    printf("error in conv2Dmm: %s\n", cudaGetErrorString(err));
     THError("aborting");
   }
 }

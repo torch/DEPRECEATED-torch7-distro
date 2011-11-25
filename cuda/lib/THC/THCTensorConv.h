@@ -5,6 +5,8 @@
 
 TH_API void THCudaTensor_conv2Dmv(THCudaTensor *output, float beta, THCudaTensor *input,
                                   THCudaTensor *kernel, long srow, long scol, const char *type);
+TH_API void THCudaTensor_conv2Dmm(THCudaTensor *output, float beta, THCudaTensor *input,
+                                  THCudaTensor *kernel, long srow, long scol, const char *type);
 
 TH_API void THCudaTensor_conv2Dger(THCudaTensor *output, float beta, THCudaTensor *input, 
                                    THCudaTensor *kernel, long srow, long scol, const char *type);

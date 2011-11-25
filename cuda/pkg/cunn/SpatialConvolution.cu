@@ -9,30 +9,61 @@ static int cunn_SpatialConvolution_updateOutput(lua_State *L)
   THCudaTensor *bias = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "bias", torch_CudaTensor_id);
   THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
 
-  luaL_argcheck(L, input->nDimension == 3, 2, "3D tensor expected");
+  luaL_argcheck(L, input->nDimension == 3 || input->nDimension == 4, 2, "3D or 4D (batch mode) tensor is expected");
+
+  int dimw = 2;
+  int dimh = 1;
+  if (input->nDimension == 4)
+  {
+    dimw++;
+    dimh++;
+  }
 
   long nOutputPlane = weight->size[0];
   long kW           = weight->size[3];
   long kH           = weight->size[2];
-  long inputWidth   = input->size[2];
-  long inputHeight  = input->size[1];
+  long inputWidth   = input->size[dimw];
+  long inputHeight  = input->size[dimh];
   long outputWidth  = (inputWidth - kW) / dW + 1;
   long outputHeight = (inputHeight - kH) / dH + 1;
 
-  THCudaTensor_resize3d(output, nOutputPlane, outputHeight, outputWidth);
+  if (input->nDimension == 3)
+  {
+    THCudaTensor_resize3d(output, nOutputPlane, outputHeight, outputWidth);
 
-  /* add bias first */
-  long k;
-  THCudaTensor *outputPlane = THCudaTensor_new();
-  for(k=0; k<nOutputPlane; k++) {
-    THCudaTensor_select(outputPlane, output, 0, k);
-    THCudaTensor_fill(outputPlane, THCudaTensor_get1d(bias, k));
+    /* add bias first */
+    long k;
+    THCudaTensor *outputPlane = THCudaTensor_new();
+    for(k=0; k<nOutputPlane; k++) {
+      THCudaTensor_select(outputPlane, output, 0, k);
+      THCudaTensor_fill(outputPlane, THCudaTensor_get1d(bias, k));
+    }
+    THCudaTensor_free(outputPlane);
+
+    /* do convolutions */
+    THCudaTensor_conv2Dmv(output, 1.0, input, weight, dH, dW, "vx");
   }
-  THCudaTensor_free(outputPlane);
+  else
+  {
+    THCudaTensor_resize4d(output, input->size[0],nOutputPlane, outputHeight, outputWidth);
 
-  /* do convolutions */
-  THCudaTensor_conv2Dmv(output, 1.0, input, weight, dH, dW, "vx");
+    /* add bias first */
+    long k,p;
+    THCudaTensor *outputPlane = THCudaTensor_new();
+    THCudaTensor *outputBatch = THCudaTensor_new();
+    for(p=0; p<input->size[0]; p++) {
+      THCudaTensor_select(outputBatch, output, 0, p);
+      for(k=0; k<nOutputPlane; k++) {
+	THCudaTensor_select(outputPlane, outputBatch, 0, k);
+	THCudaTensor_fill(outputPlane, THCudaTensor_get1d(bias, k));
+      }
+    }
+    THCudaTensor_free(outputPlane);
+    THCudaTensor_free(outputBatch);
 
+    /* do convolutions */
+    THCudaTensor_conv2Dmm(output, 1.0, input, weight, dH, dW, "vx");
+  }
   return 1;
 }
 
