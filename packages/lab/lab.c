@@ -68,28 +68,29 @@ static int lab_toc(lua_State* L)
 #define LUAT_DYNT_FUNCTION_WRAPPER(PKG, FUNC)                           \
   static int PKG##_##FUNC(lua_State *L)                                 \
   {                                                                     \
-    if(luaT_getmetaclass(L, 1))                                         \
+    if(!luaT_getmetaclass(L, 1))                                        \
     {                                                                   \
-      lua_pushstring(L, #PKG);                                          \
+      const void *id = lab_default_tensor_id;                           \
+      luaT_pushmetaclass(L, id);                                        \
+    }                                                                   \
+                                                                        \
+    lua_pushstring(L, #PKG);                                            \
+    lua_rawget(L, -2);                                                  \
+    if(lua_istable(L, -1))                                              \
+    {                                                                   \
+      lua_pushstring(L, #FUNC);                                         \
       lua_rawget(L, -2);                                                \
-      if(lua_istable(L, -1))                                            \
+      if(lua_isfunction(L, -1))                                         \
       {                                                                 \
-        lua_pushstring(L, #FUNC);                                       \
-        lua_rawget(L, -2);                                              \
-        if(lua_isfunction(L, -1))                                       \
-        {                                                               \
-          lua_insert(L, 1);                                             \
-          lua_pop(L, 2); /* the two tables we put on the stack above */ \
-          lua_call(L, lua_gettop(L)-1, LUA_MULTRET);                    \
-        }                                                               \
-        else                                                            \
-          return luaL_error(L, "%s does not implement the " #PKG "." #FUNC "() function", luaT_typename(L, 1)); \
+        lua_insert(L, 1);                                               \
+        lua_pop(L, 2); /* the two tables we put on the stack above */   \
+        lua_call(L, lua_gettop(L)-1, LUA_MULTRET);                      \
       }                                                                 \
       else                                                              \
-        return luaL_error(L, "%s does not implement " #PKG " functions", luaT_typename(L, 1)); \
+        return luaL_error(L, "%s does not implement the " #PKG "." #FUNC "() function", luaT_typename(L, 1)); \
     }                                                                   \
     else                                                                \
-      return luaL_error(L, "first argument is not a torch object");     \
+      return luaL_error(L, "%s does not implement " #PKG " functions", luaT_typename(L, 1)); \
                                                                         \
     return lua_gettop(L);                                               \
   }

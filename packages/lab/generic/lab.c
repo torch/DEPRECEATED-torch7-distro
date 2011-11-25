@@ -1222,6 +1222,13 @@ static int lab_(randn)(lua_State *L)
     int n = lua_gettop(L);				      \
     if(n == 1)						      \
     {							      \
+      if (lua_isnumber(L, 1))                                 \
+        {                                                     \
+          real in = lua_tonumber(L, 1);                       \
+          real out = NAME(in);                                \
+          lua_pushnumber(L, out);                             \
+          return 1;                                           \
+        }                                                     \
       luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id)); \
       lua_insert(L, 1);					      \
     }							      \
