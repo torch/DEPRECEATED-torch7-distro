@@ -7,10 +7,10 @@ PREFIX=@Torch_INSTALL_BIN@
 # this function is a python-like loader, it requires a module,
 # and then imports all its symbols globally
 IMPORTF="\
-function import(package) \
+function import(package, forced) \
    require(package) \
    for k,v in pairs(_G[package]) do \
-      if not _G[k] then \
+      if not _G[k] or forced then \
          _G[k] = v \
       end \
    end \
@@ -20,6 +20,7 @@ end \
 # by default, import torch+lab globally
 IMPORT_TORCH="import 'torch'"
 IMPORT_LAB="import 'lab'"
+IMPORT_PLOT="import('plot',true)"
 
 # nicer prompt (self-promotion) + copyright
 PROMPT="_PROMPT='torch> ' _PROMPT2=' ... > '"
@@ -117,7 +118,7 @@ end \
 "
 
 # concat all symbols defined above
-INIT="$COPYRIGHT $PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB $PRINT $WHO"
+INIT="$COPYRIGHT $PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB $IMPORT_PLOT $PRINT $WHO"
 
 # try to run qlua, and default to lua if not available
 # all the functions defined above are executed before
