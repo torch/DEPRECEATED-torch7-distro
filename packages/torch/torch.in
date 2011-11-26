@@ -1,17 +1,127 @@
 #!/bin/bash
 
+# install prefix
 PREFIX=@Torch_INSTALL_BIN@
 
-IMPORTF="function import(package) require(package) for k,v in pairs(_G[package]) do if not _G[k] then _G[k] = v end end end"
+# import:
+# this function is a python-like loader, it requires a module,
+# and then imports all its symbols globally
+IMPORTF="\
+function import(package) \
+   require(package) \
+   for k,v in pairs(_G[package]) do \
+      if not _G[k] then \
+         _G[k] = v \
+      end \
+   end \
+end \
+"
+
+# by default, import torch+lab globally
 IMPORT_TORCH="import 'torch'"
 IMPORT_LAB="import 'lab'"
 
+# nicer prompt (self-promotion) + copyright
 PROMPT="_PROMPT='torch> ' _PROMPT2=' ... > '"
-
 COPYRIGHT="print 'Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU'"
 
-INIT="$COPYRIGHT $PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB"
+# who:
+# a simple function that prints all the symbols defined by the user
+# very much like Matlab's who function
+WHO="\
+function who() \
+   local m = 0 \
+   for k,v in pairs(_G) do \
+      if k:len() > m then \
+         m = k:len() \
+       end \
+   end \
+   local p = _G._preloaded_ \
+   for k,v in pairs(_G) do \
+      if not package.loaded[k] and not p[k] then \
+         io.write(k) \
+         for i = 1,m-k:len()+4 do \
+            io.write(' ') \
+         end \
+         local tp = type(_G[k]) \
+         if tp == 'userdata' then \
+            tp = torch.typename(_G[k]) \
+         end \
+         print('[' .. tp .. ']') \
+      end \
+   end \
+end \
+\
+_G._preloaded_ = {} \
+for k,v in pairs(_G) do \
+   _G._preloaded_[k] = true \
+end \
+"
 
+# print:
+# a smarter print for Lua, the default Lua print is quite terse
+# this new print is much more verbose, automatically recursing through
+# lua tables, and objects.
+PRINT="\
+function print(obj,...) \
+   if _G.type(obj) == 'table' then \
+      local mt = _G.getmetatable(obj) \
+      if mt and mt.__tostring__ then \
+         _G.io.write(mt.__tostring__(obj)) \
+      else \
+         local tos = _G.tostring(obj) \
+         local obj_w_usage = false \
+         if tos and not _G.string.find(tos,'table: ') then \
+            if obj.usage and _G.type(obj.usage) == 'string' then \
+               _G.io.write(obj.usage) \
+               _G.io.write('\n\nFIELDS:\n') \
+               obj_w_usage = true \
+            else \
+               _G.io.write(tos .. ':\n') \
+            end \
+         end \
+         _G.io.write('{') \
+         local tab = '' \
+         local idx = 1 \
+         for k,v in pairs(obj) do \
+            if idx > 1 then _G.io.write(',\n') end \
+            if _G.type(v) == 'userdata' then \
+               _G.io.write(tab .. '[' .. k .. ']' .. ' = <userdata>') \
+            else \
+               local tostr = _G.tostring(v):gsub('\n','\\n') \
+               if #tostr>40 then \
+                  local tostrshort = tostr:sub(1,40) .. _G.sys.COLORS.none \
+                  _G.io.write(tab .. '[' .. _G.tostring(k) .. ']' .. ' = ' .. tostrshort .. ' ... ') \
+               else \
+                  _G.io.write(tab .. '[' .. _G.tostring(k) .. ']' .. ' = ' .. tostr) \
+               end \
+            end \
+            tab = ' ' \
+            idx = idx + 1 \
+         end \
+         _G.io.write('}') \
+         if obj_w_usage then \
+            _G.io.write('') \
+         end \
+      end \
+   else \
+      _G.io.write(_G.tostring(obj)) \
+   end \
+   if _G.select('#',...) > 0 then \
+      _G.io.write('    ') \
+      print(...) \
+   else \
+      _G.io.write('\n') \
+   end \
+end \
+"
+
+# concat all symbols defined above
+INIT="$COPYRIGHT $PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB $PRINT $WHO"
+
+# try to run qlua, and default to lua if not available
+# all the functions defined above are executed before
+# returning to a user prompt
 if [ -f $PREFIX/qlua ]; 
 then 
     if [ $DISPLAY ];
