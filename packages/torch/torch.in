@@ -34,49 +34,54 @@ function who() \
    local m = 0 \
    local p = _G._preloaded_ \
    for k,v in pairs(_G) do \
-      if not p[k] then \
-         if k:len() > m then \
-            m = k:len() \
-         end \
+      if k:len() > m then \
+         m = k:len() \
       end \
    end \
-   for k,v in pairs(_G) do \
-      if not p[k] then \
-         io.write(k) \
-         for i = 1,m-k:len()+4 do \
-            io.write(' ') \
-         end \
-         local tp = type(_G[k]) \
-         if tp == 'userdata' then \
-            tp = torch.typename(_G[k]) \
-            if tp:find('torch.*Tensor') then \
-               tp = tp .. ' - size: ' \
-               if _G[k]:dim() > 0 then \
-                  for i = 1,_G[k]:dim() do \
-                     tp = tp .. _G[k]:size(i) \
-                     if i ~= _G[k]:dim() then \
-                        tp = tp .. 'x' \
+   local function printsymb(sys) \
+      for k,v in pairs(_G) do \
+         if (sys and p[k]) or (not sys and not p[k]) then \
+            io.write(k) \
+            for i = 1,m-k:len()+4 do \
+               io.write(' ') \
+            end \
+            local tp = type(_G[k]) \
+            if tp == 'userdata' then \
+               tp = torch.typename(_G[k]) \
+               if tp:find('torch.*Tensor') then \
+                  tp = tp .. ' - size: ' \
+                  if _G[k]:dim() > 0 then \
+                     for i = 1,_G[k]:dim() do \
+                        tp = tp .. _G[k]:size(i) \
+                        if i ~= _G[k]:dim() then \
+                           tp = tp .. 'x' \
+                        end \
                      end \
+                  else \
+                     tp = tp .. '0' \
                   end \
-               else \
-                  tp = tp .. '0' \
                end \
+               if tp:find('torch.*Storage') then \
+                  tp = tp .. ' - size: ' .. _G[k]:size() \
+               end \
+            elseif tp == 'table' then \
+               tp = tp .. ' - size: ' .. #_G[k] \
+            elseif tp == 'string' then \
+               local tostr = _G[k]:gsub('\n','\\n') \
+               if #tostr>40 then \
+                  tostr = tostr:sub(1,40) \
+               end \
+               tp = tp .. ' = \"' .. tostr .. '\"' \
             end \
-            if tp:find('torch.*Storage') then \
-               tp = tp .. ' - size: ' .. _G[k]:size() \
-            end \
-         elseif tp == 'table' then \
-            tp = tp .. ' - size: ' .. #_G[k] \
-         elseif tp == 'string' then \
-            local tostr = _G[k]:gsub('\n','\\n') \
-            if #tostr>40 then \
-               tostr = tostr:sub(1,40) \
-            end \
-            tp = tp .. ' = \"' .. tostr .. '\"' \
+            print('[' .. tp .. ']') \
          end \
-         print('[' .. tp .. ']') \
       end \
    end \
+   print('== System Variables ==') \
+   printsymb(true) \
+   print('== User Variables ==') \
+   printsymb(false) \
+   print('==') \
 end \
 \
 _G._preloaded_ = {} \
