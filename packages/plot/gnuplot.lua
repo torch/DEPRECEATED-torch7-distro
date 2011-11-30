@@ -86,7 +86,7 @@ local function findgnuplotexe()
 	       end
 	    end
 	    _gptable.hasrefresh = false
-	    print('Some functionality like adding title, labels, ... will be disabled install version 4.4')
+	    print('Some functionality like adding title, labels, ... will be disabled install gnuplot version 4.4')
 	 end
 	 return s
       else
@@ -126,7 +126,7 @@ function gnuplot.setgnuplotexe(exe)
       if v < 4 then error('gnuplot version 4 is required') end
       if vv < 4 then 
 	 _gptable.hasrefresh = false
-	 print('Some functionality like adding title, labels, ... will be disabled install version 4.4')
+	 print('Some functionality like adding title, labels, ... will be disabled install gnuplot version 4.4')
       else
 	 _gptable.hasrefresh = true
       end
