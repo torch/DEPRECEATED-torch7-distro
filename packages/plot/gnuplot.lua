@@ -5,6 +5,7 @@ local _gptable = {}
 _gptable.current = nil
 _gptable.term = nil
 _gptable.exe = nil
+_gptable.hasrefresh = true
 
 local function getexec()
    if not _gptable.exe then
@@ -52,6 +53,16 @@ local function gnuplothasterm(term)
    return false
 end
 
+local function findgnuplotversion(exe)
+   ff = io.popen(exe .. '  --version','r')
+   local ss = ff:read('*l')
+   ff:close()
+   local v,vv = ss:match('(%d).(%d)')
+   v=tonumber(v)
+   vv=tonumber(vv)
+   return v,vv
+end
+
 local function findgnuplotexe()
    local os = findos()
    if os == 'windows' then
@@ -61,6 +72,22 @@ local function findgnuplotexe()
       local s=ff:read('*l')
       ff:close()
       if s and s:len() > 0 and s:match('gnuplot') then
+	 local v,vv = findgnuplotversion(s)
+	 if  v < 4 then
+	    error('gnuplot version 4 is required')
+	 end
+	 if vv < 4 then
+	    -- try to find gnuplot44
+	    if os == 'linux' and paths.filep('/usr/bin/gnuplot44') then
+	       local ss = '/usr/bin/gnuplot44'
+	       v,vv = findgnuplotversion(ss)
+	       if v == 4 and vv == 4 then
+		  return ss
+	       end
+	    end
+	    _gptable.hasrefresh = false
+	    print('Some functionality like adding title, labels, ... will be disabled install version 4.4')
+	 end
 	 return s
       else
 	 return nil
@@ -92,9 +119,32 @@ local function findgnuplot()
 end
 
 function gnuplot.setgnuplotexe(exe)
+   local oldexe = _gptable.exe
    if paths.filep(exe) then
       _gptable.exe = exe
-      print('You have manually set the gnuplot exe, run gnuplot.setgnuplotterminal("terminal-name") to set term type')
+      local v,vv = findgnuplotversion(exe)
+      if v < 4 then error('gnuplot version 4 is required') end
+      if vv < 4 then 
+	 _gptable.hasrefresh = false
+	 print('Some functionality like adding title, labels, ... will be disabled install version 4.4')
+      else
+	 _gptable.hasrefresh = true
+      end
+
+      local os = findos()
+      if os == 'windows' and gnuplothasterm('windows') then
+	 _gptable.term = 'windows'
+      elseif os == 'linux' and gnuplothasterm('wxt') then
+	 _gptable.term = 'wxt'
+      elseif os == 'linux' and gnuplothasterm('x11') then
+	 _gptable.term = 'x11'
+      elseif os == 'mac' and gnuplothasterm('aqua') then
+	 _gptable.term = 'aqua'
+      elseif os == 'mac' and gnuplothasterm('x11') then
+	 _gptable.term = 'x11'
+      else
+	 print('You have manually set the gnuplot exe and I can not find default terminals, run gnuplot.setgnuplotterminal("terminal-name") to set term type')
+      end
    else
       error(exe .. ' does not exist')
    end
@@ -117,7 +167,7 @@ end
 
 local function writeToCurrent(str)
    local _gp = getCurrentPlot()
-   _gp:writeString(str .. '\n')
+   _gp:writeString(str .. '\n\n\n')
    _gp:synchronize()
 end
 
@@ -463,21 +513,37 @@ local function gnuimagesc(x,palette)
 end
 
 function gnuplot.xlabel(label)
+   if not _gptable.hasrefresh then
+      print('gnuplot.xlabel disabled')
+      return
+   end
    local _gp = getCurrentPlot()
    writeToCurrent('set xlabel "' .. label .. '"')
    writeToCurrent('refresh')
 end
 function gnuplot.ylabel(label)
+   if not _gptable.hasrefresh then
+      print('gnuplot.ylabel disabled')
+      return
+   end
    local _gp = getCurrentPlot()
    writeToCurrent('set ylabel "' .. label .. '"')
    writeToCurrent('refresh')
 end
 function gnuplot.title(label)
+   if not _gptable.hasrefresh then
+      print('gnuplot.title disabled')
+      return
+   end
    local _gp = getCurrentPlot()
    writeToCurrent('set title "' .. label .. '"')
    writeToCurrent('refresh')
 end
 function gnuplot.grid(toggle)
+   if not _gptable.hasrefresh then
+      print('gnuplot.grid disabled')
+      return
+   end
    local _gp = getCurrentPlot()
    if toggle then
       writeToCurrent('set grid')
@@ -488,6 +554,10 @@ function gnuplot.grid(toggle)
    end
 end
 function gnuplot.movelegend(hloc,vloc)
+   if not _gptable.hasrefresh then
+      print('gnuplot.movelegend disabled')
+      return
+   end
    if hloc ~= 'left' and hloc ~= 'right' and hloc ~= 'center' then
       error('horizontal location is unknown : plot.movelegend expects 2 strings as location {left|right|center}{bottom|top|middle}')
    end
