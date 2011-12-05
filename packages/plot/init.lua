@@ -1,6 +1,7 @@
 require 'torch'
 require 'lab'
 
-plot = {}
-
+gnuplot = {}
 torch.include('plot','gnuplot.lua')
+
+plot = gnuplot

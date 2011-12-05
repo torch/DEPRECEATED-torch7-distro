@@ -234,3 +234,7 @@ function torch.load(filename, mode)
    file:close()
    return object
 end
+
+-- public API (saveobj/loadobj are safe for global import)
+torch.saveobj = torch.save
+torch.loadobj = torch.load
