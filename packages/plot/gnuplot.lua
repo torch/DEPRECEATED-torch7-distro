@@ -68,6 +68,7 @@ local function findgnuplotexe()
    if os == 'windows' then
       return 'gnuplot.exe' -- I don't know how to find executables in Windows
    else
+      _gptable.hasrefresh = true
       local ff = io.popen('which gnuplot','r')
       local s=ff:read('*l')
       ff:close()
