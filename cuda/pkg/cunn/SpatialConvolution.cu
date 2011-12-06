@@ -75,18 +75,32 @@ static int cunn_SpatialConvolution_updateGradInput(lua_State *L)
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
 
-  luaL_argcheck(L, dW == 1, 1, "dW must be 1 (this will be fixed soon)");
-  luaL_argcheck(L, dH == 1, 1, "dH must be 1 (this will be fixed soon)");
+  luaL_argcheck(L, dW == 1, 1, "dW must be 1 (this is only a limit for CudaTensors)");
+  luaL_argcheck(L, dH == 1, 1, "dH must be 1 (this is only a limit for CudaTensors)");
 
   THCudaTensor *weight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
   THCudaTensor *gradInput = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
 
-  THArgCheck(nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane");
+  if (input->nDimension == 3)
+  {
+    /* check dims */
+    THArgCheck(nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane");
 
-  /* gradient to input */
-  THCudaTensor *tweight = THCudaTensor_newTranspose(weight,0,1);
-  THCudaTensor_conv2Dmv(gradInput, 0.0, gradOutput, tweight, dH, dW, "fc");
-  THCudaTensor_free(tweight);
+    /* gradient to input */
+    THCudaTensor *tweight = THCudaTensor_newTranspose(weight,0,1);
+    THCudaTensor_conv2Dmv(gradInput, 0.0, gradOutput, tweight, dH, dW, "fc");
+    THCudaTensor_free(tweight);
+  }
+  else 
+  {
+    /* check dims */
+    THArgCheck(nOutputPlane == gradOutput->size[1], 1, "Number of output features is not equal to nOutputPlane");
+
+    /* gradient to input */
+    THCudaTensor *tweight = THCudaTensor_newTranspose(weight,0,1);
+    THCudaTensor_conv2Dmm(gradInput, 0.0, gradOutput, tweight, dH, dW, "fc");
+    THCudaTensor_free(tweight);    
+  }
 
   return 1;
 }
@@ -133,19 +147,40 @@ static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
   THCudaTensor *gradWeight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradWeight", torch_CudaTensor_id);
   THCudaTensor *gradBias = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradBias", torch_CudaTensor_id);
 
-  THArgCheck(nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane");
-
   float *gradBias_data = THCudaTensor_data(gradBias);
   float *gradOutput_data = THCudaTensor_data(gradOutput);
 
-  /* gradient to bias */
-  dim3 blocks(nOutputPlane);
-  dim3 threads(32);
-  compute_gradBias <<<blocks, threads>>> (gradBias_data, gradOutput_data, scale,
-                                          gradOutput->size[0], gradOutput->size[1], gradOutput->size[2]);
+  if (input->nDimension == 3)
+  {
+    /* check dims */
+    THArgCheck(nOutputPlane == gradOutput->size[0], 1, "Number of output features is not equal to nOutputPlane");
 
-  /* gradient to kernels */
-  THCudaTensor_conv2DRevger(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
+    /* gradient to bias */
+    dim3 blocks(nOutputPlane);
+    dim3 threads(32);
+    compute_gradBias <<<blocks, threads>>> (gradBias_data, gradOutput_data, scale,
+                                            gradOutput->size[0], gradOutput->size[1], gradOutput->size[2]);
+
+    /* gradient to kernels */
+    THCudaTensor_conv2DRevger(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
+  }
+  else
+  {
+    /* check dims */
+    THArgCheck(nOutputPlane == gradOutput->size[1], 1, "Number of output features is not equal to nOutputPlane");
+
+    /* gradient to bias */
+    dim3 blocks(nOutputPlane);
+    dim3 threads(32);
+    long sl;
+    for (sl=0; sl<gradOutput->size[0]; sl++) {
+      compute_gradBias <<<blocks, threads>>> (gradBias_data, gradOutput_data + sl*gradOutput->stride[0], scale,
+                                              gradOutput->size[1], gradOutput->size[2], gradOutput->size[3]);
+    }
+
+    /* gradient to kernels */
+    THCudaTensor_conv2DRevgerm(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
+  }
 
   return 0;
 }

@@ -38,6 +38,9 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
   // xcorr or conv
   int koffset = swapkernel ? kernel_w*kernel_h-1 : 0;
 
+  // nb outputs
+  int output_n = kernel_n / input_n;
+
   // generate offsets according to block/thread ids
   int xx_start = threadIdx.x;
   int xx_end = output_w;
@@ -47,11 +50,11 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
   int yy_end = output_h;
   int yy_step = blockDim.y*gridDim.y;
 
-  int oo_start = blockIdx.x;// + blockIdx.z * gridDim.x;
+  int oo_start = blockIdx.x;
   int oo_end = oo_start+1;
 
-  int ii_start = 0;//blockIdx.z * input_n;
-  int ii_end = input_n;//ii_start + input_n;
+  int ii_start = (blockIdx.x / output_n) * input_n;
+  int ii_end = ii_start + input_n;
 
   // nb threads, unique thread id
   int tid = blockDim.x*blockDim.y*threadIdx.z + blockDim.x * threadIdx.y + threadIdx.x;
@@ -68,7 +71,7 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
 
     // first thread of each block does the copy
     for (kk = tid; kk < kernel_w*kernel_h*input_n; kk += nthreads) {
-      shared_kernel[kk] = kernel[input_n*kernel_w*kernel_h*blockIdx.x + kk];
+      shared_kernel[kk] = kernel[input_n*kernel_w*kernel_h*(oo_start % output_n) + kk];
     }
     __syncthreads();
 
@@ -80,9 +83,9 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
           for(yy = yy_start; yy < yy_end; yy+=yy_step) {
             for(xx = xx_start; xx < xx_end; xx+=xx_step) {
               // Dot product in two dimensions... (between input image and the mask)
-              float *input_p = input + (ii+blockIdx.z*input_n)*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
-              float *output_p = output + (oo+blockIdx.z*gridDim.x)*output_h*output_w + yy*output_w + xx;
-              float *kernel_p = shared_kernel + ii * kernel_w * kernel_h + koffset;
+              float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
+              float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
+              float *kernel_p = shared_kernel + (ii % input_n)*kernel_w*kernel_h + koffset;
               float sum = 0;
               if (swapkernel) {
 #pragma unroll
@@ -115,9 +118,9 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
           for(yy = yy_start; yy < yy_end; yy+=yy_step) {
             for(xx = xx_start; xx < xx_end; xx+=xx_step) {
               // Dot product in two dimensions... (between input image and the mask)
-              float *input_p = input + (ii+blockIdx.z*input_n)*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
-              float *output_p = output + (oo+blockIdx.z*gridDim.x)*output_h*output_w + yy*output_w + xx;
-              float *kernel_p = shared_kernel + ii * kernel_w * kernel_h + koffset;
+              float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
+              float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
+              float *kernel_p = shared_kernel + (ii % input_n) * kernel_w * kernel_h + koffset;
               float sum = 0;
               if (swapkernel) {
                 for(ky = 0; ky < kernel_h; ky++) {
@@ -151,9 +154,9 @@ template <bool swapkernel, int T_kernel_h, int T_kernel_w>
         for(yy = yy_start; yy < yy_end; yy+=yy_step) {
           for(xx = xx_start; xx < xx_end; xx+=xx_step) {
             // Dot product in two dimensions... (between input image and the mask)
-            float *input_p = input + (ii+blockIdx.z*input_n)*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
-            float *output_p = output + (oo+blockIdx.z*gridDim.x)*output_h*output_w + yy*output_w + xx;
-            float *kernel_p = kernel + (oo * input_n + ii) * kernel_w * kernel_h + koffset;
+            float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
+            float *output_p = output + oo*output_h*output_w + yy*output_w + xx;
+            float *kernel_p = kernel + ((oo % output_n) * input_n + (ii % input_n))*kernel_w*kernel_h + koffset;
             float sum = 0;
             if (swapkernel) {
               for(ky = 0; ky < kernel_h; ky++) {
@@ -542,8 +545,8 @@ TH_API void THCudaTensor_conv2Dmm(THCudaTensor *output, float beta, THCudaTensor
     THCudaTensor_zero(inputP);
 
     THCudaTensor *centered = THCudaTensor_new();
-    THCudaTensor_narrow(centered, inputP, 2, nKernelCols-1, nInputCols);
-    THCudaTensor_narrow(centered, NULL, 1, nKernelRows-1, nInputRows);
+    THCudaTensor_narrow(centered, inputP, 3, nKernelCols-1, nInputCols);
+    THCudaTensor_narrow(centered, NULL, 2, nKernelRows-1, nInputRows);
     THCudaTensor_copy(centered, input);
     THCudaTensor_free(centered);
 
@@ -575,7 +578,7 @@ TH_API void THCudaTensor_conv2Dmm(THCudaTensor *output, float beta, THCudaTensor
   // cuda blocks & threads:
   int yblocks = floor(16 / nOutputPlane);
   yblocks = yblocks < 1 ? 1 : yblocks;
-  dim3 blocks(nOutputPlane,yblocks,nbatch);
+  dim3 blocks(nOutputPlane*nbatch,yblocks);
   dim3 threads(32,8);
 
   // sync any previous kernel exec
@@ -719,7 +722,15 @@ TH_API void THCudaTensor_conv2Dmm(THCudaTensor *output, float beta, THCudaTensor
   // check for errors
   cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
+    cudaDeviceProp deviceProp;
+    cudaGetDeviceProperties(&deviceProp, 0);
     printf("error in conv2Dmm: %s\n", cudaGetErrorString(err));
+    printf("requested grid size: %dx%dx%d, max allowed: %dx%dx%d\n",
+           blocks.x, blocks.y, blocks.z,
+           deviceProp.maxGridSize[0], deviceProp.maxGridSize[1], deviceProp.maxGridSize[2]);
+    printf("requested block size: %dx%dx%d, max allowed: %dx%dx%d\n",
+           threads.x, threads.y, threads.z,
+           deviceProp.maxThreadsDim[0], deviceProp.maxThreadsDim[1], deviceProp.maxThreadsDim[2]);
     THError("aborting");
   }
 }
@@ -787,6 +798,87 @@ TH_API void THCudaTensor_conv2DRevger(THCudaTensor *output, float beta, float al
                                          nInputPlane, nInputRows, nInputCols,
                                          nKernelPlane, nKernelRows, nKernelCols,
                                          alpha, srow, scol);
+
+  // sync & clean
+  cudaDeviceSynchronize();
+  THCudaTensor_free(input);
+  THCudaTensor_free(kernel);
+
+  // check for errors
+  cudaError_t err = cudaGetLastError();
+  if (err != cudaSuccess) {
+    printf("error in conv2DRevger: %s\n", cudaGetErrorString(err));
+    THError("aborting");
+  }
+}
+
+/*
+ * API-compatible with THRealTensor_conv2DRevgerm
+ * 4D input, 4D kernel, 4D output
+ * conv2DRevgerm is doing the same thing as conv2DRevger, but with batch inputs
+ */
+TH_API void THCudaTensor_conv2DRevgerm(THCudaTensor *output, float beta, float alpha,
+                                       THCudaTensor *input, THCudaTensor *kernel,
+                                       long srow, long scol)
+{
+  long nInputPlane, nInputRows, nInputCols;
+  long nKernelPlane, nKernelRows, nKernelCols;
+  long nOutputRows, nOutputCols;
+  long nbatch;
+
+  THArgCheck(input->nDimension == 4 , 3, "input: 3D Tensor expected");
+  THArgCheck(kernel->nDimension == 4 , 4, "kernel: 3D Tensor expected");
+  THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
+  THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
+
+  input = THCudaTensor_newContiguous(input);
+  kernel = THCudaTensor_newContiguous(kernel);
+
+  nbatch      = input->size[0];
+  nInputPlane = input->size[1];
+  nInputRows  = input->size[2];
+  nInputCols  = input->size[3];
+
+  nKernelPlane = kernel->size[1];
+  nKernelRows = kernel->size[2];
+  nKernelCols = kernel->size[3];
+
+  THArgCheck(nInputRows >= nKernelRows && nInputCols >= nKernelCols , 2,
+             "conv2DRevger : Input image is smaller than kernel");
+
+  nOutputRows = nInputRows - (nKernelRows - 1) * srow;
+  nOutputCols = nInputCols - (nKernelCols - 1) * scol;
+
+  long nelem = THCudaTensor_nElement(output);
+  THCudaTensor_resize4d(output, nKernelPlane, nInputPlane, nOutputRows, nOutputCols);
+
+  if (nelem == 0 || beta == 0 || nelem != THCudaTensor_nElement(output)) {
+    THCudaTensor_zero(output);
+  } else if (beta != 1) {
+    THCudaTensor_mul(output, beta);
+  }
+
+  float *input_data = THCudaTensor_data(input);
+  float *kernel_data = THCudaTensor_data(kernel);
+  float *output_data = THCudaTensor_data(output);
+
+  // auto compute nb of blocks and threads
+  dim3 blocks(nKernelPlane, nInputPlane);
+  dim3 threads(128/nOutputRows, nOutputRows);
+
+  // sync previous jobs
+  cudaDeviceSynchronize();
+
+  // compute rev conv
+  int sl;
+  for (sl=0; sl<nbatch; sl++) {
+    conv2genericrev <<<blocks, threads>>> (input_data + input->stride[0]*sl,
+                                           kernel_data + kernel->stride[0]*sl, 
+                                           output_data,
+                                           nInputPlane, nInputRows, nInputCols,
+                                           nKernelPlane, nKernelRows, nKernelCols,
+                                           alpha, srow, scol);
+  }
 
   // sync & clean
   cudaDeviceSynchronize();
