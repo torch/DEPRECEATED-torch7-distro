@@ -829,6 +829,28 @@ function nntest.SpatialMaxPooling()
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.SpatialLPPooling()
+   local fanin = math.random(1,4)
+   local osizex = math.random(1,4)
+   local osizey = math.random(1,4)
+   local p = math.random(1,4)
+   local mx = math.random(2,8)
+   local my = math.random(2,8)
+   local dx = math.random(2,mx)
+   local dy = math.random(2,my)
+   local sizex = osizex*mx
+   local sizey = osizey*my
+   local module = nn.SpatialLPPooling(fanin,p,mx,my,dx,dy)
+   local input = lab.rand(fanin,sizey,sizex)
+
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = jac.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+end
+
 function nntest.Sum()
    local ini = math.random(10,20)
    local inj = math.random(10,20)
