@@ -18,7 +18,9 @@ __global__ void subsample(float *input, float *output, float *weight, float *bia
   int output_h = (input_h - kH) / dH + 1;
 
   // compute offsets based on thread/block ID
-  int k = blockIdx.x;
+  int o = blockIdx.x;
+  int i = o;
+  int k = blockIdx.x % input_n;
 
   int xx_start = threadIdx.x;
   int xx_end = output_w;
@@ -29,8 +31,8 @@ __global__ void subsample(float *input, float *output, float *weight, float *bia
   int yy_step = blockDim.y*gridDim.y;
 
   // select input/output plane
-  output = output + k*output_w*output_h;
-  input = input + k*input_w*input_h;
+  output = output + o*output_w*output_h;
+  input = input + i*input_w*input_h;
 
   // Get the good mask for (k,i) (k out, i in)
   float the_weight = weight[k];
@@ -74,7 +76,9 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
   int output_h = (input_h - kH) / dH + 1;
 
   // compute offsets based on thread/block ID
-  int k = blockIdx.x;
+  int o = blockIdx.x;
+  int i = o;
+  int k = blockIdx.x % input_n;
 
   int xx_start = threadIdx.x;
   int xx_end = output_w;
@@ -85,8 +89,8 @@ __global__ void subgradweight(float *input, float *gradOutput, float *gradWeight
   int yy_step = blockDim.y;
 
   // select input/output plane
-  gradOutput = gradOutput + k*output_w*output_h;
-  input = input + k*input_w*input_h;
+  gradOutput = gradOutput + o*output_w*output_h;
+  input = input + i*input_w*input_h;
 
   // thread ID
   int tid = blockDim.x*threadIdx.y + threadIdx.x;
@@ -148,7 +152,9 @@ __global__ void subgradinput(float *gradInput, float *gradOutput, float *weight,
   int output_h = (input_h - kH) / dH + 1;
 
   // compute offsets based on thread/block ID
-  int k = blockIdx.x;
+  int o = blockIdx.x;
+  int i = o;
+  int k = blockIdx.x % input_n;
 
   int xx_start = threadIdx.x;
   int xx_end = output_w;
@@ -159,8 +165,8 @@ __global__ void subgradinput(float *gradInput, float *gradOutput, float *weight,
   int yy_step = blockDim.y*gridDim.y;
 
   // select input/output plane
-  gradOutput = gradOutput + k*output_w*output_h;
-  gradInput = gradInput + k*input_w*input_h;
+  gradOutput = gradOutput + o*output_w*output_h;
+  gradInput = gradInput + i*input_w*input_h;
 
   // get weight
   float the_weight = weight[k];
@@ -199,34 +205,64 @@ static int cunn_SpatialSubSampling_updateOutput(lua_State *L)
   float *output_data;
   float *input_data;
 
-  luaL_argcheck(L, input->nDimension == 3, 2, "3D tensor expected");
+  luaL_argcheck(L, input->nDimension == 3 || input->nDimension == 4, 2, "3D or 4D (batch) tensor expected");
 
-  long nInputCols = input->size[2];
-  long nInputRows = input->size[1];
-  long nOutputCols = (nInputCols - kW) / dW + 1;
-  long nOutputRows = (nInputRows - kH) / dH + 1;
+  if (input->nDimension == 3) {
+    long nInputCols = input->size[2];
+    long nInputRows = input->size[1];
+    long nOutputCols = (nInputCols - kW) / dW + 1;
+    long nOutputRows = (nInputRows - kH) / dH + 1;
 
-  luaL_argcheck(L, input->size[0] == nInputPlane, 2, "invalid number of input planes");
-  luaL_argcheck(L, nInputCols >= kW && nInputRows >= kH, 2, "input image smaller than kernel size");
+    luaL_argcheck(L, input->size[0] == nInputPlane, 2, "invalid number of input planes");
+    luaL_argcheck(L, nInputCols >= kW && nInputRows >= kH, 2, "input image smaller than kernel size");
 
-  input = THCudaTensor_newContiguous(input);
-  input_data = THCudaTensor_data(input);
+    input = THCudaTensor_newContiguous(input);
+    input_data = THCudaTensor_data(input);
 
-  THCudaTensor_resize3d(output, nInputPlane, nOutputRows, nOutputCols);
-  output_data = THCudaTensor_data(output);
+    THCudaTensor_resize3d(output, nInputPlane, nOutputRows, nOutputCols);
+    output_data = THCudaTensor_data(output);
 
-  // cuda blocks & threads:
-  int yblocks = floor(16 / nInputPlane);
-  yblocks = yblocks < 1 ? 1 : yblocks;
-  dim3 blocks(nInputPlane,yblocks);
-  dim3 threads(32,8);
+    // cuda blocks & threads:
+    int yblocks = floor(16 / nInputPlane);
+    yblocks = yblocks < 1 ? 1 : yblocks;
+    dim3 blocks(nInputPlane,yblocks);
+    dim3 threads(32,8);
 
-  // sync
-  cudaDeviceSynchronize();
+    // sync
+    cudaDeviceSynchronize();
 
-  // run subsample kernel
-  subsample <<<blocks, threads>>> (input_data, output_data, weight_data, bias_data,
-                                   nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
+    // run subsample kernel
+    subsample <<<blocks, threads>>> (input_data, output_data, weight_data, bias_data,
+                                     nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
+  } else {
+    long nInputCols = input->size[3];
+    long nInputRows = input->size[2];
+    long nbatch = input->size[0];
+    long nOutputCols = (nInputCols - kW) / dW + 1;
+    long nOutputRows = (nInputRows - kH) / dH + 1;
+
+    luaL_argcheck(L, input->size[1] == nInputPlane, 2, "invalid number of input planes");
+    luaL_argcheck(L, nInputCols >= kW && nInputRows >= kH, 2, "input image smaller than kernel size");
+
+    input = THCudaTensor_newContiguous(input);
+    input_data = THCudaTensor_data(input);
+
+    THCudaTensor_resize4d(output, nbatch, nInputPlane, nOutputRows, nOutputCols);
+    output_data = THCudaTensor_data(output);
+
+    // cuda blocks & threads:
+    int yblocks = floor(16 / nInputPlane);
+    yblocks = yblocks < 1 ? 1 : yblocks;
+    dim3 blocks(nInputPlane*nbatch,yblocks);
+    dim3 threads(32,8);
+
+    // sync
+    cudaDeviceSynchronize();
+
+    // run subsample kernel
+    subsample <<<blocks, threads>>> (input_data, output_data, weight_data, bias_data,
+                                     nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
+  }
 
   // sync & clean
   cudaDeviceSynchronize();
@@ -257,31 +293,60 @@ static int cunn_SpatialSubSampling_updateGradInput(lua_State *L)
   THCudaTensor *weight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
   THCudaTensor *gradInput = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
 
-  long nInputCols = input->size[2];
-  long nInputRows = input->size[1];
-  long nOutputCols = (nInputCols - kW) / dW + 1;
-  long nOutputRows = (nInputRows - kH) / dH + 1;
+  if (input->nDimension == 3) {
+    long nInputCols = input->size[2];
+    long nInputRows = input->size[1];
+    long nOutputCols = (nInputCols - kW) / dW + 1;
+    long nOutputRows = (nInputRows - kH) / dH + 1;
 
-  float *weight_data = THCudaTensor_data(weight);
-  float *gradOutput_data = THCudaTensor_data(gradOutput);
-  float *gradInput_data;
+    float *weight_data = THCudaTensor_data(weight);
+    float *gradOutput_data = THCudaTensor_data(gradOutput);
+    float *gradInput_data;
 
-  THCudaTensor_resizeAs(gradInput, input);
-  THCudaTensor_zero(gradInput);
-  gradInput_data = THCudaTensor_data(gradInput);
+    THCudaTensor_resizeAs(gradInput, input);
+    THCudaTensor_zero(gradInput);
+    gradInput_data = THCudaTensor_data(gradInput);
 
-  // cuda blocks & threads:
-  int yblocks = floor(16 / nInputPlane);
-  yblocks = yblocks < 1 ? 1 : yblocks;
-  dim3 blocks(nInputPlane,yblocks);
-  dim3 threads(32,8);
+    // cuda blocks & threads:
+    int yblocks = floor(16 / nInputPlane);
+    yblocks = yblocks < 1 ? 1 : yblocks;
+    dim3 blocks(nInputPlane,yblocks);
+    dim3 threads(32,8);
 
-  // sync
-  cudaDeviceSynchronize();
+    // sync
+    cudaDeviceSynchronize();
 
-  // run updateGradInput kernel
-  subgradinput <<<blocks, threads>>> (gradInput_data, gradOutput_data, weight_data,
-                                      nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
+    // run updateGradInput kernel
+    subgradinput <<<blocks, threads>>> (gradInput_data, gradOutput_data, weight_data,
+                                        nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
+  } else {
+    long nInputCols = input->size[3];
+    long nInputRows = input->size[2];
+    long nbatch = input->size[0];
+    long nOutputCols = (nInputCols - kW) / dW + 1;
+    long nOutputRows = (nInputRows - kH) / dH + 1;
+
+    float *weight_data = THCudaTensor_data(weight);
+    float *gradOutput_data = THCudaTensor_data(gradOutput);
+    float *gradInput_data;
+
+    THCudaTensor_resizeAs(gradInput, input);
+    THCudaTensor_zero(gradInput);
+    gradInput_data = THCudaTensor_data(gradInput);
+
+    // cuda blocks & threads:
+    int yblocks = floor(16 / nInputPlane);
+    yblocks = yblocks < 1 ? 1 : yblocks;
+    dim3 blocks(nInputPlane*nbatch,yblocks);
+    dim3 threads(32,8);
+
+    // sync
+    cudaDeviceSynchronize();
+
+    // run updateGradInput kernel
+    subgradinput <<<blocks, threads>>> (gradInput_data, gradOutput_data, weight_data,
+                                        nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
+  }
 
   // sync & clean
   cudaDeviceSynchronize();
@@ -312,29 +377,61 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
   THCudaTensor *gradWeight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradWeight", torch_CudaTensor_id);
   THCudaTensor *gradBias = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradBias", torch_CudaTensor_id);
 
-  long nInputCols = input->size[2];
-  long nInputRows = input->size[1];
-  long nOutputCols = (nInputCols - kW) / dW + 1;
-  long nOutputRows = (nInputRows - kH) / dH + 1;
+  if (input->nDimension == 3) {
+    long nInputCols = input->size[2];
+    long nInputRows = input->size[1];
+    long nOutputCols = (nInputCols - kW) / dW + 1;
+    long nOutputRows = (nInputRows - kH) / dH + 1;
 
-  float *gradWeight_data = THCudaTensor_data(gradWeight);
-  float *gradBias_data = THCudaTensor_data(gradBias);
-  float *gradOutput_data = THCudaTensor_data(gradOutput);
-  float *input_data;
+    float *gradWeight_data = THCudaTensor_data(gradWeight);
+    float *gradBias_data = THCudaTensor_data(gradBias);
+    float *gradOutput_data = THCudaTensor_data(gradOutput);
+    float *input_data;
 
-  input = THCudaTensor_newContiguous(input);
-  input_data = THCudaTensor_data(input);
+    input = THCudaTensor_newContiguous(input);
+    input_data = THCudaTensor_data(input);
 
-  // cuda blocks & threads:
-  dim3 blocks(nInputPlane);
-  dim3 threads(32,8);
+    // cuda blocks & threads:
+    dim3 blocks(nInputPlane);
+    dim3 threads(32,8);
 
-  // sync
-  cudaDeviceSynchronize();
+    // sync
+    cudaDeviceSynchronize();
 
-  // run gradweight kernel
-  subgradweight <<<blocks, threads>>> (input_data, gradOutput_data, gradWeight_data, gradBias_data,
-                                       nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW, scale);
+    // run gradweight kernel
+    subgradweight <<<blocks, threads>>> (input_data, gradOutput_data, gradWeight_data, gradBias_data,
+                                         nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW, scale);
+  } else {
+    long nInputCols = input->size[3];
+    long nInputRows = input->size[2];
+    long nbatch = input->size[0];
+    long nOutputCols = (nInputCols - kW) / dW + 1;
+    long nOutputRows = (nInputRows - kH) / dH + 1;
+
+    float *gradWeight_data = THCudaTensor_data(gradWeight);
+    float *gradBias_data = THCudaTensor_data(gradBias);
+    float *gradOutput_data = THCudaTensor_data(gradOutput);
+    float *input_data;
+
+    input = THCudaTensor_newContiguous(input);
+    input_data = THCudaTensor_data(input);
+
+    // cuda blocks & threads:
+    dim3 blocks(nInputPlane);
+    dim3 threads(32,8);
+
+    // sync
+    cudaDeviceSynchronize();
+
+    // run gradweight kernel
+    long sl;
+    for (sl=0; sl<nbatch; sl++) {
+      subgradweight <<<blocks, threads>>> (input_data + sl*input->stride[0], 
+                                           gradOutput_data + sl*gradOutput->stride[0], 
+                                           gradWeight_data, gradBias_data,
+                                           nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW, scale);
+    }
+  }
 
   // sync & clean
   cudaDeviceSynchronize();
