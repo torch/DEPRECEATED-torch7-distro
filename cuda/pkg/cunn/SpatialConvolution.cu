@@ -110,24 +110,27 @@ __global__ void compute_gradBias(float *gradBias, float *gradOutput, float scale
 {
   // each block does a plane
   int k = blockIdx.x;
-  float *gradOutput_k = gradOutput + k*output_h*output_w;
+  float *gradOutput_k = gradOutput + (k + threadIdx.y*output_n)*output_h*output_w;
 
   // offsets
   int i_start = threadIdx.x;
   int i_end = output_w*output_h;
   int i_step = blockDim.x;
 
+  int tid = threadIdx.x + threadIdx.y * blockDim.x;
+  int nthreads = blockDim.x * blockDim.y;
+
   // sum output plane k into partial sum array
-  __shared__ float sums[32];
-  sums[threadIdx.x] = 0;
+  __shared__ float sums[512];
+  sums[tid] = 0;
   for (int i=i_start; i<i_end; i+=i_step) {
-    sums[threadIdx.x] += gradOutput_k[i];
+    sums[tid] += gradOutput_k[i];
   }
   __syncthreads();
 
   // reduce
-  if (threadIdx.x == 0) {
-    for (int i=0; i<blockDim.x; i++)
+  if (tid == 0) {
+    for (int i=0; i<nthreads; i++)
       gradBias[k] += scale*sums[i];
   }
 }
@@ -171,9 +174,11 @@ static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
 
     /* gradient to bias */
     dim3 blocks(nOutputPlane);
-    dim3 threads(32);
     long sl;
-    for (sl=0; sl<gradOutput->size[0]; sl++) {
+    for (sl=0; sl<gradOutput->size[0]; sl+=16) {
+      int cst = 16;
+      if ((cst+sl) > gradOutput->size[0]) cst = gradOutput->size[0] - sl;
+      dim3 threads(16, cst);
       compute_gradBias <<<blocks, threads>>> (gradBias_data, gradOutput_data + sl*gradOutput->stride[0], scale,
                                               gradOutput->size[1], gradOutput->size[2], gradOutput->size[3]);
     }

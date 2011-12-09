@@ -106,8 +106,8 @@ function cunntest.SpatialConvolution_backward()
    local kj = math.random(3,13)
    local si = 1 --math.random(1,2)
    local sj = 1 --math.random(1,2)
-   local outi = math.random(8,256)
-   local outj = math.random(8,256)
+   local outi = math.random(8,128)
+   local outj = math.random(8,128)
    local ini = (outi-1)*si+ki
    local inj = (outj-1)*sj+kj
 
@@ -169,14 +169,14 @@ end
 
 function cunntest.SpatialConvolution_backward_batch()
    local bs = math.random(4,10)
-   local from = math.random(1,64)
+   local from = math.random(1,32)
    local to = math.random(1,64)
    local ki = math.random(3,13)
    local kj = math.random(3,13)
    local si = 1 --math.random(1,2)
    local sj = 1 --math.random(1,2)
-   local outi = math.random(8,256)
-   local outj = math.random(8,256)
+   local outi = math.random(8,64)
+   local outj = math.random(8,64)
    local ini = (outi-1)*si+ki
    local inj = (outj-1)*sj+kj
 

@@ -205,9 +205,16 @@ __global__ void conv2genericrev(float *input, float *kernel, float *output,
   int kk = blockIdx.x;
   int ii = blockIdx.y;
 
+  // batch id
+  int batch = threadIdx.z;
+
+  // kernel id
+  int kid = threadIdx.x;
+  int nkids = blockDim.x;
+
   // thread ID
-  int tid = threadIdx.x;
-  int nthreads = blockDim.x;
+  int tid = kid + batch*blockDim.x;
+  int nthreads = blockDim.x * blockDim.z;
 
   // one thread only sees one output
   output = output + (kk * input_n + ii) * output_h*output_w;
@@ -224,11 +231,11 @@ __global__ void conv2genericrev(float *input, float *kernel, float *output,
   float *output_p = output_s + yy * output_w;
   for(xx=0; xx<output_w; xx++) {
     // Dot product in two dimensions... (between input image and kernel)
-    float *input_p = input + ii*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
-    float *kernel_p = kernel + kk*kernel_w*kernel_h;
+    float *input_p = input + (ii + batch*input_n)*input_h*input_w + yy*stride_h*input_w + xx*stride_w;
+    float *kernel_p = kernel + (kk + batch*kernel_n)*kernel_w*kernel_h;
     float sum = 0;
     for(ky=0; ky<kernel_h; ky++) {
-      for(kx=tid; kx<kernel_w; kx+=nthreads) {
+      for(kx=kid; kx<kernel_w; kx+=nkids) {
         sum += input_p[kx]*kernel_p[kx];
       }
       input_p += input_w;
@@ -862,16 +869,20 @@ TH_API void THCudaTensor_conv2DRevgerm(THCudaTensor *output, float beta, float a
   float *kernel_data = THCudaTensor_data(kernel);
   float *output_data = THCudaTensor_data(output);
 
-  // auto compute nb of blocks and threads
-  dim3 blocks(nKernelPlane, nInputPlane);
-  dim3 threads(128/nOutputRows, nOutputRows);
-
   // sync previous jobs
   cudaDeviceSynchronize();
 
-  // compute rev conv
-  int sl;
-  for (sl=0; sl<nbatch; sl++) {
+  // kernel is called multiple times
+  // (the arbitrary split below is just here to make sure we dont go over 256 threads)
+  for (int sl=0; sl<nbatch; sl+=6) {
+    // auto compute nb of blocks and threads
+    dim3 blocks(nKernelPlane, nInputPlane);
+    int subbatch = 6;
+    if (sl+subbatch > nbatch) subbatch = nbatch - sl;
+    int cst = 256 / (subbatch * nOutputRows);
+    dim3 threads(cst, nOutputRows, subbatch);
+
+    // compute rev conv
     conv2genericrev <<<blocks, threads>>> (input_data + input->stride[0]*sl,
                                            kernel_data + kernel->stride[0]*sl, 
                                            output_data,
