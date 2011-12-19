@@ -1,123 +1,75 @@
-SET(Torch_HELP_INIT_LUA "${Torch_BINARY_DIR}/packages/help/init.lua")
-SET(Torch_HLP2HTML_LUA "${Torch_BINARY_DIR}/scripts/hlp2html.lua")
-CONFIGURE_FILE("scripts/hlp2html.lua.in" "${Torch_HLP2HTML_LUA}")
-
-SET(HTML_DOC OFF CACHE BOOL "Create HTML documentation?")
-
 # Workaround: CMake sux if we do not create the directories
 # This is completely incoherent compared to INSTALL(FILES ...)
-FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/hlp")
-INSTALL(DIRECTORY "${Torch_BINARY_DIR}/hlp/" DESTINATION "${Torch_INSTALL_HLP_SUBDIR}")
-
-IF(HTML_DOC)
-  FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/html")
-  INSTALL(DIRECTORY "${Torch_BINARY_DIR}/html/" DESTINATION "${Torch_INSTALL_HTML_SUBDIR}")
-ENDIF(HTML_DOC)
-
-ADD_CUSTOM_TARGET(hlp-help
-  ALL
-  COMMENT "Built .hlp help")
-
-IF(HTML_DOC)
-  ADD_CUSTOM_TARGET(html-help
-    ALL
-    COMMENT "Built .html help")
-  ADD_DEPENDENCIES(html-help hlp-help)
-ENDIF(HTML_DOC)
-
-# internal helpful macro
-MACRO(ADD_TORCH_HELP_FILE hlpfile hlpdstdir htmldstdir upindexhtml)
-
-  IF(WEBSITE)
-    SET(DOC_TEMPLATE "${Torch_SOURCE_DIR}/scripts/docwebtemplate.html")
-  ELSE(WEBSITE)
-    SET(DOC_TEMPLATE "${Torch_SOURCE_DIR}/scripts/doctemplate.html")
-  ENDIF(WEBSITE)
-
-  GET_FILENAME_COMPONENT(_file_ "${hlpfile}" NAME_WE)
-
-  # copy .hlp files
-  ADD_CUSTOM_COMMAND(OUTPUT "${hlpdstdir}/${_file_}.hlp"
-    COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${hlpfile}" "${hlpdstdir}/${_file_}.hlp"
-    DEPENDS "${hlpfile}")
-  SET(generatedhlpfiles ${generatedhlpfiles} "${hlpdstdir}/${_file_}.hlp")
-
-  IF(HTML_DOC)  
-    # generate corresponding .html
-    ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/${_file_}.html"
-      COMMAND ${LUA_EXECUTABLE}
-      ARGS "${Torch_HLP2HTML_LUA}" "${hlpdstdir}/${_file_}.hlp" "${DOC_TEMPLATE}" \"<a href=\\\"${upindexhtml}\\\">Torch Manual</a>\" "${htmldstdir}" "${_file__}.hlp" "${Torch_SOURCE_DIR}/scripts/docfilters.lua"
-      DEPENDS "${LUA_EXECUTABLE}" "${hlpdstdir}/${_file_}.hlp" "${DOC_TEMPLATE}")
-    SET(generatedhtmlfiles ${generatedhtmlfiles} "${htmldstdir}/${_file_}.html")
-    
-    # copy CSS file
-    ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/doctorch.css"
-      COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${Torch_SOURCE_DIR}/scripts/doctorch.css" "${htmldstdir}/doctorch.css"
-      DEPENDS "${Torch_SOURCE_DIR}/scripts/doctorch.css")
-    SET(generatedhlpfiles ${generatedhlpfiles} "${htmldstdir}/doctorch.css")
-    
-    # copy Torch logo file
-    ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/torchlogo.png"
-      COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${Torch_SOURCE_DIR}/scripts/torchlogo.png" "${htmldstdir}/torchlogo.png"
-      DEPENDS "${Torch_SOURCE_DIR}/scripts/torchlogo.png")
-    SET(generatedhlpfiles ${generatedhlpfiles} "${htmldstdir}/torchlogo.png")
-  ENDIF(HTML_DOC)
-
-ENDMACRO(ADD_TORCH_HELP_FILE)
-
-MACRO(ADD_TORCH_HELP package)
-
-  SET(generatedhlpfiles)
-  FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/hlp/${package}")
-
-  IF(HTML_DOC)
-    SET(generatedhtmlfiles)
-    FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/html/${package}")
-  ENDIF(HTML_DOC)
-
-  FILE(GLOB hlpfiles "help/*.hlp")
-  FOREACH(hlpfile ${hlpfiles})
-    ADD_TORCH_HELP_FILE("${hlpfiles}" "${Torch_BINARY_DIR}/hlp/${package}" "${Torch_BINARY_DIR}/html/${package}" "../index.html")
-  ENDFOREACH(hlpfile ${hlpfiles})
-
-  # Extra stuff to do if it is the help package
-  IF(${package} STREQUAL "help")
-    FILE(GLOB hlpfiles ${CMAKE_CURRENT_SOURCE_DIR}/main/*.hlp)
-    FOREACH(hlpfile ${hlpfiles})
-      IF(NOT ${hlpfile} STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/main/index.hlp")
-        ADD_TORCH_HELP_FILE("${hlpfile}" "${Torch_BINARY_DIR}/hlp" "${Torch_BINARY_DIR}/html" "index.html")
-      ENDIF(NOT ${hlpfile} STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}/main/index.hlp")
-    ENDFOREACH(hlpfile)
-  ENDIF(${package} STREQUAL "help")
-
-  ADD_CUSTOM_TARGET(${package}-hlp-files
-    DEPENDS ${generatedhlpfiles})
-  ADD_DEPENDENCIES(hlp-help ${package}-hlp-files)
-
-  IF(HTML_DOC)
-    ADD_CUSTOM_TARGET(${package}-html-files
-      DEPENDS ${generatedhtmlfiles})
-    ADD_DEPENDENCIES(html-help ${package}-html-files)
-  ENDIF(HTML_DOC)
-
-
-  # Build the help index if the package contains an index.hlp file
-  IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.hlp")    
-
-    ADD_CUSTOM_TARGET(${package}-hlp-index
-      ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/buildMainHelpIndex.lua" "${Torch_SOURCE_DIR}/packages/help/main/index.hlp" "${Torch_BINARY_DIR}/hlp/index.hlp" "${Torch_BINARY_DIR}/hlpsections.txt" "${package}" "${CMAKE_CURRENT_SOURCE_DIR}/help/index.hlp" "${package}/index.hlp" "${ARGN}"
-      DEPENDS ${LUA_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/help/index.hlp" "${Torch_SOURCE_DIR}/packages/help/main/index.hlp")
-
-    IF(HTML_DOC)
-      ADD_CUSTOM_TARGET(${package}-html-index
-        ${LUA_EXECUTABLE} "${Torch_HLP2HTML_LUA}" "${Torch_BINARY_DIR}/hlp/index.hlp" "${DOC_TEMPLATE}" \"\" "${Torch_BINARY_DIR}/html" "${Torch_BINARY_DIR}/hlp/index.hlp" "${Torch_SOURCE_DIR}/scripts/docfilters.lua"
-        DEPENDS "${LUA_EXECUTABLE}" "${DOC_TEMPLATE}")
-      
-      ADD_DEPENDENCIES(${package}-html-index ${package}-hlp-index)
-      ADD_DEPENDENCIES(${package}-html-files ${package}-html-index)
-    ENDIF(HTML_DOC)
-    ADD_DEPENDENCIES(${package}-hlp-files ${package}-hlp-index)
-
-  ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.hlp")
-
+MACRO(ADD_TORCH_HELP)
 ENDMACRO(ADD_TORCH_HELP)
+
+FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/dok")
+INSTALL(DIRECTORY "${Torch_BINARY_DIR}/dok/" DESTINATION "${Torch_INSTALL_DOK_SUBDIR}")
+
+ADD_CUSTOM_TARGET(documentation-dok
+  ALL
+  COMMENT "Built documentation")
+
+MACRO(ADD_TORCH_DOK package section title rank)
+
+  SET(dokdstdir "${Torch_BINARY_DIR}/dok/${package}")
+  SET(htmldstdir "${Torch_BINARY_DIR}/html/${package}")
+
+  FILE(MAKE_DIRECTORY "${dokdstdir}")
+  FILE(MAKE_DIRECTORY "${htmldstdir}")
+
+  # Note: subdirectories are not handled (yet?)
+  # http://www.cmake.org/pipermail/cmake/2008-February/020114.html
+  FILE(GLOB dokfiles "help/*")
+
+  SET(generatedfiles)
+  FOREACH(dokfile ${dokfiles})
+    GET_FILENAME_COMPONENT(_ext_ "${dokfile}" EXT)
+    GET_FILENAME_COMPONENT(_file_ "${dokfile}" NAME_WE)
+
+    IF(_ext_ STREQUAL ".dok")
+      ADD_CUSTOM_COMMAND(OUTPUT "${dokdstdir}/${_file_}.dok" "${htmldstdir}/${_file_}.html"
+        COMMAND  ${LUA_EXECUTABLE} ARGS "${Torch_SOURCE_DIR}/scripts/dokparse.lua" "${Torch_SOURCE_DIR}/packages/dok/init.lua" "${Torch_SOURCE_DIR}/scripts/doctemplate.html" "${dokfile}" "${dokdstdir}/${_file_}.dok" "${htmldstdir}/${_file_}.html"
+        DEPENDS ${LUA_EXECUTABLE}
+        "${Torch_SOURCE_DIR}/packages/dok/init.lua"
+        "${Torch_SOURCE_DIR}/scripts/dokparse.lua"
+        "${dokfile}")
+      
+      SET(generatedfiles ${generatedfiles} "${dokdstdir}/${_file_}.dok" "${htmldstdir}/${_file_}.html")
+    ELSE(_ext_ STREQUAL ".dok")
+      ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/${_file_}${_ext_}"
+        COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${dokfile}" "${htmldstdir}/${_file_}${_ext_}"
+        DEPENDS "${dokfile}")
+      SET(generatedfiles ${generatedfiles} "${htmldstdir}/${_file_}${_ext_}")
+    ENDIF(_ext_ STREQUAL ".dok")
+  ENDFOREACH(dokfile ${dokfiles})
+
+  # copy CSS file
+  ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/doctorch.css"
+    COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${Torch_SOURCE_DIR}/scripts/doctorch.css" "${htmldstdir}/doctorch.css"
+    DEPENDS "${Torch_SOURCE_DIR}/scripts/doctorch.css")
+  SET(generatedfiles ${generatedfiles} "${htmldstdir}/doctorch.css")
+  
+  # copy Torch logo file
+  ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/torchlogo.png"
+    COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${Torch_SOURCE_DIR}/scripts/torchlogo.png" "${htmldstdir}/torchlogo.png"
+    DEPENDS "${Torch_SOURCE_DIR}/scripts/torchlogo.png")
+  SET(generatedfiles ${generatedfiles} "${htmldstdir}/torchlogo.png")
+
+  ADD_CUSTOM_TARGET(${package}-dok-files
+    DEPENDS ${generatedfiles})
+  ADD_DEPENDENCIES(documentation-dok ${package}-dok-files)
+
+  # Build the dok index if the package contains an index.dok file
+  IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")    
+    ADD_CUSTOM_TARGET(${package}-dok-index
+      ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/dokindex.lua" "${TORCH_BINARY_DIR}/dok/index.dok" "${package}" "${section}" "${title}" "${rank}"
+      DEPENDS ${LUA_EXECUTABLE}
+      "${Torch_SOURCE_DIR}/scripts/dokindex.lua"
+      "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")
+    
+    ADD_DEPENDENCIES(documentation-dok ${package}-dok-index)
+
+  ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")
+  
+ENDMACRO(ADD_TORCH_DOK)

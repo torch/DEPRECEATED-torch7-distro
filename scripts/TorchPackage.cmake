@@ -60,8 +60,6 @@ MACRO(ADD_TORCH_PACKAGE package src luasrc)
     INSTALL(FILES ${luasrc} 
       DESTINATION ${Torch_INSTALL_LUA_PATH_SUBDIR}/${package})
   ENDIF(luasrc)
-  
-  ### help sources
-  ADD_TORCH_HELP(${package} ${ARGN})
-  
+
+    
 ENDMACRO(ADD_TORCH_PACKAGE)
