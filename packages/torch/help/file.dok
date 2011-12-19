@@ -5,6 +5,7 @@ File
 This is an //abstract// class. It defines most methods implemented by its
 child classes, like [[#DiskFile|DiskFile]],
 [[#MemoryFile|MemoryFile]] and [[#PipeFile|PipeFile]].
+
 Methods defined here are intended for basic read/write functionalities.
 Read/write methods might write in [[#FileAscii|ASCII]] mode or
 [[#FileBinary|binary]] mode.
