@@ -480,6 +480,7 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
   if (n == 2)
   {
     r_ = THTensor_(new)();
+    luaT_pushudata(L, r_, torch_(Tensor_id));
   }
   else if (n == 3)
   {
@@ -488,11 +489,13 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
       r_ = image;
       image = kernel;
       kernel = luaT_checkudata(L,3,torch_(Tensor_id));
+      lua_settop(L,1);
     }
     else if (lua_isstring(L,3))
     {
       r_ = THTensor_(new)();
       ctype = luaL_checkstring(L,3);
+      luaT_pushudata(L, r_, torch_(Tensor_id));
     }
     else
     {
@@ -505,6 +508,7 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
     image = kernel;
     kernel = luaT_checkudata(L,3,torch_(Tensor_id));
     ctype = luaL_checkstring(L,4);
+    lua_settop(L,1);
   }
   else
   {
@@ -514,10 +518,10 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
   {
     return luaL_error(L, "oops, bad arguments: [result,] source, kernel [, conv type]");
   }
-  else
-  {
-    luaT_pushudata(L, r_, torch_(Tensor_id));
-  }
+/*   else */
+/*   { */
+/*     //luaT_pushudata(L, r_, torch_(Tensor_id)); */
+/*   } */
 
   char type[2];
   type[0] = ctype[0];
@@ -636,6 +640,7 @@ static int lab_(convxcorr3)(lua_State *L,char* ktype)
   if (n == 2)
   {
     r_ = THTensor_(new)();
+    luaT_pushudata(L, r_, torch_(Tensor_id));    
   }
   else if (n == 3)
   {
@@ -644,11 +649,13 @@ static int lab_(convxcorr3)(lua_State *L,char* ktype)
       r_ = image;
       image = kernel;
       kernel = luaT_checkudata(L,3,torch_(Tensor_id));
+      lua_settop(L,1);
     }
     else if (lua_isstring(L,3))
     {
       r_ = THTensor_(new)();
       ctype = luaL_checkstring(L,3);
+      luaT_pushudata(L, r_, torch_(Tensor_id));
     }
     else
     {
@@ -661,6 +668,7 @@ static int lab_(convxcorr3)(lua_State *L,char* ktype)
     image = kernel;
     kernel = luaT_checkudata(L,3,torch_(Tensor_id));
     ctype = luaL_checkstring(L,4);
+    lua_settop(L,1);
   }
   else
   {
@@ -670,10 +678,10 @@ static int lab_(convxcorr3)(lua_State *L,char* ktype)
   {
     return luaL_error(L, "oops, bad arguments: [result,] source, kernel [, conv type]");
   }
-  else
-  {
-    luaT_pushudata(L, r_, torch_(Tensor_id));
-  }
+/*   else */
+/*   { */
+/*     luaT_pushudata(L, r_, torch_(Tensor_id)); */
+/*   } */
 
   char type[2];
   type[0] = ctype[0];
