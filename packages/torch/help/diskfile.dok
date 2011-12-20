@@ -1,6 +1,4 @@
-DiskFile
-
-#DiskFile
+===== DiskFile =====
 
 Parent classes: [[#File|File]]
 
@@ -17,7 +15,6 @@ The file might be open in read, write, or read-write mode, depending on the para
 given to the [[#TorchDiskFile|torch.DiskFile(fileName, mode)]].
 
 =====  torch.DiskFile(fileName, [mode], [quiet]) =====
-#TorchDiskFile
 
 //Constructor// which opens ''fileName'' on disk, using the given ''mode''. Valid ''mode'' are
 ''"r"'' (read), ''"w"'' (write) or ''"rw"'' (read-write). Default is read mode.
@@ -31,35 +28,30 @@ problem opening the file: instead ''nil'' will be returned.
 The file is opened in [[#FileAscii|ASCII]] mode by default.
 
 =====  bigEndianEncoding() =====
-#DiskFileBigEndianEncoding
 
 In [[#FileBinary|binary]] mode, force encoding in //big endian//. 
 (//big end first//: decreasing numeric significance with increasing memory
 addresses)
 
 =====  [boolean] isBigEndianCPU() =====
-#DiskFileIsBigEndianCPU
 
 Returns ''true'' if, and only if, the computer CPU operates in //big endian//.
 //Big end first//: decreasing numeric significance with increasing
 memory addresses.
 
 =====  [boolean] isLittleEndianCPU() =====
-#DiskFileIsLittleEndianCPU
 
 Returns ''true'' if, and only if, the computer CPU operates in //little endian//.
 //Little end first//: increasing numeric significance with increasing
 memory addresses.
 
 =====  littleEndianEncoding() =====
-#DiskFileLittleEndianEncoding
 
 In [[#FileBinary|binary]] mode, force encoding in //little endian//.
 (//little end first//: increasing numeric significance with increasing memory
 addresses)
 
 =====  nativeEndianEncoding() =====
-#DiskFileNativeEndianEncoding
 
 In [[#FileBinary|binary]] mode, force encoding in //native endian//.
 

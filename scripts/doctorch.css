@@ -117,6 +117,13 @@ a:visited {
         border-bottom: #ccc 1px solid;
 }
 
+.torchdoc #toc {
+          font-size: 70%;
+          text-align:right;
+          padding-bottom: 1em;
+          padding-top: 1em;
+}
+
 .clearfooterfloat {
     clear:both;
     height:0;

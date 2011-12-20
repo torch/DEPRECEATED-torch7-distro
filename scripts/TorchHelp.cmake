@@ -1,3 +1,7 @@
+# to be removed
+MACRO(ADD_TORCH_HELP)
+ENDMACRO(ADD_TORCH_HELP)
+
 # Workaround: CMake sux if we do not create the directories
 # This is completely incoherent compared to INSTALL(FILES ...)
 FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/dok")
@@ -10,7 +14,7 @@ ADD_CUSTOM_TARGET(documentation-dok
 MACRO(ADD_TORCH_DOK package section title rank)
 
   # Files for HTML creation
-  SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_DIR}/scripts/doctemplate.html"
+  SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_DIR}/scripts/doktemplate.html"
     CACHE FILEPATH "List of files needed for HTML doc creation")
   
   SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_DIR}/scripts/doctorch.css;${Torch_SOURCE_DIR}/scripts/torchlogo.png"
@@ -39,7 +43,8 @@ MACRO(ADD_TORCH_DOK package section title rank)
         DEPENDS ${LUA_EXECUTABLE}
         "${Torch_SOURCE_DIR}/packages/dok/init.lua"
         "${Torch_SOURCE_DIR}/scripts/dokparse.lua"
-        "${dokfile}")
+        "${dokfile}"
+        "${TORCH_DOK_HTML_TEMPLATE}")
       
       SET(generatedfiles ${generatedfiles} "${dokdstdir}/${_file_}.dok" "${htmldstdir}/${_file_}.html")
     ELSE(_ext_ STREQUAL ".dok")
