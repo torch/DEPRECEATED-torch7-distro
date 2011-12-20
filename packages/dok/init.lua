@@ -165,10 +165,10 @@ function dok.linkURL(txt)
       local section = txt:match('#(.*)$')
       local file
       if txt:match('^#.*$') then
-         if path == '.' then
-            file = '' -- la page courante quoi
+         if path == '.:' then
+            file = '' -- the current page
          else
-            file = 'index.html'
+            file = 'index.html' -- the default index page at the given path
          end
       else
          file = txt:gsub('#.*$', ''):gsub('^%s-$', 'index')
@@ -208,6 +208,7 @@ end
 
 function dok.dok2html(txt)
    local link = {}
+   local anch = {}
    local code = {}
    local file = {}
    local pict = {}
@@ -244,6 +245,11 @@ function dok.dok2html(txt)
                                 return line
                              end
                           end)
+
+   txt = txt:gsub('%{%{anchor%:(.-)%}%}', function(str)
+                                             table.insert(anch, str)
+                                             return '\021' .. #anch .. '\021'
+                                          end)
 
    txt = txt:gsub('%{%{(.-)%}%}', function(str)
                                      table.insert(pict, str)
@@ -443,6 +449,12 @@ function dok.dok2html(txt)
    txt = txt:gsub('\017(%d+)\017', function(id)
                                       id = tonumber(id)
                                       return '<a href="' .. dok.linkURL(link[id]) ..  '">' .. dok.linkText(link[id]) .. '</a>'
+                                   end)
+
+   -- put back anchors
+   txt = txt:gsub('\021(%d+)\021', function(id)
+                                      id = tonumber(id)
+                                      return '<a name="' .. dok.link2wikilink(anch[id]) .. '"></a>'
                                    end)
 
    -- put back pictures (note: after the links!)
