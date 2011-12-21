@@ -45,9 +45,8 @@ function dok.link2wikilink(txt)
 end
 
 function dok.parseSection(txt)
-   local root = {rank=0, title=txt:match('(.-)\n'), lines={}, subsections={}}
+   local root = {rank=0, title='', lines={}, subsections={}, anchors={}}
    local section = root
-   txt = txt:match('.-\n(.*)')
    for line in txt:gmatch('.-\n') do
       local rank, title = line:match('^=([=]+)(.*)=[=]+%s-$')
       if title then
@@ -59,14 +58,17 @@ function dok.parseSection(txt)
          end
          
          if rank > section.rank then
-            table.insert(section.subsections, {rank=rank, title=title, lines={}, subsections={}, parent=section})
+            table.insert(section.subsections, {rank=rank, title=title, lines={}, subsections={}, anchors={}, parent=section})
             section = table.last(section.subsections)
          elseif rank == section.rank then
-            table.insert(section.parent.subsections, {rank=rank, title=title, lines={}, subsections={}, parent=section.parent})
+            table.insert(section.parent.subsections, {rank=rank, title=title, lines={}, subsections={}, anchors={}, parent=section.parent})
             section = table.last(section.parent.subsections)
          end
       else
          table.insert(section.lines, line)
+         line:gsub('%{%{anchor%:(.-)%}%}', function(str)
+                                              table.insert(section.anchors, str)
+                                           end)
       end
    end
    return root

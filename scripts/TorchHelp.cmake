@@ -5,7 +5,9 @@ ENDMACRO(ADD_TORCH_HELP)
 # Workaround: CMake sux if we do not create the directories
 # This is completely incoherent compared to INSTALL(FILES ...)
 FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/dok")
+FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/html")
 INSTALL(DIRECTORY "${Torch_BINARY_DIR}/dok/" DESTINATION "${Torch_INSTALL_DOK_SUBDIR}")
+INSTALL(DIRECTORY "${Torch_BINARY_DIR}/html/" DESTINATION "${Torch_INSTALL_HTML_SUBDIR}")
 
 ADD_CUSTOM_TARGET(documentation-dok
   ALL
@@ -37,16 +39,19 @@ MACRO(ADD_TORCH_DOK package section title rank)
     GET_FILENAME_COMPONENT(_ext_ "${dokfile}" EXT)
     GET_FILENAME_COMPONENT(_file_ "${dokfile}" NAME_WE)
 
+    # we move the doc files together (in the same dok/ directory)
+    # we also convert the .dok (meaningful) to .txt (meaningless)
+    # such that dokuwiki understands it.
     IF(_ext_ STREQUAL ".dok")
-      ADD_CUSTOM_COMMAND(OUTPUT "${dokdstdir}/${_file_}.dok" "${htmldstdir}/${_file_}.html"
-        COMMAND  ${LUA_EXECUTABLE} ARGS "${Torch_SOURCE_DIR}/scripts/dokparse.lua" "${Torch_SOURCE_DIR}/packages/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${dokdstdir}/${_file_}.dok" "${htmldstdir}/${_file_}.html"
+      ADD_CUSTOM_COMMAND(OUTPUT "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
+        COMMAND  ${LUA_EXECUTABLE} ARGS "${Torch_SOURCE_DIR}/scripts/dokparse.lua" "${Torch_SOURCE_DIR}/packages/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
         DEPENDS ${LUA_EXECUTABLE}
         "${Torch_SOURCE_DIR}/packages/dok/init.lua"
         "${Torch_SOURCE_DIR}/scripts/dokparse.lua"
         "${dokfile}"
         "${TORCH_DOK_HTML_TEMPLATE}")
       
-      SET(generatedfiles ${generatedfiles} "${dokdstdir}/${_file_}.dok" "${htmldstdir}/${_file_}.html")
+      SET(generatedfiles ${generatedfiles} "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html")
     ELSE(_ext_ STREQUAL ".dok")
       ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/${_file_}${_ext_}"
         COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${dokfile}" "${htmldstdir}/${_file_}${_ext_}"
@@ -73,7 +78,7 @@ MACRO(ADD_TORCH_DOK package section title rank)
   # Build the dok index if the package contains an index.dok file
   IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")    
     ADD_CUSTOM_TARGET(${package}-dok-index
-      ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/dokindex.lua" "${TORCH_BINARY_DIR}/dok/index.dok" "${package}" "${section}" "${title}" "${rank}"
+      ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/dokindex.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${Torch_BINARY_DIR}/dokindex.txt" "${Torch_BINARY_DIR}/dok/index.txt" "${package}" "${section}" "${title}" "${rank}"
       DEPENDS ${LUA_EXECUTABLE}
       "${Torch_SOURCE_DIR}/scripts/dokindex.lua"
       "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")
