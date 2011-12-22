@@ -18,6 +18,9 @@ SET(Torch_INSTALL_INCLUDE_SUBDIR "include" CACHE PATH
 SET(Torch_INSTALL_DOK_SUBDIR "share/torch/dok" CACHE PATH
   "Install dir for dokuwiki files (relative to Torch_INSTALL_PREFIX)")
 
+SET(Torch_INSTALL_DOKMEDIA_SUBDIR "share/torch/dokmedia" CACHE PATH
+  "Install dir for dokuwiki media files (relative to Torch_INSTALL_PREFIX)")
+
 SET(Torch_INSTALL_HTML_SUBDIR "share/torch/html" CACHE PATH
   "Install dir for .html files (relative to Torch_INSTALL_PREFIX)")
 
@@ -54,6 +57,7 @@ MARK_AS_ADVANCED(
   Torch_INSTALL_SHARE_SUBDIR
   Torch_INSTALL_INCLUDE_SUBDIR
   Torch_INSTALL_DOK_SUBDIR
+  Torch_INSTALL_DOKMEDIA_SUBDIR
   Torch_INSTALL_HTML_SUBDIR
   Torch_INSTALL_CMAKE_SUBDIR
   Torch_INSTALL_LUA_PATH_SUBDIR

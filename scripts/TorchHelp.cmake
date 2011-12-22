@@ -1,8 +1,11 @@
 # Workaround: CMake sux if we do not create the directories
 # This is completely incoherent compared to INSTALL(FILES ...)
 FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/dok")
+FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/dokmedia")
 FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/html")
+
 INSTALL(DIRECTORY "${Torch_BINARY_DIR}/dok/" DESTINATION "${Torch_INSTALL_DOK_SUBDIR}")
+INSTALL(DIRECTORY "${Torch_BINARY_DIR}/dokmedia/" DESTINATION "${Torch_INSTALL_DOKMEDIA_SUBDIR}")
 INSTALL(DIRECTORY "${Torch_BINARY_DIR}/html/" DESTINATION "${Torch_INSTALL_HTML_SUBDIR}")
 
 ADD_CUSTOM_TARGET(documentation-dok
@@ -38,9 +41,11 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
   MARK_AS_ADVANCED(TORCH_DOK_HTML_FILES TORCH_DOK_HTML_TEMPLATE)
 
   SET(dokdstdir "${Torch_BINARY_DIR}/dok/${dstdir}")
+  SET(dokmediadstdir "${Torch_BINARY_DIR}/dokmedia/${dstdir}")
   SET(htmldstdir "${Torch_BINARY_DIR}/html/${dstdir}")
 
   FILE(MAKE_DIRECTORY "${dokdstdir}")
+  FILE(MAKE_DIRECTORY "${dokmediadstdir}")
   FILE(MAKE_DIRECTORY "${htmldstdir}")
 
   # Note: subdirectories are not handled (yet?)
@@ -66,10 +71,11 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
       
       SET(generatedfiles ${generatedfiles} "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html")
     ELSE(_ext_ STREQUAL ".dok")
-      ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/${_file_}${_ext_}"
+      ADD_CUSTOM_COMMAND(OUTPUT "${dokmediadstdir}/${_file_}${_ext_}" "${htmldstdir}/${_file_}${_ext_}"
         COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${dokfile}" "${htmldstdir}/${_file_}${_ext_}"
+        COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${dokfile}" "${dokmediadstdir}/${_file_}${_ext_}"
         DEPENDS "${dokfile}")
-      SET(generatedfiles ${generatedfiles} "${htmldstdir}/${_file_}${_ext_}")
+      SET(generatedfiles ${generatedfiles} "${dokmediadstdir}/${_file_}${_ext_}" "${htmldstdir}/${_file_}${_ext_}")
     ENDIF(_ext_ STREQUAL ".dok")
   ENDFOREACH(dokfile ${dokfiles})
 
