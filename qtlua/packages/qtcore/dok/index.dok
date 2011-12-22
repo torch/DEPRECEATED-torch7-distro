@@ -1,0 +1,392 @@
+QtCore Bindings
+
+The package ''qtcore'' 
+contains bindings for classes defined by the Qt module
+[[http://doc.trolltech.com/4.4/qtcore.html|QtCore]].
+
+Besides the capabilites reported below,
+all qt variants inherit a set 
+of [[..:qt:start#QVariants|default methods]],
+and all qt object classes inherit the capabilities from their 
+superclasses and automatically expose 
+[[..:qt:start#QObjects|properties, slots and signals]].
+
+
+====  qt.QByteArray ====
+#qbytearray
+
+Class ''qt.QByteArray'' represents Qt values of type 
+[[http://doc.trolltech.com/4.4/qbytearray.html|QByteArray]].
+These values are special because lua strings
+are automatically converted to QByteArray objects 
+when such objects are needed.
+
+==  qt.QByteArray(arg) ==
+
+Expression ''qt.QByteArray(arg)'' returns a new byte array object.
+Argument ''arg'' may be a lua string or a table containing 
+the integer values of the successive bytes.
+
+==  qbytearray:totable() ==
+
+Expression ''qbytearray:totable()'' returns a table
+containing the integer values of the bytes represented
+by the bytearray.
+
+====  qt.QCoreApplication ====
+#qcoreapplication
+
+The Qt class 
+[[http://doc.trolltech.com/4.4/qcoreapplication.html|QCoreApplication]]
+provides an event loop for console Qt applications and serves
+as a base class for class [[..:qtgui:start#qapplication|QApplication]].
+
+===  qt.QCoreApplication() ===
+
+Returns the unique instance of class ''QCoreApplication''.make i
+
+
+====  qt.QLine, qt.QLineF ====
+#qline
+
+Classes ''qt.QLine'' and ''qt.QLineF'' represent common Qt classes.
+Please refer to the Qt documentation for classes
+[[http://doc.trolltech.com/4.4/qline.html|QLine]] 
+and [[http://doc.trolltech.com/4.4/qlinef.html|QLineF]]
+for details.
+
+===  qt.QLine(table),  qt.QLineF(table) ===
+
+Expression ''qt.QLine(table)'' or ''qt.QLineF(table)'' 
+constructs a new ''qt.QLine'' or ''qt.QLineF'' object
+representing a segment whose endpoints coordinates
+are given by fields ''x1'', ''y1'', ''x2'', and ''y2''
+of table ''table''.
+
+===  qline:totable() ===
+
+Expression ''qline:totable()'' returns a table whose fields
+''x1'', ''y1'', ''x2'', and ''y2'' contain the coordinates of the
+endpoints of the ''qt.QLine'' or ''qt.QLineF'' object ''qline''.
+
+
+====  qt.QObject ====
+#qobject
+
+Qt class 
+[[http://doc.trolltech.com/4.4/qobject.html|QObject]].
+is the base class of all [[..:qt:start#QObjects|Qt objects]].
+All Qt object classes have separate metatables following the 
+same inheritance pattern as the corresponding Qt classes. 
+The metatable [[#qobject|qt.QObject]] sits at the top
+of this hierarchy.
+
+===  qobject:children() ===
+
+Expression ''qobject:children()'' 
+returns a Qt value of class [[#qvariantlist|qt.QVariantList]]
+containing all the children of object ''qobject''.
+
+
+===  qobject:deleteLater() ===
+#qobjectdeletelater
+
+Calling ''qobject:deleteLater()'' is the recommended way to delete 
+the Qt object ''qobject''. The object is not deleted immediately.
+The deletion occurs when the object thread is processing
+interactive events.
+
+
+===  qobject:dumpObjectInfo() ===
+
+Function ''qobject:dumpObjectInfo'' prints a human readable
+description of the object ''qobject''.
+This function only works when Qt and QtLua are 
+compiled in debug mode.
+
+
+===  qobject:dumpObjectTree() ===
+
+Function ''qobject:dumpObjectTree'' prints a human readable
+description of the object hierarchy containing ''qobject''.
+This function only works when Qt and QtLua are 
+compiled in debug mode.
+
+
+===  qobject.objectName ===
+#qobjectobjectname
+
+Property ''qobject.objectName'' contains a string 
+representing the name of a Qt object ''qobject''.
+Named children of a Qt object can be accessed
+by indexing the parent object.
+
+Consider for instance a variable ''a'' referring 
+to a Qt object that contains a child object named ''"b"''.
+The child object can be accessed using the Lua syntax ''a.b''.
+In case of name conflicts, property and methods have precedence
+over named children.
+
+===  qobject:parent() ===
+
+Expression ''qobject:parent()'' returns the parent of object ''qobject''
+if such a parent exists. Otherwise it returns ''nil''.
+
+
+
+
+====  qt.QPoint, qt.QPointF ====
+#qpoint
+
+Classes ''qt.QPoint'' and ''qt.QPointF'' represent common Qt classes.
+Please refer to the Qt documentation for classes
+[[http://doc.trolltech.com/4.4/qpoint.html|QPoint]] 
+and [[http://doc.trolltech.com/4.4/qpointf.html|QPointF]]
+for details.
+
+===  qt.QPoint(table),  qt.QPointF(table) ===
+
+Expression ''qt.QPoint(table)'' or ''qt.QPointF(table)''
+returns a new ''qt.QPoint'' or ''qt.QPointF'' object
+initialized with the contents of fields ''x'' and ''y''
+from table ''table''.
+
+===  qpoint:totable() ===
+
+Expression ''qpoint:totable()'' returns a table whose fields ''x'' and ''y''
+contain the coordinates of the ''qt.QPoint'' or ''qt.QPointF'' object ''qpoint''.
+
+
+====  qt.QRect, qt.QRectF ====
+#qrect
+
+Classes ''qt.QRect'' and ''qt.QRectF'' represent common Qt classes.
+Please refer to the Qt documentation for classes
+[[http://doc.trolltech.com/4.4/qrect.html|QRect]] 
+and [[http://doc.trolltech.com/4.4/qrectf.html|QRectF]]
+for details.
+
+===  qt.QRect(table),  qt.QRectF(table) ===
+
+Expression ''qt.QRect(table)'' or ''qt.QRectF(table)''
+returns a new ''qt.QRect'' or ''qt.QRectF'' object
+representing a rectangle whose origin is
+specified by table fields ''x'' and ''y''
+and whose width and height are specified
+by the table fields ''width'' and ''height''.
+
+===  qrect:totable() ===
+
+Expression ''qrect:totable()'' returns a table
+whose fields ''x'' and ''y'' contain the origin of the rectangle ''qrect''
+and whose fields ''width'' and ''height'' contain the width and
+height of the rectangle.
+
+
+====  qt.QSize, qt.QSizeF ====
+#qsize
+
+Classes ''qt.QSize'' and ''qt.QSizeF'' represent common Qt classes.
+Please refer to the Qt documentation for classes
+[[http://doc.trolltech.com/4.4/qsize.html|QSize]] 
+and [[http://doc.trolltech.com/4.4/qsizef.html|QSizeF]]
+for details.
+
+Example:
+<file>
+  require 'qtwidget'
+  widget = qt.QWidget()
+  widget.size = qt.QSize{width=320,height=200}
+  widget:show()
+</file>
+
+===  qt.QSize(table),  qt.QSizeF(table) ===
+
+Expression ''qt.QSize(table)'' or ''qt.QSizeF(table)''
+returns a new ''qt.QSize'' or ''qt.QSizeF'' object
+initialized with the contents of fields ''width'' and ''height''
+from table ''table''.
+
+===  qsize:totable() ===
+
+Expression ''qsize:totable()'' returns a table whose
+fields ''width'' and ''height'' are initialized with
+the width and height of the size ''qsize''.
+
+
+====  qt.QString ====
+#qstring
+
+Class ''qt.QString'' represents Qt values of type 
+[[http://doc.trolltech.com/4.4/qstring.html|QString]].
+These values are special because lua strings
+are automatically converted to string objects 
+when such objects are needed.
+
+==  qt.QString(arg) ==
+
+Expression ''qt.QString(arg)'' returns a new string object.
+Argument ''arg'' may be a lua string representing the string
+in locale encoding or a table containing the unicode values
+for the string characters.
+
+==  qstring:totable() ==
+
+Expression ''qurl:totable()'' returns a table
+containing the integer values of the successive 
+unicode characters represented by the string.
+
+====  qt.QStringList ====
+
+Class ''qt.QStringList'' represents Qt values of type 
+[[http://doc.trolltech.com/4.4/qstringlist.html|QStringList]] 
+containing a list of Qt strings.
+
+===  qt.QStringList(table) ===
+#qstringlist
+
+Expression ''qt.QStringList(table)'' creates a new ''QStringList''
+initialized with the strings contained in 
+table ''table'' at positions ''1'' to ''#table''.  
+When the argument ''table'' is omitted, 
+an empty string list is returned.
+
+Example
+<file>
+ require 'qt'
+ a = qt.QStringList{"a","b","c"}
+</file>
+
+===  qstringlist:totable() ===
+
+Expression ''qstringlist:totable()'' returns a Lua table
+containing the elements of ''qstringlist'' starting at position ''1''.
+
+Example
+<file>
+ require 'qt'
+ a = qt.QStringList{"a","b","c"}
+ return a:totable()[2]
+</file>
+
+
+====  qt.QTimer  ====
+#qtimer
+
+Class ''qt.QTimer'' is a subclass of [[#qobject|qt.QObject]]
+associated with Qt objects of class ''QTimer''.
+Please see the Qt documentation for class
+[[http://doc.trolltech.com/4.4/qtimer.html|QTimer]] 
+for an explanation of the available
+slots, signals and properties.
+
+Example:
+<file>
+require 'qt'
+timer = qt.QTimer()
+timer.singleShot = true
+qt.connect(timer,'timeout()', function() print("timeout") end)
+timer:start(2000) -- wait for 2 seconds...
+</file>
+
+
+===  qt.QTimer(parent) ===
+
+Expression ''qt.QTimer(parent)'' returns a 
+new ''QTimer'' object created from the current thread.
+Argument ''parent'' optionally specifies its parent.
+Note that the parent object must belong to the current thread as well.
+When argument ''parent'' is not specified, 
+the new timer is owned by the Lua interpreter
+and will be deleted by the Lua garbage collector
+when it is no longer referenced.
+
+
+====  qt.QUrl ====
+#qurl
+
+Class ''qt.QStringList'' represents Qt values of type 
+[[http://doc.trolltech.com/4.4/qurl.html|QUrl]] 
+containing an URL.
+
+==  qt.QUrl(string) ==
+
+Expression ''qt.QUrl(string)'' returns a 
+QUrl object from string ''string''.
+
+==  qurl:tostring() ==
+
+Expression ''qurl:tostring()'' returns a string 
+describing the QUrl object ''qurl''.
+
+
+====  qt.QVariantList ====
+#qvariantlist
+
+Class ''qt.QVariantList'' represents Qt values of type 
+[[http://doc.trolltech.com/4.4/qvariant.html#QVariantList-typedef|QVariantList]] 
+containing a list of values represented by class 
+[[http://doc.trolltech.com/4.4/qvariant.html|QVariant]].
+
+===  qt.QVariantList(table) ===
+
+Expression ''qt.QVariantList(table)'' creates a new ''QVariantList''
+initialized with the strings contained in 
+table ''table'' at positions ''1'' to ''#table''.  
+When the argument ''table'' is omitted, 
+an empty string list is returned.
+
+Example
+<file>
+ require 'qt'
+ a = qt.QVariantList{"a",32}
+</file>
+
+===  qvariantlist:totable() ===
+
+Expression ''qvariantlist:totable()'' returns a Lua table
+containing the elements of ''qstringlist'' starting at position ''1''.
+
+Example
+<file>
+ require 'qt'
+ a = qt.QVariantList{"a",2,3,4}
+ return a:totable()[2]
+</file>
+
+
+====  qt.QVariantMap ====
+#qvariantmap
+
+Class ''qt.QVariantList'' represents Qt values of type 
+[[http://doc.trolltech.com/4.4/qvariant.html#QVariantMap-typedef|QVariantMap]] 
+containing a dictionary of named values represented by class 
+[[http://doc.trolltech.com/4.4/qvariant.html|QVariant]].
+
+
+===  qt.QVariantMap(table) ===
+
+Expression ''qt.QVariantMap(table)'' creates a new ''QVariantMap''
+initialized with the contents of the table ''table''.
+When the argument ''table'' is omitted, 
+an empty map is returned.
+
+Example
+<file>
+ require 'qt'
+ a = qt.QVariantMap{a=23,b=45,c="foo"}
+</file>
+
+===  qvariantmap:totable() ===
+
+Expression ''qvariantmap:totable()'' returns a Lua table
+containing the contents of the dictonary ''qvariantmap''.
+
+Example
+<file>
+ require 'qt'
+ a = qt.QVariantMap{a=23,b=45,c="foo"}
+ t = a:totable()
+ return t.c
+</file>
+

@@ -10,4 +10,4 @@ MACRO_INSTALL_QTLUA_FILES(qtgui init.lua)
 MACRO_QT4_AUTOGEN(qtgui_GEN ${qtgui_SRC})
 MACRO_ADD_QTLUA_MODULE(libqtgui ${qtgui_SRC} ${qtgui_GEN})
 
-ADD_TORCH_HELP(qtgui "QT Interface")
+ADD_TORCH_DOK(dok qtgui "QT Interface" "GUI" 6.)

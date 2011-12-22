@@ -1,7 +1,3 @@
-# to be removed
-MACRO(ADD_TORCH_HELP)
-ENDMACRO(ADD_TORCH_HELP)
-
 # Workaround: CMake sux if we do not create the directories
 # This is completely incoherent compared to INSTALL(FILES ...)
 FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/dok")
@@ -93,16 +89,16 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
   ADD_DEPENDENCIES(documentation-dok ${dstdir}-dok-files)
 
   # Build the dok index if the package contains an index.dok file
-  IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")    
+  IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok")    
     ADD_CUSTOM_TARGET(${dstdir}-dok-index
       ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/dokindex.lua" "${Torch_SOURCE_DIR}/packages/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${Torch_BINARY_DIR}/dokindex.lua" "${Torch_BINARY_DIR}/dok/index.txt" "${Torch_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
       DEPENDS ${LUA_EXECUTABLE}
       "${Torch_SOURCE_DIR}/scripts/dokindex.lua"
-      "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok"
+      "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok"
       "${Torch_SOURCE_DIR}/packages/dok/init.lua")
     
     ADD_DEPENDENCIES(documentation-dok ${dstdir}-dok-index)
 
-  ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")
+  ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok")
   
 ENDMACRO(ADD_TORCH_DOK)

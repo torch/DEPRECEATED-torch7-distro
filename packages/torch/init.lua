@@ -61,10 +61,6 @@ torch.include('torch', 'File.lua')
 torch.include('torch', 'CmdLine.lua')
 torch.include('torch', 'Tester.lua')
 
-if not package.loaded.help then
-   require('help')
-end
-
 function torch.setdefaulttensortype(typename)
    assert(type(typename) == 'string', 'string expected')
    if torch.getconstructortable(typename) then

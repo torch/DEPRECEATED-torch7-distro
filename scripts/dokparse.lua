@@ -1,7 +1,7 @@
-print('now in dokparse')
-for k,v in ipairs(arg) do
-   print(k,v)
-end
+-- print('now in dokparse')
+-- for k,v in ipairs(arg) do
+--    print(k,v)
+-- end
 
 local dokutils = arg[1]
 local doktemplate = arg[2]
@@ -14,15 +14,11 @@ dofile(dokutils)
 local txt = io.open(src):read('*all')
 
 local sections = dok.parseSection(txt)
-for k,v in pairs(sections) do
-   print(k,v)
-end
 
 local toc = {}
 local function addtocsubsections(toc, section)
    table.insert(toc, string.format('<ul>'))
    for k,v in pairs(section.subsections) do
-      print(k,v.title,dok.link2wikilink(v.title))
       table.insert(toc, string.format('<li><a href="#%s">%s</a></li>', dok.link2wikilink(v.title), v.title))
       if v.subsections and #v.subsections > 0 then
          addtocsubsections(toc, v)

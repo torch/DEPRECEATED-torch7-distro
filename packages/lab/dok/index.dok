@@ -1,0 +1,493 @@
+Lab Package Reference Manual
+
+A Linear Algebra package consisting of Matlab-like  functions
+for manipulating [[..:torch:start#Tensor|Tensor]] objects.
+Functions fall into several types of categories:
+constructors like [[#zeros|zeros]], [[#ones|ones]]
+or extractors like  [[#diag|diag]]  and [[#triu|triu]],
+element-wise operations like [[#abs|abs]] and [[#pow|pow]],
+column or row-wise operations like [[#sum|sum]] and [[#max|max]],
+or matrix-wide operations like [[#trace|trace]] and [[#norm|norm]].
+
+
+
+======  Construction or extraction functions ======
+#construction
+
+=====  lab.new(...)       =====
+#new
+
+''x=lab.new([value],[value],...)'' returns a vector ''x'' initialized with the given values.
+
+''x=lab.new({[value],[value],...},{[value],[value],...},...)'' returns a matrix ''x'' initialized with the given values.
+
+<file>
+> print(lab.new(1,2,3))
+
+ 1
+ 2
+ 3
+[torch.Tensor of dimension 3]
+
+> print(lab.new({1,2},{3,4},{5,6}))
+
+ 1  2
+ 3  4
+ 5  6
+[torch.Tensor of dimension 3x2]
+
+</file>
+
+
+=====  lab.cat(x_1,x_2,..,x_n,[dimension])       =====
+#cat
+
+''x=lab.cat(x_1,x_2,...,x_n,[dimension])'' returns a vector ''x'' which is the concatenation of vectors x_1,..x_n along dimension ''dimension''. 
+
+If ''dimension'' is not specified it is the last dimension of x_i.
+
+For all x_i, the other dimensions have to be equal.
+
+Examples:
+<file>
+> print(lab.cat(lab.ones(3),lab.zeros(2)))
+
+ 1
+ 1
+ 1
+ 0
+ 0
+[torch.Tensor of dimension 5]
+
+
+> print(lab.cat(lab.ones(2,3),lab.zeros(2,2)))
+
+ 1  1  1  0  0
+ 1  1  1  0  0
+[torch.Tensor of dimension 2x5]
+
+
+> print(lab.cat(lab.ones(2,2),lab.zeros(2,2)))
+
+ 1  1  0  0
+ 1  1  0  0
+[torch.Tensor of dimension 2x4]
+
+> print(lab.cat(lab.ones(2,2),lab.zeros(2,2),1))
+
+ 1  1
+ 1  1
+ 0  0
+ 0  0
+[torch.Tensor of dimension 4x2]
+
+> print(lab.cat(lab.ones(2,2),lab.zeros(2,2),lab.rand(2,3)))
+
+ 1.0000  1.0000  0.0000  0.0000  0.9978  0.1596  0.8195
+ 1.0000  1.0000  0.0000  0.0000  0.2049  0.2406  0.8279
+[torch.Tensor of dimension 2x7]
+
+
+</file>
+
+
+
+
+=====  lab.diag(x)       =====
+#diag
+
+''y=lab.diag(x)'' when x is of dimension 1 returns a diagonal matrix with diagonal elements constructed from x.
+
+''y=lab.diag(x)'' when x is of dimension 2 returns a tensor of dimension 1
+with elements constructed from the diagonal of x.
+
+''y=lab.diag(x,k)'' returns the k-th diagonal of x,
+wher k=0 is the main diagonal, k>0 is above the main diagonal and k<0 
+is below the main diagonal.
+
+=====  lab.eye(n)         =====
+#eye
+
+''y=lab.eye(n)'' returns the n-by-n identity matrix.
+
+''y=lab.eye(m,n)'' returns an m-by-n identity matrix with ones on the diagonal and zeros elsewhere.
+
+
+=====  lab.linspace(x1,x2)     =====
+''y=lab.linspace(x1,x2)'' returns a one-dimensional tensor of size 100 equally spaced points between x1 and x2.
+
+''y=lab.linspace(x1,x2,n)'' returns a one-dimensional tensor of n equally spaced points between x1 and x2.
+
+
+=====  lab.logspace(x)    =====
+
+''y=lab.logspace(x1,x2)'' returns a one-dimensional tensor of 50 logarithmically eqally spaced points between x1 and x2.
+
+''y=lab.logspace(x1,x2,n)'' returns a one-dimensional tensor of n logarithmically equally spaced points between x1 and x2.
+
+=====  lab.ones(n)        =====
+#ones
+
+''y=lab.ones(n)'' returns a one-dimensional tensor of size n filled with ones.
+
+''y=lab.ones(m,n)'' returns a mxn tensor filled with ones.
+
+=====  lab.rand(x)        =====
+#rand
+
+''y=lab.rand(n)'' returns a one-dimensional tensor of size n filled with random numbers from a uniform distribution on the interval (0,1).
+
+''y=lab.rand(m,n)'' returns a mxn tensor of random numbers from a uniform distribution on the interval (0,1).
+
+=====  lab.randn(x)       =====
+#randn
+
+''y=lab.randn(n)'' returns a one-dimensional tensor of size n filled with random numbers from a normal distribution with mean zero and variance one.
+
+''y=lab.randn(m,n)'' returns a mxn tensor of random numbers from a normal distribution with mean zero and variance one.
+
+=====  lab.range(n,m)       =====
+
+''y=lab.range(n,m)'' returns a tensor of size m-n+1x1 with integer 
+values n to m.
+
+<file>
+> print(lab.range(2,5))
+
+ 2
+ 3
+ 4
+ 5
+[torch.Tensor of dimension 4]
+</file>
+
+=====  lab.randperm(n)      =====
+
+''y=lab.randperm(n)'' returns a randomly ordered nx1 tensor of the integers from 1 to n.
+
+=====  lab.repmat(x,m,n)      =====
+
+''y=lab.repmat(x,m,n)'' returns a tensor y consisting of mxn tiled copies of x.
+
+=====  lab.reshape(x,m,n)     =====
+
+''y=lab.reshape(x,m,n)'' returns an mxn tensor y whose elements
+are taken columwise from x, which must have m*n elements.  
+
+=====  lab.tril(x) =====
+
+''y=lab.tril(x)'' returns the lower triangular part of x, the other elements of y are set to 0.
+
+''lab.tril(x,k)'' returns the elements on and below the k-th diagonal of x as non-zero.   k=0 is the main diagonal, k>0 is above the main diagonal and k<0 
+is below the main diagonal.
+
+=====  lab.triu(x) =====
+#triu
+
+''y=lab.triu(x)'' returns the upper triangular part of x,
+the other elements of y are set to 0.
+
+''lab.triu(x,k)'' returns the elements on and above the k-th diagonal of x as non-zero.   k=0 is the main diagonal, k>0 is above the main diagonal and k<0 
+is below the main diagonal.
+
+
+
+=====  lab.zeros(x) =====
+#zeros
+
+''y=lab.zeros(n)'' returns a one-dimensional tensor of size n filled with zeros.
+
+''y=lab.zeros(m,n)'' returns a mxn tensor filled with zeros.
+
+
+
+
+======  Element-wise operations  ======
+#elementwise
+
+=====  lab.abs(x) =====
+#abs
+
+''y=lab.abs(x)'' returns the absolute values of the elements of x.
+
+=====  lab.acos(x) =====
+
+''y=lab.acos(x)'' returns the arcosine of the elements of x.
+
+=====  lab.asin(x)       =====
+
+''y=lab.asin(x)'' returns the arcsine  of the elements of x.
+
+=====  lab.atan(x)       =====
+
+''y=lab.atan(x)'' returns the arctangent of the elements of x.
+
+=====  lab.ceil(x)       =====
+
+''y=lab.ceil(x)'' returns the values of the elements of x rounded up to the nearest integers.
+
+=====  lab.cos(x)        =====
+
+''y=lab.cos(x)'' returns the cosine of the elements of x.
+
+=====  lab.cosh(x)       =====
+
+''y=lab.cosh(x)'' returns the hyberbolic cosine of the elements of x.
+
+
+=====  lab.exp(x) =====
+
+''y=lab.exp(x)'' returns, for each element in x,  e (the base of natural logarithms) raised to the power of the element in x.
+
+
+=====  lab.floor(x) =====
+
+''y=lab.floor(x)'' returns the values of the elements of x rounded down to the nearest integers.
+
+
+=====  lab.log(x)         =====
+
+''y=lab.log(x)'' returns the natural logarithm of the elements of x.
+
+=====  lab.map(x,f) =====
+#map
+
+''y = lab.map(x,f)'' returns a new ''Tensor'' ''f(x)'': ''f()'' is applied successively to each element of ''x''.
+
+<file>
+> x = lab.rand(5,5)
+> print(x)
+
+ 0.2828  0.2709  0.0191  0.1217  0.0161
+ 0.4847  0.6586  0.3027  0.6749  0.4945
+ 0.2003  0.9536  0.3208  0.9612  0.9265
+ 0.5415  0.1827  0.6799  0.3222  0.7285
+ 0.7835  0.5920  0.8516  0.2312  0.1857
+[torch.Tensor of dimension 5x5]
+
+> = lab.map(x, math.cos)
+
+ 0.9603  0.9635  0.9998  0.9926  0.9999
+ 0.8848  0.7909  0.9545  0.7807  0.8802
+ 0.9800  0.5788  0.9490  0.5725  0.6007
+ 0.8569  0.9834  0.7776  0.9486  0.7462
+ 0.7084  0.8298  0.6588  0.9734  0.9828
+[torch.Tensor of dimension 5x5]
+</file>
+
+''f'' must return a number or ''nil''. If it returns ''nil'', the corresponding value in the returned ''Tensor'' will be ''0''.
+This behavior is slightly different from the behavior of [[..:torch:start#TensorApplyFunction|map]] functions provided in the [[..:torch:start|torch'' package]],
+which do not modify the destination tensor if the function returns ''nil''.
+<file>
+> x = lab.rand(5,5)
+> print(x)
+
+ 0.0446  0.5119  0.4007  0.9743  0.0957
+ 0.4649  0.7575  0.4963  0.5474  0.5009
+ 0.5523  0.8003  0.2841  0.0048  0.9853
+ 0.5080  0.1222  0.3049  0.8647  0.2566
+ 0.6863  0.8243  0.3053  0.9196  0.6050
+[torch.Tensor of dimension 5x5]
+
+> = lab.map(x, function(z)
+>> if z > 0.5 then return 1 end -- nothing returned otherwise!
+>> end
+>> )
+
+ 0  1  0  1  0
+ 0  1  0  1  1
+ 1  1  0  0  1
+ 1  0  0  1  0
+ 1  1  0  1  1
+[torch.Tensor of dimension 5x5]
+</file>
+
+=====  lab.pow(x)         =====
+#pow
+
+''y=lab.pow(x,n)'' returns the elements of x to the power of n.
+
+
+=====  lab.sin(x)         =====
+
+''y=lab.sin(x)'' returns the sine  of the elements of x.
+
+=====  lab.sinh(x)        =====
+
+''y=lab.sinh(x)'' returns the hyperbolic sine of the elements of x.
+
+
+
+=====  lab.sqrt(x) =====
+
+''y=lab.sqrt(x)'' returns the square root of the elements of x.
+
+
+
+=====  lab.tan(x) =====
+
+''y=lab.abs(x)'' returns the tangent of the elements of x.
+
+=====  lab.tanh(x) =====
+
+''y=lab.tanh(x)'' returns the hyperbolic tangent of the elements of x.
+
+
+
+======  Column or row-wise operations  (dimension-wise operations) ======
+
+=====  lab.cross(a,b)      =====
+
+''y=lab.cross(a,b)'' returns the cross product of the tensors a and b.
+a and b must be 3 element vectors. 
+
+''y=cross(a,b)'' returns the cross product of a and b along the first dimension of length 3.
+
+''y=cross(a,b,n)'', where a and b returns the cross
+product of vectors in dimension n of a and b. 
+a and b must have the same size, 
+and both a:size(n) and b:size(n) must be 3.
+
+
+=====  lab.cumprod(x)    =====
+
+''y=lab.cumprod(x)'' returns the cumulative product of the elements of x, performing the operation over the first dimension.
+
+''y=lab.cumprod(x,n)'' returns the cumulative product of the elements of x, performing the operation over dimension n.
+
+=====  lab.cumsum(x)     =====
+
+''y=lab.cumsum(x)'' returns the cumulative product of the elements of x, performing the operation over the first dimension.
+
+''y=lab.cumsum(x,n)'' returns the cumulative product of the elements of x, performing the operation over dimension n.
+
+=====  lab.max(x) =====
+#max 
+
+''y,i=lab.max(x)'' returns a tensor y of the largest element in 
+each column of x, and a tensor i of  their corresponding indices in x.
+
+''y,i=lab.max(x,2)'' performs the max operation for each row and
+''y,i=lab.max(x,n)'' performs the max operation over the dimension n.
+
+
+=====  lab.mean(x) =====
+
+''y=lab.mean(x)'' returns a tensor y of the mean of the elements in 
+each column of x.
+
+''y=lab.mean(x,2)'' performs the mean operation for each row and
+''y=lab.mean(x,n)'' performs the mean operation over the dimension n.
+
+=====  lab.min(x) =====
+
+''y,i=lab.min(x)'' returns a tensor y of the smallest element in 
+each column of x, and a tensor i of  their corresponding indices in x.
+
+''y,i=lab.min(x,2)'' performs the min operation for each row and
+''y,i=lab.min(x,n)'' performs the min operation over the dimension n.
+
+
+=====  lab.prod(x)        =====
+
+''y=lab.prod(x)'' returns a tensor y of the product of the elements in 
+each column of x. 
+
+''y=lab.prod(x,2)'' performs the prod operation for each row and
+''y=lab.prod(x,n)'' performs the prod operation over the dimension n.
+
+
+=====  lab.sort(x) =====
+
+''y,i=lab.sort(x)'' returns a tensor y of the sorted 
+columns of x, and a tensor i of the corresponding indices from x.
+
+''y,i=lab.sort(x,2)'' performs the sort operation for each row and
+''y,i=lab.sort(x,n)'' performs the sort operation over the dimension n.
+
+
+=====  lab.std(x) =====
+
+''y=lab.std(x)'' returns a tensor y of the standard deviation of the elements in 
+each column of x.
+
+''lab.std(x)'' normalizes by (n-1) where n is the number of elements.  This
+makes lab.sum(lab.pow(lab.std(x),2)) 
+the best unbiased estimate of the variance if x
+is a sample from a normal distribution.
+
+''y=lab.std(x,true)'' performs the std operation normalizing by n instead of n-1.
+
+''y=lab.std(x,false)'' performs the std operation normalizing by n-1.
+
+''y=lab.std(x,flag,n)'' performs the std operation over the dimension n.
+
+
+=====  lab.sum(x) =====
+#sum
+
+''y=lab.sum(x)'' returns a tensor y of the sum of the elements in 
+each column of x.
+
+''y=lab.sum(x,2)'' performs the sum operation for each row and
+''y=lab.sum(x,n)'' performs the sum operation over the dimension n.
+
+
+
+=====  lab.var(x) =====
+
+''y=lab.var(x)'' returns a tensor y of the standard deviation of the elements in 
+each column of x.
+
+''lab.var(x)'' normalizes by (n-1) where n is the number of elements.  This
+makes lab.sum(lab.var(x)) 
+the best unbiased estimate of the variance if x
+is a sample from a normal distribution.
+
+''y=lab.var(x,true)'' performs the var operation normalizing by n instead of n-1.
+
+''y=lab.var(x,false)'' performs the var operation normalizing by n-1.
+
+''y=lab.var(x,flag,n)'' performs the var operation over the dimension n.
+
+
+
+======  Matrix-wide operations  (tensor-wide operations) ======
+
+=====  lab.norm(x)        =====
+#norm 
+
+''y=lab.norm(x)'' returns the 2-norm of the tensor x. 
+
+''y=lab.norm(x,p)'' returns the p-norm of the tensor x. 
+
+
+=====  lab.dist(x,y)        =====
+#dist
+
+''y=lab.dist(x,y)'' returns the 2-norm of (x-y). 
+
+''y=lab.dist(x,y,p)'' returns the p-norm of (x-y). 
+
+=====  lab.numel(x)      =====
+
+''y=lab.numel(x)'' returns the count of the number of elements in the matrix x.
+
+=====  lab.trace(x) =====
+#trace
+
+''y=lab.trace(x)'' returns the trace (sum of the diagonal elements) 
+of a matrix x. This is  equal  to the sum of the eigenvalues of x.
+The returned value ''y'' is a number, not a tensor.
+
+
+
+
+
+
+
+
+
+
+
+

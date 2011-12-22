@@ -53,7 +53,7 @@ IF (WITH_QTLUA_IDE AND WITH_QTLUA)
   TARGET_LINK_LIBRARIES(libqtide ${QLUA_LIBRARIES})
   
   MACRO_INSTALL_QTLUA_FILES(qtide init.lua prefs.lua prefs.ui)
-  ADD_TORCH_HELP(qtide "QT Interface")
+  ADD_TORCH_DOK(dok qtide "QT Interface" "QT IDE for Lua" 6.)
   
 ENDIF(WITH_QTLUA_IDE AND WITH_QTLUA)
     

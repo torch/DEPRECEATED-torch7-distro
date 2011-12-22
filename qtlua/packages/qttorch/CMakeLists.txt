@@ -13,4 +13,4 @@ MACRO_ADD_QTLUA_MODULE(libqttorch ${qttorch_SRC})
 
 TARGET_LINK_LIBRARIES(libqttorch luaT TH)
 
-ADD_TORCH_HELP(qttorch "QT Interface")
+ADD_TORCH_DOK(dok qttorch "QT Interface" "Torch Tensor interface" 6.)

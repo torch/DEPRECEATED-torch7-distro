@@ -11,4 +11,4 @@ MACRO_INSTALL_QTLUA_FILES(qtuiloader init.lua test.lua test.ui)
 
 MACRO_ADD_QTLUA_MODULE(libqtuiloader ${qtuiloader_SRC})
 
-ADD_TORCH_HELP(qtuiloader "QT Interface")
+ADD_TORCH_DOK(dok qtuiloader "QT Interface" "QT Designer UI files loader" 6.)

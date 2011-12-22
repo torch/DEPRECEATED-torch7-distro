@@ -9,4 +9,4 @@ MACRO_INSTALL_QTLUA_FILES(qtcore init.lua)
 
 MACRO_ADD_QTLUA_MODULE(libqtcore ${qtcore_SRC})
 
-ADD_TORCH_HELP(qtcore "QT Interface")
+ADD_TORCH_DOK(dok qtcore "QT Interface" "Core interface" 6.)

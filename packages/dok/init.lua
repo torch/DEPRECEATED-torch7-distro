@@ -224,7 +224,8 @@ function dok.dok2html(txt)
                                           return '\018' .. #code .. '\018'
                                        end)
 
-   txt = txt:gsub('<file>(.-)</file>', function(str)
+   -- note: we do not support code-specific colorization yet
+   txt = txt:gsub('<file.->(.-)</file>', function(str)
                                           table.insert(file, str)
                                           return '\019' .. #file .. '\019'
                                        end)

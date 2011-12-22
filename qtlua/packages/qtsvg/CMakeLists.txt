@@ -14,4 +14,4 @@ MACRO_ADD_QTLUA_MODULE(libqtsvg ${qtsvg_SRC} ${qtsvg_GEN})
 
 MACRO_INSTALL_QTLUA_FILES(qtsvg init.lua)
 
-ADD_TORCH_HELP(qtsvg "QT Interface")
+ADD_TORCH_DOK(dok qtsvg "QT Interface" "SVG" 6.)

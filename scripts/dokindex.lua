@@ -1,7 +1,7 @@
-print('now in dokindex')
-for k,v in ipairs(arg) do
-   print(k,v)
-end
+-- print('now in dokindex')
+-- for k,v in ipairs(arg) do
+--    print(k,v)
+-- end
 
 local dokutils = arg[1]
 local doktemplate = arg[2]
