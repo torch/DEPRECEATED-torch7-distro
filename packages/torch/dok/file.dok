@@ -1,33 +1,31 @@
-File
-
-#File
+===== File =====
 
 This is an //abstract// class. It defines most methods implemented by its
-child classes, like [[#DiskFile|DiskFile]],
-[[#MemoryFile|MemoryFile]] and [[#PipeFile|PipeFile]].
+child classes, like [[DiskFile|DiskFile]],
+[[MemoryFile|MemoryFile]] and [[PipeFile|PipeFile]].
 
 Methods defined here are intended for basic read/write functionalities.
-Read/write methods might write in [[#FileAscii|ASCII]] mode or
-[[#FileBinary|binary]] mode.
+Read/write methods might write in [[#torch.File.ascii|ASCII]] mode or
+[[#torch.File.binary|binary]] mode.
 
-In [[#FileAscii|ASCII]] mode, numbers are converted in human readable
+In [[#torch.File.ascii|ASCII]] mode, numbers are converted in human readable
 format (characters). Booleans are converted into ''0'' (false) or ''1'' (true).
-In [[#FileBinary|binary]] mode, numbers and boolean are directly encoded
+In [[#torch.File.binary|binary]] mode, numbers and boolean are directly encoded
 as represented in a register of the computer. While not being human
 readable and less portable, the binary mode is obviously faster.
 
-In [[#FileAscii|ASCII]] mode, if the default option
-[[#FileAutoSpacing|autoSpacing()]] is chosen, a space will be generated
+In [[#torch.File.ascii|ASCII]] mode, if the default option
+[[#torch.File.autoSpacing|autoSpacing()]] is chosen, a space will be generated
 after each written number or boolean. A carriage return will also be added
 after each call to a write method. With this option, the spaces are
 supposed to exist while reading. This option can be deactivated with
-[[#FileNoAutoSpacing|noAutoSpacing()]].
+[[#torch.File.noAutoSpacing|noAutoSpacing()]].
 
 A ''Lua'' error might or might be not generated in case of read/write error
 or problem in the file. This depends on the choice made between
-[[#FileQuiet|quiet()]] and [[#FilePedantic|pedantic()]] options. It
+[[#torch.File.quiet|quiet()]] and [[#FilePedantic|pedantic()]] options. It
 is possible to query if an error occured in the last operation by calling
-[[#FileHasError|hasError()]].
+[[#torch.File.hasError|hasError()]].
 
 =====  Read methods =====
 #FileReadMethods
@@ -120,7 +118,7 @@ respect the dependencies between objects.
 
 Interestingly, if the ''File'' is a [[#MemoryFile|MemoryFile]], it allows
 the user to easily make a //clone// of any serializable object:
-<file>
+<file lua>
 file = torch.MemoryFile() -- creates a file in memory
 file:writeObject(object) -- writes the object into file
 file:seek(1) -- comes back at the beginning of the file
@@ -137,7 +135,7 @@ Note that objects which were [[#FileWriteObject|written]] with the same
 reference have still the same reference after loading.
 
 Example:
-<file>
+<file lua>
 -- creates an array which contains twice the same tensor  
 array = {}
 x = torch.Tensor(1)
