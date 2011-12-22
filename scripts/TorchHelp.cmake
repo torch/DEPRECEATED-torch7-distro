@@ -8,6 +8,15 @@ INSTALL(DIRECTORY "${Torch_BINARY_DIR}/dok/" DESTINATION "${Torch_INSTALL_DOK_SU
 INSTALL(DIRECTORY "${Torch_BINARY_DIR}/dokmedia/" DESTINATION "${Torch_INSTALL_DOKMEDIA_SUBDIR}")
 INSTALL(DIRECTORY "${Torch_BINARY_DIR}/html/" DESTINATION "${Torch_INSTALL_HTML_SUBDIR}")
 
+# Files for HTML creation
+SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_DIR}/scripts/doktemplate.html"
+  CACHE FILEPATH "List of files needed for HTML doc creation")
+
+SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_DIR}/scripts/doctorch.css;${Torch_SOURCE_DIR}/scripts/torchlogo.png"
+  CACHE STRING "HTML template needed for HTML doc creation")
+
+MARK_AS_ADVANCED(TORCH_DOK_HTML_FILES TORCH_DOK_HTML_TEMPLATE)
+
 ADD_CUSTOM_TARGET(documentation-dok
   ALL
   COMMENT "Built documentation")
@@ -15,9 +24,9 @@ ADD_CUSTOM_TARGET(documentation-dok
 # copy extra files needed for HTML doc (main index)
 SET(htmldstdir "${Torch_BINARY_DIR}/html")
 SET(generatedfiles)
+
 FOREACH(extrafile ${TORCH_DOK_HTML_FILES}) 
   GET_FILENAME_COMPONENT(_file_ "${extrafile}" NAME)
-  
   ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/${_file_}"
     COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${extrafile}" "${htmldstdir}/${_file_}"
     DEPENDS "${extrafile}")
@@ -30,15 +39,6 @@ ADD_CUSTOM_TARGET(main-index-dok-files
 ADD_DEPENDENCIES(documentation-dok main-index-dok-files)
 
 MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
-
-  # Files for HTML creation
-  SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_DIR}/scripts/doktemplate.html"
-    CACHE FILEPATH "List of files needed for HTML doc creation")
-  
-  SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_DIR}/scripts/doctorch.css;${Torch_SOURCE_DIR}/scripts/torchlogo.png"
-    CACHE STRING "HTML template needed for HTML doc creation")
-
-  MARK_AS_ADVANCED(TORCH_DOK_HTML_FILES TORCH_DOK_HTML_TEMPLATE)
 
   SET(dokdstdir "${Torch_BINARY_DIR}/dok/${dstdir}")
   SET(dokmediadstdir "${Torch_BINARY_DIR}/dokmedia/${dstdir}")
