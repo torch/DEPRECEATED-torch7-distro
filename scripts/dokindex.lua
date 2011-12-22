@@ -1,23 +1,14 @@
-print('now in dokindex')
-for k,v in ipairs(arg) do
-   print(k,v)
-end
+local dokutils = arg[1]
+local doktemplate = arg[2]
+local dokcurrentindex = arg[3]
+local dokindex = arg[4]
+local htmlindex = arg[5]
+local package = arg[6]
+local section = arg[7]
+local title = arg[8]
+local rank = arg[9]
 
-local doktemplate = arg[1]
-local dokcurrentindex = arg[2]
-local dokindex = arg[3]
-local package = arg[4]
-local section = arg[5]
-local title = arg[6]
-local rank = arg[7]
-
--- "${TORCH_DOK_HTML_TEMPLATE}"
--- "${TORCH_BINARY_DIR}/dokindex.txt"
--- "${TORCH_BINARY_DIR}/dok/index.txt"
--- "${package}"
--- "${section}"
--- "${title}"
--- "${rank}"
+dofile(dokutils)
 
 -- find out rank/package rank
 local ranksec = tonumber(rank:match('^(%d+)%.')) or 111111
@@ -58,10 +49,9 @@ table.sort(sortedsections, function(sa, sb)
                            end)
 
 -- sort packages (for each section)
-local txt = {}
+local txtdok = {}
 for _,section in ipairs(sortedsections) do
-   table.insert(txt, string.format('<h2>%s</h2>', section.secname))
-   table.insert(txt, '<ul>\n')
+   table.insert(txtdok, string.format('===== %s =====', section.secname))
    local sortedpackages = {}
    for k,v in pairs(section.packages) do
       table.insert(sortedpackages, {pkgname=k, title=v.title, rank=v.rank})      
@@ -71,18 +61,23 @@ for _,section in ipairs(sortedsections) do
                               end)
 
    for _,package in ipairs(sortedpackages) do
-      table.insert(txt, string.format('  <li><a href="%s/index.html">%s</a></li>', package.pkgname, package.title))
+      table.insert(txtdok, string.format('  * [[.:%s:|%s]]', package.pkgname, package.title))
    end
-   table.insert(txt, '</ul>')
 end
+
+-- write the dok
+table.insert(txtdok, '\n')
+txtdok = table.concat(txtdok, '\n')
+local f = io.open(dokindex, 'w')
+f:write(txtdok)
+f:close()
 
 -- write the html
 local templatehtml = io.open(doktemplate):read('*all')
-
-templatehtml = templatehtml:gsub('%%CONTENTS%%', table.concat(txt, '\n'))
+txthtml = dok.dok2html(txtdok)
+templatehtml = templatehtml:gsub('%%CONTENTS%%', txthtml)
 templatehtml = templatehtml:gsub('%%TITLE%%', 'Torch7 Documentation')
 templatehtml = templatehtml:gsub('%%TOC%%', '')
-
-local f = io.open(dokindex, 'w')
+local f = io.open(htmlindex, 'w')
 f:write(templatehtml)
 f:close()

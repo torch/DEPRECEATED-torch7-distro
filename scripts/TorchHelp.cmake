@@ -78,10 +78,11 @@ MACRO(ADD_TORCH_DOK package section title rank)
   # Build the dok index if the package contains an index.dok file
   IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")    
     ADD_CUSTOM_TARGET(${package}-dok-index
-      ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/dokindex.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${Torch_BINARY_DIR}/dokindex.lua" "${Torch_BINARY_DIR}/html/index.html" "${package}" "${section}" "${title}" "${rank}"
+      ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/dokindex.lua" "${Torch_SOURCE_DIR}/packages/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${Torch_BINARY_DIR}/dokindex.lua" "${Torch_BINARY_DIR}/dok/index.txt" "${Torch_BINARY_DIR}/html/index.html" "${package}" "${section}" "${title}" "${rank}"
       DEPENDS ${LUA_EXECUTABLE}
       "${Torch_SOURCE_DIR}/scripts/dokindex.lua"
-      "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")
+      "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok"
+      "${Torch_SOURCE_DIR}/packages/dok/init.lua")
     
     ADD_DEPENDENCIES(documentation-dok ${package}-dok-index)
 
