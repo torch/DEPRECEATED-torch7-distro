@@ -31,5 +31,6 @@ SET(luasrc
   "${CMAKE_CURRENT_BINARY_DIR}/init.lua")
 
 ADD_TORCH_PACKAGE(paths "${src}" "${luasrc}" "System")
+ADD_TORCH_DOK(dok paths "Fundamentals" "Paths and files utilities" 1.)
 
 TARGET_LINK_LIBRARIES(paths ${LUA_LIBRARIES})

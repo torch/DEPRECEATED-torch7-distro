@@ -4,7 +4,7 @@ SET(luasrc init.lua File.lua Tensor.lua CmdLine.lua Tester.lua)
 SET(src ${src})
   
 ADD_TORCH_PACKAGE(torch "${src}" "${luasrc}" "Basics")
-ADD_TORCH_DOK(help torch "Fundamentals" "Torch package" 1.1)
+ADD_TORCH_DOK(dok torch "Fundamentals" "Torch package" 1.1)
 
 TARGET_LINK_LIBRARIES(torch luaT TH)
 

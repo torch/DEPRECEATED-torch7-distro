@@ -1,0 +1,95 @@
+Random Number Package
+
+This package provides accurate mathematical random generation, based on
+[[http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html|Mersenne Twister]]
+random number generator.
+
+======  Seed Handling ======
+
+If no seed is provided to the random generator (using
+[[#RandomSeed|seed()]] or [[#RandomManualSeed|manualSeed()]]), a
+random seed will be set according to [[#RandomSeed|seed()]] the first
+time a random number is generated.
+
+Initial seed can be obtained using [[#RandomInitialSeed|initialSeed()]].
+
+Setting a particular seed allows the user to (re)-generate a particular serie of
+random numbers. Example:
+<file>
+> random.manualSeed(123)
+> = random.uniform()
+0.69646918727085
+> return  random.uniform()
+0.71295532141812
+> return  random.uniform()
+0.28613933874294
+> random.manualSeed(123)
+> return  random.uniform()
+0.69646918727085
+> return  random.uniform()
+0.71295532141812
+> return  random.uniform()
+0.28613933874294
+> random.manualSeed(random.initialSeed())
+> return  random.uniform()
+0.69646918727085
+> return  random.uniform()
+0.71295532141812
+> return  random.uniform()
+0.28613933874294
+</file>
+
+=====  [number] seed() =====
+#RandomSeed
+
+Set the seed of the random number generator according to the time of the
+computer. Granularity is seconds. Returns the seed obtained.
+
+=====  manualSeed(number) =====
+#RandomManualSeed
+
+Set the seed of the random number generator to the given ''number''.
+
+=====  initialSeed() =====
+#RandomInitialSeed
+
+Returns the initial seed used to initialize the random generator.
+
+======  [number] random() ======
+
+Returns a 32 bit integer random number.
+
+======  [number] uniform([a],[b]) ======
+
+Returns a random real number according to uniform distribution on [a,b[. By default ''a'' is 0 and ''b'' is 1.
+
+======  [number] normal([mean],[stdv]) ======
+
+Returns a random real number according to a normal distribution with the given ''mean'' and standard deviation ''stdv''.
+''stdv'' must be positive.
+
+======  [number] exponential(lambda) ======
+
+Returns a random real number according to the exponential distribution
+''p(x) = lambda * exp(-lambda * x)''
+
+======  [number] cauchy(median, sigma) ======
+
+Returns a random real number according to the Cauchy distribution
+''p(x) = sigma/(pi*(sigma^2 + (x-median)^2))''
+
+======  [number] logNormal(mean, stdv) ======
+
+Returns a random real number according to the log-normal distribution, with
+the given ''mean'' and standard deviation ''stdv''.
+''stdv'' must be positive.
+
+======  [number] geometric(p) ======
+
+Returns a random integer number according to a geometric distribution
+''p(i) = (1-p) * p^(i-1)''. ''p'' must satisfy ''0 < p < 1''.
+
+======  [number] bernouilli([p]) ======
+
+Returns ''1'' with probability ''p'' and ''0'' with probability ''1-p''. ''p'' must satisfy ''0 < p < 1''.
+By default ''p'' is equal to ''0.5''.
