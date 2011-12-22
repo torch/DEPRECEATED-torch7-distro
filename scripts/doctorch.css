@@ -119,7 +119,9 @@ a:visited {
 
 .torchdoc #toc {
           font-size: 70%;
-          text-align:right;
+          width: 100px;
+          float: right;
+          background-color: #fff;
           padding-bottom: 1em;
           padding-top: 1em;
 }

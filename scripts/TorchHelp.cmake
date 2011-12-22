@@ -13,7 +13,24 @@ ADD_CUSTOM_TARGET(documentation-dok
   ALL
   COMMENT "Built documentation")
 
-MACRO(ADD_TORCH_DOK package section title rank)
+# copy extra files needed for HTML doc (main index)
+SET(htmldstdir "${Torch_BINARY_DIR}/html")
+SET(generatedfiles)
+FOREACH(extrafile ${TORCH_DOK_HTML_FILES}) 
+  GET_FILENAME_COMPONENT(_file_ "${extrafile}" NAME)
+  
+  ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/${_file_}"
+    COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${extrafile}" "${htmldstdir}/${_file_}"
+    DEPENDS "${extrafile}")
+  SET(generatedfiles ${generatedfiles} "${htmldstdir}/${_file_}")
+ENDFOREACH(extrafile ${TORCH_DOK_HTML_FILES}) 
+
+# the doc depends on all these files to be generated
+ADD_CUSTOM_TARGET(main-index-dok-files
+  DEPENDS ${generatedfiles})
+ADD_DEPENDENCIES(documentation-dok main-index-dok-files)
+
+MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
 
   # Files for HTML creation
   SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_DIR}/scripts/doktemplate.html"
@@ -24,15 +41,15 @@ MACRO(ADD_TORCH_DOK package section title rank)
 
   MARK_AS_ADVANCED(TORCH_DOK_HTML_FILES TORCH_DOK_HTML_TEMPLATE)
 
-  SET(dokdstdir "${Torch_BINARY_DIR}/dok/${package}")
-  SET(htmldstdir "${Torch_BINARY_DIR}/html/${package}")
+  SET(dokdstdir "${Torch_BINARY_DIR}/dok/${dstdir}")
+  SET(htmldstdir "${Torch_BINARY_DIR}/html/${dstdir}")
 
   FILE(MAKE_DIRECTORY "${dokdstdir}")
   FILE(MAKE_DIRECTORY "${htmldstdir}")
 
   # Note: subdirectories are not handled (yet?)
   # http://www.cmake.org/pipermail/cmake/2008-February/020114.html
-  FILE(GLOB dokfiles "help/*")
+  FILE(GLOB dokfiles "${srcdir}/*")
 
   SET(generatedfiles)
   FOREACH(dokfile ${dokfiles})
@@ -71,20 +88,20 @@ MACRO(ADD_TORCH_DOK package section title rank)
   ENDFOREACH(extrafile ${TORCH_DOK_HTML_FILES}) 
 
   # the doc depends on all these files to be generated
-  ADD_CUSTOM_TARGET(${package}-dok-files
+  ADD_CUSTOM_TARGET(${dstdir}-dok-files
     DEPENDS ${generatedfiles})
-  ADD_DEPENDENCIES(documentation-dok ${package}-dok-files)
+  ADD_DEPENDENCIES(documentation-dok ${dstdir}-dok-files)
 
   # Build the dok index if the package contains an index.dok file
   IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")    
-    ADD_CUSTOM_TARGET(${package}-dok-index
-      ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/dokindex.lua" "${Torch_SOURCE_DIR}/packages/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${Torch_BINARY_DIR}/dokindex.lua" "${Torch_BINARY_DIR}/dok/index.txt" "${Torch_BINARY_DIR}/html/index.html" "${package}" "${section}" "${title}" "${rank}"
+    ADD_CUSTOM_TARGET(${dstdir}-dok-index
+      ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/scripts/dokindex.lua" "${Torch_SOURCE_DIR}/packages/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${Torch_BINARY_DIR}/dokindex.lua" "${Torch_BINARY_DIR}/dok/index.txt" "${Torch_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
       DEPENDS ${LUA_EXECUTABLE}
       "${Torch_SOURCE_DIR}/scripts/dokindex.lua"
       "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok"
       "${Torch_SOURCE_DIR}/packages/dok/init.lua")
     
-    ADD_DEPENDENCIES(documentation-dok ${package}-dok-index)
+    ADD_DEPENDENCIES(documentation-dok ${dstdir}-dok-index)
 
   ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/help/index.dok")
   

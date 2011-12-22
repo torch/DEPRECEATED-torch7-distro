@@ -19,10 +19,18 @@ for k,v in pairs(sections) do
 end
 
 local toc = {}
-for k,v in pairs(sections.subsections) do
-   print(k,v.title,dok.link2wikilink(v.title))
-   table.insert(toc, string.format('<a href="#%s">%s</a><br>', dok.link2wikilink(v.title), v.title))
+local function addtocsubsections(toc, section)
+   table.insert(toc, string.format('<ul>'))
+   for k,v in pairs(section.subsections) do
+      print(k,v.title,dok.link2wikilink(v.title))
+      table.insert(toc, string.format('<li><a href="#%s">%s</a></li>', dok.link2wikilink(v.title), v.title))
+      if v.subsections and #v.subsections > 0 then
+         addtocsubsections(toc, v)
+      end
+   end
+   table.insert(toc, string.format('</ul>'))
 end
+addtocsubsections(toc, sections)
 toc = table.concat(toc, '\n')
 
 local templatehtml = io.open(doktemplate):read('*all')

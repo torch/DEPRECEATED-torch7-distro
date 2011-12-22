@@ -1,3 +1,8 @@
+print('now in dokindex')
+for k,v in ipairs(arg) do
+   print(k,v)
+end
+
 local dokutils = arg[1]
 local doktemplate = arg[2]
 local dokcurrentindex = arg[3]
@@ -17,17 +22,17 @@ local rankpkg = tonumber(rank:match('(%d+)$')) or 111111
 -- create sections
 sections = {}
 
--- add new (given) section
-sections[section] = sections[section] or {rank=ranksec, packages={}}
-sections[section].packages[package] = {title=title, rank=rankpkg}
-sections[section].rank = math.min(sections[section].rank, ranksec)
-
 -- add existing sections
 local f = io.open(dokcurrentindex)
 if f then
    dofile(dokcurrentindex)
    f:close()
 end
+
+-- add new (given) section
+sections[section] = sections[section] or {rank=ranksec, packages={}}
+sections[section].packages[package] = {title=title, rank=rankpkg}
+sections[section].rank = math.min(sections[section].rank, ranksec)
 
 -- write all the stuff on disk so we can reload it easily
 local f = io.open(dokcurrentindex, 'w')
