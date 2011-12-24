@@ -1,16 +1,16 @@
 ======  Tensor ======
-#Tensor
+{{anchor:torch.Tensor.dok}}
 
 The ''Tensor'' class is probably the most important class in ''Torch''. Almost every package depends on this
-class. It is ***the*** class for handling numeric data. Tensors are [[#FileSerialization|serializable]].
+class. It is ***the*** class for handling numeric data. Tensors are [[File#torch.File.serialization|serializable]].
 
 **Multi-dimensional matrix**
 
 A ''Tensor'' is a potentially multi-dimensional matrix. The number of
 dimensions is unlimited. Many methods have some convenience methods for for
-a number of dimensions inferior or equal to ''4'', but can also be used using
-[[#Storage|LongStorage]] with more dimensions. Example:
-<file>
+a number of dimensions inferior or equal to ''4'', but can also be called using
+[[Storage|LongStorage]] with more dimensions. Example:
+<file lua>
  --- creation of a 4D-tensor 4x5x6x2
  z = torch.Tensor(4,5,6,2)
  --- for more dimensions, (here a 6D tensor) one can do:
@@ -20,11 +20,11 @@ a number of dimensions inferior or equal to ''4'', but can also be used using
 </file>
 
 The number of dimensions of a ''Tensor'' can be queried by
-[[#TensorNDimension|nDimension()]] or [[#TensorDim|dim()]]. Size of
-the ''i-th'' dimension is returned by [[#TensorSizeDim|size(i)]]. An
-[[#Storage|LongStorage]] containing all the dimensions can be returned by
-[[#TensorSize|size()]].
-<file>
+[[#torch.Tensor.nDimension|nDimension()]] or [[#torch.Tensor.dim|dim()]]. Size of
+the ''i-th'' dimension is returned by [[#torch.Tensor.size|size(i)]]. A
+[[Storage|LongStorage]] containing all the dimensions can be returned by
+[[#torch.Tensor.size|size()]].
+<file lua>
 > print(x:nDimension())
 6
 > print(x:size())
@@ -40,85 +40,100 @@ the ''i-th'' dimension is returned by [[#TensorSizeDim|size(i)]]. An
 **Internal data representation**
 
 The actual data of a ''Tensor'' is contained into a
-[[#Storage|DoubleStorage]]. It can be accessed using
-[[#TensorStorage|storage()]]. While the memory of a ''Tensor'' has to be
+[[Storage|Storage]]. It can be accessed using
+[[#torch.Tensor.storage|''storage()'']]. While the memory of a ''Tensor'' has to be
 contained in this unique ''Storage'', it might not be contiguous:
-the first position used in the ''Storage'' is given by ''storageOffset()''
+the first position used in the ''Storage'' is given by [[#torch.Tensor.storageOffset|''storageOffset()'']]
 (starting at ''1''). And the //jump// needed to go from one element to another element
-in the ''i-th'' dimension is given by ''stride(i)''. In other words, given a 3D tensor
-<file>
+in the ''i-th'' dimension is given by [[#torch.Tensor.stride|''stride(i)'']]. In other words, given a 3D tensor
+<file lua>
 x = torch.Tensor(7,7,7)
 </file>
 accessing the element ''(3,4,5)'' can be done by
-<file>
+<file lua>
 = x[3][4][5]
 </file>
 or equivalently (but slowly!)
-<file>
+<file lua>
 = x:storage()[x:storageOffset()
            +(3-1)*x:stride(1)+(4-1)*x:stride(2)+(5-1)*x:stride(3)]
 </file>
 One could say that a ''Tensor'' is a particular way of //viewing// a
 ''Storage'': a ''Storage'' only represents a chunk of memory, while the
 ''Tensor'' interprets this chunk of memory as having dimensions:
-<file>
+<file lua>
 > x = torch.Tensor(4,5)
 > s = x:storage()
 > for i=1,s:size() do -- fill up the Storage
 >> s[i] = i
 >> end
 > print(x) -- s is interpreted by x as a 2D matrix
-
-  1   5   9  13  17
-  2   6  10  14  18
-  3   7  11  15  19
-  4   8  12  16  20
-[torch.Tensor of dimension 4x5]
+  1   2   3   4   5
+  6   7   8   9  10
+ 11  12  13  14  15
+ 16  17  18  19  20
+[torch.DoubleTensor of dimension 4x5]
 </file>
 
-Note also that in ''Torch'' //elements in the same column// [elements along the first dimension]
+Note also that in Torch7 **//elements in the same row//** [elements along the **last** dimension]
 are contiguous in memory for a matrix [tensor]:
-<file>
-> x = torch.Tensor(4,5):zero()
+<file lua>
+> x = torch.Tensor(4,5)
+> i = 0
+>
+> x:apply(function()
+>> i = i + 1
+>> return i
+>> end)
+>
 > print(x)
-
-0 0 0 0 0
-0 0 0 0 0
-0 0 0 0 0
-0 0 0 0 0
-[torch.Tensor of dimension 4x5]
+  1   2   3   4   5
+  6   7   8   9  10
+ 11  12  13  14  15
+ 16  17  18  19  20
+[torch.DoubleTensor of dimension 4x5]
 
 > return  x:stride()
- 1 -- element in the first dimension are contiguous!
- 4
+ 5
+ 1  -- element in the last dimension are contiguous!
 [torch.LongStorage of size 2]
 </file>
-This is like in Fortran (and not ''C''), which allows us to efficiently
-interface ''Torch'' with standard numerical library packages.
+This is exactly like in C (and not ''Fortran'').
 
 **Tensors of different types**
 
 Actually, several types of ''Tensor'' exists:
-<file>
-CharTensor -- contains chars
+<file lua>
+ByteTensor -- contains unsigned chars
+CharTensor -- contains signed chars
 ShortTensor -- contains shorts
 IntTensor -- contains ints
 FloatTensor -- contains floats
-Tensor -- contains doubles
+DoubleTensor -- contains doubles
 </file>
 
-It is recommended using only ''Tensor'', as many of the numeric operations
-are not implemented for other classes.  However, in some cases, you might
-want to use another class, e.g. to save memory space.
+Most numeric operations are implemented //only// for ''FloatTensor'' and ''DoubleTensor''. 
+Other Tensor types are useful if you want to save memory space.
 
-**Efficient memory managment**
+**Default Tensor type**
+
+For convenience, //an alias// ''torch.Tensor'' is provided, which allows the user to write
+type-independent scripts, which can then ran after choosing the desired Tensor type with
+a call like
+<file lua>
+torch.setdefaulttensortype('torch.FloatTensor')
+</file>
+See [[Utility#torch.setdefaulttensortype|torch.setdefaulttensortype]] for more details.
+By default, the alias "points" on ''torch.DoubleTensor''.
+
+**Efficient memory management**
 
 //All// tensor operations in this class do //not// make any memory copy. All
 these methods transform the existing tensor, or return a new tensor
 referencing //the same storage//. This magical behavior is internally
-obtained by good usage of the [[#TensorStride|stride()]] and
-[[#TensorStorageOffset|storageOffset()]]. Example:
-<file>
+obtained by good usage of the [[#torch.Tensor.stride|stride()]] and
+[[#torch.Tensor.storageOffset|storageOffset()]]. Example:
+<file lua>
 > x = torch.Tensor(5):zero()
 > print(x)
 0
@@ -126,7 +141,7 @@ obtained by good usage of the [[#TensorStride|stride()]] and
 0
 0
 0
-[torch.Tensor of dimension 5]
+[torch.DoubleTensor of dimension 5]
 > x:narrow(1, 2, 3):fill(1) -- narrow() returns a Tensor
                             -- referencing the same Storage than x
 > print(x)
@@ -138,93 +153,84 @@ obtained by good usage of the [[#TensorStride|stride()]] and
 [torch.Tensor of dimension 5]
 </file>
 
-If you really need to copy a ''Tensor'', you can use the [[#TensorCopy|copy()]] method:
-<file>
-> y = torch.Tensor():resizeAs(x):copy(x)
+If you really need to copy a ''Tensor'', you can use the [[#torch.Tensor.copy|copy()]] method:
+<file lua>
+> y = torch.Tensor(x:size()):copy(x)
+</file>
+Or the convenience method
+<file lua>
+> y = x:clone()
 </file>
 
-We now describe all the methods for ''Tensor'', but for the other variants,
-just replace ''Tensor'' by the name of the variant (like ''CharTensor'').
-
+We now describe all the methods for ''Tensor''. If you want to specify the Tensor type,
+just replace ''Tensor'' by the name of the Tensor variant (like ''CharTensor'').
 
 =====  Tensor constructors =====
-#TensorConstructors
+{{anchor:torch.Tensor}}
 
 Here are several ways to construct a new ''Tensor''.
 
 ====  torch.Tensor() ====
-#TorchTensor
 
 Returns an empty tensor.
 
 ====  torch.Tensor(tensor) ====
-#TorchTensorTensor
 
-Returns a new tensor which reference the same [[#TensorStorage|Storage]]
-than the given ''tensor''. The [[#TensorSize|size]],
-[[#TensorStride|stride]], and [[#TensorStorageOffset|storage offset]] are
+Returns a new tensor which reference the same [[#torch.Tensor.storage|Storage]]
+than the given ''tensor''. The [[#torch.Tensor.size|size]],
+[[#torch.Tensor.stride|stride]], and [[#torch.Tensor.storageOffset|storage offset]] are
 the same than the given tensor.
 
 The new ''Tensor'' is now going to "view" the same
-[[#TensorStorage|storage]] than the given ''tensor''. As the result, any
+[[Storage|storage]] than the given ''tensor''. As the result, any
 modification in the elements of the ''Tensor'' will have a impact on the
 elements of the given ''tensor'', and vice-versa. No memory copy!
-<file>
+<file lua>
 > x = torch.Tensor(2,5):fill(3.14)
 > print(x)
 
  3.1400  3.1400  3.1400  3.1400  3.1400
  3.1400  3.1400  3.1400  3.1400  3.1400
-[torch.Tensor of dimension 2x5]
+[torch.DoubleTensor of dimension 2x5]
 
 > y = torch.Tensor(x)
 > print(y)
 
  3.1400  3.1400  3.1400  3.1400  3.1400
  3.1400  3.1400  3.1400  3.1400  3.1400
-[torch.Tensor of dimension 2x5]
+[torch.DoubleTensor of dimension 2x5]
 
 > y:zero()
 > print(x) -- elements of x are the same than y!
 
 0 0 0 0 0
 0 0 0 0 0
-[torch.Tensor of dimension 2x5]
+[torch.DoubleTensor of dimension 2x5]
 </file>
 
 
 ====  torch.Tensor(sz1 [,sz2 [,sz3 [,sz4]]]]) ====
-#TorchTensorSzx
 
 Create a tensor up to 4 dimensions. The tensor size will be ''sz1 x sz2 x sx3 x sz4''.
-For more dimensions, see [[#TorchTensorSizesStrides|this more general method]].
 
 ====  torch.Tensor(sizes, [strides]) ====
-#TorchTensorSizesStrides
 
-Create a tensor of any number of dimensions. The [[#Storage|LongStorage]]
+Create a tensor of any number of dimensions. The [[Storage|LongStorage]]
 ''sizes'' gives the size in each dimension of the tensor. The optional
-[[#Storage|LongStorage]] ''strides'' gives the jump necessary to go from
+[[Storage|LongStorage]] ''strides'' gives the jump necessary to go from
 one element to the next one in the each dimension. Of course, ''sizes'' and
 ''strides'' must have the same size. If not given, or if some elements of
-''strides'' are negative, the [[#TensorStride|stride()]] will be computed
+''strides'' are //negative//, the [[#torch.Tensor.stride|stride()]] will be computed
 such that the tensor is as contiguous as possible in memory.
 
-A [[#TorchTensorSzx|convenience method]] exists for a number of dimensions
-up to 4.
-
 Example, create a 4D 4x4x3x2 tensor:
-<file>
-s = torch.LongStorage(4)
-s[1] = 4; s[2] = 4; s[3] = 3; s[4] = 2;
-x = torch.Tensor(s)
+<file lua>
+x = torch.Tensor(torch.LongStorage({4,4,3,2}))
 </file>
 
 Playing with the strides can give some interesting things:
-<file>
-sz = torch.LongStorage(1); sz[1] = 4
-st = torch.LongStorage(1); st[1] = 0
-x = torch.Tensor(sz, st):zero() -- zeroes the tensor
+<file lua>
+x = torch.Tensor(torch.LongStorage({4}), torch.LongStorage({0})):zero() -- zeroes the tensor
 x[1] = 1 -- all elements point to the same address!
 print(x)
 
@@ -232,42 +238,39 @@ print(x)
  1
  1
  1
-[torch.Tensor of dimension 4]
+[torch.DoubleTensor of dimension 4]
 </file>
+Note that //negative strides are not allowed//, and, if given as argument when constructing the Tensor, will be interpreted
+as //choose the right stride such that the Tensor is contiguous in memory//.
 
 ====  torch.Tensor(storage, [storageOffset, sizes, [strides]]) ====
-#TorchTensorStorageStorageOffsetSizesStrides
 
-Returns a tensor which uses the existing [[#Storage|DoubleStorage]]
+Returns a tensor which uses the existing [[Storage|Storage]]
 ''storage'', starting at position ''storageOffset'' (>=1).  The size of each
-dimension of the tensor is given by the [[#Storage|LongStorage]]
+dimension of the tensor is given by the [[Storage|LongStorage]]
 ''sizes''.
 
 If only ''storage'' is provided, it will create a 1D Tensor viewing the all Storage.
 
 The jump necessary to go from one element to the next one in each dimension
-is given by the optional argument [[#Storage|LongStorage]] ''strides''.If
+is given by the optional argument [[Storage|LongStorage]] ''strides''. If
 not given, or if some elements of ''strides'' are negative, the
-[[#TensorStride|stride()]] will be computed such that the tensor is as
+[[#torch.Tensor.stride|stride()]] will be computed such that the tensor is as
 contiguous as possible in memory.
-
-For a number of dimension up to 4, you can use a [[#TorchTensorSzxStx|convenience method]].
 
 Any modification in the elements of the ''Storage'' will have a impact on the
 elements of the new ''Tensor'', and vice-versa. There is no memory copy!
-<file>
+<file lua>
 -- creates a storage with 10 elements
-> s = torch.DoubleStorage(10):fill(1)
+> s = torch.Storage(10):fill(1)
 
   -- we want to see it as a 2x5 tensor
-> sz = torch.LongStorage(2)
-> sz[1] = 2; sz[2] = 5;
-> x = torch.Tensor(s, 1, sz)
+> x = torch.Tensor(s, 1, torch.LongStorage{2,5})
 > print(x)
 
  1  1  1  1  1
  1  1  1  1  1
-[torch.Tensor of dimension 2x5]
+[torch.DoubleTensor of dimension 2x5]
 > x:zero()
 > print(s) -- the storage contents have been modified
 > print(s)
@@ -285,34 +288,33 @@ elements of the new ''Tensor'', and vice-versa. There is no memory copy!
 </file>
 
 ====  torch.Tensor(storage, [storageOffset, sz1 [, st1 ... [, sz4 [, st4]]]]) ====
-#TorchTensorSzxStx
 
-Same as [[#TorchTensorStorageStorageOffsetSizesStrides|this constructor]] for a number of
-dimensions up to 4. ''szi'' is the size in the ''i-th'' dimension, and ''sti'' it
+Convenience constructor (for the previous constructor) assuming a number of
+dimensions inferior or equal to 4. ''szi'' is the size in the ''i-th'' dimension, and ''sti'' it
 the stride in the ''i-th'' dimension.
 
 =====  Querying the size and structure =====
 
 ====  [number] nDimension() ====
-#TensorNDimension
+{{anchor:torch.Tensor.nDimension}}
 
 Returns the number of dimensions in a ''Tensor''.
-<file>
+<file lua>
 > x = torch.Tensor(4,5) -- a matrix
 > = x:nDimension()
 2
 </file>
 
 ====  [number] dim() ====
-#TensorDim
+{{anchor:torch.Tensor.dim}}
 
-Same as [[#TensorNDimension|nDimension()]].
+Same as [[#torch.Tensor.nDimension|nDimension()]].
 
 ====  [number] size(dim) ====
-#TensorSizeDim
+{{anchor:torch.Tensor.size}}
 
 Returns the size of the specified dimension ''dim''. Example:
-<file>
+<file lua>
 > x = torch.Tensor(4,5):zero()
 > print(x)
 
@@ -320,18 +322,18 @@ Returns the size of the specified dimension ''dim''. Example:
 0 0 0 0 0
 0 0 0 0 0
 0 0 0 0 0
-[torch.Tensor of dimension 4x5]
+[torch.DoubleTensor of dimension 4x5]
 
 > return  x:size(2) -- gets the number of columns
 5
 </file>
 
 ====  [LongStorage] size() ====
-#TensorSize
+{{anchor:torch.Tensor.size}}
 
-Returns an [[#Storage|LongStorage]] containing the size of each dimension
-of the tensor. Equivalent to [[#TensorSizeO|#]].
-<file>
+Returns a [[Storage|LongStorage]] containing the size of each dimension
+of the tensor.
+<file lua>
 > x = torch.Tensor(4,5):zero()
 > print(x)
 
@@ -339,7 +341,7 @@ of the tensor. Equivalent to [[#TensorSizeO|#]].
 0 0 0 0 0
 0 0 0 0 0
 0 0 0 0 0
-[torch.Tensor of dimension 4x5]
+[torch.DoubleTensor of dimension 4x5]
 
 > return  x:size()
  4
@@ -348,17 +350,16 @@ of the tensor. Equivalent to [[#TensorSizeO|#]].
 </file>
 
 ====  [LongStorage] #self ====
-#TensorSizeO
+{{anchor:torch.Tensor.size}}
 
-Equivalent to [[#TensorSize|size()]].
-
+Same as previous method.
 
 ====  [number] stride(dim) ====
-#TensorStrideDim
+{{anchor:torch.Tensor.stride}}
 
 Returns the jump necessary to go from one element to the next one in the
 specified dimension ''dim''. Example:
-<file>
+<file lua>
 > x = torch.Tensor(4,5):zero()
 > print(x)
 
@@ -366,7 +367,7 @@ specified dimension ''dim''. Example:
 0 0 0 0 0
 0 0 0 0 0
 0 0 0 0 0
-[torch.Tensor of dimension 4x5]
+[torch.DoubleTensor of dimension 4x5]
 
   --- elements in a column are contiguous in memory
 > return  x:stride(1)
@@ -374,18 +375,18 @@ specified dimension ''dim''. Example:
 
   --- to go from one element to the next one in a row
   --- we need here to jump the size of the column
-> return  x:stride(2)
-4
+> return  x:stride(1)
+5
 </file>
 
-Note also that in ''Torch'' //elements in the same column// [elements along the first dimension]
+Note also that in ''Torch'' //elements in the same row// [elements along the **last** dimension]
 are contiguous in memory for a matrix [tensor].
 
 ====  [LongStorage] stride() ====
-#TensorStride
+{{anchor:torch.Tensor.stride}}
 
 Returns the jump necessary to go from one element to the next one in each dimension. Example:
-<file>
+<file lua>
 > x = torch.Tensor(4,5):zero()
 > print(x)
 
@@ -393,23 +394,23 @@ Returns the jump necessary to go from one element to the next one in each dimens
 0 0 0 0 0
 0 0 0 0 0
 0 0 0 0 0
-[torch.Tensor of dimension 4x5]
+[torch.DoubleTensor of dimension 4x5]
 
 > return  x:stride()
- 1 -- elements are contiguous in a column [first dimension]
- 4
+ 5
+ 1 -- elements are contiguous in a column [last dimension]
 [torch.LongStorage of size 2]
 </file>
 
-Note also that in ''Torch'' //elements in the same column// [elements along the first dimension]
+Note also that in ''Torch'' //elements in the same row// [elements along the **last** dimension]
 are contiguous in memory for a matrix [tensor].
 
-====  [DoubleStorage] storage() ====
-#TensorStorage
+====  [Storage] storage() ====
+{{anchor:torch.Tensor.storage}}
 
-Returns the [[#Storage|DoubleStorage]] used to store all the elements of the ''Tensor''.
+Returns the [[Storage|Storage]] used to store all the elements of the ''Tensor''.
 Basically, a ''Tensor'' is a particular way of //viewing// a ''Storage''.
-<file>
+<file lua>
 > x = torch.Tensor(4,5)
 > s = x:storage()
 > for i=1,s:size() do -- fill up the Storage
@@ -417,162 +418,167 @@ Basically, a ''Tensor'' is a particular way of //viewing// a ''Storage''.
 >> end
 > print(x) -- s is interpreted by x as a 2D matrix
 
-  1   5   9  13  17
-  2   6  10  14  18
-  3   7  11  15  19
-  4   8  12  16  20
-[torch.Tensor of dimension 4x5]
+  1   2   3   4   5
+  6   7   8   9  10
+ 11  12  13  14  15
+ 16  17  18  19  20
+[torch.DoubleTensor of dimension 4x5]
 </file>
 
 ====  [boolean] isContiguous() ====
-#TensorIsContiguous
+{{anchor:torch.Tensor.isContiguous}}
 
 Returns ''true'' iff the elements of the ''Tensor'' are contiguous in memory.
-<file>
+<file lua>
   -- normal tensors are contiguous in memory
 > x = torch.Tensor(4,5):zero()
 > = x:isContiguous()
 true
-  -- y now "views" the 3rd row of x
+  -- y now "views" the 3rd column of x
   -- the storage of y is the same than x
   -- so the memory cannot be contiguous
-> y = x:select(1, 3)
+> y = x:select(2, 3)
 > = y:isContiguous()
 false
   -- indeed, to jump to one element to
   -- the next one, the stride is 4
 > = y:stride()
- 4
+ 5
 [torch.LongStorage of size 1]
 </file>
 
 ====  [number] nElement() ====
-#TensorNElement
+{{anchor:torch.Tensor.nElement}}
 
 Returns the number of elements of a tensor.
-<file>
+<file lua>
 > x = torch.Tensor(4,5)
 > = x:nElement() -- 4x5 = 20!
 20
 </file>
 
-====  [boolean] ownStorage() ====
-#TensorOwnStorage
-
-Returns ''true'' if the ''Tensor'' "own" (that is, if it created itself) its
-[[#TensorStorage|storage]], ''false'' otherwise.
-
 ====  [number] storageOffset() ====
-#TensorStorageOffset
+{{anchor:torch.Tensor.storageOffset}}
 
-Return the first index (starting at 1) used in the tensor's [[#TensorStorage|storage]].
+Return the first index (starting at 1) used in the tensor's [[#torch.Tensor.storage|storage]].
 
 =====  Querying elements =====
 
 Elements of a tensor can be retrieved with the ''[index]'' operator.
 
-The ''[index]'' operator is equivalent to a [[#TensorSelect|select(1, start)]] if the
+If ''index'' is a number, ''[index]'' operator is equivalent to a [[#torch.Tensor.select|''select(last dim, start)'']] if the
 tensor has more than one dimension. If the tensor is a 1D tensor, it returns the value
 at ''index'' in this tensor.
 
+If ''index'' is a table, the table must contain //n// numbers, where //n//
+is the [[#torch.Tensor.nDimension|number of dimensions]] of the Tensor. It will return the element
+at the given position.
+
+In the same spirit, ''index'' might be a [[Storage|LongStorage]],
+specifying the position (in the Tensor) of the element to be retrieved.
+
 Example:
-<file>
+<file lua>
 > x = torch.Tensor(3,3)
 > i = 0; x:apply(function() i = i + 1; return i end)
 > = x
 
- 1  4  7
- 2  5  8
- 3  6  9
-[torch.Tensor of dimension 3x3]
+ 1  2  3
+ 4  5  6
+ 7  8  9
+[torch.DoubleTensor of dimension 3x3]
 
 > = x[2] -- returns row 2
 
- 2
+ 4
  5
- 8
-[torch.Tensor of dimension 3]
+ 6
+[torch.DoubleTensor of dimension 3]
 
 > = x[2][3] -- returns row 2, column 3
-8
+6
+
+> = x[{2,3}] -- another way to return row 2, column 3
+6
+
+> = x[torch.LongStorage{2,3}] -- yet another way to return row 2, column 3
+6
+
 </file>
 
 =====  Referencing a tensor to an existing tensor or chunk of memory =====
-#TensorReferencingMemory
+{{anchor:torch.Tensor.set}}
 
-A ''Tensor'' being a way of //viewing// a [[#TensorStorage|Storage]], it is
-possible to "set" a ''Tensor'' such that it views an existing [[#Storage|Storage]].
+A ''Tensor'' being a way of //viewing// a [[Storage|Storage]], it is
+possible to "set" a ''Tensor'' such that it views an existing [[Storage|Storage]].
 
 Note that if you want to perform a set on an empty ''Tensor'' like
-<file>
-y = torch.DoubleStorage(10)
+<file lua>
+y = torch.Storage(10)
 x = torch.Tensor()
 x:set(y, 1, 10)
 </file>
-you might want in that case to use one of the [[#TensorConstructors|equivalent constructor]].
-<file>
-y = torch.DoubleStorage(10)
+you might want in that case to use one of the [[#torch.Tensor|equivalent constructor]].
+<file lua>
+y = torch.Storage(10)
 x = torch.Tensor(y, 1, 10)
 </file>
 
 ====  [self] set(tensor) ====
-#TensorSetTensor
 
-The ''Tensor'' is now going to "view" the same [[#TensorStorage|storage]]
+The ''Tensor'' is now going to "view" the same [[#torch.Tensor.storage|storage]]
 than the given ''tensor''. As the result, any modification in the elements of
 the ''Tensor'' will have a impact on the elements of the given ''tensor'', and
 vice-versa. This is an efficient method, as there is no memory copy!
 
-<file>
+<file lua>
 > x = torch.Tensor(2,5):fill(3.14)
 > print(x)
 
  3.1400  3.1400  3.1400  3.1400  3.1400
  3.1400  3.1400  3.1400  3.1400  3.1400
-[torch.Tensor of dimension 2x5]
+[torch.DoubleTensor of dimension 2x5]
 
 > y = torch.Tensor():set(x)
 > print(y)
 
  3.1400  3.1400  3.1400  3.1400  3.1400
  3.1400  3.1400  3.1400  3.1400  3.1400
-[torch.Tensor of dimension 2x5]
+[torch.DoubleTensor of dimension 2x5]
 
 > y:zero()
 > print(x) -- elements of x are the same than y!
 
 0 0 0 0 0
 0 0 0 0 0
-[torch.Tensor of dimension 2x5]
+[torch.DoubleTensor of dimension 2x5]
 </file>
 
 ====  [self] set(storage, [storageOffset, sizes, [strides]]) ====
-#TensorSetStorageStorageOffsetSizesStrides
 
 The ''Tensor'' is now going to "view" the given
-[[#Storage|DoubleStorage]], starting at position ''storageOffset'' (>=1)
-with the given [[#TensorSize|dimension ''sizes]] and the optional given
-[[#TensorStride|strides]]. As the result, any modification in the
+[[Storage|''storage'']], starting at position ''storageOffset'' (>=1)
+with the given [[#torch.Tensor.size|dimension ''sizes'']] and the optional given
+[[#torch.Tensor.stride|''strides'']]. As the result, any modification in the
 elements of the ''Storage'' will have a impact on the elements of the
 ''Tensor'', and vice-versa. This is an efficient method, as there is no
 memory copy!
 
 If only ''storage'' is provided, the whole storage will be viewed as a 1D Tensor.
 
-<file>
+<file lua>
   -- creates a storage with 10 elements
-> s = torch.DoubleStorage(10):fill(1)
+> s = torch.Storage(10):fill(1)
 
   -- we want to see it as a 2x5 tensor
-> sz = torch.LongStorage(2)
-> sz[1] = 2; sz[2] = 5;
+> sz = torch.LongStorage({2,5})
 > x = torch.Tensor()
 > x:set(s, 1, sz)
 > print(x)
 
  1  1  1  1  1
  1  1  1  1  1
-[torch.Tensor of dimension 2x5]
+[torch.DoubleTensor of dimension 2x5]
 > x:zero()
 > print(s) -- the storage contents have been modified
 > print(s)
@@ -589,12 +595,9 @@ If only ''storage'' is provided, the whole storage will be viewed as a 1D Tensor
 [torch.DoubleStorage of size 10]
 </file>
 
-A shorcut which works up to 4 dimensional tensors [[#TensorSetStorageStorageOffsetSzxStx|exists]].
-
 ====  [self] set(storage, [storageOffset, sz1 [, st1 ... [, sz4 [, st4]]]]) ====
-#TensorSetStorageStorageOffsetSzxStx
 
-This is a shorcut for [[#TensorSetStorageStorageOffsetSizesStrides|this]] method.
+This is a "shorcut" for previous method.
 It works up to 4 dimensions. ''szi'' is the size of the ''i''-th dimension of the tensor.
 ''sti'' is the stride in the ''i''-th dimension.
 
