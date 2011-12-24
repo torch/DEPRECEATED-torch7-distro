@@ -9,7 +9,7 @@
 {{anchor:torch.DoubleStorage.dok}}
 
 //Storages// are basically a way for ''Lua'' to access memory of a ''C'' pointer
-or array. //Storages// can also [[#TorchStorageFile|map the contents of a file to memory]].
+or array. //Storages// can also [[#__torch.StorageMap|map the contents of a file to memory]].
 A ''Storage'' is an array of //basic// ''C'' types. For arrays of ''Torch'' objects,
 use the ''Lua'' tables.
 
