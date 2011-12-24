@@ -1,4 +1,5 @@
-===== File =====
+====== File ======
+{{anchor:torch.File.dok}}
 
 This is an //abstract// class. It defines most methods implemented by its
 child classes, like [[DiskFile|DiskFile]],
@@ -250,31 +251,6 @@ Clear the error.flag returned by [[#torch.File.hasError|hasError()]].
 
 Close the file. Any subsequent operation will generate a ''Lua'' error.
 
-=====  [boolean] hasError() =====
-{{anchor:torch.File.hasError}}
-
-Returns if an error occurred since the last [[#torch.File.clearError|clearError()]] call, or since
-the opening of the file if ''clearError()'' has never been called.
-
-=====  [boolean] isQuiet() =====
-{{anchor:torch.File.isQuiet}}
-
-Returns a boolean which tells if the file is in [[#torch.File.quiet|quiet]] mode or not.
-
-=====  [boolean] isReadable() =====
-{{anchor:torch.File.isReadable}}
-
-Tells if one can read the file or not.
-
-=====  [boolean] isWritable() =====
-{{anchor:torch.File.isWritable}}
-
-Tells if one can write in the file or not.
-
-===== [boolean] isAutoSpacing() =====
-
-Return ''true'' if [[#torch.File.autoSpacing|autoSpacing]] has been chosen.
-
 =====  noAutoSpacing() =====
 {{anchor:torch.noAutoSpacing}}
 
@@ -302,6 +278,7 @@ and set a flag instead.
 {{anchor:torch.File.position}}
 
 Returns the current position (in bytes) in the file.
+The first position is ''1'' (following Lua standard indexing).
 
 =====  quiet() =====
 {{anchor:torch.File.quiet}}
@@ -324,3 +301,32 @@ an error in case of problem. The first position is ''1'' (following Lua standard
 
 Jump at the end of the file. Might generate/raise an error in case of
 problem.
+
+===== File state query =====
+
+These methods allow the user to query the state of the given ''File''.
+
+====  [boolean] hasError() ====
+{{anchor:torch.File.hasError}}
+
+Returns if an error occurred since the last [[#torch.File.clearError|clearError()]] call, or since
+the opening of the file if ''clearError()'' has never been called.
+
+====  [boolean] isQuiet() ====
+{{anchor:torch.File.isQuiet}}
+
+Returns a boolean which tells if the file is in [[#torch.File.quiet|quiet]] mode or not.
+
+====  [boolean] isReadable() ====
+{{anchor:torch.File.isReadable}}
+
+Tells if one can read the file or not.
+
+====  [boolean] isWritable() ====
+{{anchor:torch.File.isWritable}}
+
+Tells if one can write in the file or not.
+
+==== [boolean] isAutoSpacing() ====
+
+Return ''true'' if [[#torch.File.autoSpacing|autoSpacing]] has been chosen.

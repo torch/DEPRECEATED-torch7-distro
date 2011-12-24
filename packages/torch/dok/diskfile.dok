@@ -1,13 +1,14 @@
-===== DiskFile =====
+====== DiskFile ======
+{{anchor:torch.DiskFile.dok}}
 
 Parent classes: [[File|File]]
 
 A ''DiskFile'' is a particular ''File'' which is able to perform basic read/write operations
-on a file stored on disk. It implements all methods described in [[#File|File]], and
+on a file stored on disk. It implements all methods described in [[File|File]], and
 some additional methods relative to //endian// encoding.
 
-By default, a ''DiskFile'' is in [[file#torch.File.binary|ASCII]] mode. If changed to
-the [[file#torch.File.binary|binary]] mode, the default endian encoding is the native
+By default, a ''DiskFile'' is in [[File#torch.File.binary|ASCII]] mode. If changed to
+the [[File#torch.File.binary|binary]] mode, the default endian encoding is the native
 computer one.
 
 The file might be open in read, write, or read-write mode, depending on the parameter
@@ -26,7 +27,7 @@ exists, it will be positionned at the beginning of the file after opening.
 If (and only if) ''quiet'' is ''true'', no error will be raised in case of
 problem opening the file: instead ''nil'' will be returned.
 
-The file is opened in [[file#torch.File.ascii|ASCII]] mode by default.
+The file is opened in [[File#torch.File.ascii|ASCII]] mode by default.
 
 =====  bigEndianEncoding() =====
 {{anchor:torch.DiskFile.bigEndianEncoding}}
