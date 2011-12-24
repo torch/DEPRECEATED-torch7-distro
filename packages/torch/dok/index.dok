@@ -11,5 +11,5 @@ classes also handle //serialization//.
 
 [[Timer|Timer]] is provided for //measuring time//.
 
-Finally, ''Torch'' provides some [[Utilities|utility functions]] for creating and handling ''Torch'' //classes//.
+Finally, ''Torch'' provides some [[Utility|utility functions]] for creating and handling ''Torch'' //classes//.
 
