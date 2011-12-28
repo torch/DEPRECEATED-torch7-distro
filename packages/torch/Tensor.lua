@@ -1,3 +1,12 @@
+-- additional methods for Storage
+local Storage = {}
+
+-- additional methods for Tensor
+local Tensor = {}
+
+-- types
+local types = {'Byte', 'Char', 'Short', 'Int', 'Long', 'Float', 'Double'}
+
 -- tostring() functions for Tensor and Storage
 local function Storage__printformat(self)
    local intMode = true
@@ -60,7 +69,7 @@ local function Storage__printformat(self)
    return format, scale, sz
 end
 
-local function Storage__tostring(self)
+function Storage.__tostring__(self)
    local strt = {'\n'}
    local format,scale = Storage__printformat(self)
    if format:sub(2,4) == 'nan' then format = '%f' end
@@ -79,13 +88,12 @@ local function Storage__tostring(self)
    return str
 end
 
-rawset(torch.getmetatable('torch.ByteStorage'), '__tostring__', Storage__tostring)
-rawset(torch.getmetatable('torch.CharStorage'), '__tostring__', Storage__tostring)
-rawset(torch.getmetatable('torch.ShortStorage'), '__tostring__', Storage__tostring)
-rawset(torch.getmetatable('torch.IntStorage'), '__tostring__', Storage__tostring)
-rawset(torch.getmetatable('torch.LongStorage'), '__tostring__', Storage__tostring)
-rawset(torch.getmetatable('torch.FloatStorage'), '__tostring__', Storage__tostring)
-rawset(torch.getmetatable('torch.DoubleStorage'), '__tostring__', Storage__tostring)
+for _,type in ipairs(types) do
+   local metatable = torch.getmetatable('torch.' .. type .. 'Storage')
+   for funcname, func in pairs(Storage) do
+      rawset(metatable, funcname, func)
+   end
+end
 
 local function Tensor__printMatrix(self, indent)
    local format,scale,sz = Storage__printformat(self:storage())
@@ -176,7 +184,7 @@ local function Tensor__printTensor(self)
    return str
 end
 
-local function Tensor__tostring(self)
+function Tensor.__tostring__(self)
    local str = '\n'
    local strt = {''}
    if self:nDimension() == 0 then
@@ -215,15 +223,8 @@ local function Tensor__tostring(self)
    local str = table.concat(strt)
    return str
 end
-rawset(torch.getmetatable('torch.ByteTensor'), '__tostring__', Tensor__tostring)
-rawset(torch.getmetatable('torch.CharTensor'), '__tostring__', Tensor__tostring)
-rawset(torch.getmetatable('torch.ShortTensor'), '__tostring__', Tensor__tostring)
-rawset(torch.getmetatable('torch.IntTensor'), '__tostring__', Tensor__tostring)
-rawset(torch.getmetatable('torch.LongTensor'), '__tostring__', Tensor__tostring)
-rawset(torch.getmetatable('torch.FloatTensor'), '__tostring__', Tensor__tostring)
-rawset(torch.getmetatable('torch.DoubleTensor'), '__tostring__', Tensor__tostring)
 
-local function Tensor__type(self,type)
+function Tensor.type(self,type)
    local current = torch.typename(self)
    if not type then return current end
    if type ~= current then
@@ -236,32 +237,43 @@ local function Tensor__type(self,type)
       return self
    end
 end
-local function Tensor__typeAs(self,tensor)
+
+function Tensor.typeAs(self,tensor)
    return self:type(tensor:type())
 end
-local function Tensor__double(self,type)
-   return self:type('torch.DoubleTensor')
+
+function Tensor.byte(self,type)
+   return self:type('torch.ByteTensor')
 end
-local function Tensor__float(self,type)
+
+function Tensor.char(self,type)
+   return self:type('torch.CharTensor')
+end
+
+function Tensor.short(self,type)
+   return self:type('torch.ShortTensor')
+end
+
+function Tensor.int(self,type)
+   return self:type('torch.IntTensor')
+end
+
+function Tensor.long(self,type)
+   return self:type('torch.LongTensor')
+end
+
+function Tensor.float(self,type)
    return self:type('torch.FloatTensor')
 end
-rawset(torch.getmetatable('torch.DoubleTensor'), 'type', Tensor__type)
-rawset(torch.getmetatable('torch.DoubleTensor'), 'typeAs', Tensor__typeAs)
-rawset(torch.getmetatable('torch.DoubleTensor'), 'double', Tensor__double)
-rawset(torch.getmetatable('torch.DoubleTensor'), 'float', Tensor__float)
-rawset(torch.getmetatable('torch.FloatTensor'), 'type', Tensor__type)
-rawset(torch.getmetatable('torch.FloatTensor'), 'typeAs', Tensor__typeAs)
-rawset(torch.getmetatable('torch.FloatTensor'), 'double', Tensor__double)
-rawset(torch.getmetatable('torch.FloatTensor'), 'float', Tensor__float)
 
-rawset(torch.getmetatable('torch.ByteTensor'), 'type', Tensor__type)
-rawset(torch.getmetatable('torch.CharTensor'), 'type', Tensor__type)
-rawset(torch.getmetatable('torch.ShortTensor'), 'type', Tensor__type)
-rawset(torch.getmetatable('torch.IntTensor'), 'type', Tensor__type)
-rawset(torch.getmetatable('torch.LongTensor'), 'type', Tensor__type)
+function Tensor.double(self,type)
+   return self:type('torch.DoubleTensor')
+end
 
-rawset(torch.getmetatable('torch.ByteTensor'), 'typeAs', Tensor__typeAs)
-rawset(torch.getmetatable('torch.CharTensor'), 'typeAs', Tensor__typeAs)
-rawset(torch.getmetatable('torch.ShortTensor'), 'typeAs', Tensor__typeAs)
-rawset(torch.getmetatable('torch.IntTensor'), 'typeAs', Tensor__typeAs)
-rawset(torch.getmetatable('torch.LongTensor'), 'typeAs', Tensor__typeAs)
+
+for _,type in ipairs(types) do
+   local metatable = torch.getmetatable('torch.' .. type .. 'Tensor')
+   for funcname, func in pairs(Tensor) do
+      rawset(metatable, funcname, func)
+   end
+end
