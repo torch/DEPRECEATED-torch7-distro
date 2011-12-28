@@ -100,7 +100,7 @@ static int torch_Tensor_(new)(lua_State *L)
             
     counter = THLongStorage_newWithSize(size->size);
     THLongStorage_fill(counter, 0);
-    
+
     tensor = THTensor_(newWithSize)(size, NULL);
     
     if(size->size == 0)
@@ -134,7 +134,7 @@ static int torch_Tensor_(new)(lua_State *L)
           THTensor_(free)(tensor);
           luaL_error(L, "invalid element (not a number)");
         }
-        THTensor_(set1d)(tensor, si++, (real)lua_tonumber(L, -1));
+        THStorage_(set)(THTensor_(storage)(tensor), si++, (real)lua_tonumber(L, -1));
         lua_pop(L, 1);
       }
     
