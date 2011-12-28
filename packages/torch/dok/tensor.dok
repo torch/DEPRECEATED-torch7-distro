@@ -307,6 +307,217 @@ Example:
 [torch.DoubleTensor of dimension 2x4]
 </file>
 
+===== Cloning =====
+
+==== [Tensor] clone() ====
+{{anchor:torch.Tensor.clone}}
+
+Returns a clone of a tensor. The memory is copied.
+
+<file lua>
+i = 0
+x = torch.Tensor(5):apply(function(x)
+i = i + 1
+return i
+end)
+= x
+
+ 1
+ 2
+ 3
+ 4
+ 5
+[torch.DoubleTensor of dimension 5]
+
+-- create a clone of x
+y = x:clone()
+
+= y
+
+ 1
+ 2
+ 3
+ 4
+ 5
+[torch.DoubleTensor of dimension 5]
+
+-- fill up y with 1
+y:fill(1)
+= y
+
+ 1
+ 1
+ 1
+ 1
+ 1
+[torch.DoubleTensor of dimension 5]
+
+-- the contents of x were not changed:
+= x
+
+ 1
+ 2
+ 3
+ 4
+ 5
+[torch.DoubleTensor of dimension 5]
+</file>
+
+==== [Tensor] contiguous ====
+{{anchor:torch.Tensor.contiguous}}
+
+  * If the given Tensor contents are contiguous in memory, returns the exact same Tensor (no memory copy).
+  * Otherwise (//not contiguous in memory//), returns a [[#torch.Tensor.clone|clone]] (memory //copy//).
+
+<file lua>
+x = torch.Tensor(2,3):fill(1)
+= x
+
+ 1  1  1
+ 1  1  1
+[torch.DoubleTensor of dimension 2x3]
+
+-- x is contiguous, so y points to the same thing
+y = x:contiguous():fill(2)
+= y
+
+ 2  2  2
+ 2  2  2
+[torch.DoubleTensor of dimension 2x3]
+
+-- contents of x have been changed
+= x
+
+ 2  2  2
+ 2  2  2
+[torch.DoubleTensor of dimension 2x3]
+
+-- x:t() is not contiguous, so z is a clone
+z = x:t():contiguous():fill(3.14)
+= z
+
+ 3.1400  3.1400
+ 3.1400  3.1400
+ 3.1400  3.1400
+[torch.DoubleTensor of dimension 3x2]
+
+-- contents of x have not been changed
+= x
+
+ 2  2  2
+ 2  2  2
+[torch.DoubleTensor of dimension 2x3]
+</file>
+
+==== [Tensor or string] type(type) ====
+{{anchor:torch.Tensor.type}}
+
+**If ''type'' is ''nil''**, returns the type name of the given tensor.
+<file lua>
+= torch.Tensor():type()
+torch.DoubleTensor
+</file>
+
+**If ''type'' is a string** describing a Tensor type, and is equal to the
+given tensor typename, returns the exact same tensor (//no memory copy//).
+<file lua>
+x = torch.Tensor(3):fill(3.14)
+= x
+
+ 3.1400
+ 3.1400
+ 3.1400
+[torch.DoubleTensor of dimension 3]
+
+y = x:type('torch.DoubleTensor')
+= y
+
+ 3.1400
+ 3.1400
+ 3.1400
+[torch.DoubleTensor of dimension 3]
+
+-- zero y contents
+y:zero()
+
+-- contents of x have been changed
+= x
+
+0
+0
+0
+[torch.DoubleTensor of dimension 3]
+
+</file>
+
+**If ''type'' is a string** describing a Tensor type, different from the type name of the given Tensor,
+returns a new Tensor of the specified type, whose contents corresponds to the contents of the original Tensor,
+casted to the given type (//memory copy occurs, with possible loss of precision//).
+<file lua>
+x = torch.Tensor(3):fill(3.14)
+= x
+
+ 3.1400
+ 3.1400
+ 3.1400
+[torch.DoubleTensor of dimension 3]
+
+y = x:type('torch.IntTensor')
+= y
+
+ 3
+ 3
+ 3
+[torch.IntTensor of dimension 3]
+
+</file>
+
+==== [Tensor] typeAs(tensor) ====
+{{anchor:torch.Tensor.typeAs}}
+
+Convenience method for the [[#torch.Tensor.type|type]] method. Equivalent to
+<file lua>
+type(tensor:type())
+</file>
+
+
+==== [Tensor] byte(), char(), short(), int(), long(), float(), double() ====
+{{anchor:torch.Tensor.byte}}
+{{anchor:torch.Tensor.char}}
+{{anchor:torch.Tensor.short}}
+{{anchor:torch.Tensor.int}}
+{{anchor:torch.Tensor.long}}
+{{anchor:torch.Tensor.float}}
+{{anchor:torch.Tensor.double}}
+
+Convenience methods for the [[#torch.Tensor.type|type]] method. For e.g.,
+<file lua>
+x = torch.Tensor(3):fill(3.14)
+
+= x
+ 3.1400
+ 3.1400
+ 3.1400
+[torch.DoubleTensor of dimension 3]
+
+-- calling type('torch.IntTensor')
+= x:type('torch.IntTensor')
+
+ 3
+ 3
+ 3
+[torch.IntTensor of dimension 3]
+
+
+-- is equivalent to calling int()
+= x:int()
+
+ 3
+ 3
+ 3
+[torch.IntTensor of dimension 3]
+</file>
+
 =====  Querying the size and structure =====
 
 ====  [number] nDimension() ====
