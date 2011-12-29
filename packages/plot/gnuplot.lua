@@ -41,7 +41,7 @@ local function gnuplothasterm(term)
    local fi = io.open(tfni,'w')
    fi:write('set terminal\n\n')
    fi:close()
-   os.execute(getexec() .. ' < ' .. tfni .. ' 2> ' .. tfno)
+   os.execute(getexec() .. ' < ' .. tfni .. ' &> ' .. tfno)
    local tf = io.open(tfno,'r')
    local s = tf:read('*l')
    while s do
