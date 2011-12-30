@@ -69,10 +69,10 @@ static int nn_(SparseLinear_accGradParameters)(lua_State *L)
       luaL_error(L, "index out of bound");
   }
   
-  THTensor_(cadd)(gradBias, 1, gradOutput); 
+  THLab_(cadd)(gradBias, gradBias, 1, gradOutput); 
   
   if(weightDecay != 0)
-    THTensor_(cadd)(gradWeight, weightDecay, weight);
+    THLab_(cadd)(gradWeight, gradWeight, weightDecay, weight);
   
   THTensor_(resizeAs)(lastInput, input);
   THTensor_(copy)(lastInput, input);
@@ -93,7 +93,7 @@ int nn_(SparseLinear_updateParameters)(lua_State *L)
   real weightDecay = luaT_getfieldchecknumber(L, 1, "weightDecay");
   
   long dim = weight->size[0]; /* number of weights.. */
-  THTensor_(cadd)(bias, -learningRate, gradBias);
+  THLab_(cadd)(bias, bias, -learningRate, gradBias);
   
   for(i = 0; i < lastInput->size[1]; i++) 
   {

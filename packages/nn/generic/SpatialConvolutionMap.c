@@ -50,7 +50,7 @@ static int nn_(SpatialConvolutionMap_updateOutput)(lua_State *L)
   int k;
   for (k = 0; k < nOutputPlane; k++) {
     THTensor_(select)(outputPlane,output,0,k);
-    THTensor_(fill)(outputPlane, THTensor_(get1d)(bias, k));
+    THLab_(fill)(outputPlane, THTensor_(get1d)(bias, k));
   }
   THTensor_(free)(outputPlane);
 
@@ -100,7 +100,7 @@ static int nn_(SpatialConvolutionMap_updateGradInput)(lua_State *L)
 
   // Resize/Zero
   THTensor_(resizeAs)(gradInput, input);
-  THTensor_(zero)(gradInput);
+  THLab_(zero)(gradInput);
 
   // get raw pointers
   real *gradInput_data = THTensor_(data)(gradInput);
@@ -187,7 +187,7 @@ static int nn_(SpatialConvolutionMap_accGradParameters)(lua_State *L)
   real *gradBias_data = THTensor_(data)(gradBias);
   for(k = 0; k < nOutputPlane; k++) {
     THTensor_(select)(gradOutputPlane, gradOutput, 0, k);
-    gradBias_data[k] += scale * THTensor_(sum)(gradOutputPlane);
+    gradBias_data[k] += scale * THLab_(sumall)(gradOutputPlane);
   }
   THTensor_(free)(gradOutputPlane);
 

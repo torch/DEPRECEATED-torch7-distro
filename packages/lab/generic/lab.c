@@ -5,11 +5,7 @@
 static int lab_(numel)(lua_State *L)
 {
   THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
-  long n;
-
-  THLab_(numel)(&n, tensor);
-  lua_pushnumber(L, n);
-
+  lua_pushnumber(L, THLab_(numel)(tensor));
   return 1;
 }
 
@@ -21,7 +17,7 @@ static int lab_(max_)(lua_State *L)
   int dimension = (int)(luaL_optnumber(L, 4, THTensor_(nDimension)(t)))-1;
 
   THLab_(max)(values_, indices_, t, dimension);
-  THLongTensor_add(indices_, 1);
+  THLongLab_add(indices_, indices_, 1);
 
   lua_settop(L, 2);  
   return 2;
@@ -48,7 +44,7 @@ static int lab_(min_)(lua_State *L)
   int dimension = (int)(luaL_optnumber(L, 4, THTensor_(nDimension)(t)))-1;
 
   THLab_(min)(values_, indices_, t, dimension);
-  THLongTensor_add(indices_, 1);
+  THLongLab_add(indices_, indices_, 1);
 
   lua_settop(L, 2);  
   return 2;
@@ -162,11 +158,7 @@ static int lab_(cumprod)(lua_State *L)
 static int lab_(trace)(lua_State *L)
 {
   THTensor *t = luaT_checkudata(L, 1, torch_(Tensor_id));
-  real trace;
-
-  THLab_(trace)(&trace, t);
-
-  lua_pushnumber(L, trace);  
+  lua_pushnumber(L, THLab_(trace)(t));
   return 1;
 }
 
@@ -314,7 +306,7 @@ static int lab_(randperm_)(lua_State *L)
   long n = (long)luaL_checknumber(L, 2);
 
   THLab_(randperm)(r_, n);
-  THTensor_(add)(r_, 1);
+  THLab_(add)(r_, r_, 1);
 
   lua_settop(L, 1);  
   return 1;
@@ -367,7 +359,7 @@ static int lab_(sort_)(lua_State *L)
   int descendingOrder = luaT_optboolean(L, 5, 0);
 
   THLab_(sort)(rt_, ri_, t, dimension, descendingOrder);
-  THLongTensor_add(ri_, 1);
+  THLongLab_add(ri_, ri_, 1);
 
   lua_settop(L, 2);
   return 2;
@@ -1100,10 +1092,8 @@ static int lab_(norm)(lua_State *L)
 {
   THTensor *t = luaT_checkudata(L, 1, torch_(Tensor_id));
   real value = luaL_optnumber(L, 2, 2);
-  real norm;
-
-  THLab_(norm)(&norm, t, value);
-  lua_pushnumber(L, norm);
+  
+  lua_pushnumber(L, THLab_(norm)(t, value));
 
   return 1;
 }
@@ -1113,10 +1103,8 @@ static int lab_(dist)(lua_State *L)
   THTensor *t1 = luaT_checkudata(L, 1, torch_(Tensor_id));
   THTensor *t2 = luaT_checkudata(L, 2, torch_(Tensor_id));
   real value = luaL_optnumber(L, 3, 2);
-  real dist;
-
-  THLab_(dist)(&dist, t1, t2, value);
-  lua_pushnumber(L, dist);
+  
+  lua_pushnumber(L, THLab_(dist)(t1, t2, value));
 
   return 1;
 }

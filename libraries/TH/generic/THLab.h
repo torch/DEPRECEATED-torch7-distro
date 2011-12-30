@@ -2,6 +2,15 @@
 #define TH_GENERIC_FILE "generic/THLab.h"
 #else
 
+TH_API void THLab_(fill)(THTensor *r_, real value);
+TH_API void THLab_(zero)(THTensor *r_);
+
+TH_API accreal THLab_(dot)(THTensor *t, THTensor *src);
+  
+TH_API real THLab_(minall)(THTensor *t);
+TH_API real THLab_(maxall)(THTensor *t);
+TH_API accreal THLab_(sumall)(THTensor *t);
+
 TH_API void THLab_(add)(THTensor *r_, THTensor *t, real value);
 TH_API void THLab_(mul)(THTensor *r_, THTensor *t, real value);
 TH_API void THLab_(div)(THTensor *r_, THTensor *t, real value);
@@ -10,14 +19,21 @@ TH_API void THLab_(cadd)(THTensor *r_, THTensor *t, real value, THTensor *src);
 TH_API void THLab_(cmul)(THTensor *r_, THTensor *t, THTensor *src);
 TH_API void THLab_(cdiv)(THTensor *r_, THTensor *t, THTensor *src);
 
-TH_API void THLab_(numel)(long *n_, THTensor *t);
+TH_API void THLab_(addcmul)(THTensor *r_, THTensor *t, real value, THTensor *src1, THTensor *src2);
+TH_API void THLab_(addcdiv)(THTensor *r_, THTensor *t, real value, THTensor *src1, THTensor *src2);
+
+TH_API void THLab_(addmv)(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *mat,  THTensor *vec);
+TH_API void THLab_(addmm)(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *mat1, THTensor *mat2);
+TH_API void THLab_(addr)(THTensor *r_,  real beta, THTensor *t, real alpha, THTensor *vec1, THTensor *vec2);
+
+TH_API long THLab_(numel)(THTensor *t);
 TH_API void THLab_(max)(THTensor *values_, THLongTensor *indices_, THTensor *t, int dimension);
 TH_API void THLab_(min)(THTensor *values_, THLongTensor *indices_, THTensor *t, int dimension);
 TH_API void THLab_(sum)(THTensor *r_, THTensor *t, int dimension);
 TH_API void THLab_(prod)(THTensor *r_, THTensor *t, int dimension);
 TH_API void THLab_(cumsum)(THTensor *r_, THTensor *t, int dimension);
 TH_API void THLab_(cumprod)(THTensor *r_, THTensor *t, int dimension);
-TH_API void THLab_(trace)(real *trace_, THTensor *t);
+TH_API accreal THLab_(trace)(THTensor *t);
 TH_API void THLab_(cross)(THTensor *r_, THTensor *a, THTensor *b, int dimension);
 
 TH_API void THLab_(zeros)(THTensor *r_, THLongStorage *size);
@@ -56,8 +72,12 @@ TH_API void THLab_(abs)(THTensor *r_, THTensor *t);
 TH_API void THLab_(mean)(THTensor *r_, THTensor *t, int dimension);
 TH_API void THLab_(std)(THTensor *r_, THTensor *t, int dimension, int flag);
 TH_API void THLab_(var)(THTensor *r_, THTensor *t, int dimension, int flag);
-TH_API void THLab_(norm)(real *norm_, THTensor *t, real value);
-TH_API void THLab_(dist)(real *dist_, THTensor *a, THTensor *b, real value);
+TH_API accreal THLab_(norm)(THTensor *t, real value);
+TH_API accreal THLab_(dist)(THTensor *a, THTensor *b, real value);
+
+TH_API accreal THLab_(meanall)(THTensor *self);
+TH_API accreal THLab_(varall)(THTensor *self);
+TH_API accreal THLab_(stdall)(THTensor *self);
 
 TH_API void THLab_(linspace)(THTensor *r_, real a, real b, long n);
 TH_API void THLab_(logspace)(THTensor *r_, real a, real b, long n);

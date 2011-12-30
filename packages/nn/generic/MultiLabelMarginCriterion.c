@@ -29,8 +29,8 @@ static int nn_(MultiLabelMarginCriterion_updateOutput)(lua_State *L)
     THArgCheck((target->nDimension == 2) && (target->size[0] == nframe) && (target->size[1] == dim), 3, "inconsistent target size");
   }
 
-  THArgCheck(THTensor_(min)(target) >= 0, 3, "target out of range");
-  THArgCheck(THTensor_(max)(target) <= dim, 3, "target out of range");
+  THArgCheck(THLab_(minall)(target) >= 0, 3, "target out of range");
+  THArgCheck(THLab_(maxall)(target) <= dim, 3, "target out of range");
 
   target = THTensor_(newContiguous)(target);
   input = THTensor_(newContiguous)(input);
@@ -113,8 +113,8 @@ static int nn_(MultiLabelMarginCriterion_updateGradInput)(lua_State *L)
     THArgCheck((target->nDimension == 2) && (target->size[0] == nframe) && (target->size[1] == dim), 3, "inconsistent target size");
   }
 
-  THArgCheck(THTensor_(min)(target) >= 0, 3, "target out of range");
-  THArgCheck(THTensor_(max)(target) <= dim, 3, "target out of range");
+  THArgCheck(THLab_(minall)(target) >= 0, 3, "target out of range");
+  THArgCheck(THLab_(maxall)(target) <= dim, 3, "target out of range");
 
   target = THTensor_(newContiguous)(target);
   input = THTensor_(newContiguous)(input);
@@ -124,7 +124,7 @@ static int nn_(MultiLabelMarginCriterion_updateGradInput)(lua_State *L)
   g = (sizeAverage ? 1./((real)dim) : 1.);
 
   THTensor_(resizeAs)(gradInput, input);
-  THTensor_(zero)(gradInput);
+  THLab_(zero)(gradInput);
   gradInput_data = THTensor_(data)(gradInput);
 
   for(t = 0; t < nframe; t++)
@@ -163,7 +163,6 @@ static int nn_(MultiLabelMarginCriterion_updateGradInput)(lua_State *L)
     target_data += dim;
     gradInput_data += dim;
   }
-
 
   THTensor_(free)(input);  
   THTensor_(free)(target);

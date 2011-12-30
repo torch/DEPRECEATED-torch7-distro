@@ -2,6 +2,58 @@
 #define TH_GENERIC_FILE "generic/THLab.c"
 #else
 
+void THLab_(fill)(THTensor *r_, real value)
+{
+  TH_TENSOR_APPLY(real, r_, 
+                  THVector_(fill)(r__data, value, r__size); break;);
+}
+
+void THLab_(zero)(THTensor *r_)
+{
+  TH_TENSOR_APPLY(real, r_, 
+                  THVector_(fill)(r__data, 0, r__size); break;);
+}
+
+accreal THLab_(dot)(THTensor *tensor, THTensor *src)
+{
+  accreal sum = 0;
+  /* we use a trick here. careful with that. */
+  TH_TENSOR_APPLY2(real, tensor, real, src,
+                   long sz = (tensor_size-tensor_i < src_size-src_i ? tensor_size-tensor_i : src_size-src_i);
+                   sum += THBlas_(dot)(sz, src_data, src_stride, tensor_data, tensor_stride);
+                   tensor_i += sz;
+                   src_i += sz;
+                   tensor_data += sz*tensor_stride;
+                   src_data += sz*src_stride; 
+                   break;);
+  return sum; 
+}
+
+real THLab_(minall)(THTensor *tensor)
+{
+  real theMin;
+  THArgCheck(tensor->nDimension > 0, 1, "tensor must have one dimension");
+  theMin = THTensor_(data)(tensor)[0];
+  TH_TENSOR_APPLY(real, tensor, if(*tensor_data < theMin) theMin = *tensor_data;);
+  return theMin; 
+}
+
+real THLab_(maxall)(THTensor *tensor)
+{
+  real theMax;
+  THArgCheck(tensor->nDimension > 0, 1, "tensor must have one dimension");
+  theMax = THTensor_(data)(tensor)[0];
+  TH_TENSOR_APPLY(real, tensor, if(*tensor_data > theMax) theMax = *tensor_data;);
+  return theMax; 
+}
+
+accreal THLab_(sumall)(THTensor *tensor)
+{
+  accreal sum = 0;
+  TH_TENSOR_APPLY(real, tensor, sum += *tensor_data;);
+  return sum;
+}
+
 void THLab_(add)(THTensor *r_, THTensor *t, real value)
 {
   THTensor_(resizeAs)(r_, t);
@@ -38,9 +90,240 @@ void THLab_(cdiv)(THTensor *r_, THTensor *t, THTensor *src)
   TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data / *src_data;);
 }
 
-void THLab_(numel)(long *n_, THTensor *t)
+void THLab_(addcmul)(THTensor *r_, THTensor *t, real value, THTensor *src1, THTensor *src2)
 {
-  *n_ = THTensor_(nElement)(t);
+  if(r_ != t)
+  {
+    THTensor_(resizeAs)(r_, t);
+    THTensor_(copy)(r_, t);
+  }
+
+  TH_TENSOR_APPLY3(real, r_, real, src1, real, src2, *r__data += value * *src1_data * *src2_data;);
+}
+
+
+void THLab_(addcdiv)(THTensor *r_, THTensor *t, real value, THTensor *src1, THTensor *src2)
+{
+  if(r_ != t)
+  {
+    THTensor_(resizeAs)(r_, t);
+    THTensor_(copy)(r_, t);
+  }
+
+  TH_TENSOR_APPLY3(real, r_, real, src1, real, src2, *r__data += value * *src1_data / *src2_data;);
+}
+
+void THLab_(addmv)(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *mat, THTensor *vec)
+{
+  if( (mat->nDimension != 2) || (vec->nDimension != 1) )
+    THError("matrix and vector expected");
+ 
+  if( mat->size[1] != vec->size[0] )
+    THError("size mismatch");
+
+  if(t->nDimension != 1)
+    THError("size mismatch");
+    
+  if(t->size[0] != mat->size[0])
+    THError("size mismatch");
+
+  if(r_ != t)
+  {
+    THTensor_(resizeAs)(r_, t);
+    THTensor_(copy)(r_, t);
+  }
+
+  if(mat->stride[0] == 1)
+  {
+    THBlas_(gemv)('n', mat->size[0], mat->size[1],
+                  alpha, THTensor_(data)(mat), mat->stride[1],
+                  THTensor_(data)(vec), vec->stride[0],
+                  beta, THTensor_(data)(r_), r_->stride[0]);
+  }
+  else if(mat->stride[1] == 1)
+  {
+    THBlas_(gemv)('t',  mat->size[1], mat->size[0],
+                  alpha, THTensor_(data)(mat), mat->stride[0],
+                  THTensor_(data)(vec), vec->stride[0],
+                  beta, THTensor_(data)(r_), r_->stride[0]);
+  }
+  else
+  {
+    THTensor *cmat = THTensor_(newContiguous)(mat);
+
+    THBlas_(gemv)('t',  mat->size[1], mat->size[0],
+                  alpha, THTensor_(data)(cmat), cmat->stride[0],
+                  THTensor_(data)(vec), vec->stride[0],
+                  beta, THTensor_(data)(r_), r_->stride[0]);
+
+    THTensor_(free)(cmat);
+  }
+}
+
+void THLab_(addmm)(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *m1, THTensor *m2)
+{ 
+  long r, c;
+  char transpose, transpose_m1, transpose_m2;
+  THTensor *r__, *m1_, *m2_;
+
+  if( (m1->nDimension != 2) || (m2->nDimension != 2) ) 
+    THError("matrix and matrix expected"); 
+ 
+  if(t->nDimension != 2)
+    THError("size mismatch"); 
+
+  if( (t->size[0] != m1->size[0]) || (t->size[1] != m2->size[1]) || (m1->size[1] != m2->size[0]) ) 
+    THError("size mismatch"); 
+
+  if(t != r_)
+  {
+    THTensor_(resizeAs)(r_, t);
+    THTensor_(copy)(r_, t);
+  }
+
+  /* r_ */
+  if(r_->stride[0] == 1)
+  {
+    transpose = 'n';
+    r__ = r_;
+  }
+  else if(r_->stride[1] == 1)
+  {
+    THTensor *swap = m2;
+    m2 = m1;
+    m1 = swap;
+    THTensor_(transpose)(r_, NULL, 0, 1);
+    THTensor_(transpose)(m1, NULL, 0, 1);
+    THTensor_(transpose)(m2, NULL, 0, 1);
+    transpose = 't';
+    r__ = r_;
+  }
+  else
+  {
+    transpose = 'n';
+    THTensor_(transpose)(r_, NULL, 0, 1);
+    r__ = THTensor_(newClone)(r_);
+    THTensor_(transpose)(r_, NULL, 0, 1);
+    THTensor_(transpose)(r__, NULL, 0, 1);
+  }
+
+  /* m1 */
+  if(m1->stride[0] == 1)
+  {
+    transpose_m1 = 'n';
+    m1_ = m1;
+  }
+  else if(m1->stride[1] == 1)
+  {
+    transpose_m1 = 't';
+    m1_ = m1;
+  }
+  else
+  {
+    transpose_m1 = 't';
+    m1_ = THTensor_(newContiguous)(m1);
+  }
+
+  /* m2 */
+  if(m2->stride[0] == 1)
+  {
+    transpose_m2 = 'n';
+    m2_ = m2;
+  }
+  else if(m2->stride[1] == 1)
+  {
+    transpose_m2 = 't';
+    m2_ = m2;
+  }
+  else
+  {
+    transpose_m2 = 't';
+    m2_ = THTensor_(newContiguous)(m2);
+  }
+
+  /* do the operation */
+  THBlas_(gemm)(transpose_m1,
+                transpose_m2,
+                r__->size[0],
+                r__->size[1],
+                m1_->size[1],
+                alpha,
+                THTensor_(data)(m1_),
+                (transpose_m1 == 'n' ? m1_->stride[1] : m1_->stride[0]),
+                THTensor_(data)(m2_),
+                (transpose_m2 == 'n' ? m2_->stride[1] : m2_->stride[0]),
+                beta,
+                THTensor_(data)(r__),
+                r__->stride[1]);
+
+  /* free intermediate variables */
+  if(m1_ != m1)
+    THTensor_(free)(m1_);
+
+  if(m2_ != m2)
+    THTensor_(free)(m2_);
+
+  if(r__ != r_)
+    THTensor_(freeCopyTo)(r__, r_);
+
+  if(transpose == 't')
+  {
+    THTensor_(transpose)(r_, NULL, 0, 1);
+    THTensor_(transpose)(m1, NULL, 0, 1);
+    THTensor_(transpose)(m2, NULL, 0, 1);
+  }
+} 
+
+void THLab_(addr)(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *vec1, THTensor *vec2)
+{
+  if( (vec1->nDimension != 1) || (vec2->nDimension != 1) )
+    THError("vector and vector expected");
+
+  if(t->nDimension != 2)
+    THError("size mismatch");
+    
+  if( (t->size[0] != vec1->size[0]) || (t->size[1] != vec2->size[0]) )
+    THError("size mismatch");
+
+  if(r_ != t)
+  {
+    THTensor_(resizeAs)(r_, t);
+    THTensor_(copy)(r_, t);
+  }
+
+  if(beta != 1)
+    THLab_(mul)(r_, r_, beta);
+
+  if(r_->stride[0] == 1)
+  {
+    THBlas_(ger)(vec1->size[0], vec2->size[0],
+                 alpha, THTensor_(data)(vec1), vec1->stride[0],
+                 THTensor_(data)(vec2), vec2->stride[0],
+                 THTensor_(data)(r_), r_->stride[1]);
+  }
+  else if(r_->stride[1] == 1)
+  {
+    THBlas_(ger)(vec2->size[0], vec1->size[0],
+                 alpha, THTensor_(data)(vec2), vec2->stride[0],
+                 THTensor_(data)(vec1), vec1->stride[0],
+                 THTensor_(data)(r_), r_->stride[0]);
+  }
+  else
+  {
+    THTensor *cr = THTensor_(newClone)(r_);
+
+    THBlas_(ger)(vec2->size[0], vec1->size[0],
+                 alpha, THTensor_(data)(vec2), vec2->stride[0],
+                 THTensor_(data)(vec1), vec1->stride[0],
+                 THTensor_(data)(cr), cr->stride[0]);
+
+    THTensor_(freeCopyTo)(cr, r_);
+  }
+}
+
+long THLab_(numel)(THTensor *t)
+{
+  return THTensor_(nElement)(t);
 }
 
 void THLab_(max)(THTensor *values_, THLongTensor *indices_, THTensor *t, int dimension)
@@ -173,7 +456,7 @@ void THLab_(cumprod)(THTensor *r_, THTensor *t, int dimension)
                        });
 }
 
-void THLab_(trace)(real *trace_, THTensor *t)
+accreal THLab_(trace)(THTensor *t)
 {
   real *t_data = THTensor_(data)(t);
   accreal sum = 0;
@@ -191,7 +474,7 @@ void THLab_(trace)(real *trace_, THTensor *t)
     i++;
   }
 
-  *trace_ = (real)sum;
+  return sum;
 }
 
 void THLab_(cross)(THTensor *r_, THTensor *a, THTensor *b, int dimension)
@@ -235,13 +518,13 @@ void THLab_(cross)(THTensor *r_, THTensor *a, THTensor *b, int dimension)
 void THLab_(zeros)(THTensor *r_, THLongStorage *size)
 {
   THTensor_(resize)(r_, size, NULL);
-  THTensor_(zero)(r_);
+  THLab_(zero)(r_);
 }
 
 void THLab_(ones)(THTensor *r_, THLongStorage *size)
 {
   THTensor_(resize)(r_, size, NULL);
-  THTensor_(fill)(r_, 1);
+  THLab_(fill)(r_, 1);
 }
 
 void THLab_(diag)(THTensor *r_, THTensor *t, int k)
@@ -260,7 +543,7 @@ void THLab_(diag)(THTensor *r_, THTensor *t, int k)
     long i;
 
     THTensor_(resize2d)(r_, sz, sz);    
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
     r__data = THTensor_(data)(r_);
     r__stride_0 = THTensor_(stride)(r_, 0);
     r__stride_1 = THTensor_(stride)(r_, 1);
@@ -304,7 +587,7 @@ void THLab_(eye)(THTensor *r_, long n, long m)
     m = n;
 
   THTensor_(resize2d)(r_, n, m);
-  THTensor_(zero)(r_);
+  THLab_(zero)(r_);
 
   i = 0;
   r__data = THTensor_(data)(r_);
@@ -681,15 +964,40 @@ void THLab_(var)(THTensor *r_, THTensor *t, int dimension, int flag)
                        });
 }
 
-void THLab_(norm)(real *norm_, THTensor *t, real value)
-{
-  *norm_ = THTensor_(norm)(t, value);
+accreal THLab_(norm)(THTensor *tensor, real value)
+{ 
+  accreal sum = 0;
+  TH_TENSOR_APPLY(real, tensor, sum += pow(fabs(*tensor_data), value););
+  return pow(sum, 1.0/value);
 }
 
-void THLab_(dist)(real *dist_, THTensor *a, THTensor *b, real value)
+accreal THLab_(dist)(THTensor *tensor, THTensor *src, real value)
 { 
-  *dist_ = THTensor_(dist)(a, b, value);
+  real sum = 0;
+  TH_TENSOR_APPLY2(real, tensor, real, src, 
+	sum += pow(fabs(*tensor_data - *src_data), value);)
+  return pow(sum, 1.0/value);
 }
+
+accreal THLab_(meanall)(THTensor *tensor)
+{ 
+  THArgCheck(tensor->nDimension > 0, 1, "empty Tensor");
+  return THLab_(sumall)(tensor)/THTensor_(nElement)(tensor);
+}  
+
+accreal THLab_(varall)(THTensor *tensor)
+{ 
+  accreal mean = THLab_(meanall)(tensor);
+  accreal sum = 0;
+  TH_TENSOR_APPLY(real, tensor, sum += (*tensor_data - mean)*(*tensor_data - mean););
+  sum /= (THTensor_(nElement)(tensor)-1);
+  return sum;
+}
+
+accreal THLab_(stdall)(THTensor *tensor)
+{ 
+  return sqrt(THLab_(varall)(tensor));
+} 
 
 void THLab_(linspace)(THTensor *r_, real a, real b, long n)
 {

@@ -9,7 +9,7 @@ static void nn_(convolution_updateOutput_)(THTensor *input, THTensor *output, TH
   THTensor *outn = THTensor_(new)();
   for (i=0; i<bias->size[0]; i++) {
     THTensor_(select)(outn,output,0,i);
-    THTensor_(fill)(outn, THTensor_(get1d)(bias, i));
+    THLab_(fill)(outn, THTensor_(get1d)(bias, i));
   }
   THTensor_(free)(outn);
 
@@ -76,7 +76,7 @@ static int nn_(SpatialConvolution_updateOutput)(lua_State *L)
 /*   THTensor *outn = THTensor_(new)(); */
 /*   for (i=0; i<bias->size[0]; i++) { */
 /*     THTensor_(select)(outn,output,0,i); */
-/*     THTensor_(fill)(outn, THTensor_(get1d)(bias, i)); */
+/*     THLab_(fill)(outn, THTensor_(get1d)(bias, i)); */
 /*   } */
 /*   THTensor_(free)(outn); */
 
@@ -140,7 +140,7 @@ static void nn_(convolution_accGradParameters_)(THTensor *input, THTensor *gradO
   for(k = 0; k < gradOutput->size[0]; k++)
   {
     THTensor_(select)(gradOutSlice, gradOutput, 0, k);
-    gradBias_data[k] += scale*THTensor_(sum)(gradOutSlice);
+    gradBias_data[k] += scale*THLab_(sumall)(gradOutSlice);
   }
   THTensor_(free)(gradOutSlice);
 

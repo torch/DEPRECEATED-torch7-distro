@@ -617,10 +617,10 @@ void THLab_(conv2DRevger)(THTensor *r_, real beta, real alpha, THTensor *t_, THT
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
@@ -693,10 +693,10 @@ void THLab_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, THTens
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
@@ -776,10 +776,10 @@ void THLab_(conv2Dmv)(THTensor *r_, real beta, real alpha, THTensor *t_, THTenso
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
@@ -839,9 +839,9 @@ void THLab_(conv2Dmul)(THTensor *r_, real beta, real alpha, THTensor *t_, THTens
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize2d)(r_, nOutputRows, nOutputCols);
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *ptr_input = THTensor_(data)(input);
   real *ptr_weight = THTensor_(data)(kernel);
@@ -899,10 +899,10 @@ void THLab_(conv2Dcmul)(THTensor *r_, real beta, real alpha, THTensor *t_, THTen
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
@@ -972,10 +972,10 @@ void THLab_(conv2Dmap)(THTensor *r_, real beta, real alpha, THTensor *t_, THTens
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
@@ -1056,10 +1056,10 @@ void THLab_(conv3DRevger)(THTensor *r_, real beta, real alpha, THTensor *t_, THT
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
@@ -1142,10 +1142,10 @@ void THLab_(conv3Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, THTens
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
@@ -1232,10 +1232,10 @@ void THLab_(conv3Dmv)(THTensor *r_, real beta, real alpha, THTensor *t_, THTenso
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
@@ -1302,9 +1302,9 @@ void THLab_(conv3Dmul)(THTensor *r_, real beta, real alpha, THTensor *t_, THTens
   long nelem = THTensor_(nElement)(r_);
   THTensor_(resize3d)(r_, nOutputDepth, nOutputRows, nOutputCols);
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *ptr_input = THTensor_(data)(input);
   real *ptr_weight = THTensor_(data)(kernel);
@@ -1368,10 +1368,10 @@ void THLab_(conv3Dcmul)(THTensor *r_, real beta, real alpha, THTensor *t_, THTen
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);
@@ -1450,10 +1450,10 @@ void THLab_(conv3Dmap)(THTensor *r_, real beta, real alpha, THTensor *t_, THTens
 
   if (nelem == 0 || beta == 0 || nelem != THTensor_(nElement)(r_))
   {
-    THTensor_(zero)(r_);
+    THLab_(zero)(r_);
   }
   else if (beta != 1)
-    THTensor_(mul)(r_, beta);
+    THLab_(mul)(r_, r_, beta);
 
   real *input_data = THTensor_(data)(input);
   real *weight_data = THTensor_(data)(kernel);

@@ -54,7 +54,7 @@ static int nn_(Min_updateGradInput)(lua_State *L)
   int i, j;
 
   THTensor_(resizeAs)(gradInput, input);
-  THTensor_(zero)(gradInput);
+  THLab_(zero)(gradInput);
 
   dim = THLongStorage_newWithSize(gradOutput->nDimension+1);
   str = THLongStorage_newWithSize(gradOutput->nDimension+1);

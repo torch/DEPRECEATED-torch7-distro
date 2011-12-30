@@ -361,9 +361,18 @@ static int torch_Tensor_(select)(lua_State *L)
   THArgCheck((sliceIndex >= 0) && (sliceIndex < src->size[dimension]), 3, "out of range");
 */
 
-  tensor = THTensor_(newWithTensor)(tensor);
-  THTensor_(select)(tensor, NULL, dimension, sliceIndex);
-  luaT_pushudata(L, tensor, torch_Tensor_id);
+  if(tensor->nDimension > 1)
+  {
+    tensor = THTensor_(newWithTensor)(tensor);
+    THTensor_(select)(tensor, NULL, dimension, sliceIndex);
+    luaT_pushudata(L, tensor, torch_Tensor_id);
+  }
+  else
+  {
+    THArgCheck(tensor->nDimension == 1, 1, "empty Tensor");
+    lua_pushnumber(L, THTensor_(get1d)(tensor, sliceIndex));
+  }
+
   return 1;
 }
 

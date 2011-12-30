@@ -36,8 +36,8 @@ static int nn_(TemporalSubSampling_updateOutput)(lua_State *L)
     THTensor_(narrow)(inputWindow, input, 0, k*dW, kW);
     THTensor_(select)(outputFrame, output, 0, k);
     THLab_(sum)(outputFrame, inputWindow, 0);
-    THTensor_(cmul)(outputFrame, weight);
-    THTensor_(cadd)(outputFrame, 1, bias);
+    THLab_(cmul)(outputFrame, outputFrame, weight);
+    THLab_(cadd)(outputFrame, outputFrame, 1, bias);
   }
 
   THTensor_(free)(outputFrame);
@@ -65,16 +65,16 @@ static int nn_(TemporalSubSampling_updateGradInput)(lua_State *L)
   buffer = THTensor_(new)();
   kwunit = THTensor_(newWithSize1d)(kW);
 
-  THTensor_(fill)(kwunit, 1);
+  THLab_(fill)(kwunit, 1);
   THTensor_(resizeAs)(gradInput, input);
-  THTensor_(zero)(gradInput);
+  THLab_(zero)(gradInput);
 
   for(k = 0; k < gradOutput->size[0]; k++)
   {
     THTensor_(narrow)(gradInputWindow, gradInput, 0, k*dW, kW);
     THTensor_(select)(gradOutputFrame, gradOutput, 0, k);
     THLab_(cmul)(buffer, weight, gradOutputFrame);
-    THTensor_(addr)(gradInputWindow, 1, kwunit, buffer);
+    THLab_(addr)(gradInputWindow, 1, gradInputWindow, 1, kwunit, buffer);
   }
 
   THTensor_(free)(gradOutputFrame);
@@ -111,8 +111,8 @@ static int nn_(TemporalSubSampling_accGradParameters)(lua_State *L)
     THTensor_(narrow)(inputWindow, input, 0, k*dW, kW);
     THTensor_(select)(gradOutputFrame, gradOutput, 0, k);
     THLab_(sum)(buffer, inputWindow, 0);
-    THTensor_(addcmul)(gradWeight, scale, buffer, gradOutputFrame);
-    THTensor_(cadd)(gradBias, scale, gradOutputFrame);
+    THLab_(addcmul)(gradWeight, gradWeight, scale, buffer, gradOutputFrame);
+    THLab_(cadd)(gradBias, gradBias, scale, gradOutputFrame);
   }
 
   THTensor_(free)(gradOutputFrame);
