@@ -108,7 +108,7 @@ static int nnOmp_(SpatialMaxPooling_updateGradInputOmp)(lua_State *L)
   int k,i,j;
 
   THTensor_(resizeAs)(gradInput, input);
-  THTensor_(zero)(gradInput);
+  THLab_(zero)(gradInput);
 
   gradInputPlane = THTensor_(new)();
   gradOutputPlane = THTensor_(new)();

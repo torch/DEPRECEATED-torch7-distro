@@ -109,7 +109,7 @@ static int nnOmp_(SpatialConvolutionMap_updateGradInputOmp)(lua_State *L)
 
   // Resize/Zero
   THTensor_(resizeAs)(gradInput, input);
-  THTensor_(zero)(gradInput);
+  THLab_(zero)(gradInput);
 
   // get raw pointers
   real *gradInput_data = THTensor_(data)(gradInput);

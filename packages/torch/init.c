@@ -24,13 +24,13 @@ extern void torch_LongTensor_init(lua_State *L);
 extern void torch_FloatTensor_init(lua_State *L);
 extern void torch_DoubleTensor_init(lua_State *L);
 
-extern void torch_ByteTensorMath_init(lua_State *L);
-extern void torch_CharTensorMath_init(lua_State *L);
-extern void torch_ShortTensorMath_init(lua_State *L);
-extern void torch_IntTensorMath_init(lua_State *L);
-extern void torch_LongTensorMath_init(lua_State *L);
-extern void torch_FloatTensorMath_init(lua_State *L);
-extern void torch_DoubleTensorMath_init(lua_State *L);
+/* extern void torch_ByteTensorMath_init(lua_State *L); */
+/* extern void torch_CharTensorMath_init(lua_State *L); */
+/* extern void torch_ShortTensorMath_init(lua_State *L); */
+/* extern void torch_IntTensorMath_init(lua_State *L); */
+/* extern void torch_LongTensorMath_init(lua_State *L); */
+/* extern void torch_FloatTensorMath_init(lua_State *L); */
+/* extern void torch_DoubleTensorMath_init(lua_State *L); */
 
 static lua_State *globalL;
 static void luaTorchErrorHandlerFunction(const char *msg)
@@ -74,13 +74,13 @@ DLL_EXPORT int luaopen_libtorch(lua_State *L)
 
   torch_File_init_storage_id(L);
 
-  torch_ByteTensorMath_init(L);
-  torch_CharTensorMath_init(L);
-  torch_ShortTensorMath_init(L);
-  torch_IntTensorMath_init(L);
-  torch_LongTensorMath_init(L);
-  torch_FloatTensorMath_init(L);
-  torch_DoubleTensorMath_init(L);
+/*   torch_ByteTensorMath_init(L); */
+/*   torch_CharTensorMath_init(L); */
+/*   torch_ShortTensorMath_init(L); */
+/*   torch_IntTensorMath_init(L); */
+/*   torch_LongTensorMath_init(L); */
+/*   torch_FloatTensorMath_init(L); */
+/*   torch_DoubleTensorMath_init(L); */
 
   torch_Timer_init(L);
   torch_DiskFile_init(L);

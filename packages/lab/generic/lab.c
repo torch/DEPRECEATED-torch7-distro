@@ -2,6 +2,364 @@
 #define TH_GENERIC_FILE "generic/lab.c"
 #else
 
+static int lab_(zero)(lua_State *L)
+{
+  THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
+  THLab_(zero)(tensor);
+  return 1;
+}
+
+static int lab_(fill)(lua_State *L)
+{
+  THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
+  real value = (real)luaL_checknumber(L, 2);
+  THLab_(fill)(tensor, value);
+  return 1;
+}
+
+static int lab_(dot)(lua_State *L)
+{
+  THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
+  THTensor *src = luaT_checkudata(L, 2, torch_(Tensor_id));
+  lua_pushnumber(L, THLab_(dot)(tensor, src));
+  return 1;
+}
+
+static int lab_(minall)(lua_State *L)
+{
+  THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
+  lua_pushnumber(L, THLab_(minall)(tensor));
+  return 1;
+}
+
+static int lab_(maxall)(lua_State *L)
+{
+  THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
+  lua_pushnumber(L, THLab_(maxall)(tensor));
+  return 1;
+}
+
+static int lab_(sumall)(lua_State *L)
+{
+  THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
+  lua_pushnumber(L, THLab_(sumall)(tensor));
+  return 1;
+}
+
+static int lab_(add)(lua_State *L)
+{
+  THTensor *r_, *t;
+  real value;
+  int n = lua_gettop(L);
+
+  if(n == 2)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    value = luaL_checknumber(L, 2);
+    t = r_;
+  }
+  else
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = luaT_checkudata(L, 2, torch_(Tensor_id));
+    value = luaL_checknumber(L, 3);
+  }
+
+  THLab_(add)(r_, t, value);
+  return 1;
+}
+
+static int lab_(mul)(lua_State *L)
+{
+  THTensor *r_, *t;
+  real value;
+  int n = lua_gettop(L);
+
+  if(n == 2)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    value = luaL_checknumber(L, 2);
+    t = r_;
+  }
+  else
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = luaT_checkudata(L, 2, torch_(Tensor_id));
+    value = luaL_checknumber(L, 3);
+  }
+
+  THLab_(mul)(r_, t, value);
+  return 1;
+}
+
+static int lab_(div)(lua_State *L)
+{
+  THTensor *r_, *t;
+  real value;
+  int n = lua_gettop(L);
+
+  if(n == 2)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    value = luaL_checknumber(L, 2);
+    t = r_;
+  }
+  else
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = luaT_checkudata(L, 2, torch_(Tensor_id));
+    value = luaL_checknumber(L, 3);
+  }
+
+  THLab_(div)(r_, t, value);
+  return 1;
+}
+
+static int lab_(cadd)(lua_State *L)
+{
+  THTensor *r_, *t, *src;
+  real value;
+  int n = lua_gettop(L);
+
+  if(n == 4)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = luaT_checkudata(L, 2, torch_(Tensor_id));
+    value = luaL_checknumber(L, 3);
+    src = luaT_checkudata(L, 4, torch_(Tensor_id));
+  }
+  else if(n == 3)
+  {
+    if(lua_isuserdata(L, 2))
+    {
+      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+      t = luaT_checkudata(L, 2, torch_(Tensor_id));
+      value = 1;
+      src = luaT_checkudata(L, 3, torch_(Tensor_id));
+    }
+    else
+    {
+      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+      t = r_; 
+      value = luaL_checknumber(L, 2);
+      src = luaT_checkudata(L, 3, torch_(Tensor_id));
+    }
+  }
+  else
+    THError("invalid number of arguments");
+
+  THLab_(cadd)(r_, t, value, src);
+  return 1;
+}
+
+static int lab_(cmul)(lua_State *L)
+{
+  THTensor *r_, *t, *src;
+  int n = lua_gettop(L);
+
+  if(n == 3)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = luaT_checkudata(L, 2, torch_(Tensor_id));
+    src = luaT_checkudata(L, 3, torch_(Tensor_id));
+  }
+  else if(n == 2)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = r_; 
+    src = luaT_checkudata(L, 2, torch_(Tensor_id));
+  }
+  else
+    THError("invalid number of arguments");
+  
+  THLab_(cmul)(r_, t, src);
+  return 1;
+}
+
+static int lab_(cdiv)(lua_State *L)
+{
+  THTensor *r_, *t, *src;
+  int n = lua_gettop(L);
+
+  if(n == 3)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = luaT_checkudata(L, 2, torch_(Tensor_id));
+    src = luaT_checkudata(L, 3, torch_(Tensor_id));
+  }
+  else if(n == 2)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = r_; 
+    src = luaT_checkudata(L, 2, torch_(Tensor_id));
+  }
+  else
+    THError("invalid number of arguments");
+  
+  THLab_(cdiv)(r_, t, src);
+  return 1;
+}
+
+static int lab_(addcmul)(lua_State *L)
+{
+  THTensor *r_, *t, *src1, *src2;
+  real value;
+  int n = lua_gettop(L);
+
+  if(n == 5)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = luaT_checkudata(L, 2, torch_(Tensor_id));
+    value = luaL_checknumber(L, 3);
+    src1 = luaT_checkudata(L, 4, torch_(Tensor_id));
+    src2 = luaT_checkudata(L, 5, torch_(Tensor_id));
+  }
+  else if(n == 4)
+  {
+    if(lua_isuserdata(L, 2))
+    {
+      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+      t = luaT_checkudata(L, 2, torch_(Tensor_id));
+      value = 1;
+      src1 = luaT_checkudata(L, 3, torch_(Tensor_id));
+      src2 = luaT_checkudata(L, 4, torch_(Tensor_id));
+    }
+    else
+    {
+      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+      t = r_;
+      value = luaL_checknumber(L, 2);
+      src1 = luaT_checkudata(L, 3, torch_(Tensor_id));
+      src2 = luaT_checkudata(L, 4, torch_(Tensor_id));
+    }
+  }
+  else
+    THError("invalid number of arguments");
+  
+  THLab_(addcmul)(r_, t, value, src1, src2);
+  return 1;
+}
+
+static int lab_(addcdiv)(lua_State *L)
+{
+  THTensor *r_ = NULL, *t, *src1, *src2;
+  real value = 1;
+  int n = lua_gettop(L);
+
+  if(n == 5)
+  {
+    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+    t = luaT_checkudata(L, 2, torch_(Tensor_id));
+    value = luaL_checknumber(L, 3);
+    src1 = luaT_checkudata(L, 4, torch_(Tensor_id));
+    src2 = luaT_checkudata(L, 5, torch_(Tensor_id));
+  }
+  else if(n == 4)
+  {
+    if(lua_isuserdata(L, 2))
+    {
+      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
+      t = luaT_checkudata(L, 2, torch_(Tensor_id));
+      src1 = luaT_checkudata(L, 3, torch_(Tensor_id));
+      src2 = luaT_checkudata(L, 4, torch_(Tensor_id));
+    }
+    else
+    {
+      t = luaT_checkudata(L, 1, torch_(Tensor_id));
+      value = luaL_checknumber(L, 2);
+      src1 = luaT_checkudata(L, 3, torch_(Tensor_id));
+      src2 = luaT_checkudata(L, 4, torch_(Tensor_id));
+    }
+  }
+  else
+    THError("invalid number of arguments");
+
+  /* seul changement avec torch package... r_ = t */
+  if(!r_)
+    r_ = THTensor_(new)();
+
+  THLab_(addcdiv)(r_, t, value, src1, src2);
+
+  return 1;
+}
+
+static int lab_(addmv)(lua_State *L)
+{
+  THTensor *r_ = NULL, *t, *mat, *vec;
+  lua_Number beta = 1, alpha = 1;
+
+  if(!luaT_checkargs6(L,
+                      &r_,    LUA_TUSERDATA, torch_(Tensor_id),
+                      &beta,  LUA_TNUMBER, NULL,
+                      &t,     LUA_TUSERDATA, torch_(Tensor_id),
+                      &alpha, LUA_TNUMBER, NULL,
+                      &mat,   LUA_TUSERDATA, torch_(Tensor_id),
+                      &vec,  LUA_TUSERDATA, torch_(Tensor_id)))
+    
+    if(!luaT_checkargs5(L,
+                        &r_,    LUA_TUSERDATA, torch_(Tensor_id),
+                        &beta,  LUA_TNUMBER, NULL,
+                        &t,     LUA_TUSERDATA, torch_(Tensor_id),
+                        &mat,   LUA_TUSERDATA, torch_(Tensor_id),
+                        &vec,  LUA_TUSERDATA, torch_(Tensor_id)))
+
+      if(!luaT_checkargs5(L,
+                          &r_,    LUA_TUSERDATA, torch_(Tensor_id),
+                          &t,     LUA_TUSERDATA, torch_(Tensor_id),
+                          &alpha, LUA_TNUMBER, NULL,
+                          &mat,   LUA_TUSERDATA, torch_(Tensor_id),
+                          &vec,  LUA_TUSERDATA, torch_(Tensor_id)))
+
+        if(!luaT_checkargs5(L,
+                            &beta,  LUA_TNUMBER, NULL,
+                            &t,     LUA_TUSERDATA, torch_(Tensor_id),
+                            &alpha, LUA_TNUMBER, NULL,
+                            &mat,   LUA_TUSERDATA, torch_(Tensor_id),
+                            &vec,  LUA_TUSERDATA, torch_(Tensor_id)))
+        
+          if(!luaT_checkargs4(L,
+                              &r_,    LUA_TUSERDATA, torch_(Tensor_id),
+                              &t,     LUA_TUSERDATA, torch_(Tensor_id),
+                              &mat,   LUA_TUSERDATA, torch_(Tensor_id),
+                              &vec,  LUA_TUSERDATA, torch_(Tensor_id)))
+
+            if(!luaT_checkargs4(L,
+                                &beta,  LUA_TNUMBER, NULL,
+                                &t,     LUA_TUSERDATA, torch_(Tensor_id),
+                                &mat,   LUA_TUSERDATA, torch_(Tensor_id),
+                                &vec,  LUA_TUSERDATA, torch_(Tensor_id)))
+
+
+              if(!luaT_checkargs4(L,
+                                  &t,     LUA_TUSERDATA, torch_(Tensor_id),
+                                  &alpha, LUA_TNUMBER, NULL,
+                                  &mat,   LUA_TUSERDATA, torch_(Tensor_id),
+                                  &vec,  LUA_TUSERDATA, torch_(Tensor_id)))
+              
+                if(!luaT_checkargs3(L,
+                                    &t,     LUA_TUSERDATA, torch_(Tensor_id),
+                                    &mat,   LUA_TUSERDATA, torch_(Tensor_id),
+                                    &vec,  LUA_TUSERDATA, torch_(Tensor_id)))
+
+                  THError("invalid arguments");
+
+  if(!r_)
+    r_ = THTensor_(new)();
+  else
+    THTensor_(retain)(r_);
+
+  luaT_pushudata(L, r_, torch_(Tensor_id));
+
+  THLab_(addmv)(r_, beta, t, alpha, mat, vec);
+
+  return 1;
+}
+
+//op: beta, t, alpha
+//TH_API void THLab_(addmv)(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *mat,  THTensor *vec);
+//TH_API void THLab_(addmm)(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *mat1, THTensor *mat2);
+//TH_API void THLab_(addr)(THTensor *r_,  real beta, THTensor *t, real alpha, THTensor *vec1, THTensor *vec2);
+
 static int lab_(numel)(lua_State *L)
 {
   THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
@@ -1109,6 +1467,27 @@ static int lab_(dist)(lua_State *L)
   return 1;
 }
 
+static int lab_(meanall)(lua_State *L)
+{
+  THTensor *t = luaT_checkudata(L, 1, torch_(Tensor_id));  
+  lua_pushnumber(L, THLab_(meanall)(t));
+  return 1;
+}
+
+static int lab_(varall)(lua_State *L)
+{
+  THTensor *t = luaT_checkudata(L, 1, torch_(Tensor_id));  
+  lua_pushnumber(L, THLab_(varall)(t));
+  return 1;
+}
+
+static int lab_(stdall)(lua_State *L)
+{
+  THTensor *t = luaT_checkudata(L, 1, torch_(Tensor_id));  
+  lua_pushnumber(L, THLab_(stdall)(t));
+  return 1;
+}
+
 static int lab_(linspace_)(lua_State *L)
 {
   THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
@@ -1373,6 +1752,9 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"var", lab_(var)},
   {"norm", lab_(norm)},
   {"dist", lab_(dist)},
+  {"meanall", lab_(meanall)},
+  {"varall", lab_(varall)},
+  {"stdall", lab_(stdall)},
   //{"linspace_", lab_(linspace_)},
   {"linspace", lab_(linspace)},
   //{"logspace_", lab_(logspace_)},
@@ -1381,6 +1763,9 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"rand", lab_(rand)},
   {"randn_", lab_(randn_)},
   {"randn", lab_(randn)},
+  {"addmv", lab_(addmv)},
+  {"maxall", lab_(maxall)},
+  {"minall", lab_(minall)},
 #endif
   {NULL, NULL}
 };

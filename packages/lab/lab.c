@@ -133,6 +133,8 @@ static int lab_toc(lua_State* L)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, numel)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, max_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, max)
+LUAT_DYNT_FUNCTION_WRAPPER(lab, maxall)
+LUAT_DYNT_FUNCTION_WRAPPER(lab, minall)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, min_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, min)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, sum_)
@@ -172,6 +174,8 @@ LUAT_DYNT_FUNCTION_WRAPPER(lab, conv2)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, xcorr2)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, conv3)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, xcorr3)
+
+LUAT_DYNT_FUNCTION_WRAPPER(lab, addmv)
 
 LUAT_DYNT_FUNCTION_WRAPPER(lab, gesv)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, gels)
@@ -237,6 +241,8 @@ static const struct luaL_Reg lab_stuff__ [] = {
   {"numel", lab_numel},
   //{"max_", lab_max_},
   {"max", lab_max},
+  {"maxall", lab_maxall},
+  {"minall", lab_minall},
   //{"min_", lab_min_},
   {"min", lab_min},
   //{"sum_", lab_sum_},
@@ -333,6 +339,7 @@ static const struct luaL_Reg lab_stuff__ [] = {
   {"rand", lab_rand},
   //{"randn_", lab_randn_},
   {"randn", lab_randn},
+  {"addmv", lab_addmv},
   {NULL, NULL}
 };
 
