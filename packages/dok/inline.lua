@@ -1,6 +1,9 @@
 
 dok.inline = {}
 
+paths.install_dok = paths.concat(paths.install_hlp, '..', 'dok')
+paths.install_dokmedia = paths.concat(paths.install_hlp, '..', 'dokmedia')
+
 dok.colors = {
    none = '\27[0m',
    black = '\27[0;30m',
@@ -32,10 +35,11 @@ local c = dok.colors
 
 local style = {
    banner = '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++',
-   list = c.blue .. '>' .. c.none,
+   list = c.blue .. '> ' .. c.none,
    title = c.Magenta,
    pre = c.cyan,
    em = c.Black,
+   img = c.red,
    code = c.green,
    none = c.none
 }
@@ -48,8 +52,6 @@ local function uncleanText(txt)
    txt = txt:gsub('&gt;', '>')
    return txt
 end
-
-paths.install_dok = paths.concat(paths.install_hlp, '..', 'dok')
 
 local function string2symbol(str)
    local ok, res = pcall(loadstring('local t = ' .. str .. '; return t'))
@@ -86,7 +88,7 @@ local function maxcols(str, cols)
    return res
 end
 
-function dok.stylize(html)
+function dok.stylize(html, package)
    local styled = html
    -- (0) useless white space
    styled = styled:gsub('^%s+','')
@@ -105,6 +107,11 @@ function dok.stylize(html)
    styled = styled:gsub('<em>(.-)</em>', style.em .. '%1' .. style.none)
    -- (6) links
    styled = styled:gsub('<a.->(.-)</a>', style.none .. '%1' .. style.none)
+   -- (7) images
+   styled = styled:gsub('<img.-src="(.-)".->%s*', 
+                         style.img .. 'image: file://' 
+                         .. paths.concat(paths.install_dokmedia,package,'%1')
+                         .. style.none .. '\n')
    -- (-) paragraphs
    styled = styled:gsub('<p>', '')
    -- (-) special chars
@@ -123,7 +130,7 @@ function dok.html2funcs(html, package)
    for body in next do
       local func = body:gfind('<a name="' .. package .. '%.(.-)">.-</a>')()
       if func then
-         funcs[func] = dok.stylize(body)
+         funcs[func] = dok.stylize(body, package)
       end
    end
    return funcs
