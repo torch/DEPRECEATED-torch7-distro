@@ -1,4 +1,4 @@
-Random Number Package
+====== Random Number Package ======
 
 This package provides accurate mathematical random generation, based on
 [[http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html|Mersenne Twister]]
@@ -40,18 +40,18 @@ random numbers. Example:
 </file>
 
 =====  [number] seed() =====
-#RandomSeed
+{{anchor:#RandomSeed}}
 
 Set the seed of the random number generator according to the time of the
 computer. Granularity is seconds. Returns the seed obtained.
 
 =====  manualSeed(number) =====
-#RandomManualSeed
+{{anchor:#RandomManualSeed}}
 
 Set the seed of the random number generator to the given ''number''.
 
 =====  initialSeed() =====
-#RandomInitialSeed
+{{anchor:#RandomInitialSeed}}
 
 Returns the initial seed used to initialize the random generator.
 

@@ -1,4 +1,4 @@
-Neural Network Package
+======= Neural Network Package =======
 
 This package provides an easy way to build and train simple or complex
 neural networks.
@@ -59,7 +59,7 @@ calling a ''backward()'', on the //same// ''input'', or your gradients are going
 
 Building a simple neural network can be achieved by constructing an available layer.
 A linear neural network (perceptron!) is built only in one line:
-<file>
+<file lua>
 nn = nn.Linear(10,1) -- perceptron with 10 inputs
 </file>
 
@@ -70,7 +70,7 @@ one layer several modules: they take the same inputs, and their output is
 concatenated.
 
 Creating a one hidden-layer multi-layer perceptron is thus just as easy as:
-<file>
+<file lua>
 mlp = nn.Sequential()
 mlp:add( nn.Linear(10, 25) ) -- 10 input, 25 hidden units
 mlp:add( nn.Tanh() ) -- some hyperbolic tangent transfer function
@@ -87,7 +87,7 @@ Once you built your neural network, you have to choose a particular [[#Criterion
 train it. A criterion is a class which describes the cost to be minimized during training.
 
 You can then train the neural network by using the [[#StochasticGradient|StochasticGradient]] class.
-<file>
+<file lua>
  criterion = nn.MSECriterion(1) -- Mean Squared Error criterion
  trainer = nn.StochasticGradient(mlp, criterion)
  trainer:train(dataset) -- train using some examples
@@ -117,7 +117,7 @@ constraints of ''StochasticGradient'' do not satisfy you).
 
 If you want to program the ''StochasticGradient'' by hand, you essentially need to control the use of forwards and backwards through the network yourself.
 For example, here is the code fragment one would need to make a gradient step given an input ''x'', a desired output ''y'', a network ''mlp'' and a given criterion ''criterion'' and learning rate ''learningRate'':
-<file>
+<file lua>
 function gradUpdate(mlp, x, y, criterion, learningRate) 
   local pred = mlp:forward(x)
   local err = criterion:forward(pred, y)
@@ -201,7 +201,7 @@ to the accumulation of the gradients with respect to these parameters,
 accumulated through [[#ModuleBackward|backward()]] calls.
 
 The update is basically:
-<file>
+<file lua>
 parameters = parameters - learningRate * gradients_wrt_parameters
 </file>
 If the module does not have parameters, it does nothing.
@@ -216,7 +216,7 @@ The parameters have to be Tensors. This function is typically used if you want t
 Note that this function if called on a [[#Containers|Container]] module will share the same parameters for all the contained modules as well.
 
 Example:
-<file>
+<file lua>
 
 -- make an mlp
 mlp1=nn.Sequential(); 
@@ -246,7 +246,7 @@ Creates a deep copy of (i.e. not just a pointer to) the module, including the cu
 If arguments are provided to the ''clone(...)'' function it also calls [[#ModuleShare|share(...)]] with those arguments on the cloned module after creating it, hence making a deep copy of this module with some shared parameters.
 
 Example:
-<file>
+<file lua>
 -- make an mlp
 mlp1=nn.Sequential(); 
 mlp1:add(nn.Linear(100,10));
@@ -298,13 +298,13 @@ are module dependent.
 ====  Concat ====
 #Concat
 
-<file>
+<file lua>
 module = nn.Concat(dim)
 </file>
 Concat concatenates the output of one layer of "parallel" modules along the
 provided dimension ''dim'': they take the same inputs, and their output is
 concatenated.
-<file>
+<file lua>
 mlp=nn.Concat(1);
 mlp:add(nn.Linear(5,3))
 mlp:add(nn.Linear(5,7))
@@ -312,7 +312,7 @@ require "lab"
 print(mlp:forward(lab.randn(5)))
 </file>
 which gives the output:
-<file>
+<file lua>
  0.7486
  0.1349
  0.7924
@@ -335,7 +335,7 @@ in a feed-forward fully connected manner.
 
 E.g. 
 creating a one hidden-layer multi-layer perceptron is thus just as easy as:
-<file>
+<file lua>
 mlp = nn.Sequential()
 mlp:add( nn.Linear(10, 25) ) -- 10 input, 25 hidden units
 mlp:add( nn.Tanh() ) -- some hyperbolic tangent transfer function
@@ -345,7 +345,7 @@ require "lab"
 print(mlp:forward(lab.randn(10)))
 </file>
 which gives the output:
-<file>
+<file lua>
 -0.1815
 [torch.Tensor of dimension 1]
 </file>
@@ -359,7 +359,7 @@ Creates a container module that applies its ''ith'' child module to the  ''ith''
 on dimension ''inputDimension''. It concatenates the results of its contained modules together along dimension ''outputDimension''.
 
 Example:
-<file>
+<file lua>
  require "lab"
  mlp=nn.Parallel(2,1);     -- iterate over dimension 2 of input
  mlp:add(nn.Linear(10,3)); -- apply to first slice
@@ -367,7 +367,7 @@ Example:
  print(mlp:forward(lab.randn(10,2)))
 </file>
 gives the output:
-<file>
+<file lua>
 -0.5300
 -1.1015
  0.7764
@@ -377,7 +377,7 @@ gives the output:
 </file>
 
 A more complicated example:
-<file>
+<file lua>
 require "lab"
 
 mlp=nn.Sequential();
@@ -418,27 +418,27 @@ Applies a linear transformation to the incoming data, i.e.
 be a vector (1D tensor).
 
 You can create a layer in the following way:
-<file>
+<file lua>
  module= nn.Linear(10,5)  -- 10 inputs, 5 outputs
 </file>
 Usually this would be added to a network of some kind, e.g.:
-<file>
+<file lua>
  mlp = nn.Sequential();
  mlp:add(module)
 </file>
 The weights and biases (//A// and //b//) can be viewed with:
-<file>
+<file lua>
  print(module.weight)
  print(module.bias)
 </file>
 The gradients for these weights can be seen with:
-<file>
+<file lua>
  print(module.gradWeight)
  print(module.gradBias)
 </file>
 As usual with ''nn'' modules,
 applying the linear transformation is performed with:
-<file>
+<file lua>
  x=torch.Tensor(10) -- 10 inputs
  y=module:forward(x)
 </file>
@@ -457,7 +457,7 @@ dimensions is very large and the input data is sparse.
 
 You can create a sparse linear layer in the following way:
 
-<file>
+<file lua>
  module= nn.SparseLinear(10000,2)  -- 10000 inputs, 2 outputs
 </file>
 The sparse linear module may be used as part of a larger network, 
@@ -466,7 +466,7 @@ and apart from the form of the input,
 operates in exactly the same way as the [[#Linear|Linear]] layer.
 
 A sparse input vector may be created as so..
-<file>
+<file lua>
 
  x=lab.new({1, 0.1},{2, 0.3},{10, 0.3},{31, 0.2})
 
@@ -496,7 +496,7 @@ Applies a bias term to the incoming data, i.e.
 _y_i= x_i + b. 
 
 Example:
-<file>
+<file lua>
 y=torch.Tensor(5);  
 mlp=nn.Sequential()
 mlp:add(nn.Add(5))
@@ -520,7 +520,7 @@ end
 print(mlp:get(1).bias)
 </file>
 gives the output:
-<file>
+<file lua>
  1.0000
  2.0000
  3.0000
@@ -541,7 +541,7 @@ Applies a //single// scaling factor to the incoming data, i.e.
 //y= w x//, where //w// is a scalar. 
 
 Example:
-<file>
+<file lua>
 y=torch.Tensor(5);  
 mlp=nn.Sequential()
 mlp:add(nn.Mul(5))
@@ -565,7 +565,7 @@ end
 print(mlp:get(1).weight)
 </file>
 gives the output:
-<file>
+<file lua>
  3.1416
 [torch.Tensor of dimension 1]
 </file>
@@ -581,7 +581,7 @@ Applies a component-wise multiplication to the incoming data, i.e.
 ''y_i'' = ''w_i'' =x_i=. 
 
 Example:
-<file>
+<file lua>
 mlp=nn.Sequential()
 mlp:add(nn.CMul(5))
 
@@ -606,7 +606,7 @@ end
 print(mlp:get(1).weight)
 </file>
 gives the output:
-<file>
+<file lua>
  1.0000
  2.0000
  3.0000
@@ -676,7 +676,7 @@ Reshapes an ''nxpxqx..''  Tensor into a ''dimension1xdimension2x...'' Tensor,
 taking the elements column-wise.
 
 Example:
-<file>
+<file lua>
 > x=torch.Tensor(4,4)
 > for i=1,4 do
 >  for j=1,4 do
@@ -739,7 +739,7 @@ Example:
 Selects a dimension and index of a  ''nxpxqx..''  Tensor.
 
 Example:
-<file>
+<file lua>
 mlp=nn.Sequential();
 mlp:add(nn.Select(1,3))
 
@@ -749,7 +749,7 @@ print(x)
 print(mlp:forward(x))
 </file>
 gives the output:
-<file>
+<file lua>
  0.9720 -0.0836  0.0831 -0.2059 -0.0871
  0.8750 -2.0432 -0.1295 -2.3932  0.8168
  0.0369  1.1633  0.6483  1.2862  0.6596
@@ -774,7 +774,7 @@ This can be used in conjunction with [[#Concat|Concat]]
 to emulate the behavior 
 of [[#Parallel|Parallel]], or to select various parts of an input Tensor to 
 perform operations on. Here is a fairly complicated example:
-<file>
+<file lua>
 require "lab"
 
 mlp=nn.Sequential();
@@ -886,7 +886,7 @@ TemporalSubsampling apply to sequences with a one-dimensional relationship
 
 ====  SpatialConvolution ====
 
-<file>
+<file lua>
 module = nn.SpatialConvolution(nInputPlane, nOutputPlane, kW, kH, [dW], [dH])
 </file>
 
@@ -907,7 +907,7 @@ add proper padding in images.
 
 If the input image is a 3D tensor ''width x height x nInputPlane'', the output image size
 will be ''owidth x oheight x nOutputPlane'' where
-<file>
+<file lua>
 owidth  = (width  - kW) / dW + 1
 oheight = (height - kH) / dH + 1 .
 </file>
@@ -918,7 +918,7 @@ size ''nOutputPlane''). The corresponding gradients can be found in
 ''self.gradWeight'' and ''self.gradBias''.
 
 The output value of the layer can be precisely described as:
-<file>
+<file lua>
 output[i][j][k] = bias[k]
   + sum_l sum_{s=1}^kW sum_{t=1}^kH weight[s][t][l][k]
                                     * input[dW*(i-1)+s)][dH*(j-1)+t][l]
@@ -926,7 +926,7 @@ output[i][j][k] = bias[k]
 
 ====  SpatialSubSampling ====
 
-<file>
+<file lua>
 module = nn.SpatialSubSampling(nInputPlane, kW, kH, [dW], [dH])
 </file>
 
@@ -947,7 +947,7 @@ add proper padding in images.
 
 If the input image is a 3D tensor ''width x height x nInputPlane'', the output image size
 will be ''owidth x oheight x nInputPlane'' where
-<file>
+<file lua>
 owidth  = (width  - kW) / dW + 1
 oheight = (height - kH) / dH + 1 .
 </file>
@@ -958,14 +958,14 @@ corresponding gradients can be found in ''self.gradWeight'' and
 ''self.gradBias''.
 
 The output value of the layer can be precisely described as:
-<file>
+<file lua>
 output[i][j][k] = bias[k]
   + weight[k] sum_{s=1}^kW sum_{t=1}^kH input[dW*(i-1)+s)][dH*(j-1)+t][k]
 </file>
 
 ====  TemporalConvolution ====
 
-<file>
+<file lua>
 module = nn.TemporalConvolution(inputFrameSize, outputFrameSize, kW, [dW])
 </file>
 
@@ -984,7 +984,7 @@ sequences.
 
 If the input sequence is a 2D tensor ''inputFrameSize x nInputFrame'', the output sequence will be
 ''outputFrameSize x nOutputFrame'' where
-<file>
+<file lua>
 nOutputFrame = (nInputFrame - kW) / dW + 1
 </file>
 
@@ -994,7 +994,7 @@ size ''outputFrameSize''). The corresponding gradients can be found in
 ''self.gradWeight'' and ''self.gradBias''.
 
 The output value of the layer can be precisely described as:
-<file>
+<file lua>
 output[i][t] = bias[i]
   + sum_j sum_{k=1}^kW weight[j][k][i]
                                 * input[j][dW*(t-1)+k)]
@@ -1002,7 +1002,7 @@ output[i][t] = bias[i]
 
 Here is a simple example:
 
-<file>
+<file lua>
 inp=5;  -- dimensionality of one sequence element 
 outp=1; -- number of derived features for one sequence element
 kw=1;   -- kernel only operates on one sequence element at once
@@ -1015,13 +1015,13 @@ x=lab.rand(inp,7) -- a sequence of 7 elements
 print(mlp:forward(x))
 </file>
 which gives:
-<file>
+<file lua>
 -0.9109 -0.9872 -0.6808 -0.9403 -0.9680 -0.6901 -0.6387
 [torch.Tensor of dimension 1x7]
 </file>
 
 This is equivalent to:
-<file>
+<file lua>
 weights=lab.reshape(mlp.weight,inp) -- weights applied to all
 bias= mlp.bias[1];
 for i=1,x:size(2) do -- for each sequence element
@@ -1030,7 +1030,7 @@ for i=1,x:size(2) do -- for each sequence element
 end
 </file>
 which gives:
-<file>
+<file lua>
 -0.91094998687717
 -0.98721705771773
 -0.68075004276185
@@ -1043,7 +1043,7 @@ which gives:
 
 ====  TemporalSubSampling ====
 
-<file>
+<file lua>
 module = nn.TemporalSubSampling(inputFrameSize, kW, [dW])
 </file>
 
@@ -1062,7 +1062,7 @@ sequences.
 
 If the input sequence is a 2D tensor ''inputFrameSize x nInputFrame'', the output sequence will be
 ''inputFrameSize x nOutputFrame'' where
-<file>
+<file lua>
 nOutputFrame = (nInputFrame - kW) / dW + 1
 </file>
 
@@ -1072,17 +1072,17 @@ size ''inputFrameSize''). The corresponding gradients can be found in
 ''self.gradWeight'' and ''self.gradBias''.
 
 The output value of the layer can be precisely described as:
-<file>
+<file lua>
 output[i][t] = bias[i] + weight[i] * sum_{k=1}^kW input[i][dW*(t-1)+k)]
 </file>
 
 ====  LookupTable ====
 
-<file>
+<file lua>
 module = nn.LookupTable(nIndex, sizes)
 </file>
 or
-<file>
+<file lua>
 module = nn.LookupTable(nIndex, size1, [size2], [size3], ...)
 </file>
 
@@ -1096,14 +1096,14 @@ is the size of the ''input'' tensor.
 
 When only ''size1'' is provided, this is equivalent to do the following matrix-matrix multiplication
 in an efficient manner:
-<file>
+<file lua>
 M P
 </file>
 where ''M'' is a 2D matrix ''size1 x nIndex'' containing the parameters of the lookup-table and
 ''P'' is a 2D matrix, where each column vector ''i'' is a zero vector except at index ''input[i]'' where it is ''1''.
 
 Example:
-<file>
+<file lua>
  -- a lookup table containing 10 tensors of size 3
  module = nn.LookupTable(10, 3) 
 
@@ -1113,7 +1113,7 @@ Example:
 </file>
 
 Outputs something like:
-<file>
+<file lua>
 -0.1784  2.2045 -0.1784 -0.2475
 -1.0120  0.0537 -1.0120 -0.2148
 -1.2840  0.8685 -1.2840 -0.2792
@@ -1130,7 +1130,7 @@ This allows one to build very rich architectures.
 
 Table-based modules work by supporting forward and backward methods that can accept 
 tables as inputs. It turns out that the usual [[#Sequential|Sequential]] module can do this, so all that is needed is other child modules that take advantage of such tables.
-<file>
+<file lua>
 mlp = nn.Sequential();
 t={x,y,z}
 pred=mlp:forward(t)
@@ -1145,7 +1145,7 @@ ConcatTable is a container module that applies each member module to
 the same input Tensor.
 
 Example:
-<file>
+<file lua>
 mlp= nn.ConcatTable()
 mlp:add(nn.Linear(5,2))
 mlp:add(nn.Linear(5,3))
@@ -1155,7 +1155,7 @@ pred=mlp:forward(lab.randn(5));
 for i,k in pairs(pred) do print(i,k); end
 </file>
 which gives the output:
-<file>
+<file lua>
 1
 -0.4073
  0.0110
@@ -1174,7 +1174,7 @@ which gives the output:
 ParallelTable is a container module that, in its ''forward'' method, applies the ''ith'' member module to the ''ith'' input, and outputs a table of the set of outputs. 
 
 Example:
-<file>
+<file lua>
 mlp= nn.ParallelTable()
 mlp:add(nn.Linear(10,2))
 mlp:add(nn.Linear(5,3))
@@ -1187,7 +1187,7 @@ pred=mlp:forward{x,y}
 for i,k in pairs(pred) do print(i,k); end
 </file>
 which gives the output:
-<file>
+<file lua>
 1
  0.0331
  0.7003
@@ -1207,7 +1207,7 @@ which gives the output:
 Creates a module that takes a Tensor as input and outputs several tables, splitting the Tensor along dimension ''dimension''.
 
 Example 1:
-<file>
+<file lua>
 require "lab"
 mlp=nn.SplitTable(2)
 x=lab.randn(4,3)
@@ -1215,7 +1215,7 @@ pred=mlp:forward(x)
 for i,k in pairs(pred) do print(i,k); end
 </file>
 gives the output:
-<file>
+<file lua>
 1
  1.3885
  1.3295
@@ -1239,14 +1239,14 @@ gives the output:
 </file>
 
 Example 2:
-<file>
+<file lua>
 require "lab"
 mlp=nn.SplitTable(1)
 pred=mlp:forward(lab.randn(10,3))
 for i,k in pairs(pred) do print(i,k); end
 </file>
 gives the output:
-<file>
+<file lua>
 1
  1.6114
  0.9038
@@ -1273,7 +1273,7 @@ gives the output:
 </file>
 
 A more complicated example:
-<file>
+<file lua>
 require "lab"
 
 mlp=nn.Sequential();       --Create a network that takes a Tensor as input
@@ -1314,7 +1314,7 @@ end
 Creates a module that takes a list of Tensors as input and outputs a Tensor by joining them together along dimension ''dimension''.
 
 Example:
-<file>
+<file lua>
 require "lab"
 x=lab.randn(5,1)
 y=lab.randn(5,1)
@@ -1325,7 +1325,7 @@ print(nn.JoinTable(2):forward{x,y})
 print(nn.JoinTable(1):forward{x,z})
 </file>
 gives the output:
-<file>
+<file lua>
 1.3965
  0.5146
 -1.5244
@@ -1354,7 +1354,7 @@ gives the output:
 </file>
 
 A more complicated example:
-<file>
+<file lua>
 require "lab"
 
 mlp=nn.Sequential();       --Create a network that takes a Tensor as input
@@ -1396,13 +1396,13 @@ This is useful when combined with the module
 [[#ParallelTable|ParallelTable]]
 in case you do not wish to do anything to one of the input Tensors.
 Example:
-<file>
+<file lua>
 require "lab"
 mlp=nn.Identity()
 print(mlp:forward(lab.ones(5,2)))
 </file>
 gives the output: 
-<file>
+<file lua>
  1  1
  1  1
  1  1
@@ -1446,7 +1446,7 @@ end
 ''module'' = ''PairwiseDistance(p)'' creates a module that takes a table of two vectors as input and outputs the distance between them using the ''p''-norm. 
 
 Example:
-<file>
+<file lua>
 mlp_l1=nn.PairwiseDistance(1)
 mlp_l2=nn.PairwiseDistance(2)
 x=lab.new(1,2,3) 
@@ -1455,7 +1455,7 @@ print(mlp_l1:forward({x,y}))
 print(mlp_l2:forward({x,y}))
 </file>
 gives the output:
-<file>
+<file lua>
  9
 [torch.Tensor of dimension 1]
 
@@ -1464,7 +1464,7 @@ gives the output:
 </file>
 
 A more complicated example:
-<file>
+<file lua>
 -- imagine we have one network we are interested in, it is called "p1_mlp"
 p1_mlp= nn.Sequential(); p1_mlp:add(nn.Linear(5,2))
 
@@ -1529,21 +1529,21 @@ end
 ''module'' = ''DotProduct()'' creates a module that takes a table of two vectors as input and outputs the dot product between them.
 
 Example:
-<file>
+<file lua>
 mlp=nn.DotProduct()
 x=lab.new(1,2,3) 
 y=lab.new(4,5,6)
 print(mlp:forward({x,y}))
 </file>
 gives the output:
-<file>
+<file lua>
  32
 [torch.Tensor of dimension 1]
 </file>
 
 
 A more complicated example:
-<file>
+<file lua>
 
 -- Train a ranking function so that mlp:forward({x,y},{x,z}) returns a number
 -- which indicates whether x is better matched with y or z (larger score = better match), or vice versa.
@@ -1622,20 +1622,20 @@ end
 ''module'' = ''CosineDistance()'' creates a module that takes a table of two vectors as input and outputs the cosine distance between them.
 
 Example:
-<file>
+<file lua>
 mlp=nn.CosineDistance()
 x=lab.new(1,2,3) 
 y=lab.new(4,5,6)
 print(mlp:forward({x,y}))
 </file>
 gives the output:
-<file>
+<file lua>
  0.9746
 [torch.Tensor of dimension 1]
 </file>
 
 A more complicated example:
-<file>
+<file lua>
 
 -- imagine we have one network we are interested in, it is called "p1_mlp"
 p1_mlp= nn.Sequential(); p1_mlp:add(nn.Linear(5,2))
@@ -1697,7 +1697,7 @@ end
 Creates a module that wraps a Criterion module so that it can accept a Table of inputs. Typically the table would contain two elements: the input and output ''x'' and ''y'' that the Criterion compares.
 
 Example:
-<file>
+<file lua>
 mlp = nn.CriterionTable(nn.MSECriterion())
 require "lab"
 x=lab.randn(5)
@@ -1706,13 +1706,13 @@ print(mlp:forward{x,x})
 print(mlp:forward{x,y})
 </file>
 gives the output:
-<file>
+<file lua>
 0
 1.9028918413199
 </file>
 
 Here is a more complex example of embedding the criterion into a network:
-<file>
+<file lua>
 require "lab"
 
 function table.print(t)
@@ -1793,7 +1793,7 @@ State variable which contains the result of the last [[#CriterionBackward|backwa
 =====  AbsCriterion =====
 #AbsCriterion
 
-<file>
+<file lua>
 criterion = AbsCriterion()
 </file>
 
@@ -1807,7 +1807,7 @@ If ''x'' and ''y'' are ''d''-dimensional Tensors with a total of ''n'' elements,
 the sum operation still operates over all the elements, and divides by ''n''.
 
 The division by ''n'' can be avoided if one sets the internal variable ''sizeAverage'' to ''false'':
-<file>
+<file lua>
 criterion = nn.AbsCriterion()
 criterion.sizeAverage = false
 </file>
@@ -1815,7 +1815,7 @@ criterion.sizeAverage = false
 =====  ClassNLLCriterion =====
 #ClassNLLCriterion
 
-<file>
+<file lua>
 criterion = ClassNLLCriterion()
 </file>
 
@@ -1831,7 +1831,7 @@ when calling [[#CriterionForward|forward(input, target)]] and
 [[#CriterionBackward|backward(input, target)]].
 
 The loss can be described as:
-<file>
+<file lua>
 loss(x, class) = forward(x, class) = -x[class]
 </file>
 
@@ -1839,7 +1839,7 @@ The following is a code fragment showing how to make a gradient step
 given an input ''x'', a desired output ''y'' (an integer ''1'' to ''n'', 
 in this case ''n'' = ''2'' classes), 
 a network ''mlp'' and a learning rate ''learningRate'':
-<file>
+<file lua>
 function gradUpdate(mlp,x,y,learningRate)
   local criterion = nn.ClassNLLCriterion()
   pred = mlp:forward(x)
@@ -1854,19 +1854,19 @@ end
 =====  MarginCriterion =====
 #MarginCriterion
 
-<file>
+<file lua>
 criterion = MarginCriterion()
 </file>
 
 Creates a criterion that optimizes a two-class classification hinge loss (margin-based loss) between input ''x''  (a Tensor of dimension 1) and output ''y'' (which is a scalar, either 1 or -1) :
 
-<file>
+<file lua>
 loss(x,y) = forward(x,y) = max(0,m- y x).
 </file>
 
 ''m'' is the margin, which is by default 1.
 
-<file>
+<file lua>
 criterion = MarginCriterion(marginValue)
 </file>
 
@@ -1874,7 +1874,7 @@ sets a different value of ''m''.
 
 
 Example:
-<file>
+<file lua>
 require "nn"
 require "lab"
 
@@ -1906,7 +1906,7 @@ print(criterion:forward(mlp:forward(x1),1))
 print(criterion:forward(mlp:forward(x2),-1))
 </file>
 gives the output:
-<file>
+<file lua>
  1.0043
 [torch.Tensor of dimension 1]
 
@@ -1922,14 +1922,14 @@ i.e. the mlp successfully separates the two data points such that they both have
 =====  MSECriterion =====
 #MSECriterion
 
-<file>
+<file lua>
 criterion = MSECriterion()
 </file>
 
 Creates a criterion that measures the mean squared error between ''n'' elements in the input ''x'' 
 and output ''y'':
 
-<file>
+<file lua>
 loss(x,y) = forward(x,y) = 1/n \sum |x_i-y_i|^2 .
 </file>
 
@@ -1938,14 +1938,14 @@ the sum operation still operates over all the elements, and divides by ''n''. Th
 have the same number of elements (but their sizes might be different...)
 
 The division by ''n'' can be avoided if one sets the internal variable ''sizeAverage'' to ''false'':
-<file>
+<file lua>
 criterion = nn.MSECriterion()
 criterion.sizeAverage = false
 </file>
 
 =====  MultiCriterion =====
 
-<file>
+<file lua>
 criterion = MultiCriterion()
 </file>
 
@@ -1960,7 +1960,7 @@ where ''weight'' is a scalar.
 =====  HingeEmbeddingCriterion =====
 #HingeEmbeddingCriterion
 
-<file>
+<file lua>
 criterion = HingeEmbeddingCriterion()
 </file>
 
@@ -1977,14 +1977,14 @@ loss(x,y) = forward(x,y) = x, if y=1
 </verbatim>
 
 The ''margin'' has a default value of 1, or can be set in the constructor:
-<file>
+<file lua>
 criterion = HingeEmbeddingCriterion(marginValue)
 </file>
 
 
 
 Example use:
-<file>
+<file lua>
 -- imagine we have one network we are interested in, it is called "p1_mlp"
 p1_mlp= nn.Sequential(); p1_mlp:add(nn.Linear(5,2))
 
@@ -2048,7 +2048,7 @@ end
 =====  L1HingeEmbeddingCriterion =====
 #L1HingeEmbeddingCriterion
 
-<file>
+<file lua>
 criterion = L1HingeEmbeddingCriterion(margin)
 </file>
 
@@ -2064,13 +2064,13 @@ loss(x,y) = forward(x,y) = ||x1-x2||_1, if y=1
 </verbatim>
 
 The ''margin'' has a default value of 1, or can be set in the constructor:
-<file>
+<file lua>
 criterion = L1HingeEmbeddingCriterion(marginValue)
 </file>
 
 =====  CosineEmbeddingCriterion =====
 
-<file>
+<file lua>
 criterion = nn.CosineEmbeddingCriterion(margin)
 </file>
 
@@ -2092,7 +2092,7 @@ loss(x,y) = forward(x,y) = 1-cos(x1, x2), if y=1
 =====  MarginRankingCriterion =====
 #MarginRankingCriterion
 
-<file>
+<file lua>
 criterion = nn.MarginRankingCriterion(margin)
 </file>
 
@@ -2109,7 +2109,7 @@ loss(x,y) = forward(x,y) = max(0,-y*(x[1]-x[2])+margin)
 </verbatim>
 
 Example:
-<file>
+<file lua>
 
 p1_mlp= nn.Linear(5,2)
 p2_mlp= p1_mlp:clone('weight','bias')
@@ -2246,7 +2246,7 @@ We show an example here on a classical XOR problem.
 
 We first need to create a dataset, following the conventions described in
 [[#StochasticGradientTrain|StochasticGradient]].
-<file>
+<file lua>
 require "lab"
 dataset={};
 function dataset:size() return 100 end -- 100 examples
@@ -2265,7 +2265,7 @@ end
 **Neural Network**
 
 We create a simple neural network with one hidden layer.
-<file>
+<file lua>
 require "nn"
 mlp = nn.Sequential();  -- make a multi-layer perceptron
 inputs = 2; outputs = 1; HUs = 20; -- parameters
@@ -2277,7 +2277,7 @@ mlp:add(nn.Linear(HUs, outputs))
 ***Training***
 
 We choose the Mean Squared Error criterion and train the beast.
-<file>
+<file lua>
 criterion = nn.MSECriterion()  
 trainer = nn.StochasticGradient(mlp, criterion)
 trainer.learningRate = 0.01
@@ -2286,7 +2286,7 @@ trainer:train(dataset)
 
 **Test the network**
 
-<file>
+<file lua>
 x = torch.Tensor(2)
 x[1] =  0.5; x[2] =  0.5; print(mlp:forward(x))
 x[1] =  0.5; x[2] = -0.5; print(mlp:forward(x))
@@ -2295,7 +2295,7 @@ x[1] = -0.5; x[2] = -0.5; print(mlp:forward(x))
 </file>
 
 You should see something like:
-<file>
+<file lua>
 > x = torch.Tensor(2)
 > x[1] =  0.5; x[2] =  0.5; print(mlp:forward(x))
 
@@ -2326,7 +2326,7 @@ We show an example here on a classical XOR problem.
 **Neural Network**
 
 We create a simple neural network with one hidden layer.
-<file>
+<file lua>
 require "nn"
 mlp = nn.Sequential();  -- make a multi-layer perceptron
 inputs = 2; outputs = 1; HUs = 20; -- parameters
@@ -2338,7 +2338,7 @@ mlp:add(nn.Linear(HUs, outputs))
 **Loss function**
 
 We choose the Mean Squared Error criterion.
-<file>
+<file lua>
 criterion = nn.MSECriterion()  
 </file>
 
@@ -2346,7 +2346,7 @@ criterion = nn.MSECriterion()
 
 We create data //on the fly// and feed it to the neural network.
 
-<file>
+<file lua>
 require "lab"
 for i = 1,2500 do
   -- random sample
@@ -2373,7 +2373,7 @@ end
 
 **Test the network**
 
-<file>
+<file lua>
 x = torch.Tensor(2)
 x[1] =  0.5; x[2] =  0.5; print(mlp:forward(x))
 x[1] =  0.5; x[2] = -0.5; print(mlp:forward(x))
@@ -2382,7 +2382,7 @@ x[1] = -0.5; x[2] = -0.5; print(mlp:forward(x))
 </file>
 
 You should see something like:
-<file>
+<file lua>
 > x = torch.Tensor(2)
 > x[1] =  0.5; x[2] =  0.5; print(mlp:forward(x))
 
