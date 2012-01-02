@@ -1,8 +1,8 @@
 
 dok.inline = {}
 
-paths.install_dok = paths.concat(paths.install_hlp, '..', 'dok')
-paths.install_dokmedia = paths.concat(paths.install_hlp, '..', 'dokmedia')
+paths.install_dok = paths.concat(paths.install_html, '..', 'dok')
+paths.install_dokmedia = paths.concat(paths.install_html, '..', 'dokmedia')
 
 dok.colors = {
    none = '\27[0m',
