@@ -50,7 +50,11 @@ for k,v in pairs(sections) do
    table.insert(sortedsections, {secname=k, rank=v.rank, packages=v.packages})
 end
 table.sort(sortedsections, function(sa, sb)
-                              return sa.rank < sb.rank
+			      if sa.rank == sb.rank then
+				 return sa.secname < sb.secname
+			      else
+				 return sa.rank < sb.rank
+			      end
                            end)
 
 -- sort packages (for each section)
@@ -62,7 +66,11 @@ for _,section in ipairs(sortedsections) do
       table.insert(sortedpackages, {pkgname=k, title=v.title, rank=v.rank})      
    end
    table.sort(sortedpackages, function(sa, sb)
-                                 return sa.rank < sb.rank
+				 if sa.rank == sb.rank then
+				    return sa.title < sb.title
+				 else
+				    return sa.rank < sb.rank
+				 end
                               end)
 
    for _,package in ipairs(sortedpackages) do
