@@ -62,7 +62,7 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
     # such that dokuwiki understands it.
     IF(_ext_ STREQUAL ".dok")
       ADD_CUSTOM_COMMAND(OUTPUT "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
-        COMMAND  ${LUA_EXECUTABLE} ARGS "${Torch_SOURCE_DIR}/scripts/dokparse.lua" "${Torch_SOURCE_DIR}/packages/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
+        COMMAND  ${LUA_EXECUTABLE} ARGS "${Torch_SOURCE_DIR}/scripts/dokparse.lua" "${Torch_SOURCE_DIR}/packages/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${title}" "${Torch_BINARY_DIR}/html" "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
         DEPENDS ${LUA_EXECUTABLE}
         "${Torch_SOURCE_DIR}/packages/dok/init.lua"
         "${Torch_SOURCE_DIR}/scripts/dokparse.lua"
