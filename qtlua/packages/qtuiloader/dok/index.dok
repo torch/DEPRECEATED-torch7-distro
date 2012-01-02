@@ -1,4 +1,4 @@
-QtUiLoader Package Reference Manual
+======  QtUiLoader Package Reference Manual ====== 
 
 
 Package ''qtuiloader'' provides 
@@ -16,7 +16,7 @@ Use program
 [[http://doc.trolltech.com/4.4/designer-manual.html|Qt Designer]]
 to examine file ''test.ui''.  
 Then load file ''test.lua'' into the
-[[..:qt:start#qlua|qlua]] program.
+[[..:qt:index#qlua|qlua]] program.
 
 <file>
   $ cd /usr/local/share/lua/5.1/qtuiloader
@@ -38,21 +38,21 @@ user interface description.
 
 
 ===  qtuiloader.availableWidgets() ===
-#qtuiloaderavailablewidgets
+{{anchor:qtuiloaderavailablewidgets}}
 
 Expression ''qtuiloader.availableWidgets()'' returns a 
-[[..:qtcore:start#qstringlist|qt.QStringList]]
+[[..:qtcore:index#qstringlist|qt.QStringList]]
 containing the names of the supported widget classes.
 
 
 ===  qtuiloader.createWidget(classname,[parent,[objectname]]) ===
 
-Creates a [[..:qtgui:start#qwidget|widget]] of class ''classname''.
+Creates a [[..:qtgui:index#qwidget|widget]] of class ''classname''.
 Argument ''classname'' can be any of the strings returned
 by [[#qtuiloaderavailablewidgets][''qtuiloader.availableWidgets()''].
 The optional argument ''parent'' specifies the parent widget
 and the optional argument ''name'' specifies the 
-[[..:qtcore:start#qobjectobjectname|object name]].
+[[..:qtcore:index#qobjectobjectname|object name]].
 
 When argument ''parent'' is ''nil'' or not specified,
 the new widget is owned by the Lua interpreter 
@@ -62,7 +62,7 @@ determines that it is no longer referenced.
 
 
 ===  qtuiloader.load(filename,[parent]) ===
-#qtuiloaderload
+{{anchor:qtuiloaderload}}
 
 Expression ''qtuiloader.load(filename,parent)'' dynamically
 constructs and returns the widget described by the 
@@ -76,7 +76,7 @@ determines that it is no longer referenced.
 
 
 ===  qtuiloader.loader() ===
-#qtuiloaderloader
+{{anchor:qtuiloaderloader}}
 
 Expression ''qtuiloader.loader()''
 returns a preallocated instance
@@ -86,7 +86,7 @@ of class [[#quiloader|qt.QUiLoader]].
 ====  Classes ====
 
 ===  qt.QUiLoader ===
-#quiloader
+{{anchor:quiloader}}
 
 Class ''qt.QUiLoader'' provides bindings 
 for all the functions of the Qt class 

@@ -1,4 +1,4 @@
-QtGui Bindings
+======  QtGui Bindings ====== 
 
 The package ''qtgui'' 
 contains bindings for classes defined by the Qt module
@@ -6,18 +6,18 @@ contains bindings for classes defined by the Qt module
 
 Besides the capabilites reported below,
 all qt variants inherit a set 
-of [[..:qt:start#QVariants|default methods]],
+of [[..:qt:index#QVariants|default methods]],
 and all qt object classes inherit the capabilities from their 
 superclasses and automatically expose 
-[[..:qt:start#QObjects|properties, slots and signals]].
+[[..:qt:index#QObjects|properties, slots and signals]].
 
 
 ====  qt.QAction, qt.QtLuaAction ====
-#qaction
+{{anchor:qaction}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qaction.html|QAction]] 
-is a sublass of [[..:qtcore:start#qobject|qt.QObject]]
+is a sublass of [[..:qtcore:index#qobject|qt.QObject]]
 that represents actions associated with menu items
 and toolbar icons.  
 
@@ -45,7 +45,7 @@ destroyed when the garbage collector determines that
 it is no longer referenced.
 
 Actions are always created from the main thread using
-the [[..:qt:start#qtqcall|thread hopping]] mechanism.
+the [[..:qt:index#qtqcall|thread hopping]] mechanism.
 
 ===  qaction:menu() ===
 
@@ -77,11 +77,11 @@ The default is ''true''.
 
 
 ====  qt.QApplication ====
-#qapplication
+{{anchor:qapplication}}
 
 Qt class [[http://doc.trolltech.com/4.4/qapplication.html|QApplication]]
 manages the GUI application's control flow and main settings. This is a 
-subclass of [[..:qtcore:start#qcoreapplication|QCoreApplication]].
+subclass of [[..:qtcore:index#qcoreapplication|QCoreApplication]].
 
 ===  qt.QApplication.changeOverrideCursor(qcursor) ===
 
@@ -117,7 +117,7 @@ Function ''restoreOverrideCursor()'' pops the stack.
 
 
 ====  qt.QBrush ====
-#qbrush
+{{anchor:qbrush}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qbrush.html|QBrush]] 
@@ -127,7 +127,7 @@ by Qt variants of class ''qt.QBrush''.
 
 
 ===  qt.QBrush(table) ===
-#qbrushfromtable
+{{anchor:qbrushfromtable}}
 
 Expression ''qt.QBrush(table)'' returns a brush whose settings
 are determined by the fields of table ''table''. 
@@ -163,7 +163,7 @@ for a description of the table fields.
 
 
 ====  qt.QColor ====
-#qcolor
+{{anchor:qcolor}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qcolor.html|QColor]] 
@@ -201,7 +201,7 @@ of the red, green, blue, and alpha channels.  Such a table
 is returned by function [[#qcolortotable|qcolor:totable()]].
 
 ===  qcolor:totable() ===
-#qcolortotable
+{{anchor:qcolortotable}}
 
 Expression ''qcolor:totable()'' returns a table whose fields
 ''r'', ''g'', ''b'' and ''a'' contain numbers in range ''[0,1]'' 
@@ -210,7 +210,7 @@ and alpha channels.
 
 
 ====  qt.QColorDialog ====
-#qcolordialog
+{{anchor:qcolordialog}}
 
 Qt class
 [[http://doc.trolltech.com/4.4/qcolordialog.html|QColorDialog]] 
@@ -228,7 +228,7 @@ Otherwise it returns a qvariant of type [[#qcolor|qt.QColor]].
 
 
 ====  qt.QCursor ====
-#qcursor
+{{anchor:qcursor}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qcursor.html|QCursor]] 
@@ -271,7 +271,7 @@ Sets the global coordinates of the mouse cursor.
 
 
 ====  qt.QDialog ====
-#qdialog
+{{anchor:qdialog}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qdialog.html|QDialog]] 
@@ -300,7 +300,7 @@ and ''0'' when the dialog has been rejected.
 
 
 ====  qt.QFileDialog ====
-#qfiledialog
+{{anchor:qfiledialog}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qfiledialog.html|QFileDialog]] 
@@ -418,7 +418,7 @@ Returns the value of the specified
 Not available before Qt-4.5.
 
 ====  qt.QFont ====
-#qfont
+{{anchor:qfont}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qfont.html|QFont]] 
@@ -427,7 +427,7 @@ used to display text.
 
 
 ===  qt.QFont(arg) ===
-#qfontfromtable
+{{anchor:qfontfromtable}}
 
 Expression ''qt.QFont(arg)'' returns a new font object.
 Argument ''arg'' may be a string previously returned
@@ -513,7 +513,7 @@ Example:
 </file>
 
 ===  qfont:tostring() ===
-#qfonttostring
+{{anchor:qfonttostring}}
 
 Expression ''qfont:tostring()'' returns a string 
 representation of the font settings that is
@@ -522,7 +522,7 @@ Use [[#qfontfromtable|qt.QFont(string)]] to
 reconstruct the corresponding font object.
 
 ===  qfont:info() ===
-#qfontinfo
+{{anchor:qfontinfo}}
 
 Expression ''qfont:info()'' returns a table describing
 the actual font selected by the font matching algorithm
@@ -536,7 +536,7 @@ Fields ''"underline"'', ''"overline"'', ''"strikeOut"'', and ''"stretch"''
 are copied verbatim from the ''qfont'' object.
 
 ====  qt.QFontDialog ====
-#qfontdialog
+{{anchor:qfontdialog}}
 
 Qt class
 [[http://doc.trolltech.com/4.4/qfontdialog.html|QFontDialog]] 
@@ -555,7 +555,7 @@ Otherwise it returns a qvariant of type [[#qfont|qt.QFont]].
 
 
 ====  qt.QGradient ====
-#qgradient
+{{anchor:qgradient}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qgradient.html|QGradient]] 
@@ -564,7 +564,7 @@ No specific Lua methods have been defined for this Qt variant class.
 
 
 ====  qt.QIcon ====
-#qicon
+{{anchor:qicon}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qimage.html|QIcon]] 
@@ -581,7 +581,7 @@ file name that will be loaded on demand.
 
 
 ====  qt.QImage ====
-#qimage
+{{anchor:qimage}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qimage.html|QImage]] 
@@ -616,7 +616,7 @@ A depth of 24 or 32 indicates a true color image.
 ===  qimage:rect() ===
 
 Expression ''qimage:rect()'' returns a Qt variant of class
-[[..:qtcore:start#qrect|qt.QRect]] representing the
+[[..:qtcore:index#qrect|qt.QRect]] representing the
 boundaries of the image ''qimage''.
 
 ===  qimage:save(f,[format]) ===
@@ -629,11 +629,11 @@ optional string ''format'' or by the file name extension.
 ===  qimage:size() ===
 
 Expression ''qimage:size()'' returns a Qt variant of class
-[[..:qtcore:start#qsize|qt.QSize]] representing the
+[[..:qtcore:index#qsize|qt.QSize]] representing the
 size of the image ''qimage''.
 
 ===  qt.QImage.formats([string]) ===
-#qimageformats
+{{anchor:qimageformats}}
 
 Function ''qt.QImage.formats'' describes the 
 supported formats for reading or saving files.
@@ -648,7 +648,7 @@ returns a ''qt.QStringList'' with the supported formats.
 
 
 ====  qt.QKeySequence ====
-#qkeysequence
+{{anchor:qkeysequence}}
 
 Qt class
 [[http://doc.trolltech.com/4.4/qkeysequence.html|QKeySequence]] 
@@ -667,7 +667,7 @@ Returns a string describing the keys in the key sequence.
 
 
 ====  qt.QMainWindow ====
-#qmainwindow
+{{anchor:qmainwindow}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qmainwindow.html|QMainWindow]] 
@@ -720,7 +720,7 @@ if the status bar does not exist yet.
 
 
 ====  qt.QMenu ====
-#qmenu
+{{anchor:qmenu}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qmenu.html|QMenu]] 
@@ -809,7 +809,7 @@ and returns the corresponding action object.
 Returns the action associated with the menu ''qmenu''.
 
 ====  qt,QMenuBar ====
-#qmenubar
+{{anchor:qmenubar}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qmenu.html|QMenuBar]] 
@@ -864,18 +864,18 @@ and returns the corresponding action object.
 
 
 ====  qt.QPainterPath ====
-#qpainterpath
+{{anchor:qpainterpath}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qpainterpath.html|QPainterPath]] 
 represents mathematical boundaries delimiting
-regions that can be painted using [[..:qtwidget:start#painterfill|painter:fill]] 
-or delimited using [[..:qtwidget:start#painterstroke|painter:stroke]].
+regions that can be painted using [[..:qtwidget:index#painterfill|painter:fill]] 
+or delimited using [[..:qtwidget:index#painterstroke|painter:stroke]].
 No specific Lua methods have been defined for this Qt variant class.
 
 
 ====  qt.QPixmap ====
-#qpixmap
+{{anchor:qpixmap}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qpixmap.html|QPixmap]] 
@@ -884,7 +884,7 @@ No specific Lua methods have been defined for this Qt variant class.
 
 
 ====  qt.QPen ====
-#qpen
+{{anchor:qpen}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qpen.html|QPen]] 
@@ -892,7 +892,7 @@ represents the painter settings that determine how
 lines are drawn.
 
 ===  qt.QPen(table) ===
-#qpenfromtable
+{{anchor:qpenfromtable}}
 
 Expression ''qt.QPen(table)'' returns a pen whose settings
 are determined by the fields of table ''table''. 
@@ -947,7 +947,7 @@ for a description of the table fields.
 
 
 ====  qt.QTransform ====
-#qtransform
+{{anchor:qtransform}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qtransform.html|QTransform]] 
@@ -956,7 +956,7 @@ Transformation matrices are represented as Qt variants
 of class ''qt.QTransform''.
 
 ===  qt.QTransform([table[,table]]) ===
-#qtransformfromtable
+{{anchor:qtransformfromtable}}
 
 Expression ''qt.QTransform()'' constructs an identity transformation matrix.
 
@@ -967,7 +967,7 @@ whose matrix elements are initialized with the fields ''m11'', ''m12'', ''m13'',
 Expression ''qt.QTransform(fquad,tquad)'' constructs a transformation matrix
 that maps the quad ''fquad'' to the quad ''tquad''. 
 Both arguments ''fquad'' and ''tquad'' are table containing exactly four
-[[..:qtcore:start#qpoint|qt.QPointF]] representing the four corners of the quad.
+[[..:qtcore:index#qpoint|qt.QPointF]] representing the four corners of the quad.
 
 ===  qtransform:totable() ===
 
@@ -1024,20 +1024,20 @@ the coordinates of a point and return two reals
 representing the transformed coordinates.
 
 ====  qt.QWidget ====
-#qwidget
+{{anchor:qwidget}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qwidget.html|QWidget]] 
 is the base class of all graphical interface components.
 All widgets inherit class ''qt.QWidget'' and
-its superclass [[..:qtcore:start#qobject|qt.QObject]].
+its superclass [[..:qtcore:index#qobject|qt.QObject]].
 
 ===  qt.QWidget([parent]) ===
 
 Expression ''qt.QWidget(parent)'' returns a new widget.
 The optional argument ''parent'' specifies the widget parent.
 New widgets are always created from the main thread using
-the [[..:qt:start#qtqcall|thread hopping]] mechanism.
+the [[..:qt:index#qtqcall|thread hopping]] mechanism.
 
 When argument ''parent'' is ''nil'' or not specified,
 the new widget is owned by the Lua interpreter 
@@ -1048,7 +1048,7 @@ determines that it is no longer referenced.
 ===  qwidget:actions() ===
 
 Expression ''qwidget:actions()'' returns a 
-qt value of class [[..:qtcore:start#qvariantlist|qt.QVariantList]]
+qt value of class [[..:qtcore:index#qvariantlist|qt.QVariantList]]
 containing list of actions associated with this widget.
 
 ===  qwidget:addAction(qaction) ===

@@ -1,4 +1,4 @@
-QtCore Bindings
+====== QtCore Bindings ======
 
 The package ''qtcore'' 
 contains bindings for classes defined by the Qt module
@@ -6,14 +6,14 @@ contains bindings for classes defined by the Qt module
 
 Besides the capabilites reported below,
 all qt variants inherit a set 
-of [[..:qt:start#QVariants|default methods]],
+of [[..:qt:index#QVariants|default methods]],
 and all qt object classes inherit the capabilities from their 
 superclasses and automatically expose 
-[[..:qt:start#QObjects|properties, slots and signals]].
+[[..:qt:index#QObjects|properties, slots and signals]].
 
 
 ====  qt.QByteArray ====
-#qbytearray
+{{anchor:qbytearray}}
 
 Class ''qt.QByteArray'' represents Qt values of type 
 [[http://doc.trolltech.com/4.4/qbytearray.html|QByteArray]].
@@ -34,12 +34,12 @@ containing the integer values of the bytes represented
 by the bytearray.
 
 ====  qt.QCoreApplication ====
-#qcoreapplication
+{{anchor:qcoreapplication}}
 
 The Qt class 
 [[http://doc.trolltech.com/4.4/qcoreapplication.html|QCoreApplication]]
 provides an event loop for console Qt applications and serves
-as a base class for class [[..:qtgui:start#qapplication|QApplication]].
+as a base class for class [[..:qtgui:index#qapplication|QApplication]].
 
 ===  qt.QCoreApplication() ===
 
@@ -47,7 +47,7 @@ Returns the unique instance of class ''QCoreApplication''.make i
 
 
 ====  qt.QLine, qt.QLineF ====
-#qline
+{{anchor:qline}}
 
 Classes ''qt.QLine'' and ''qt.QLineF'' represent common Qt classes.
 Please refer to the Qt documentation for classes
@@ -71,11 +71,11 @@ endpoints of the ''qt.QLine'' or ''qt.QLineF'' object ''qline''.
 
 
 ====  qt.QObject ====
-#qobject
+{{anchor:qobject}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qobject.html|QObject]].
-is the base class of all [[..:qt:start#QObjects|Qt objects]].
+is the base class of all [[..:qt:index#QObjects|Qt objects]].
 All Qt object classes have separate metatables following the 
 same inheritance pattern as the corresponding Qt classes. 
 The metatable [[#qobject|qt.QObject]] sits at the top
@@ -89,7 +89,7 @@ containing all the children of object ''qobject''.
 
 
 ===  qobject:deleteLater() ===
-#qobjectdeletelater
+{{anchor:qobjectdeletelater}}
 
 Calling ''qobject:deleteLater()'' is the recommended way to delete 
 the Qt object ''qobject''. The object is not deleted immediately.
@@ -114,7 +114,7 @@ compiled in debug mode.
 
 
 ===  qobject.objectName ===
-#qobjectobjectname
+{{anchor:qobjectobjectname}}
 
 Property ''qobject.objectName'' contains a string 
 representing the name of a Qt object ''qobject''.
@@ -136,7 +136,7 @@ if such a parent exists. Otherwise it returns ''nil''.
 
 
 ====  qt.QPoint, qt.QPointF ====
-#qpoint
+{{anchor:qpoint}}
 
 Classes ''qt.QPoint'' and ''qt.QPointF'' represent common Qt classes.
 Please refer to the Qt documentation for classes
@@ -158,7 +158,7 @@ contain the coordinates of the ''qt.QPoint'' or ''qt.QPointF'' object ''qpoint''
 
 
 ====  qt.QRect, qt.QRectF ====
-#qrect
+{{anchor:qrect}}
 
 Classes ''qt.QRect'' and ''qt.QRectF'' represent common Qt classes.
 Please refer to the Qt documentation for classes
@@ -184,7 +184,7 @@ height of the rectangle.
 
 
 ====  qt.QSize, qt.QSizeF ====
-#qsize
+{{anchor:qsize}}
 
 Classes ''qt.QSize'' and ''qt.QSizeF'' represent common Qt classes.
 Please refer to the Qt documentation for classes
@@ -215,7 +215,7 @@ the width and height of the size ''qsize''.
 
 
 ====  qt.QString ====
-#qstring
+{{anchor:qstring}}
 
 Class ''qt.QString'' represents Qt values of type 
 [[http://doc.trolltech.com/4.4/qstring.html|QString]].
@@ -243,7 +243,7 @@ Class ''qt.QStringList'' represents Qt values of type
 containing a list of Qt strings.
 
 ===  qt.QStringList(table) ===
-#qstringlist
+{{anchor:qstringlist}}
 
 Expression ''qt.QStringList(table)'' creates a new ''QStringList''
 initialized with the strings contained in 
@@ -271,7 +271,7 @@ Example
 
 
 ====  qt.QTimer  ====
-#qtimer
+{{anchor:qtimer}}
 
 Class ''qt.QTimer'' is a subclass of [[#qobject|qt.QObject]]
 associated with Qt objects of class ''QTimer''.
@@ -303,7 +303,7 @@ when it is no longer referenced.
 
 
 ====  qt.QUrl ====
-#qurl
+{{anchor:qurl}}
 
 Class ''qt.QStringList'' represents Qt values of type 
 [[http://doc.trolltech.com/4.4/qurl.html|QUrl]] 
@@ -321,7 +321,7 @@ describing the QUrl object ''qurl''.
 
 
 ====  qt.QVariantList ====
-#qvariantlist
+{{anchor:qvariantlist}}
 
 Class ''qt.QVariantList'' represents Qt values of type 
 [[http://doc.trolltech.com/4.4/qvariant.html#QVariantList-typedef|QVariantList]] 
@@ -356,7 +356,7 @@ Example
 
 
 ====  qt.QVariantMap ====
-#qvariantmap
+{{anchor:qvariantmap}}
 
 Class ''qt.QVariantList'' represents Qt values of type 
 [[http://doc.trolltech.com/4.4/qvariant.html#QVariantMap-typedef|QVariantMap]] 
