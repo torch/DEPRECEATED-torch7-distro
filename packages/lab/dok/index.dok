@@ -1,4 +1,4 @@
-Lab Package Reference Manual
+======= Lab Package Reference Manual =======
 
 A Linear Algebra package consisting of Matlab-like  functions
 for manipulating [[..:torch:index#Tensor|Tensor]] objects.
@@ -14,7 +14,7 @@ Functions fall into several types of categories:
 By default all lab operations allocate a new tensor to return the result. However, all lab function also support passing the resulting tensor as the first argument, in which case the resulting tensor will be resized accordingly and filled with result.
 
 For example, ''lab.conv2'' function can be used in the following manner.
-<file>
+<file lua>
 
 x = lab.rand(100,100)
 k = lab.rand(10,10)
@@ -30,7 +30,7 @@ lab.conv2(res2,x,k)
 
 The advantage of second case is, same ''res2'' tensor can be used successively in a loop without any new allocation.
 
-<file>
+<file lua>
 -- no new memory allocations...
 for i=1,100 do
     lab.conv2(res2,x,k)
@@ -52,7 +52,7 @@ If ''dimension'' is not specified it is 1.
 The other dimensions of x_1 and x_2 have to be equal.
 
 Examples:
-<file>
+<file lua>
 > print(lab.cat(lab.ones(3),lab.zeros(2)))
 
  1
@@ -166,7 +166,7 @@ is below the main diagonal.
 ''y=lab.range(n,m)'' returns a tensor of size m-n+1x1 with integer 
 values n to m.
 
-<file>
+<file lua>
 > print(lab.range(2,5))
 
  2
@@ -177,7 +177,7 @@ values n to m.
 </file>
 
 ''y=lab.range(n,m,incr)'' returns a tensor filled in range n to m with incr increments.
-<file>
+<file lua>
 print(lab.range(2,5,1.2))
  2.0000
  3.2000
@@ -478,7 +478,7 @@ This function computes 2 dimensional convolutions between '' x '' and '' k ''. T
 
 The last argument controls if the convolution is a full ('f') or valid ('v') convolution. The default is 'valid' convolution.
 
-<file>
+<file lua>
 x=lab.rand(100,100)
 k=lab.rand(10,10)
 c = lab.conv2(x,k)
@@ -517,7 +517,7 @@ This function computes 3 dimensional convolutions between '' x '' and '' k ''. T
 
 The last argument controls if the convolution is a full ('f') or valid ('v') convolution. The default is 'valid' convolution.
 
-<file>
+<file lua>
 x=lab.rand(100,100,100)
 k=lab.rand(10,10,10)
 c = lab.conv3(x,k)
@@ -564,7 +564,7 @@ version compared to originial LAPACK.
 Solution of '' XA=B '' and ''A'' has to be square and non-singular. ''
 A '' is '' m x m '', '' X '' is '' k x m '', '' B '' is '' k x m ''.
 
-<file>
+<file lua>
 a=torch.Tensor({{6.80, -2.11,  5.66,  5.97,  8.23},
                 {-6.05, -3.30,  5.36, -4.44,  1.08},
                 {-0.45,  2.58, -2.70,  0.27,  9.04},
@@ -610,7 +610,7 @@ Solution of least squares and least norm  problems for a full rank '' A '' that 
 
 On return, first '' n '' columns of '' X '' matrix contains the solution and the rest contains residual information. Square root of sum squares of elements of each row of '' X '' starting at column '' n +1 '' is the residual for corresponding row.
 
-<file>
+<file lua>
 
 a=torch.Tensor({{ 1.44, -9.96, -7.55,  8.34,  7.08, -5.45},
                 {-7.84, -0.28,  3.24,  8.09,  2.52, -5.70},
@@ -659,7 +659,7 @@ Last argument defines computation of eigenvectors or eigenvalues
 only. If '' n '', only eignevalues are computed. If '' v '', both
 eigenvalues and eigenvectors are computed.
 
-<file>
+<file lua>
 
 a=torch.Tensor({{ 1.96,  0.00,  0.00,  0.00,  0.00},
                 {-6.49,  3.80,  0.00,  0.00,  0.00},
@@ -721,7 +721,7 @@ Singular value decomposition of a real matrix '' A '' of size '' n x m
 '' such that '' V S U = A ''.
 
 
-<file>
+<file lua>
 
 a=torch.Tensor({{8.79,  6.11, -9.15,  9.57, -3.49,  9.84},
 		{9.93,  6.91, -7.93,  1.64,  4.02,  0.15},
