@@ -2,6 +2,9 @@
 #define TH_GENERIC_FILE "generic/lab.c"
 #else
 
+/* note: debug the doacc (both begininng and end */
+/* possibly put some defines */
+
 static int lab_(zero)(lua_State *L)
 {
   if(lua_gettop(L) == 1)
@@ -139,171 +142,192 @@ LAB_IMPLEMENT_ADDMULDIV(div)
 
 static int lab_(cadd)(lua_State *L)
 {
-  THTensor *r_, *t, *src;
-  real value;
-  int n = lua_gettop(L);
+  THTensor *r_ = NULL, *t = NULL, *src = NULL;
+  real value = 1;
+  int narg = lua_gettop(L);
+  int doacc = 0;
 
-  if(n == 4)
+  if(narg > 0 && lua_isboolean(L, -1))
   {
-    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-    t = luaT_checkudata(L, 2, torch_(Tensor_id));
-    value = luaL_checknumber(L, 3);
-    src = luaT_checkudata(L, 4, torch_(Tensor_id));
+    doacc = lua_toboolean(L, -1);
+    lua_pop(L, 1);
+    narg--;
   }
-  else if(n == 3)
+
+  if(narg == 4
+     && luaT_isudata(L, 1, torch_(Tensor_id))
+     && luaT_isudata(L, 2, torch_(Tensor_id))
+     && lua_isnumber(L, 3)
+     && luaT_isudata(L, 4, torch_(Tensor_id)))
   {
-    if(lua_isuserdata(L, 2))
-    {
-      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-      t = luaT_checkudata(L, 2, torch_(Tensor_id));
-      value = 1;
-      src = luaT_checkudata(L, 3, torch_(Tensor_id));
-    }
-    else
-    {
-      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-      t = r_; 
-      value = luaL_checknumber(L, 2);
-      src = luaT_checkudata(L, 3, torch_(Tensor_id));
-    }
+    r_ = luaT_toudata(L, 1, torch_(Tensor_id));
+    t = luaT_toudata(L, 2, torch_(Tensor_id));
+    value = lua_tonumber(L, 3);
+    src = luaT_toudata(L, 4, torch_(Tensor_id));
+  }
+  else if(narg == 3
+          && luaT_isudata(L, 1, torch_(Tensor_id))
+          && luaT_isudata(L, 2, torch_(Tensor_id))
+          && luaT_isudata(L, 3, torch_(Tensor_id)))
+  {
+    r_ = luaT_toudata(L, 1, torch_(Tensor_id));
+    t = luaT_toudata(L, 2, torch_(Tensor_id));
+    src = luaT_toudata(L, 3, torch_(Tensor_id));
+  }
+  else if(narg == 3
+          && luaT_isudata(L, 1, torch_(Tensor_id))
+          && lua_isnumber(L, 2)
+          && luaT_isudata(L, 3, torch_(Tensor_id)))
+  {
+    t = luaT_toudata(L, 1, torch_(Tensor_id));
+    value = lua_tonumber(L, 2);
+    src = luaT_toudata(L, 3, torch_(Tensor_id));
   }
   else
-    THError("invalid number of arguments");
+    THError("invalid arguments: [result] tensor [number] tensor");
+
+  if(!r_)
+  {
+    if(doacc)
+      r_ = t;
+    else
+        r_ = THTensor_(new)();
+  }
+  else
+    THTensor_(retain)(r_);
+
+  luaT_pushudata(L, r_, torch_(Tensor_id));
 
   THLab_(cadd)(r_, t, value, src);
-  return 1;
-}
-
-static int lab_(cmul)(lua_State *L)
-{
-  THTensor *r_, *t, *src;
-  int n = lua_gettop(L);
-
-  if(n == 3)
-  {
-    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-    t = luaT_checkudata(L, 2, torch_(Tensor_id));
-    src = luaT_checkudata(L, 3, torch_(Tensor_id));
-  }
-  else if(n == 2)
-  {
-    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-    t = r_; 
-    src = luaT_checkudata(L, 2, torch_(Tensor_id));
-  }
-  else
-    THError("invalid number of arguments");
-  
-  THLab_(cmul)(r_, t, src);
-  return 1;
-}
-
-static int lab_(cdiv)(lua_State *L)
-{
-  THTensor *r_, *t, *src;
-  int n = lua_gettop(L);
-
-  if(n == 3)
-  {
-    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-    t = luaT_checkudata(L, 2, torch_(Tensor_id));
-    src = luaT_checkudata(L, 3, torch_(Tensor_id));
-  }
-  else if(n == 2)
-  {
-    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-    t = r_; 
-    src = luaT_checkudata(L, 2, torch_(Tensor_id));
-  }
-  else
-    THError("invalid number of arguments");
-  
-  THLab_(cdiv)(r_, t, src);
-  return 1;
-}
-
-static int lab_(addcmul)(lua_State *L)
-{
-  THTensor *r_, *t, *src1, *src2;
-  real value;
-  int n = lua_gettop(L);
-
-  if(n == 5)
-  {
-    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-    t = luaT_checkudata(L, 2, torch_(Tensor_id));
-    value = luaL_checknumber(L, 3);
-    src1 = luaT_checkudata(L, 4, torch_(Tensor_id));
-    src2 = luaT_checkudata(L, 5, torch_(Tensor_id));
-  }
-  else if(n == 4)
-  {
-    if(lua_isuserdata(L, 2))
-    {
-      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-      t = luaT_checkudata(L, 2, torch_(Tensor_id));
-      value = 1;
-      src1 = luaT_checkudata(L, 3, torch_(Tensor_id));
-      src2 = luaT_checkudata(L, 4, torch_(Tensor_id));
-    }
-    else
-    {
-      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-      t = r_;
-      value = luaL_checknumber(L, 2);
-      src1 = luaT_checkudata(L, 3, torch_(Tensor_id));
-      src2 = luaT_checkudata(L, 4, torch_(Tensor_id));
-    }
-  }
-  else
-    THError("invalid number of arguments");
-  
-  THLab_(addcmul)(r_, t, value, src1, src2);
-  return 1;
-}
-
-static int lab_(addcdiv)(lua_State *L)
-{
-  THTensor *r_ = NULL, *t, *src1, *src2;
-  real value = 1;
-  int n = lua_gettop(L);
-
-  if(n == 5)
-  {
-    r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-    t = luaT_checkudata(L, 2, torch_(Tensor_id));
-    value = luaL_checknumber(L, 3);
-    src1 = luaT_checkudata(L, 4, torch_(Tensor_id));
-    src2 = luaT_checkudata(L, 5, torch_(Tensor_id));
-  }
-  else if(n == 4)
-  {
-    if(lua_isuserdata(L, 2))
-    {
-      r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-      t = luaT_checkudata(L, 2, torch_(Tensor_id));
-      src1 = luaT_checkudata(L, 3, torch_(Tensor_id));
-      src2 = luaT_checkudata(L, 4, torch_(Tensor_id));
-    }
-    else
-    {
-      t = luaT_checkudata(L, 1, torch_(Tensor_id));
-      value = luaL_checknumber(L, 2);
-      src1 = luaT_checkudata(L, 3, torch_(Tensor_id));
-      src2 = luaT_checkudata(L, 4, torch_(Tensor_id));
-    }
-  }
-  else
-    THError("invalid number of arguments");
-
-  /* seul changement avec torch package... r_ = t */
-  if(!r_)
-    r_ = THTensor_(new)();
-
-  THLab_(addcdiv)(r_, t, value, src1, src2);
 
   return 1;
 }
+
+#define LAB_IMPLEMENT_CMULCDIV(NAME)                        \
+  static int lab_(NAME)(lua_State *L)                       \
+  {                                                         \
+    THTensor *r_ = NULL, *t = NULL, *src = NULL;            \
+    int narg = lua_gettop(L);                               \
+    int doacc = 0;                                          \
+                                                            \
+    if(narg > 0 && lua_isboolean(L, -1))                    \
+    {                                                       \
+      doacc = lua_toboolean(L, -1);                         \
+      lua_pop(L, 1);                                        \
+      narg--;                                               \
+    }                                                       \
+                                                            \
+    if(narg == 3                                            \
+       && luaT_isudata(L, 1, torch_(Tensor_id))             \
+       && luaT_isudata(L, 2, torch_(Tensor_id))             \
+       && luaT_isudata(L, 3, torch_(Tensor_id)))            \
+    {                                                       \
+      r_ = luaT_toudata(L, 1, torch_(Tensor_id));           \
+      t = luaT_toudata(L, 2, torch_(Tensor_id));            \
+      src = luaT_toudata(L, 3, torch_(Tensor_id));          \
+    }                                                       \
+    else if(narg == 3                                       \
+            && luaT_isudata(L, 1, torch_(Tensor_id))        \
+            && luaT_isudata(L, 2, torch_(Tensor_id)))       \
+    {                                                       \
+      t = luaT_toudata(L, 1, torch_(Tensor_id));            \
+      src = luaT_toudata(L, 2, torch_(Tensor_id));          \
+    }                                                       \
+    else                                                    \
+      THError("invalid arguments: [result] tensor tensor"); \
+                                                            \
+    if(!r_)                                                 \
+    {                                                       \
+      if(doacc)                                             \
+        r_ = t;                                             \
+      else                                                  \
+        r_ = THTensor_(new)();                              \
+    }                                                       \
+    else                                                    \
+      THTensor_(retain)(r_);                                \
+                                                            \
+    luaT_pushudata(L, r_, torch_(Tensor_id));               \
+                                                            \
+    THLab_(NAME)(r_, t, src);                               \
+                                                            \
+    return 1;                                               \
+  }
+
+LAB_IMPLEMENT_CMULCDIV(cmul)
+LAB_IMPLEMENT_CMULCDIV(cdiv)
+
+#define LAB_IMPLEMENT_ADDCMULADDCDIV(NAME)                              \
+  static int lab_(NAME)(lua_State *L)                                   \
+  {                                                                     \
+    THTensor *r_ = NULL, *t = NULL, *src1 = NULL, *src2 = NULL;         \
+    real value = 1;                                                     \
+    int narg = lua_gettop(L);                                           \
+    int doacc = 0;                                                      \
+                                                                        \
+    if(narg > 0 && lua_isboolean(L, -1))                                \
+    {                                                                   \
+      doacc = lua_toboolean(L, -1);                                     \
+      lua_pop(L, 1);                                                    \
+      narg--;                                                           \
+    }                                                                   \
+                                                                        \
+    if(narg == 5                                                        \
+       && luaT_isudata(L, 1, torch_(Tensor_id))                         \
+       && luaT_isudata(L, 2, torch_(Tensor_id))                         \
+       && lua_isnumber(L, 3)                                            \
+       && luaT_isudata(L, 4, torch_(Tensor_id))                         \
+       && luaT_isudata(L, 5, torch_(Tensor_id)))                        \
+    {                                                                   \
+      r_ = luaT_toudata(L, 1, torch_(Tensor_id));                       \
+      t = luaT_toudata(L, 2, torch_(Tensor_id));                        \
+      value = lua_tonumber(L, 3);                                       \
+      src1 = luaT_toudata(L, 4, torch_(Tensor_id));                     \
+      src2 = luaT_toudata(L, 5, torch_(Tensor_id));                     \
+    }                                                                   \
+    else if(narg == 4                                                   \
+            && luaT_isudata(L, 1, torch_(Tensor_id))                    \
+            && luaT_isudata(L, 2, torch_(Tensor_id))                    \
+            && luaT_isudata(L, 3, torch_(Tensor_id))                    \
+            && luaT_isudata(L, 4, torch_(Tensor_id)))                   \
+    {                                                                   \
+      r_ = luaT_toudata(L, 1, torch_(Tensor_id));                       \
+      t = luaT_toudata(L, 2, torch_(Tensor_id));                        \
+      src1 = luaT_toudata(L, 3, torch_(Tensor_id));                     \
+      src2 = luaT_toudata(L, 4, torch_(Tensor_id));                     \
+    }                                                                   \
+    else if(narg == 4                                                   \
+            && luaT_isudata(L, 1, torch_(Tensor_id))                    \
+            && lua_isnumber(L, 2)                                       \
+            && luaT_isudata(L, 3, torch_(Tensor_id))                    \
+            && luaT_isudata(L, 4, torch_(Tensor_id)))                   \
+    {                                                                   \
+      t = luaT_toudata(L, 1, torch_(Tensor_id));                        \
+      value = lua_tonumber(L, 2);                                       \
+      src1 = luaT_toudata(L, 3, torch_(Tensor_id));                     \
+      src2 = luaT_toudata(L, 4, torch_(Tensor_id));                     \
+    }                                                                   \
+    else                                                                \
+      THError("invalid arguments: [result] tensor [number] tensor tensor"); \
+                                                                        \
+    if(!r_)                                                             \
+    {                                                                   \
+      if(doacc)                                                         \
+        r_ = t;                                                         \
+      else                                                              \
+        r_ = THTensor_(new)();                                          \
+    }                                                                   \
+    else                                                                \
+      THTensor_(retain)(r_);                                            \
+                                                                        \
+    luaT_pushudata(L, r_, torch_(Tensor_id));                           \
+                                                                        \
+    THLab_(NAME)(r_, t, value, src1, src2);                             \
+                                                                        \
+    return 1;                                                           \
+  }
+
+LAB_IMPLEMENT_ADDCMULADDCDIV(addcmul)
+LAB_IMPLEMENT_ADDCMULADDCDIV(addcdiv)
 
 #define LAB_IMPLEMENT_ADDMVRMM(NAME)                                    \
   static int lab_(NAME)(lua_State *L)                                   \
