@@ -252,7 +252,7 @@ Clear the error.flag returned by [[#torch.File.hasError|hasError()]].
 Close the file. Any subsequent operation will generate a ''Lua'' error.
 
 =====  noAutoSpacing() =====
-{{anchor:torch.noAutoSpacing}}
+{{anchor:torch.File.noAutoSpacing}}
 
 In [[#torch.File.ascii|ASCII]] mode, do not put extra spaces between element
 written on disk. This is the contrary of the option

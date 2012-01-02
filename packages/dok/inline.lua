@@ -126,7 +126,7 @@ end
 
 function dok.html2funcs(html, package)
    local funcs = {}
-   local next = html:gfind('<div class="level2">(.-)</div>')
+   local next = html:gfind('<div class="level%d">(.-)</div>')
    for body in next do
       local func = body:gfind('<a name="' .. package .. '%.(.-)">.-</a>')()
       if func then

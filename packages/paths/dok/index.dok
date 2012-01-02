@@ -1,4 +1,5 @@
 ====== Filename Manipulation Package ====== 
+{{anchor:paths.dok}}
 
 This package provides portable functions to manipulate filenames.
 
@@ -8,6 +9,7 @@ Do not change their values.
 
 
 ====  Manipulating file names ====
+{{anchor:paths.filenames.dok}}
 
 The following functions can be used
 to manipulate filenames in a portable way
@@ -15,23 +17,33 @@ over multiple platforms.
 
 
 ===  paths.filep(path) ===
+{{anchor:paths.filep}}
+
 Return a boolean indicating whether ''path'' 
 refers to an existing file.
 
 ===  paths.dirp(path) ===
+{{anchor:paths.dirp}}
+
 Return a boolean indicating whether ''path'' 
 refers to an existing directory.
 
 ===  paths.basename(path,[suffix]) ===
+{{anchor:paths.basename}}
+
 Return the last path component of ''path''
 and optionally strip the suffix ''suffix''.
 This is similar to the well know shell command ''"basename"''.
 
 ===  paths.dirname(path) ===
+{{anchor:paths.dirname}}
+
 Return the name of directory containing file ''path''.
 This is similar to the well known shell command ''"dirname"''.
 
 ===  paths.concat([path1,....,pathn]) ===
+{{anchor:paths.concat}}
+
 Concatenates relative filenames.
 
 First this function computes the full filename
@@ -46,10 +58,14 @@ full name of the current directory.
 
 
 ===  paths.cwd() ===
+{{anchor:paths.cwd}}
+
 Return the full path of the current directory.
 
 
 ===  paths.execdir() ===
+{{anchor:paths.execdir}}
+
 Return the name of the directory containing the
 current Lua executable.
 When the module ''paths'' is first loaded,
@@ -59,17 +75,22 @@ the location of the various Torch components.
 
 
 ====  Accessing directories ====
+{{anchor:paths.dirs.dok}}
 
 The following functions can be used
 to examine directory contents.
 
 
 ===  paths.dir(dname) ===
+{{anchor:paths.dir}}
+
 Return a table containing the files in directory ''dname''.
 This function return ''nil'' if the specified directory
 does not exists.
 
 ===  paths.files(dname) ===
+{{anchor:paths.files}}
+
 Returns an iterator over the files located in directory ''dname''.
 This can be used in ***for*** expression as shown below:
 <file>
@@ -80,8 +101,10 @@ This can be used in ***for*** expression as shown below:
 
 
 ====  Finding files relative to a Lua script ====
+{{anchor:paths.findingfiles.dok}}
 
 ===  paths.thisfile([arg]) ===
+{{anchor:paths.thisfile}}
 
 Calling ''paths.thisfile()'' without argument 
 inside a lua file returns returns the full 
@@ -98,6 +121,7 @@ directory as a lua script.
 
 
 ===  paths.dofile(filename) ===
+{{anchor:paths.dofile}}
 
 This function is similar to the standard Lua function ''dofile''
 but interprets ''filename'' relative to the directory containing 
@@ -105,56 +129,75 @@ the file that contains the call to ''paths.dofile'',
 or to the current directory when ''paths.dofile'' is 
 called interactively.
 
-
-
-
 ====  Well known directories ====
+{{anchor:paths.wellknowndirs.dok}}
 
 These variables indicate where the various Torch components are installed.  
 It is not advisable to change their values!
 
 
 ===  paths.install_prefix ===
+{{anchor:paths.install_prefix}}
+
 The base directory of the Torch installation.
 
 ===  paths.install_bin ===
+{{anchor:paths.install_bin}}
+
 The name of the directory containing the executable programs.
 Under Windows, this directory also contains 
 the dynamically loadable libraries (''.dll'').
 
 ===  paths.install_man ===
+{{anchor:paths.install_man}}
+
 The name of the directory containing the unix style manual pages.
 
 ===  paths.install_lib ===
+{{anchor:paths.install_lib}}
+
 The name of the directory containing the object code libraries.
 Under Unix, this directory also contains the dynamically
 loadable libraries (''.so'' or ''.dylib'').
 
 ===  paths.install_share ===
+{{anchor:paths.install_share}}
+
 The name of the directory containing processor independent data files,
 such as lua code and other text files.
 
 ===  paths.install_include ===
+{{anchor:paths.install_include}}
+
 The name of the directory containing the include files
 for the various Torch libraries.
 
 ===  paths.install_hlp ===
+{{anchor:paths.install_hlp}}
+
 The name of the directory containing the Torch help files.
 
 ===  paths.install_html ===
+{{anchor:paths.install_html}}
+
 The name of the directory containing the HTML version
 of the Torch help files.  These files are generated
 when you enable the CMake option ''HTML_DOC''.
 
 ===  paths.install_cmake ===
+{{anchor:paths.install_cmake}}
+
 The name of the directory containing the CMake files
 used by external Torch modules.
 
 ===  paths.install_lua_path ===
+{{anchor:paths.install_lua_path}}
+
 The name of the directory containing the Lua packages.
 This directory is used to build variable ''package.path''.
 
 ===  paths.install_lua_cpath ===
+{{anchor:paths.install_lua_cpath}}
 
 The name of the directory containing the Lua loadable binary modules.
 This directory is used to build variable ''package.cpath''.
