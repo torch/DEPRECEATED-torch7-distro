@@ -40,6 +40,7 @@ local style = {
    pre = c.cyan,
    em = c.Black,
    img = c.red,
+   link = c.red,
    code = c.green,
    none = c.none
 }
@@ -184,6 +185,13 @@ function dok.refresh()
 end
 
 function dok.help(symbol)
+   -- no symbol? global help
+   if not symbol then
+      print('no symbol passed: either provide a symbol, or checkout:\n'
+            .. style.link .. paths.concat(paths.install_html,'index.html')
+            .. style.none)
+      return
+   end
    -- always refresh (takes time, but insures that 
    -- we generate help for all packages loaded)
    dok.refresh()
