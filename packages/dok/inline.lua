@@ -137,26 +137,28 @@ function dok.refresh()
                   local content = f:read('*all')
                   local html = dok.dok2html(content)
                   local funcs = dok.html2funcs(html, package)
-                  for key,symb in pairs(_G[package]) do
-                     -- level 1: global functions and objects
-                     local entry = (key):lower()
-                     if funcs[entry] then
-                        dok.inline[string2symbol(package .. '.' .. key)] = funcs[entry]
-                     end
-                     -- level 2: objects' methods
-                     if type(_G[package][key]) == 'table' then
-                        local entries = {}
-                        for k,v in pairs(_G[package][key]) do
-                           entries[k] = v
+                  if type(_G[package]) == 'table' then
+                     for key,symb in pairs(_G[package]) do
+                        -- level 1: global functions and objects
+                        local entry = (key):lower()
+                        if funcs[entry] then
+                           dok.inline[string2symbol(package .. '.' .. key)] = funcs[entry]
                         end
-                        local mt = getmetatable(_G[package][key]) or {}
-                        for k,v in pairs(mt) do
-                           entries[k] = v
-                        end
-                        for subkey,subsymb in pairs(entries) do
-                           local entry = (key .. '.' .. subkey):lower()
-                           if funcs[entry] then
-                              dok.inline[string2symbol(package .. '.' .. key .. '.' .. subkey)] = funcs[entry]
+                        -- level 2: objects' methods
+                        if type(_G[package][key]) == 'table' then
+                           local entries = {}
+                           for k,v in pairs(_G[package][key]) do
+                              entries[k] = v
+                           end
+                           local mt = getmetatable(_G[package][key]) or {}
+                           for k,v in pairs(mt) do
+                              entries[k] = v
+                           end
+                           for subkey,subsymb in pairs(entries) do
+                              local entry = (key .. '.' .. subkey):lower()
+                              if funcs[entry] then
+                                 dok.inline[string2symbol(package .. '.' .. key .. '.' .. subkey)] = funcs[entry]
+                              end
                            end
                         end
                      end
