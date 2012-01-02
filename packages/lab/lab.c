@@ -131,11 +131,9 @@ static int lab_toc(lua_State* L)
   }
 
 LUAT_DYNT_FUNCTION_WRAPPER(lab, numel)
-LUAT_DYNT_FUNCTION_WRAPPER(lab, max_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, max)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, maxall)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, minall)
-LUAT_DYNT_FUNCTION_WRAPPER(lab, min_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, min)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, sum_)
 LUAT_DYNT_FUNCTION_WRAPPER(lab, sum)
@@ -239,11 +237,9 @@ static const struct luaL_Reg lab_stuff__ [] = {
   {"toc", lab_toc},
 
   {"numel", lab_numel},
-  //{"max_", lab_max_},
   {"max", lab_max},
   {"maxall", lab_maxall},
   {"minall", lab_minall},
-  //{"min_", lab_min_},
   {"min", lab_min},
   //{"sum_", lab_sum_},
   {"sum", lab_sum},

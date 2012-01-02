@@ -466,64 +466,82 @@ LAB_IMPLEMENT_ADDMVRMM(addr)
 
 static int lab_(numel)(lua_State *L)
 {
-  THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
-  lua_pushnumber(L, THLab_(numel)(tensor));
+  if(lua_gettop(L) == 1)
+  {
+    THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
+    lua_pushnumber(L, THLab_(numel)(tensor));
+  }
+  else
+    luaL_error(L, "invalid arguments: tensor");
+
   return 1;
 }
 
-static int lab_(max_)(lua_State *L)
-{
-  THTensor *values_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-  THLongTensor *indices_ = luaT_checkudata(L, 2, torch_LongTensor_id);
-  THTensor *t = luaT_checkudata(L, 3, torch_(Tensor_id));
-  int dimension = (int)(luaL_optnumber(L, 4, THTensor_(nDimension)(t)))-1;
-
-  THLab_(max)(values_, indices_, t, dimension);
-  THLongLab_add(indices_, indices_, 1);
-
-  lua_settop(L, 2);  
-  return 2;
-}
-
-static int lab_(max)(lua_State *L)
-{
-  int n = lua_gettop(L);
-  if (n == 1 || ( n == 2 && lua_type(L,2) == LUA_TNUMBER))
-  {
-    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-    lua_insert(L, 1);
-    luaT_pushudata(L, THLongTensor_new(), torch_LongTensor_id);
-    lua_insert(L, 2);
+#define LAB_IMPLEMENT_MINMAX(NAME)                                      \
+  static int lab_(NAME)(lua_State *L)                                   \
+  {                                                                     \
+    THTensor *values = NULL, *t = NULL;                                 \
+    THLongTensor *indices = NULL;                                       \
+    int dimension = 0; /* DEBUG: a voir */                              \
+    int narg = lua_gettop(L);                                           \
+                                                                        \
+    if(narg == 4                                                        \
+       && luaT_isudata(L, 1, torch_(Tensor_id))                         \
+       && luaT_isudata(L, 2, torch_LongTensor_id)                       \
+       && luaT_isudata(L, 3, torch_(Tensor_id))                         \
+       && lua_isnumber(L, 4))                                           \
+    {                                                                   \
+      values = luaT_toudata(L, 1, torch_(Tensor_id));                   \
+      indices = luaT_toudata(L, 2, torch_LongTensor_id);                \
+      t = luaT_toudata(L, 3, torch_(Tensor_id));                        \
+      dimension = (int)lua_tonumber(L, 4)-1;                            \
+    }                                                                   \
+    else if(narg == 3                                                   \
+            && luaT_isudata(L, 1, torch_(Tensor_id))                    \
+            && luaT_isudata(L, 2, torch_LongTensor_id)                  \
+            && luaT_isudata(L, 3, torch_(Tensor_id)))                   \
+    {                                                                   \
+      values = luaT_toudata(L, 1, torch_(Tensor_id));                   \
+      indices = luaT_toudata(L, 2, torch_LongTensor_id);                \
+      t = luaT_toudata(L, 3, torch_(Tensor_id));                        \
+    }                                                                   \
+    else if(narg == 2                                                   \
+            && luaT_isudata(L, 1, torch_(Tensor_id))                    \
+            && lua_isnumber(L, 2))                                      \
+    {                                                                   \
+      t = luaT_toudata(L, 1, torch_(Tensor_id));                        \
+      dimension = (int)lua_tonumber(L, 2)-1;                            \
+    }                                                                   \
+    else if(narg == 1                                                   \
+            && luaT_isudata(L, 1, torch_(Tensor_id)))                   \
+    {                                                                   \
+      t = luaT_toudata(L, 1, torch_(Tensor_id));                        \
+    }                                                                   \
+    else                                                                \
+      luaL_error(L, "invalid arguments: [tensor longtensor] tensor [dimension]"); \
+                                                                        \
+    if(values)                                                          \
+    {                                                                   \
+      THTensor_(retain)(values);                                        \
+      THLongTensor_retain(indices);                                     \
+    }                                                                   \
+    else                                                                \
+    {                                                                   \
+      values = THTensor_(new)();                                        \
+      indices = THLongTensor_new();                                     \
+    }                                                                   \
+                                                                        \
+    luaT_pushudata(L, values, torch_(Tensor_id));                       \
+    luaT_pushudata(L, indices, torch_LongTensor_id);                    \
+                                                                        \
+    THLab_(NAME)(values, indices, t, dimension);                        \
+    THLongLab_add(indices, indices, 1);                                 \
+                                                                        \
+    return 2;                                                           \
   }
-  return lab_(max_)(L);
-}
 
-static int lab_(min_)(lua_State *L)
-{
-  THTensor *values_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-  THLongTensor *indices_ = luaT_checkudata(L, 2, torch_LongTensor_id);
-  THTensor *t = luaT_checkudata(L, 3, torch_(Tensor_id));
-  int dimension = (int)(luaL_optnumber(L, 4, THTensor_(nDimension)(t)))-1;
-
-  THLab_(min)(values_, indices_, t, dimension);
-  THLongLab_add(indices_, indices_, 1);
-
-  lua_settop(L, 2);  
-  return 2;
-}
-
-static int lab_(min)(lua_State *L)
-{
-  int n = lua_gettop(L);
-  if (n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
-  {
-    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-    lua_insert(L, 1);
-    luaT_pushudata(L, THLongTensor_new(), torch_LongTensor_id);
-    lua_insert(L, 2);
-  }
-  return lab_(min_)(L);
-}
+LAB_IMPLEMENT_MINMAX(min)
+LAB_IMPLEMENT_MINMAX(max)
 
 static int lab_(sum_)(lua_State *L)
 {
@@ -1765,9 +1783,7 @@ static int lab_(pow)(lua_State *L)
 
 static const struct luaL_Reg lab_(stuff__) [] = {
   {"numel", lab_(numel)},
-  //{"max_", lab_(max_)},
   {"max", lab_(max)},
-  //{"min_", lab_(min_)},
   {"min", lab_(min)},
   //{"sum_", lab_(sum_)},
   {"sum", lab_(sum)},
