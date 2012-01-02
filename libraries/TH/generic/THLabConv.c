@@ -1274,8 +1274,8 @@ void THLab_(conv3Dmul)(THTensor *r_, real beta, real alpha, THTensor *t_, THTens
                        long sdepth, long srow, long scol, const char *type)
 {
 
-  THArgCheck(t_->nDimension == 2 , 3, "input: 2D Tensor expected");
-  THArgCheck(k_->nDimension == 2 , 4, "kernel: 2D Tensor expected");
+  THArgCheck(t_->nDimension == 3 , 3, "input: 3D Tensor expected");
+  THArgCheck(k_->nDimension == 3 , 4, "kernel: 3D Tensor expected");
   THArgCheck(sdepth >= 1, 5, "Stride should be a positive integer");
   THArgCheck(srow >= 1, 6, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 7, "Stride should be a positive integer");
