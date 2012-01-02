@@ -531,6 +531,15 @@ function gnuplot.ylabel(label)
    writeToCurrent('set ylabel "' .. label .. '"')
    writeToCurrent('refresh')
 end
+function gnuplot.zlabel(label)
+   if not _gptable.hasrefresh then
+      print('gnuplot.zlabel disabled')
+      return
+   end
+   local _gp = getCurrentPlot()
+   writeToCurrent('set zlabel "' .. label .. '"')
+   writeToCurrent('refresh')
+end
 function gnuplot.title(label)
    if not _gptable.hasrefresh then
       print('gnuplot.title disabled')
