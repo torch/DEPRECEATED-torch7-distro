@@ -349,7 +349,7 @@ each row of x, and a tensor i of  their corresponding indices in x.
 {{anchor:lab.mean}}
 
 ''y=lab.mean(x)'' returns a tensor y of the mean of the elements in 
-each column of x.
+each row of x.
 
 ''y=lab.mean(x,2)'' performs the mean operation for each row and
 ''y=lab.mean(x,n)'' performs the mean operation over the dimension n.
@@ -358,7 +358,7 @@ each column of x.
 {{anchor:lab.min}}
 
 ''y,i=lab.min(x)'' returns a tensor y of the smallest element in 
-each column of x, and a tensor i of  their corresponding indices in x.
+each row of x, and a tensor i of  their corresponding indices in x.
 
 ''y,i=lab.min(x,2)'' performs the min operation for each row and
 ''y,i=lab.min(x,n)'' performs the min operation over the dimension n.
@@ -368,7 +368,7 @@ each column of x, and a tensor i of  their corresponding indices in x.
 {{anchor:lab.prod}}
 
 ''y=lab.prod(x)'' returns a tensor y of the product of the elements in 
-each column of x. 
+each row of x. 
 
 ''y=lab.prod(x,2)'' performs the prod operation for each row and
 ''y=lab.prod(x,n)'' performs the prod operation over the dimension n.
@@ -377,7 +377,7 @@ each column of x.
 {{anchor:lab.sort}}
 
 ''y,i=lab.sort(x)'' returns a tensor y of the sorted 
-columns of x, and a tensor i of the corresponding indices from x.
+rows of x, and a tensor i of the corresponding indices from x.
 
 ''y,i=lab.sort(x,2)'' performs the sort operation for each row and
 ''y,i=lab.sort(x,n)'' performs the sort operation over the dimension n.
@@ -386,7 +386,7 @@ columns of x, and a tensor i of the corresponding indices from x.
 {{anchor:lab.std}}
 
 ''y=lab.std(x)'' returns a tensor y of the standard deviation of the elements in 
-each column of x.
+each row of x.
 
 ''lab.std(x)'' normalizes by (n-1) where n is the number of elements.  This
 makes lab.sum(lab.pow(lab.std(x),2)) 
@@ -404,7 +404,7 @@ is a sample from a normal distribution.
 {{anchor:lab.sum}}
 
 ''y=lab.sum(x)'' returns a tensor y of the sum of the elements in 
-each column of x.
+each row of x.
 
 ''y=lab.sum(x,2)'' performs the sum operation for each row and
 ''y=lab.sum(x,n)'' performs the sum operation over the dimension n.
@@ -413,7 +413,7 @@ each column of x.
 {{anchor:lab.var}}
 
 ''y=lab.var(x)'' returns a tensor y of the standard deviation of the elements in 
-each column of x.
+each row of x.
 
 ''lab.var(x)'' normalizes by (n-1) where n is the number of elements.  This
 makes lab.sum(lab.var(x)) 
@@ -457,7 +457,7 @@ of a matrix x. This is  equal  to the sum of the eigenvalues of x.
 The returned value ''y'' is a number, not a tensor.
 
 ====== Convolution Operations ======
-{{anchor:lab.linalg.dok}}
+{{anchor:lab.conv.dok}}
 
 These function implement convolution or cross-correlation of an input
 image (or set of input images) with a kernel (or set of kernels). The
