@@ -9,6 +9,10 @@ PREFIX=@Torch_INSTALL_BIN@
 IMPORTF="\
 function import(package, forced) \
    require(package) \
+   if _G[package] then \
+      _G._torchimport = _G._torchimport or {} \
+      _G._torchimport[package] = _G[package] \
+   end \
    for k,v in pairs(_G[package]) do \
       if not _G[k] or forced then \
          _G[k] = v \
