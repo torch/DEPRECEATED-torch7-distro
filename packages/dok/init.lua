@@ -1,5 +1,9 @@
 dok = {}
 
+if torch then
+   torch.include('dok', 'inline.lua')
+end
+
 dok.options = {}
 
 function table.last(t)
