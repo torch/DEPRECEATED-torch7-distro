@@ -1,4 +1,5 @@
 ======= Lab Package Reference Manual =======
+{{anchor:lab.reference.dok}}
 
 A Linear Algebra package consisting of Matlab-like  functions
 for manipulating [[..:torch:index#Tensor|Tensor]] objects.
