@@ -1,58 +1,53 @@
-======= Neural Network Package =======
+====== Neural Network Package =======
+{{anchor:nn.dok}}
 
 This package provides an easy way to build and train simple or complex
 neural networks.
 
-Each module of a network is composed of [[#Modules|Modules]] and there
+Each module of a network is composed of [[#nn.Modules|Modules]] and there
 are several sub-classes of ''Module'' available: container classes like
-[[#Sequential|Sequential]], [[#Parallel|Parallel]] and
-[[#Concat|Concat]] , which can contain simple layers like
-[[#Linear|Linear]], [[#Mean|Mean]], [[#Max|Max]] and
-[[#Reshape|Reshape]], as well as convolutional layers, and transfer
-functions like [[#Tanh|Tanh]].
+[[#nn.Sequential|Sequential]], [[#nn.Parallel|Parallel]] and
+[[#nn.Concat|Concat]] , which can contain simple layers like
+[[#nn.Linear|Linear]], [[#nn.Mean|Mean]], [[#nn.Max|Max]] and
+[[#nn.Reshape|Reshape]], as well as convolutional layers, and transfer
+functions like [[#nn.Tanh|Tanh]].
 
-Loss functions are implemented as sub-classes of [[#Criterions|Criterion]]. They are helpful to train neural network on classical tasks. 
-Common criterions are the
-Mean Squared Error criterion implemented in [[#MSECriterion|MSECriterion]]
-and the cross-entropy criterion implemented in [[#ClassNLLCriterion|ClassNLLCriterion]].
+Loss functions are implemented as sub-classes of
+[[#nn.Criterions|Criterion]]. They are helpful to train neural network on
+classical tasks.  Common criterions are the Mean Squared Error
+criterion implemented in [[#nn.MSECriterion|MSECriterion]] and the
+cross-entropy criterion implemented in
+[[#nn.ClassNLLCriterion|ClassNLLCriterion]].
 
-Finally, the [[#StochasticGradient|StochasticGradient]] class provides a
+Finally, the [[#nn.StochasticGradient|StochasticGradient]] class provides a
 high level way to train the neural network of choice, even though it is
-easy with a simple for loop to [[#DoItYourself|train a neural network yourself]].
+easy with a simple for loop to [[#nn.DoItYourself|train a neural network yourself]].
 
 ======  Detailed Overview of the Neural Network Package ======
+{{anchor:nn.overview.dok}}
 
-''Module''
+**Module**
 
-A neural network is called a [[#Module|Module]] (or simply
+A neural network is called a [[#nn.Module|Module]] (or simply
 //module// in this documentation) in Torch. ''Module'' is an abstract
 class which defines four main methods:
-  * [[#ModuleForward|forward(input)]] which computes the output
-of the module given the ''input'' [[..:torch:start#Tensor|Tensor]].
-  * [[#ModuleBackward|backward(input, gradOutput)]] which computes the gradients of the module
-with respect to its own parameters, and its own inputs.
-  * [[#ModuleZeroGradParameters|zeroGradParameters()]] which zeroes the gradient with respect to the parameters of
-the module.
-  * [[#ModuleUpdateParameters|updateParameters(learningRate)]] which updates the parameters after one has computed
-the gradients with ''backward()''
+  * [[#nn.Module.forward|forward(input)]] which computes the output of the module given the ''input'' [[..:torch:index#Tensor|Tensor]].
+  * [[#nn.Module.backward|backward(input, gradOutput)]] which computes the gradients of the module with respect to its own parameters, and its own inputs.
+  * [[#nn.Module.zeroGradParameters|zeroGradParameters()]] which zeroes the gradient with respect to the parameters of the module.
+  * [[#nn.Module.updateParameters|updateParameters(learningRate)]] which updates the parameters after one has computed the gradients with ''backward()''
 
 It also declares two members:
-  * [[#ModuleOutput|output]] which is the output returned by ''forward()''.
-  * [[#ModuleGradInput|gradInput]] which contains the gradients with respect to the input of the module,
-computed in a ''backward()''.
+  * [[#nn.Module.output|output]] which is the output returned by ''forward()''.
+  * [[#nn.Module.gradInput|gradInput]] which contains the gradients with respect to the input of the module, computed in a ''backward()''.
 
 Two other perhaps less used but handy methods are also defined:
-  * [[#ModuleShare|share(mlp,s1,s2,...,sn)]] which makes this module share the parameters s1,..sn of the module ''mlp''. This is useful if you want to have modules that share the same weights.
-  * [[#ModuleClone|clone(...)]] which produces a deep copy of (i.e. not just a pointer to) this Module, including the current state of its parameters (if any). 
+  * [[#nn.Module.share|share(mlp,s1,s2,...,sn)]] which makes this module share the parameters s1,..sn of the module ''mlp''. This is useful if you want to have modules that share the same weights.
+  * [[#nn.Module.clone|clone(...)]] which produces a deep copy of (i.e. not just a pointer to) this Module, including the current state of its parameters (if any).
 
 Some important remarks:
-  * ''output'' contains only valid values after a
-[[#ModuleForward|forward(input)]].
-  * ''gradInput'' contains only
-valid values after a [[#ModuleBackward|backward(input, gradOutput)]].
-  * [[#ModuleBackward|backward(input, gradOutput)]] uses certain computations obtained
-during [[#ModuleForward|forward(input)]]. You //must// call ''forward()'' before
-calling a ''backward()'', on the //same// ''input'', or your gradients are going to be incorrect!
+  * ''output'' contains only valid values after a [[#nn.Module.forward|forward(input)]].
+  * ''gradInput'' contains only valid values after a [[#nn.Module.backward|backward(input, gradOutput)]].
+  * [[#nn.Module.backward|backward(input, gradOutput)]] uses certain computations obtained during [[#nn.Module.forward|forward(input)]]. You //must// call ''forward()'' before calling a ''backward()'', on the //same// ''input'', or your gradients are going to be incorrect!
 
 
 **Plug and play**
@@ -64,7 +59,7 @@ nn = nn.Linear(10,1) -- perceptron with 10 inputs
 </file>
 
 More complex neural networks are easily built using container classes
-[[#Sequential|Sequential]] and [[#Concat|Concat]]. ''Sequential'' plugs
+[[#nn.Sequential|Sequential]] and [[#nn.Concat|Concat]]. ''Sequential'' plugs
 layer in a feed-forward fully connected manner. ''Concat'' concatenates in
 one layer several modules: they take the same inputs, and their output is
 concatenated.
@@ -77,46 +72,58 @@ mlp:add( nn.Tanh() ) -- some hyperbolic tangent transfer function
 mlp:add( nn.Linear(25, 1) ) -- 1 output
 </file>
 
-Of course, ''Sequential'' and ''Concat'' can contains other ''Sequential'' or
-''Concat'', allowing you to try the craziest neural networks you ever dreamt
-of! See the [[#Modules|complete list of available modules]].
+Of course, ''Sequential'' and ''Concat'' can contains other
+''Sequential'' or ''Concat'', allowing you to try the craziest neural
+networks you ever dreamt of! See the [[#nn.Modules|complete list of
+available modules]].
 
 **Training a neural network**
 
-Once you built your neural network, you have to choose a particular [[#Criterions|Criterion]] to
-train it. A criterion is a class which describes the cost to be minimized during training.
+Once you built your neural network, you have to choose a particular
+[[#nn.Criterions|Criterion]] to train it. A criterion is a class which
+describes the cost to be minimized during training.
 
-You can then train the neural network by using the [[#StochasticGradient|StochasticGradient]] class.
+You can then train the neural network by using the
+[[#nn.StochasticGradient|StochasticGradient]] class.
+
 <file lua>
- criterion = nn.MSECriterion(1) -- Mean Squared Error criterion
+ criterion = nn.MSECriterion() -- Mean Squared Error criterion
  trainer = nn.StochasticGradient(mlp, criterion)
  trainer:train(dataset) -- train using some examples
 </file>
 
-StochasticGradient expect as a ''dataset'' an object which implements the operator
-''dataset[index]'' and implements the method ''dataset:size()''. The ''size()'' methods
-returns the number of examples and ''dataset[i]'' has to return the i-th example.
+StochasticGradient expect as a ''dataset'' an object which implements
+the operator ''dataset[index]'' and implements the method
+''dataset:size()''. The ''size()'' methods returns the number of
+examples and ''dataset[i]'' has to return the i-th example.
 
 An ''example'' has to be an object which implements the operator
-''example[field]'', where ''field'' might take the value ''1'' (input features)
-or ''2'' (corresponding label which will be given to the criterion). 
-The input is usually a Tensor (except if you use special kind of gradient modules,
-like [[#TableLayers|table layers]]). The label type depends of the criterion.
-For example, the [[#MSECriterion|MSECriterion]] expect a Tensor, but the
-[[#ClassNLLCriterion|ClassNLLCriterion]] except a integer number (the class).
+''example[field]'', where ''field'' might take the value ''1'' (input
+features) or ''2'' (corresponding label which will be given to the
+criterion).  The input is usually a Tensor (except if you use special
+kind of gradient modules, like [[#nn.TableLayers|table layers]]). The
+label type depends of the criterion.  For example, the
+[[#nn.MSECriterion|MSECriterion]] expect a Tensor, but the
+[[#nn.ClassNLLCriterion|ClassNLLCriterion]] except a integer number (the
+class).
 
-Such a dataset is easily constructed by using Lua tables, but it could any ''C'' object
-for example, as long as required operators/methods are implemented.
-[[#DoItStochasticGradient|See an example]].
+Such a dataset is easily constructed by using Lua tables, but it could
+any ''C'' object for example, as long as required operators/methods
+are implemented.  [[#nn.DoItStochasticGradient|See an example]].
 
-''StochasticGradient'' being written in ''Lua'', it is extremely easy to
-cut-and-paste it and create a variant to it adapted to your needs (if the
-constraints of ''StochasticGradient'' do not satisfy you).
+''StochasticGradient'' being written in ''Lua'', it is extremely easy
+to cut-and-paste it and create a variant to it adapted to your needs
+(if the constraints of ''StochasticGradient'' do not satisfy you).
 
 **Low Level Training Of a Neural Network**
 
-If you want to program the ''StochasticGradient'' by hand, you essentially need to control the use of forwards and backwards through the network yourself.
-For example, here is the code fragment one would need to make a gradient step given an input ''x'', a desired output ''y'', a network ''mlp'' and a given criterion ''criterion'' and learning rate ''learningRate'':
+If you want to program the ''StochasticGradient'' by hand, you
+essentially need to control the use of forwards and backwards through
+the network yourself.  For example, here is the code fragment one
+would need to make a gradient step given an input ''x'', a desired
+output ''y'', a network ''mlp'' and a given criterion ''criterion''
+and learning rate ''learningRate'':
+
 <file lua>
 function gradUpdate(mlp, x, y, criterion, learningRate) 
   local pred = mlp:forward(x)
@@ -132,73 +139,93 @@ For example, if you wish to use your own criterion you can simple replace
 
 
 ======  Modules ======
-#Modules
+{{anchor:nn.Modules}}
 
-Modules are bricks to build neural networks. A [[#Module|Module]] is a neural network
-by itself, but it can be combined with other networks using [[#Containers|container classes]] to create
+Modules are bricks to build neural networks. A [[#nn.Module|Module]] is a neural network
+by itself, but it can be combined with other networks using [[#nn.Containers|container classes]] to create
 complex neural networks.
 
 =====  Module =====
-#Module
+{{anchor:nn.Module}}
 
 ''Module'' is an abstract class which defines fundamental methods necessary
-for a training a neural network. Modules are
-[[..:torch:start#FileSerialization|serializable]].
+for a training a neural network. Modules are [[..:torch:index#FileSerialization|serializable]].
 
-Modules contain two states variables: [[#ModuleOutput|output]] and
-[[#ModuleGradInput|gradInput]].
+Modules contain two states variables: [[#nn.ModuleOutput|output]] and
+[[#nn.ModuleGradInput|gradInput]].
 
 ====  [output] forward(input) ====
-#ModuleForward
+{{anchor:nn.Module.forward}}
 
-Takes a ''input'' object, and computes the corresponding ''output'' of the
+Takes an ''input'' object, and computes the corresponding ''output'' of the
 module. In general ''input'' and ''output'' are
-[[..:torch:start#Tensor|Tensors]]. However, some special sub-classes
-like [[#TableLayers|table layers]] might expect something else. Please,
+[[..:torch:index#Tensor|Tensors]]. However, some special sub-classes
+like [[#nn.TableLayers|table layers]] might expect something else. Please,
 refer to each module specification for further information.
 
-After a ''forward()'', the [[#ModuleOutput|ouput'' state variable]] should
+After a ''forward()'', the [[#nn.ModuleOutput|ouput]] state variable should
 have been updated to the new value.
 
 ====  [gradInput] backward(input, gradOutput) ====
-#ModuleBackward
+{{anchor:nn.Module.backward}}
 
 Performs a //backpropagation step// through the module, with respect to the
 given ''input''.  In general this method makes the assumption
-[[#ModuleForward|forward(input)]] has been called before, //with the same input//.
+[[#nn.Module.forward|forward(input)]] has been called before, //with the same input//.
 This is necessary for optimization reasons. If you do not respect
 this rule, ''backward()'' will compute incorrect gradients.
 
 In general ''input'' and ''gradOutput''  and ''gradInput'' are
-[[..:torch:start#Tensor|Tensors]]. However, some special sub-classes
-like [[#TableLayers|table layers]] might expect something else. Please,
+[[..:torch:index#Tensor|Tensors]]. However, some special sub-classes
+like [[#nn.TableLayers|table layers]] might expect something else. Please,
 refer to each module specification for further information.
 
-A //backpropagation step// consist in computing two kind of gradients at
-''input'' given ''gradOutput'' (gradients with respect to the output of the module).
-  - Computing the gradient of the module with respect to its own input. This
-is returned in ''gradInput''. Also, the [[#ModuleGradInput|gradInput'' state variable]]
-is updated accordingly.
-  - Computing the gradient of the module with respect to its ownparameters. Many
-modules do not perform this step as they do not have any parameters. The state variable
-name for the parameters is module dependent. The module is expected to //accumulate//
-the gradients with respect to the parameters in some variable. Zeroing this
-accumulation is achieved with [[#ModuleZeroGradParameters|zeroGradParameters()]] and
-updating the parameters according to this accumulation is done with
-[[#ModuleUpdateParameters|updateParameters()]].
+A //backpropagation step// consist in computing two kind of gradients
+at ''input'' given ''gradOutput'' (gradients with respect to the
+output of the module).  This function simply performs this task using
+two function calls:
+
+  - A function call to [[#nn.Module.updateGradInput|updateGradInput(input, gradOutput)]].
+  - A function call to [[#nn.Module.accGradParameters|accGradParameters(input,gradOutput)]].
+
+It is not advised to override this function call in custom classes. It is better to override [[#nn.Module.updateGradInput|updateGradInput(input, gradOutput)]] and [[#nn.Module.accGradParameters|accGradParameters(input, gradOutput)]] functions.
+
+====  updateGradInput(input, gradOutput) ====
+{{anchor:nn.Module.updateGradInput}}
+
+Computing the gradient of the module with respect to its own
+input. This is returned in ''gradInput''. Also, the
+[[#nn.Module.gradInput|gradInput]] state variable is updated
+accordingly.
+
+==== accGradParameters(input, gradOutput) ====
+{{anchor:nn.Module.accGradParameters}}
+
+Computing the gradient of the module with respect to its
+ownparameters. Many modules do not perform this step as they do not
+have any parameters. The state variable name for the parameters is
+module dependent. The module is expected to //accumulate// the
+gradients with respect to the parameters in some variable.
+
+Zeroing this accumulation is achieved with
+[[#nn.Module.zeroGradParameters|zeroGradParameters()]] and updating
+the parameters according to this accumulation is done with
+[[#nn.Module.updateParameters|updateParameters()]].
 
 ====  zeroGradParameters() ====
-#ModuleZeroGradParameters
+{{anchor:nn.Module.zeroGradParameters}}
 
-If the module has parameters, this will zero the accumulation of the gradients with respect to
-these parameters, accumulated through [[#ModuleBackward|backward()]] calls. Otherwise, it does nothing.
+If the module has parameters, this will zero the accumulation of the
+gradients with respect to these parameters, accumulated through
+[[#nn.Module.accGradParameters|accGradParameters(input, gradOutput)]]
+calls. Otherwise, it does nothing.
 
 ====  updateParameters(learningRate) ====
-#ModuleUpdateParameters
+{{anchor:nn.Module.updateParameters}}
 
 If the module has parameters, this will update these parameters, according
 to the accumulation of the gradients with respect to these parameters,
-accumulated through [[#ModuleBackward|backward()]] calls.
+accumulated through [[#nn.Module.backward|backward()]] calls.
 
 The update is basically:
 <file lua>
@@ -207,13 +234,18 @@ parameters = parameters - learningRate * gradients_wrt_parameters
 If the module does not have parameters, it does nothing.
 
 ====  share(mlp,s1,s2,...,sn) ====
-#ModuleShare
+{{anchor:nn.Module.share}}
 
-This function modifies the parameters of the module named ''s1'',..''sn'' (if they exist) so that they are shared with (pointers to) the parameters with the same names in the given module ''mlp''. 
+This function modifies the parameters of the module named
+''s1'',..''sn'' (if they exist) so that they are shared with (pointers
+to) the parameters with the same names in the given module ''mlp''.
 
-The parameters have to be Tensors. This function is typically used if you want to have modules that share the same weights or biases.
+The parameters have to be Tensors. This function is typically used if
+you want to have modules that share the same weights or biases.
 
-Note that this function if called on a [[#Containers|Container]] module will share the same parameters for all the contained modules as well.
+Note that this function if called on a [[#nn.Containers|Container]]
+module will share the same parameters for all the contained modules as
+well.
 
 Example:
 <file lua>
@@ -239,11 +271,16 @@ print(mlp2:get(1).bias[1])
 
 
 ====  clone(mlp,...) ====
-#ModuleClone
+{{anchor:nn.Module.clone}}
 
-Creates a deep copy of (i.e. not just a pointer to) the module, including the current state of its parameters (e.g. weight, biases etc., if any).
+Creates a deep copy of (i.e. not just a pointer to) the module,
+including the current state of its parameters (e.g. weight, biases
+etc., if any).
 
-If arguments are provided to the ''clone(...)'' function it also calls [[#ModuleShare|share(...)]] with those arguments on the cloned module after creating it, hence making a deep copy of this module with some shared parameters.
+If arguments are provided to the ''clone(...)'' function it also calls
+[[#nn.Module.share|share(...)]] with those arguments on the cloned
+module after creating it, hence making a deep copy of this module with
+some shared parameters.
 
 Example:
 <file lua>
@@ -263,28 +300,29 @@ print(mlp2:get(1).bias[1])
 </file>
 
 
-====  State variables ====
+====  State Variables ====
+{{anchor:nn.statevars.dok}}
 
 These state variables are useful objects if one wants to check the guts of
 a ''Module''. The object pointer is //never// supposed to change. However, its
 contents (including its size if it is a Tensor) are supposed to change.
 
 In general state variables are
-[[..:torch:start#Tensor|Tensors]]. However, some special sub-classes
-like [[#TableLayers|table layers]] contain something else. Please,
+[[..:torch:index#Tensor|Tensors]]. However, some special sub-classes
+like [[#nn.TableLayers|table layers]] contain something else. Please,
 refer to each module specification for further information.
 
 ===  output ===
-#ModuleOutput
+{{anchor:nn.Module.output}}
 
 This contains the output of the module, computed with the last call of
-[[#ModuleForward|forward()]]. 
+[[#nn.Module.forward|forward(input)]].
 
 ===  gradInput ===
-#ModuleGradInput
+{{anchor:nn.Module.gradInput}}
 
 This contains the gradients with respect to the inputs of the module, computed with the last call of
-[[#ModuleBackward|backward()]]. 
+[[#nn.Module.updateGradInput|updateGradInput(input, gradOutput)]]. 
 
 ===  Parameters and gradients w.r.t parameters ===
 
@@ -293,10 +331,10 @@ train!). The name of these parameters, and gradients w.r.t these parameters
 are module dependent.
 
 =====  Containers =====
-#Containers
+{{anchor:nn.Containers}}
 
 ====  Concat ====
-#Concat
+{{anchor:nn.Concat}}
 
 <file lua>
 module = nn.Concat(dim)
@@ -328,7 +366,7 @@ which gives the output:
 
 
 ====  Sequential ====
-#Sequential
+{{anchor:nn.Sequential}}
 
 Sequential provides a means to plug layers together
 in a feed-forward fully connected manner.
@@ -351,11 +389,11 @@ which gives the output:
 </file>
 
 ====  Parallel ====
-#Parallel
+{{anchor:nn.Parallel}}
 
 ''module'' = ''Parallel(inputDimension,outputDimension)''
 
-Creates a container module that applies its ''ith'' child module to the  ''ith'' slice of the input Tensor by using [[..:torch:start#TensorSelect|select]] 
+Creates a container module that applies its ''ith'' child module to the  ''ith'' slice of the input Tensor by using [[..:torch:index#TensorSelect|select]] 
 on dimension ''inputDimension''. It concatenates the results of its contained modules together along dimension ''outputDimension''.
 
 Example:
@@ -408,14 +446,16 @@ for i=1,10000 do     -- Train for a few iterations
 end
 </file>
 =====  Simple layers =====
+{anchor:nn.simplelayers.dok}}
 ====  Linear ====
-#Linear
+{{anchor:nn.Linear}}
 
 ''module'' = ''Linear(inputDimension,outputDimension)''
 
-Applies a linear transformation to the incoming data, i.e.
-//y= Ax+b//. The ''input'' tensor given in ''forward(input)'' must
-be a vector (1D tensor).
+Applies a linear transformation to the incoming data, i.e.  //y=
+Ax+b//. The ''input'' tensor given in ''forward(input)'' must be
+either a vector (1D tensor) or matrix (2D tensor). If the input is a
+matrix, then each row is assumed to be an input sample of given batch.
 
 You can create a layer in the following way:
 <file lua>
@@ -444,7 +484,7 @@ applying the linear transformation is performed with:
 </file>
 
 ====  SparseLinear ====
-#SparseLinear
+{{anchor:nn.SparseLinear}}
 
 ''module'' = ''SparseLinear(inputDimension,outputDimension)''
 
@@ -462,8 +502,8 @@ You can create a sparse linear layer in the following way:
 </file>
 The sparse linear module may be used as part of a larger network, 
 and apart from the form of the input, 
-[[#SparseLinear|SparseLinear]] 
-operates in exactly the same way as the [[#Linear|Linear]] layer.
+[[#nn.SparseLinear|SparseLinear]] 
+operates in exactly the same way as the [[#nn.Linear|Linear]] layer.
 
 A sparse input vector may be created as so..
 <file lua>
@@ -487,7 +527,7 @@ layer (10000 in the example).
 
 
 ====  Add  ====
-#Add 
+{{anchor:nn.Add }}
 
 ''module'' = ''Add(inputDimension,scalar)''
 
@@ -533,7 +573,7 @@ to produce the output //y//.
 
 
 ====  Mul ====
-#Mul
+{{anchor:nn.Mul}}
 
 ''module'' = ''Mul(inputDimension)''
 
@@ -573,7 +613,7 @@ i.e. the network successfully learns the input ''x'' has been scaled by
 pi.
 
 ====  CMul ====
-#CMul  
+{{anchor:nn.CMul  }}
 
 ''module'' = ''CMul(inputDimension)''
 
@@ -619,7 +659,7 @@ those scaling factors to produce the output //y//.
 
 
 ====  Max ====
-#Max
+{{anchor:nn.Max}}
 
 ''module'' = ''Max(dimension)''
 
@@ -629,7 +669,7 @@ then an ''nxq'' matrix would be output.
 
 
 ====  Min ====
-#Min
+{{anchor:nn.Min}}
 
 ''module'' = ''Min(dimension)''
 
@@ -639,7 +679,7 @@ then an ''nxq'' matrix would be output.
 
 
 ====  Mean ====
-#Mean
+{{anchor:nn.Mean}}
 
 ''module'' = ''Mean(dimension)''
 
@@ -648,7 +688,7 @@ Hence, if an ''nxpxq'' Tensor was given as input, and ''dimension'' = ''2''
 then an ''nxq'' matrix would be output.
 
 ====  Sum ====
-#Sum
+{{anchor:nn.Sum}}
 
 ''module'' = ''Sum(dimension)''
 
@@ -658,7 +698,7 @@ then an ''nxq'' matrix would be output.
 
 
 ====  Euclidean ====
-#Euclidean
+{{anchor:nn.Euclidean}}
 
 ''module'' = ''Euclidean(inputDimension,outputDimension)''
 
@@ -668,7 +708,7 @@ i.e. this layer has the weights ''c_i'', ''i'' = ''1'',..,''outputDimension'', w
 ''|| c_i - x||^2'', where ''x'' is the input.
 
 ====  Reshape ====
-#Reshape
+{{anchor:nn.Reshape}}
 
 ''module'' = ''Reshape(dimension1, dimension2, ..)''
 
@@ -734,7 +774,7 @@ Example:
 
 
 ====  Select ====
-#Select
+{{anchor:nn.Select}}
 
 Selects a dimension and index of a  ''nxpxqx..''  Tensor.
 
@@ -770,9 +810,9 @@ gives the output:
 [torch.Tensor of dimension 5]
 </file>
 
-This can be used in conjunction with [[#Concat|Concat]]
+This can be used in conjunction with [[#nn.Concat|Concat]]
 to emulate the behavior 
-of [[#Parallel|Parallel]], or to select various parts of an input Tensor to 
+of [[#nn.Parallel|Parallel]], or to select various parts of an input Tensor to 
 perform operations on. Here is a fairly complicated example:
 <file lua>
 require "lab"
@@ -810,12 +850,13 @@ end
 =====  Transfer function layers =====
 
 ====  Exp ====
-#Exp
+{{anchor:nn.Exp}}
 
 Applies the ''exp'' function element-wise to the input Tensor,
 thus outputting a Tensor of the same dimension.
 
 ====  HardTanh ====
+{{anchor:nn.HardTanh}}
 
 Applies the ''HardTanh'' function element-wise to the input Tensor,
 thus outputting a Tensor of the same dimension.
@@ -828,7 +869,7 @@ thus outputting a Tensor of the same dimension.
 
 
 ====  SoftMax ====
-#SoftMax
+{{anchor:nn.SoftMax}}
 
 Applies the ''Softmax'' function to an n-dimensional input Tensor,
 rescaling them so that the elements of the n-dimensional output Tensor
@@ -841,7 +882,7 @@ if ''self.computeShift'' is set to ''false'', then ''shift'' should be specified
 ''self.shift''.
 
 ====  SoftPlus ====
-#SoftPlus
+{{anchor:nn.SoftPlus}}
 
 Applies the ''SoftPlus'' function to an n-dimensioanl input Tensor.
 Can be used to constrain the output of a machine to always be positive.
@@ -849,14 +890,14 @@ Can be used to constrain the output of a machine to always be positive.
 ''SoftPlus'' is defined as ''f_i(x)'' = ''log(1 + exp(x_i)))''.
 
 ====  LogSigmoid ====
-#LogSigmoid
+{{anchor:nn.LogSigmoid}}
 
 Applies the ''LogSigmoid'' function to an n-dimensioanl input Tensor.
 
 ''LogSigmoid'' is defined as ''f_i(x)'' = ''log(1/(1+ exp(-x_i)))''.
 
 ====  LogSoftMax ====
-#LogSoftMax
+{{anchor:nn.LogSoftMax}}
 
 Applies the ''LogSoftmax'' function to an n-dimensional input Tensor.
 
@@ -864,7 +905,7 @@ Applies the ''LogSoftmax'' function to an n-dimensional input Tensor.
 where  ''a'' = ''sum_j exp(x_j)''.
 
 ====  Sigmoid ====
-#Sigmoid
+{{anchor:nn.Sigmoid}}
 
 Applies the ''Sigmoid'' function element-wise to the input Tensor,
 thus outputting a Tensor of the same dimension.
@@ -872,12 +913,13 @@ thus outputting a Tensor of the same dimension.
 ''Sigmoid'' is defined as ''f(x)'' = ''1/(1+exp(-x))''.
 
 ====  Tanh ====
-#Tanh
+{{anchor:nn.Tanh}}
 
 Applies the ''Tanh'' function element-wise to the input Tensor,
 thus outputting a Tensor of the same dimension.
 
 =====  Convolutional layers =====
+{{anchor:nn.convlayers.dok}}
 
 SpatialConvolution and SpatialSubsampling apply to inputs with
 two-dimensional relationships (e.g. images).  TemporalConvolution and
@@ -885,6 +927,7 @@ TemporalSubsampling apply to sequences with a one-dimensional relationship
 (e.g. strings of some kind).
 
 ====  SpatialConvolution ====
+{{anchor:nn.SpatialConvolution}}
 
 <file lua>
 module = nn.SpatialConvolution(nInputPlane, nOutputPlane, kW, kH, [dW], [dH])
@@ -894,26 +937,26 @@ Applies a 2D convolution over an input image composed of several input planes. T
 ''forward(input)'' is expected to be a 3D tensor (''width x height x nInputPlane'').
 
 The parameters are the following:
-$ ''nInputPlane'': The number of expected input planes in the image given into ''forward()''.
-$ ''nOutputPlane'': The number of output planes the convolution layer will produce.
-$ ''kW'': The kernel width of the convolution
-$ ''kH'': The kernel height of the convolution
-$ ''dW'': The step of the convolution in the width dimension. Default is ''1''.
-$ ''dH'': The step of the convolution in the height dimension. Default is ''1''.
+  * ''nInputPlane'': The number of expected input planes in the image given into ''forward()''.
+  * ''nOutputPlane'': The number of output planes the convolution layer will produce.
+  * ''kW'': The kernel width of the convolution
+  * ''kH'': The kernel height of the convolution
+  * ''dW'': The step of the convolution in the width dimension. Default is ''1''.
+  * ''dH'': The step of the convolution in the height dimension. Default is ''1''.
 
 Note that depending of the size of your kernel, several (of the last)
 columns or rows of the input image might be lost. It is up to the user to
 add proper padding in images.
 
-If the input image is a 3D tensor ''width x height x nInputPlane'', the output image size
-will be ''owidth x oheight x nOutputPlane'' where
+If the input image is a 3D tensor ''nInputPlane x width x height'', the output image size
+will be ''nOutputPlane x owidth x oheight'' where
 <file lua>
 owidth  = (width  - kW) / dW + 1
 oheight = (height - kH) / dH + 1 .
 </file>
 
 The parameters of the convolution can be found in ''self.weight'' (Tensor of
-size ''kH x kW x nInputPlane x nOutputPlane'') and ''self.bias'' (Tensor of
+size ''nOutputPlane x nInputPlane x kH x kW'') and ''self.bias'' (Tensor of
 size ''nOutputPlane''). The corresponding gradients can be found in
 ''self.gradWeight'' and ''self.gradBias''.
 
@@ -925,21 +968,22 @@ output[i][j][k] = bias[k]
 </file>
 
 ====  SpatialSubSampling ====
+{{anchor:nn.SpatialSubSampling}}
 
 <file lua>
 module = nn.SpatialSubSampling(nInputPlane, kW, kH, [dW], [dH])
 </file>
 
 Applies a 2D sub-sampling over an input image composed of several input planes. The ''input'' tensor in
-''forward(input)'' is expected to be a 3D tensor (''width x height x nInputPlane''). The number of output
+''forward(input)'' is expected to be a 3D tensor (''nInputPlane x width x height''). The number of output
 planes will be the same as ''nInputPlane''.
 
 The parameters are the following:
-$ ''nInputPlane'': The number of expected input planes in the image given into ''forward()''.
-$ ''kW'': The kernel width of the sub-sampling
-$ ''kH'': The kernel height of the sub-sampling
-$ ''dW'': The step of the sub-sampling in the width dimension. Default is ''1''.
-$ ''dH'': The step of the sub-sampling in the height dimension. Default is ''1''.
+  * ''nInputPlane'': The number of expected input planes in the image given into ''forward()''.
+  * ''kW'': The kernel width of the sub-sampling
+  * ''kH'': The kernel height of the sub-sampling
+  * ''dW'': The step of the sub-sampling in the width dimension. Default is ''1''.
+  * ''dH'': The step of the sub-sampling in the height dimension. Default is ''1''.
 
 Note that depending of the size of your kernel, several (of the last)
 columns or rows of the input image might be lost. It is up to the user to
@@ -964,32 +1008,33 @@ output[i][j][k] = bias[k]
 </file>
 
 ====  TemporalConvolution ====
+{{anchor:nn.TemporalConvolution}}
 
 <file lua>
 module = nn.TemporalConvolution(inputFrameSize, outputFrameSize, kW, [dW])
 </file>
 
 Applies a 1D convolution over an input sequence composed of ''nInputFrame'' frames. The ''input'' tensor in
-''forward(input)'' is expected to be a 2D tensor (''inputFrameSize x nInputFrame'').
+''forward(input)'' is expected to be a 2D tensor (''nInputFrame x inputFrameSize'').
 
 The parameters are the following:
-$ ''inputFrameSize'': The input frame size expected in sequences given into ''forward()''.
-$ ''outputFrameSize'': The output frame size the convolution layer will produce.
-$ ''kW'': The kernel width of the convolution
-$ ''dW'': The step of the convolution. Default is ''1''.
+  * ''inputFrameSize'': The input frame size expected in sequences given into ''forward()''.
+  * ''outputFrameSize'': The output frame size the convolution layer will produce.
+  * ''kW'': The kernel width of the convolution
+  * ''dW'': The step of the convolution. Default is ''1''.
 
 Note that depending of the size of your kernel, several (of the last)
 frames of the sequence might be lost. It is up to the user to add proper padding frames in the input
 sequences.
 
 If the input sequence is a 2D tensor ''inputFrameSize x nInputFrame'', the output sequence will be
-''outputFrameSize x nOutputFrame'' where
+''nOutputFrame x outputFrameSize'' where
 <file lua>
 nOutputFrame = (nInputFrame - kW) / dW + 1
 </file>
 
 The parameters of the convolution can be found in ''self.weight'' (Tensor of
-size ''inputFrameSize x kW x outputFrameSize'') and ''self.bias'' (Tensor of
+size ''outputFrameSize x (inputFrameSize x kW) '') and ''self.bias'' (Tensor of
 size ''outputFrameSize''). The corresponding gradients can be found in
 ''self.gradWeight'' and ''self.gradBias''.
 
@@ -1011,22 +1056,28 @@ dw=1;   -- we step once and go on to the next sequence element
 mlp=nn.TemporalConvolution(inp,outp,kw,dw)
 
 require "lab"
-x=lab.rand(inp,7) -- a sequence of 7 elements
+x=lab.rand(7,inp) -- a sequence of 7 elements
 print(mlp:forward(x))
 </file>
 which gives:
 <file lua>
--0.9109 -0.9872 -0.6808 -0.9403 -0.9680 -0.6901 -0.6387
-[torch.Tensor of dimension 1x7]
+-0.9109
+-0.9872
+-0.6808
+-0.9403
+-0.9680 
+-0.6901 
+-0.6387
+[torch.Tensor of dimension 7x1]
 </file>
 
 This is equivalent to:
 <file lua>
 weights=lab.reshape(mlp.weight,inp) -- weights applied to all
 bias= mlp.bias[1];
-for i=1,x:size(2) do -- for each sequence element
- element= x:t()[i]; -- features of ith sequence element
- print(element:dot(weights) + bias)
+for i=1,x:size(1) do -- for each sequence element
+  element= x[i]; -- features of ith sequence element
+  print(element:dot(weights) + bias)
 end
 </file>
 which gives:
@@ -1042,25 +1093,26 @@ which gives:
 
 
 ====  TemporalSubSampling ====
+{{anchor:nn.TemporalSubSampling}}
 
 <file lua>
 module = nn.TemporalSubSampling(inputFrameSize, kW, [dW])
 </file>
 
 Applies a 1D sub-sampling over an input sequence composed of ''nInputFrame'' frames. The ''input'' tensor in
-''forward(input)'' is expected to be a 2D tensor (''inputFrameSize x nInputFrame''). The output frame size
+''forward(input)'' is expected to be a 2D tensor (''nInputFrame x inputFrameSize''). The output frame size
 will be the same as the input one (''inputFrameSize'').
 
 The parameters are the following:
-$ ''inputFrameSize'': The input frame size expected in sequences given into ''forward()''.
-$ ''kW'': The kernel width of the sub-sampling
-$ ''dW'': The step of the sub-sampling. Default is ''1''.
+  * ''inputFrameSize'': The input frame size expected in sequences given into ''forward()''.
+  * ''kW'': The kernel width of the sub-sampling
+  * ''dW'': The step of the sub-sampling. Default is ''1''.
 
 Note that depending of the size of your kernel, several (of the last)
 frames of the sequence might be lost. It is up to the user to add proper padding frames in the input
 sequences.
 
-If the input sequence is a 2D tensor ''inputFrameSize x nInputFrame'', the output sequence will be
+If the input sequence is a 2D tensor ''nInputFrame x inputFrameSize'', the output sequence will be
 ''inputFrameSize x nOutputFrame'' where
 <file lua>
 nOutputFrame = (nInputFrame - kW) / dW + 1
@@ -1077,6 +1129,7 @@ output[i][t] = bias[i] + weight[i] * sum_{k=1}^kW input[i][dW*(t-1)+k)]
 </file>
 
 ====  LookupTable ====
+{{anchor:nn.LookupTable}}
 
 <file lua>
 module = nn.LookupTable(nIndex, sizes)
@@ -1122,14 +1175,14 @@ Outputs something like:
 Note that the first column vector is the same than the 3rd one!
 
 =====  Layers for manipulating tables =====
-#TableLayers
+{{anchor:nn.TableLayers}}
 
 This set of modules allows the manipulation of  Tables
 through the layers of a neural network.
 This allows one to build very rich architectures.
 
 Table-based modules work by supporting forward and backward methods that can accept 
-tables as inputs. It turns out that the usual [[#Sequential|Sequential]] module can do this, so all that is needed is other child modules that take advantage of such tables.
+tables as inputs. It turns out that the usual [[#nn.Sequential|Sequential]] module can do this, so all that is needed is other child modules that take advantage of such tables.
 <file lua>
 mlp = nn.Sequential();
 t={x,y,z}
@@ -1138,8 +1191,7 @@ pred=mlp:forward{x,y,z}      -- This is equivalent to the line before
 </file>
 
 ====  ConcatTable  ====
-
-#ConcatTable
+{{anchor:nn.ConcatTable}}
 
 ConcatTable is a container module that applies each member module to 
 the same input Tensor.
@@ -1169,7 +1221,7 @@ which gives the output:
 </file>
 
 ====  ParallelTable ====
-#ParallelTable
+{{anchor:nn.ParallelTable}}
 
 ParallelTable is a container module that, in its ''forward'' method, applies the ''ith'' member module to the ''ith'' input, and outputs a table of the set of outputs. 
 
@@ -1201,6 +1253,7 @@ which gives the output:
 </file>
 
 ====  SplitTable  ====
+{{anchor:nn.SplitTable}}
 
 ''module'' = ''SplitTable(dimension)''
 
@@ -1308,6 +1361,7 @@ end
 </file>
 
 ====  JoinTable   ====
+{{anchor:nn.JoinTable}}
 
 ''module'' = ''JoinTable(dimension)''
 
@@ -1388,12 +1442,13 @@ end
 </file>
 
 ====  Identity  ====
+{{anchor:nn.Identity}}
 
 ''module'' = ''Identity()''
 
 Creates a module that returns whatever is input to it as output. 
 This is useful when combined with the module 
-[[#ParallelTable|ParallelTable]]
+[[#nn.ParallelTable|ParallelTable]]
 in case you do not wish to do anything to one of the input Tensors.
 Example:
 <file lua>
@@ -1412,7 +1467,7 @@ gives the output:
 </file>
 
 Here is a more useful example, where one can implement a network which also computes a Criterion using this module:
-<verbatim> 
+<file lua> 
 pred_mlp=nn.Sequential(); -- A network that makes predictions given x.
 pred_mlp:add(nn.Linear(5,4)) 
 pred_mlp:add(nn.Linear(4,3)) 
@@ -1428,20 +1483,20 @@ cr_wrap=nn.CriterionTable(cr)
 mlp:add(cr_wrap)         -- and then applies the criterion.
 
 for i=1,100 do 		 -- Do a few training iterations
-x=lab.ones(5);          -- Make input features.
-y=torch.Tensor(3); 
-y:copy(x:narrow(1,1,3)) -- Make output label.
-err=mlp:forward{x,y}    -- Forward both input and output.
-print(err)		 -- Print error from criterion.
+  x=lab.ones(5);          -- Make input features.
+  y=torch.Tensor(3); 
+  y:copy(x:narrow(1,1,3)) -- Make output label.
+  err=mlp:forward{x,y}    -- Forward both input and output.
+  print(err)		 -- Print error from criterion.
 
-mlp:zeroGradParameters();  -- Do backprop... 
-mlp:backward({x, y} );   
-mlp:updateParameters(0.05); 
+  mlp:zeroGradParameters();  -- Do backprop... 
+  mlp:backward({x, y} );   
+  mlp:updateParameters(0.05); 
 end
-</verbatim>
+</file>
 
 ====  PairwiseDistance  ====
-#PairwiseDistance
+{{anchor:nn.PairwiseDistance}}
 
 ''module'' = ''PairwiseDistance(p)'' creates a module that takes a table of two vectors as input and outputs the distance between them using the ''p''-norm. 
 
@@ -1524,7 +1579,7 @@ end
 </file>
 
 ====  DotProduct ====
-#DotProduct
+{{anchor:nn.DotProduct}}
 
 ''module'' = ''DotProduct()'' creates a module that takes a table of two vectors as input and outputs the dot product between them.
 
@@ -1617,7 +1672,7 @@ end
 
 
 ====  CosineDistance  ====
-#CosineDistance
+{{anchor:nn.CosineDistance}}
 
 ''module'' = ''CosineDistance()'' creates a module that takes a table of two vectors as input and outputs the cosine distance between them.
 
@@ -1691,6 +1746,7 @@ end
 
 
 ====  CriterionTable  ====
+{{anchor:nn.CriterionTable}}
 
 ''module'' = ''CriterionTable(criterion)''
 
@@ -1743,55 +1799,55 @@ end
 
 
 ======  Criterions ======
-#Criterions
+{{anchor:nn.Criterions}}
 
 Criterions are helpful to train a neural network. Given an input and a
 target, they compute a gradient according to a given loss
-function. [[#AbsCriterion|AbsCriterion]] and
-[[#MSECriterion|MSECriterion]] are perfect for regression problems, while
-[[#ClassNLLCriterion|ClassNLLCriterion]] is the criterion of choice when
+function. [[#nn.AbsCriterion|AbsCriterion]] and
+[[#nn.MSECriterion|MSECriterion]] are perfect for regression problems, while
+[[#nn.ClassNLLCriterion|ClassNLLCriterion]] is the criterion of choice when
 dealing with classification.
 
-Criterions are [[..:torch:start#FileSerialization|serializable]].
+Criterions are [[..:torch:index#FileSerialization|serializable]].
 
 =====  Criterion =====
-#Criterion
+{{anchor:nn.Criterion}}
 
 This is an abstract class which declares methods defined in all criterions.
-This class is [[..:torch:start#FileSerialization|serializable]].
+This class is [[..:torch:index#nn.FileSerialization|serializable]].
 
 ====  [output] forward(input, target) ====
-#CriterionForward
+{{anchor:nn.Criterion.forward}}
 
 Given an ''input'' and a ''target'', compute the loss function associated to the criterion and return the
-result. In general ''input'' and ''target'' are [[..:torch:start#Tensor|tensors]], but some specific criterions
+result. In general ''input'' and ''target'' are [[..:torch:index#Tensor|tensors]], but some specific criterions
 might require some other type of object.
 
 The ''output'' returned should be a scalar in general.
 
-The state variable [[#CriterionOutput|self.output]] should be updated after a call to ''forward()''.
+The state variable [[#nn.Criterion.output|self.output]] should be updated after a call to ''forward()''.
 
 ====  [gradInput] backward(input, target) ====
-#CriterionBackward
+{{anchor:nn.Criterion.backward}}
 
 Given an ''input'' and a ''target'', compute the gradients of the loss function associated to the criterion and
-return the result.In general ''input'', ''target'' and ''gradInput'' are [[..:torch:start#Tensor|tensors]], but some specific criterions
+return the result.In general ''input'', ''target'' and ''gradInput'' are [[..:torch:index#Tensor|tensors]], but some specific criterions
 might require some other type of object.
 
-The state variable [[#CriterionGradInput|self.gradInput]] should be updated after a call to ''backward()''.
+The state variable [[#nn.Criterion.gradInput|self.gradInput]] should be updated after a call to ''backward()''.
 
 ====  State variable: output ====
-#CriterionOutput
+{{anchor:nn.Criterion.output}}
 
-State variable which contains the result of the last [[#CriterionForward|forward(input, target)]] call.
+State variable which contains the result of the last [[#nn.Criterion.forward|forward(input, target)]] call.
 
 ====  State variable: gradInput ====
-#CriterionGradInput
+{{anchor:nn.Criterion.gradInput}}
 
-State variable which contains the result of the last [[#CriterionBackward|backward(input, target)]] call.
+State variable which contains the result of the last [[#nn.Criterion.backward|backward(input, target)]] call.
 
 =====  AbsCriterion =====
-#AbsCriterion
+{{anchor:nn.AbsCriterion}}
 
 <file lua>
 criterion = AbsCriterion()
@@ -1813,7 +1869,7 @@ criterion.sizeAverage = false
 </file>
 
 =====  ClassNLLCriterion =====
-#ClassNLLCriterion
+{{anchor:nn.ClassNLLCriterion}}
 
 <file lua>
 criterion = ClassNLLCriterion()
@@ -1823,12 +1879,12 @@ The negative log likelihood criterion. It is useful to train a classication
 problem with ''n'' classes. The ''input'' given through a ''forward()'' is
 expected to contain //log-probabilities// of each class: ''input'' has to be a
 1D tensor of size ''n''. Obtaining log-probabilities in a neural network is
-easily achieved by adding a [[#LogSoftMax|LogSoftMax]] layer in the last
+easily achieved by adding a [[#nn.LogSoftMax|LogSoftMax]] layer in the last
 layer of your neural network.
 
 This criterion expect a class index (1 to the number of class) as ''target''
-when calling [[#CriterionForward|forward(input, target)]] and
-[[#CriterionBackward|backward(input, target)]].
+when calling [[#nn.CriterionForward|forward(input, target)]] and
+[[#nn.CriterionBackward|backward(input, target)]].
 
 The loss can be described as:
 <file lua>
@@ -1852,7 +1908,7 @@ end
 </file>
 
 =====  MarginCriterion =====
-#MarginCriterion
+{{anchor:nn.MarginCriterion}}
 
 <file lua>
 criterion = MarginCriterion()
@@ -1920,7 +1976,7 @@ gives the output:
 i.e. the mlp successfully separates the two data points such that they both have a margin of 1, and hence a loss of 0.
 
 =====  MSECriterion =====
-#MSECriterion
+{{anchor:nn.MSECriterion}}
 
 <file lua>
 criterion = MSECriterion()
@@ -1944,6 +2000,7 @@ criterion.sizeAverage = false
 </file>
 
 =====  MultiCriterion =====
+{{anchor:nn.MultiCriterion}}
 
 <file lua>
 criterion = MultiCriterion()
@@ -1958,7 +2015,7 @@ where ''weight'' is a scalar.
 
 
 =====  HingeEmbeddingCriterion =====
-#HingeEmbeddingCriterion
+{{anchor:nn.HingeEmbeddingCriterion}}
 
 <file lua>
 criterion = HingeEmbeddingCriterion()
@@ -1980,8 +2037,6 @@ The ''margin'' has a default value of 1, or can be set in the constructor:
 <file lua>
 criterion = HingeEmbeddingCriterion(marginValue)
 </file>
-
-
 
 Example use:
 <file lua>
@@ -2043,10 +2098,8 @@ end
 
 </file>
 
-
-
 =====  L1HingeEmbeddingCriterion =====
-#L1HingeEmbeddingCriterion
+{{anchor:nn.L1HingeEmbeddingCriterion}}
 
 <file lua>
 criterion = L1HingeEmbeddingCriterion(margin)
@@ -2069,6 +2122,7 @@ criterion = L1HingeEmbeddingCriterion(marginValue)
 </file>
 
 =====  CosineEmbeddingCriterion =====
+{{anchor:nn.CosineEmbeddingCriterion}}
 
 <file lua>
 criterion = nn.CosineEmbeddingCriterion(margin)
@@ -2090,7 +2144,7 @@ loss(x,y) = forward(x,y) = 1-cos(x1, x2), if y=1
 </verbatim>
 
 =====  MarginRankingCriterion =====
-#MarginRankingCriterion
+{{anchor:nn.MarginRankingCriterion}}
 
 <file lua>
 criterion = nn.MarginRankingCriterion(margin)
@@ -2171,31 +2225,32 @@ end
 </file>
 
 ======  Training a neural network ======
+{{anchor:nn.traningneuralnet.dok}}
 
-Training a neural network is easy with a [[#DoItYourself|simple ''for'' loop]].
+Training a neural network is easy with a [[#nn.DoItYourself|simple ''for'' loop]].
 While doing your own loop provides great flexibility, you might
 want sometimes a quick way of training neural
-networks. [[#StochasticGradient|StochasticGradient]], a simple class
+networks. [[#nn.StochasticGradient|StochasticGradient]], a simple class
 which does the job for you is provided as standard.
 
 =====  StochasticGradient =====
-#StochasticGradient
+{{anchor:nn.StochasticGradient.dok}}
 
-''StochasticGradient'' is a high-level class for training [[#Module|neural networks]], using a stochastic gradient
-algorithm. This class is [[..:torch:start#FileSerialization|serializable]].
+''StochasticGradient'' is a high-level class for training [[#nn.Module|neural networks]], using a stochastic gradient
+algorithm. This class is [[..:torch:index#FileSerialization|serializable]].
 
 ====  StochasticGradient(module, criterion) ====
-#StochasticGradientConstructor
+{{anchor:nn.StochasticGradient}}
 
-Create a ''StochasticGradient'' class, using the given [[#Module|Module]] and [[#Criterion|Criterion]].
-The class contains [[#StochasticGradientParameters|several parameters]] you might want to set after initialization.
+Create a ''StochasticGradient'' class, using the given [[#nn.Module|Module]] and [[#nn.Criterion|Criterion]].
+The class contains [[#nn.StochasticGradientParameters|several parameters]] you might want to set after initialization.
 
 ====  train(dataset) ====
-#StochasticGradientTrain
+{{anchor:nn.StochasticGradientTrain}}
 
 Train the module and criterion given in the
-[[#StochasticGradientConstructor|constructor]] over ''dataset'', using the
-internal [[#StochasticGradientParameters|parameters]].
+[[#nn.StochasticGradient|constructor]] over ''dataset'', using the
+internal [[#nn.StochasticGradientParameters|parameters]].
 
 StochasticGradient expect as a ''dataset'' an object which implements the operator
 ''dataset[index]'' and implements the method ''dataset:size()''. The ''size()'' methods
@@ -2205,47 +2260,35 @@ An ''example'' has to be an object which implements the operator
 ''example[field]'', where ''field'' might take the value ''1'' (input features)
 or ''2'' (corresponding label which will be given to the criterion). 
 The input is usually a Tensor (except if you use special kind of gradient modules,
-like [[#TableLayers|table layers]]). The label type depends of the criterion.
-For example, the [[#MSECriterion|MSECriterion]] expects a Tensor, but the
-[[#ClassNLLCriterion|ClassNLLCriterion]] except a integer number (the class).
+like [[#nn.TableLayers|table layers]]). The label type depends of the criterion.
+For example, the [[#nn.MSECriterion|MSECriterion]] expects a Tensor, but the
+[[#nn.ClassNLLCriterion|ClassNLLCriterion]] except a integer number (the class).
 
 Such a dataset is easily constructed by using Lua tables, but it could any ''C'' object
 for example, as long as required operators/methods are implemented. 
-[[#DoItStochasticGradient|See an example]].
+[[#nn.DoItStochasticGradient|See an example]].
 
 ====  Parameters ====
-#StochasticGradientParameters
+{{anchor:nn.StochasticGradientParameters}}
 
-''StochasticGradient'' has several field which have an impact on a call to [[#StochasticGradientTrain|train()]].
+''StochasticGradient'' has several field which have an impact on a call to [[#nn.StochasticGradientTrain|train()]].
 
-$ ''learningRate'': This is the learning rate used during training. The update of the parameters will be
-<verbatim>
-parameters = parameters - learningRate * parameters_gradient
-</verbatim>
-Default value is ''0.01''.
-$ ''learningRateDecay'': The learning rate decay. If non-zero, the learning rate (note: the field learningRate
-will not change value) will be computed after each iteration (pass over the dataset) with:
-<verbatim>
-current_learning_rate =
-learningRate / (1 + iteration * learningRateDecay)
-</verbatim>
-$ ''maxIteration'': The maximum number of iteration (passes over the dataset). Default is ''25''.
-$ ''shuffleIndices'': Boolean which says if the examples will be randomly sampled or not. Default is ''true''.
-If ''false'', the examples will be taken in the order of the dataset.
-$ ''hookExample'': A possible hook function which will be called (if non-nil) during training after each example forwarded and backwarded
-through the network. The function takes ''(self, example)'' as parameters. Default is ''nil''.
-$ ''hookIteration'': A possible hook function which will be called (if non-nil) during training after a complete pass
-over the dataset. The function takes ''(self, iteration)'' as parameters. Default is ''nil''.
+  * ''learningRate'': This is the learning rate used during training. The update of the parameters will be ''parameters = parameters - learningRate * parameters_gradient''. Default value is ''0.01''.
+  * ''learningRateDecay'': The learning rate decay. If non-zero, the learning rate (note: the field learningRate will not change value) will be computed after each iteration (pass over the dataset) with: ''current_learning_rate =learningRate / (1 + iteration * learningRateDecay)''
+  * ''maxIteration'': The maximum number of iteration (passes over the dataset). Default is ''25''.
+  * ''shuffleIndices'': Boolean which says if the examples will be randomly sampled or not. Default is ''true''. If ''false'', the examples will be taken in the order of the dataset.
+  * ''hookExample'': A possible hook function which will be called (if non-nil) during training after each example forwarded and backwarded through the network. The function takes ''(self, example)'' as parameters. Default is ''nil''.
+  * ''hookIteration'': A possible hook function which will be called (if non-nil) during training after a complete pass over the dataset. The function takes ''(self, iteration)'' as parameters. Default is ''nil''.
 
 =====  Example of training using StochasticGradient =====
-#DoItStochasticGradient
+{{anchor:nn.DoItStochasticGradient}}
 
 We show an example here on a classical XOR problem.
 
-***Dataset***
+**Dataset**
 
 We first need to create a dataset, following the conventions described in
-[[#StochasticGradientTrain|StochasticGradient]].
+[[#nn.StochasticGradientTrain|StochasticGradient]].
 <file lua>
 require "lab"
 dataset={};
@@ -2274,7 +2317,7 @@ mlp:add(nn.Tanh())
 mlp:add(nn.Linear(HUs, outputs))
 </file>
 
-***Training***
+**Training**
 
 We choose the Mean Squared Error criterion and train the beast.
 <file lua>
@@ -2319,7 +2362,7 @@ You should see something like:
 </file>
 
 =====  Example of manual training of a neural network =====
-#DoItYourself
+{{anchor:nn.DoItYourself}}
 
 We show an example here on a classical XOR problem.
 
@@ -2342,7 +2385,7 @@ We choose the Mean Squared Error criterion.
 criterion = nn.MSECriterion()  
 </file>
 
-***Training***
+**Training**
 
 We create data //on the fly// and feed it to the neural network.
 

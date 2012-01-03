@@ -1065,9 +1065,9 @@ Example: creating a context menu
    w:addAction(action1)
    w:addAction(action2)
    w.contextMenuPolicy='ActionsContextMenu'
-/verbatim>
+</file>
 
----++++ qwidget:insertAction(beforeqaction, qaction)
+===  qwidget:insertAction(beforeqaction, qaction) ===
 
 Insert action =qaction= into the 
 list actions associated with this widget.
@@ -1075,26 +1075,26 @@ Argument =beforeqaction= indicates at which position
 to insert the action. If =beforeqaction= is omitted
 or invalid, the action is simply appended.
 
----++++ qwidget:mapToGlobal(qpoint)
+===  qwidget:mapToGlobal(qpoint) ===
 
 Translates the widget coordinates =qpoint= to global screen coordinates.
 Both argument =qpoint= and the return value are Qt value of class
 [[../qtcore/index#qpoint][=qt.QPoint=]].
 
----++++ qwidget:mapFromGlobal(qpoint)
+===  qwidget:mapFromGlobal(qpoint) ===
 
 Translates the global screen coordinates =qpoint= to widget coordinates.
 Both argument =qpoint= and the return value are Qt value of class
 [[../qtcore/index#qpoint][=qt.QPoint=]].    
 
 
----++++ qwidget:removeAction(qaction)
+===  qwidget:removeAction(qaction) ===
 
 Removes action =qaction= from the 
 list actions associated with this widget.
 
 
----++++ qwidget:render([pointer])
+===  qwidget:render([pointer]) ===
 
 When called without argument, 
 this function draws the widget into an image
@@ -1109,7 +1109,7 @@ Such pointers can be obtained using functions
 When such an argument is specified,
 nothing is returned.
 
----++++ qwidget:setAttribute(widgetattribute,[value])
+===  qwidget:setAttribute(widgetattribute,[value]) ===
 
 Sets the specified
 [[http://doc.trolltech.com/4.4/qt.html#WidgetAttribute-enum][widget attribute]]
@@ -1117,7 +1117,7 @@ to boolean value =value=.
 Some of these flags are used internally by Qt. 
 Care is required.
 
----++++ qwidget:setWindowFlag(windowflag,[value])
+===  qwidget:setWindowFlag(windowflag,[value]) ===
 
 Sets the specified
 [[http://doc.trolltech.com/4.4/qt.html#WindowType-enum][window flag]]
@@ -1127,21 +1127,21 @@ are handled as exclusive flags.
 Setting these flags usually hides the window.
 You need to do call =qwidget:show= again.
 
----++++ qwidget:testAttribute(widgetattribute)
+===  qwidget:testAttribute(widgetattribute) ===
 
 Returns a boolean indicating the value of the specified
 [[http://doc.trolltech.com/4.4/qt.html#WidgetAttribute-enum][widget attribute]].
 Flags indicating a window type 
 are handled as exclusive flags.
 
----++++ qwidget:testWindowFlag(windowflag)
+===  qwidget:testWindowFlag(windowflag) ===
 
 Returns a boolean indicating the value of the specified
 [[http://doc.trolltech.com/4.4/qt.html#WindowType-enum][window flag]].
 Flags indicating a window type 
 are handled as exclusive flags.
 
----++++ qwidget:window()
+===  qwidget:window() ===
 
 Expression =qwidget:window()= returns the window for widget =qwidget=,
 that is the next ancestor that is (or could be) displayed
@@ -1149,7 +1149,7 @@ with a window frame.
 
 For instance the following code changes the
 title of the window containing widget =qwidget=.
-<verbatim>
+<file>
    qwidget:window().windowTitle = "New Title"
 </file>
 

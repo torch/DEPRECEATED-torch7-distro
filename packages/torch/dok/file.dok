@@ -328,5 +328,6 @@ Tells if one can read the file or not.
 Tells if one can write in the file or not.
 
 ==== [boolean] isAutoSpacing() ====
+{{anchor:torch.File.isAutoSpacing}}
 
 Return ''true'' if [[#torch.File.autoSpacing|autoSpacing]] has been chosen.
