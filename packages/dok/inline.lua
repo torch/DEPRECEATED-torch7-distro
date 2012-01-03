@@ -153,6 +153,9 @@ function dok.refresh()
                   if type(pkg) ~= 'table' then -- unsafe import, use protected import
                      pkg = _G._torchimport[package]
                   end
+                  -- level 0: the package itself
+                  dok.inline[pkg] = funcs['dok'] or funcs['reference.dok'] or funcs['overview.dok']
+                  -- next levels
                   for key,symb in pairs(pkg) do
                      -- level 1: global functions and objects
                      local entry = (key):lower()
