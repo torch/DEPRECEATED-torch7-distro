@@ -352,7 +352,7 @@ end
 
 local function gnuplot_string(legend,x,y,format)
    local hstr = 'plot '
-   local dstr = ''
+   local dstr = {''}
    local coef
    local function gformat(f)
       if f ~= '~' and f:find('~') or f:find('acsplines') then
@@ -377,16 +377,18 @@ local function gnuplot_string(legend,x,y,format)
    end
    hstr = hstr .. '\n'
    for i=1,#legend do
-      for j=1,x[i]:size(1) do
+      local xi = x[i]
+      local yi = y[i]
+      for j=1,xi:size(1) do
          if coef then
-            dstr = dstr .. string.format('%g %g %g\n',x[i][j],y[i][j],coef)
+            table.insert(dstr,string.format('%g %g %g\n',xi[j],yi[j],coef))
          else
-            dstr = dstr .. string.format('%g %g\n',x[i][j],y[i][j])
+            table.insert(dstr,string.format('%g %g\n',xi[j],yi[j]))
          end
       end
-      dstr = string.format('%se\n',dstr)
+      table.insert(dstr,'e\n')
    end
-   return hstr,dstr
+   return hstr,table.concat(dstr)
 end
 local function gnu_splot_string(legend,x,y,z)
    local hstr = string.format('%s\n','set contour base')
@@ -482,6 +484,7 @@ function gnuplot.figure(n)
    end
    _gptable.current = n
    writeToCurrent('set term ' .. _gptable.term .. ' ' .. n .. '\n')
+   writeToCurrent('raise')
    return n
 end
 
