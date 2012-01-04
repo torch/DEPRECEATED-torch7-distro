@@ -190,7 +190,8 @@ end
 function dok.help(symbol)
    -- no symbol? global help
    if not symbol then
-      print('no symbol passed: either provide a symbol, or checkout:\n'
+      print('help(symbol): get help on a specific symbol \n'
+            .. 'or checkout the complete help:\n'
             .. style.link .. paths.concat(paths.install_html,'index.html')
             .. style.none)
       return

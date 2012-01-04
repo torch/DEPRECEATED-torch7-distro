@@ -164,12 +164,15 @@ then
     if [ $DISPLAY ];
     then
         echo "Try the IDE: torch -ide"
+        echo "Type help() for more info"
         $PREFIX/qlua -e "$INIT" -i $*;
     else
         echo "Unable to connect X11 server (disabling graphics)"
+        echo "Type help() for more info"
         $PREFIX/qlua -nographics -e "$INIT" -i $*;
     fi
 else 
     echo "Install Qt4 and rebuild Torch7 for graphics capability"
+    echo "Type help() for more info"
     $PREFIX/lua -e "$INIT" -i $*;
 fi
