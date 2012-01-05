@@ -466,9 +466,9 @@ LAB_IMPLEMENT_ADDMVRMM(addr)
 
 static int lab_(numel)(lua_State *L)
 {
-  if(lua_gettop(L) == 1)
+  if(lua_gettop(L) == 1 && luaT_isudata(L, 1, torch_(Tensor_id))
   {
-    THTensor *tensor = luaT_checkudata(L, 1, torch_(Tensor_id));
+    THTensor *tensor = luaT_toudata(L, 1, torch_(Tensor_id));
     lua_pushnumber(L, THLab_(numel)(tensor));
   }
   else
