@@ -3,7 +3,7 @@ require 'paths'
 
 local _gptable = {}
 _gptable.current = nil
-_gptable.term = nil
+_gptable.defaultterm = nil
 _gptable.exe = nil
 _gptable.hasrefresh = true
 
@@ -30,6 +30,23 @@ local function findos()
 	 return '?'
       end
    end
+end
+
+local function getfigure(n)
+   local n = n
+   if not n or n == nil then
+      n = #_gptable+1
+   end
+   if _gptable[n] == nil then
+      _gptable[n] = {}
+      if _gptable.defaultterm == nil then
+         error('Gnuplot terminal is not set')
+      end
+      _gptable[n].term = _gptable.defaultterm
+      _gptable[n].pipe = torch.PipeFile(getexec() .. ' -persist > /dev/null 2>&1 ','w')
+   end
+   _gptable.current = n
+   return _gptable[n]
 end
 
 local function gnuplothasterm(term)
@@ -96,6 +113,23 @@ local function findgnuplotexe()
    end
 end
 
+local function getgnuplotdefaultterm(os)
+   if os == 'windows' and gnuplothasterm('windows') then
+      return  'windows'
+   elseif os == 'linux' and gnuplothasterm('wxt') then
+      return  'wxt'
+   elseif os == 'linux' and gnuplothasterm('x11') then
+      return  'x11'
+   elseif os == 'mac' and gnuplothasterm('aqua') then
+      return  'aqua'
+   elseif os == 'mac' and gnuplothasterm('x11') then
+      return  'x11'
+   else
+      print('Can not find any of the default terminals for ' .. os .. ' you can manually set terminal by gnuplot.setgnuplotterminal("terminal-name")')
+      return nil
+   end
+end
+
 local function findgnuplot()
    local exe = findgnuplotexe()
    local os = findos()
@@ -103,57 +137,37 @@ local function findgnuplot()
       return nil--error('I could not find gnuplot exe')
    end
    _gptable.exe = exe
-
-   if os == 'windows' and gnuplothasterm('windows') then
-      _gptable.term = 'windows'
-   elseif os == 'linux' and gnuplothasterm('wxt') then
-      _gptable.term = 'wxt'
-   elseif os == 'linux' and gnuplothasterm('x11') then
-      _gptable.term = 'x11'
-   elseif os == 'mac' and gnuplothasterm('aqua') then
-      _gptable.term = 'aqua'
-   elseif os == 'mac' and gnuplothasterm('x11') then
-      _gptable.term = 'x11'
-   else
-      return nil--error('can not find terminal')
-   end
+   _gptable.defaultterm = getgnuplotdefaultterm(os)
 end
+
 
 function gnuplot.setgnuplotexe(exe)
    local oldexe = _gptable.exe
-   if paths.filep(exe) then
-      _gptable.exe = exe
-      local v,vv = findgnuplotversion(exe)
-      if v < 4 then error('gnuplot version 4 is required') end
-      if vv < 4 then 
-	 _gptable.hasrefresh = false
-	 print('Some functionality like adding title, labels, ... will be disabled install gnuplot version 4.4')
-      else
-	 _gptable.hasrefresh = true
-      end
 
-      local os = findos()
-      if os == 'windows' and gnuplothasterm('windows') then
-	 _gptable.term = 'windows'
-      elseif os == 'linux' and gnuplothasterm('wxt') then
-	 _gptable.term = 'wxt'
-      elseif os == 'linux' and gnuplothasterm('x11') then
-	 _gptable.term = 'x11'
-      elseif os == 'mac' and gnuplothasterm('aqua') then
-	 _gptable.term = 'aqua'
-      elseif os == 'mac' and gnuplothasterm('x11') then
-	 _gptable.term = 'x11'
-      else
-	 print('You have manually set the gnuplot exe and I can not find default terminals, run gnuplot.setgnuplotterminal("terminal-name") to set term type')
-      end
-   else
+   if not paths.filep(exe) then
       error(exe .. ' does not exist')
+   end
+
+   _gptable.exe = exe
+   local v,vv = findgnuplotversion(exe)
+   if v < 4 then error('gnuplot version 4 is required') end
+   if vv < 4 then 
+      _gptable.hasrefresh = false
+      print('Some functionality like adding title, labels, ... will be disabled, it is better to install gnuplot version 4.4')
+   else
+      _gptable.hasrefresh = true
+   end
+   
+   local os = findos()
+   local term = getgnuplotdefaultterm(os)
+   if term == nil then
+      print('You have manually set the gnuplot exe and I can not find default terminals, run gnuplot.setgnuplotterminal("terminal-name") to set term type')
    end
 end
 
 function gnuplot.setgnuplotterminal(term)
    if gnuplothasterm(term) then
-      _gptable.term = term
+      _gptable.defaultterm = term
    else
       error('gnuplot does not seem to have this term')
    end
@@ -166,10 +180,25 @@ local function getCurrentPlot()
    return _gptable[_gptable.current]
 end
 
+local function writeToPlot(gp,str)
+   local pipe = gp.pipe
+   pipe:writeString(str .. '\n\n\n')
+   pipe:synchronize()
+end
+local function refreshPlot(gp)
+   if gp.fname then
+      writeToPlot(gp,'set output "' .. gp.fname .. '"')
+   end
+   writeToPlot(gp,'refresh')
+   if gp.fname then
+      writeToPlot(gp,'unset output')
+   end
+end
 local function writeToCurrent(str)
-   local _gp = getCurrentPlot()
-   _gp:writeString(str .. '\n\n\n')
-   _gp:synchronize()
+   writeToPlot(getCurrentPlot(),str)
+end
+local function refreshCurrent()
+   refreshPlot(getCurrentPlot())
 end
 
 -- t is the arguments for one plot at a time
@@ -398,7 +427,7 @@ local function gnu_splot_string(legend,x,y,z)
    hstr = string.format('%s%s\n',hstr,'set hidden3d\n')
 
    hstr = hstr .. 'splot '
-   local dstr = ''
+   local dstr = {''}
    local coef
    for i=1,#legend do
       if i > 1 then hstr = hstr .. ' , ' end
@@ -406,15 +435,21 @@ local function gnu_splot_string(legend,x,y,z)
    end
    hstr = hstr .. '\n'
    for i=1,#legend do
-      for j=1,x[i]:size(1) do
-	 for k=1,x[i]:size(2) do
-            dstr =  string.format('%s%g %g %g\n',dstr,x[i][j][k],y[i][j][k],z[i][j][k])
+      local xi = x[i]
+      local yi = y[i]
+      local zi = z[i]
+      for j=1,xi:size(1) do
+         local xij = xi[j]
+         local yij = yi[j]
+         local zij = zi[j]
+	 for k=1,xi:size(2) do
+            table.insert(dstr, string.format('%g %g %g\n',xij[k],yij[k],zij[k]))
          end
-	 dstr = string.format('%s\n',dstr)
+	 table.insert(dstr,'\n')
       end
-      dstr = string.format('%se\n',dstr)
+      table.insert(dstr,'e\n')
    end
-   return hstr,dstr
+   return hstr,table.concat(dstr)
 end
 
 local function gnu_imagesc_string(x,palette)
@@ -424,94 +459,111 @@ local function gnu_imagesc_string(x,palette)
    hstr = string.format('%s%s%g%s\n',hstr,"set xrange [ -0.5 : ",x:size(2)-0.5,"] noreverse nowriteback")
    hstr = string.format('%s%s%g%s\n',hstr,"set yrange [ -0.5 : ",x:size(1)-0.5,"] reverse nowriteback")
    hstr = string.format('%s%s\n',hstr,"splot '-' matrix with image")
-   local dstr = ''
+   local dstr = {''}
    for i=1,x:size(1) do
+      local xi = x[i];
       for j=1,x:size(2) do
-	 dstr =  string.format('%s%g ',dstr,x[i][j])
+	 table.insert(dstr,string.format('%g ',xi[j]))
       end
-      dstr = string.format('%s\n',dstr)
+      table.insert(dstr, string.format('\n'))
    end
-   dstr = string.format('%se\ne\n',dstr)
-   return hstr,dstr
+   table.insert(dstr,string.format('e\ne\n'))
+   return hstr,table.concat(dstr)
+end
+
+function gnuplot.close(n)
+   if not n then return end
+   local gp = _gptable[n]
+   if gp == nil then return end
+   if type(n) ==  number and torch.typename(gp.pipe) == 'torch.PipeFile' then
+      _gptable.current = n
+      gnuplot.plotflush(i)
+      writeToPLot(gp, 'quit')
+      gp.pipe:close()
+      gp.pipe=nil
+      gp = nil
+   end
+   collectgarbage()
 end
 
 function gnuplot.closeall()
    for i,v in pairs(_gptable) do
-      if type(i) ==  number and torch.typename(v) == 'torch.PipeFile' then
-	 v:close()
-	 v=nil
-      end
+      gnuplot.close(i)
    end
    _gptable = {}
+   collectgarbage()
    findgnuplot()
    _gptable.current = nil
 end
 
-function gnuplot.epsfigure(fname)
-   local n = #_gptable+1
-   _gptable[n] = torch.PipeFile(getexec() .. ' -persist ','w')
-   _gptable.current = n
-   writeToCurrent('set term postscript eps enhanced color')
-   writeToCurrent('set output \''.. fname .. '\'')
+local function filefigure(fname,term,n)
+   local gp = getfigure(n)
+   gp.fname = fname
+   gp.term = term
+   writeToCurrent('set term '.. gp.term)
+   --writeToCurrent('set output \'' .. gp.fname .. '\'')
+end
+function gnuplot.epsfigure(fname,n)
+   filefigure(fname,'postscript eps enhanced color',n)
 end
 
-function gnuplot.pngfigure(fname)
-   local n = #_gptable+1
-   _gptable[n] = torch.PipeFile(getexec() .. ' -persist ','w')
-   _gptable.current = n
-   writeToCurrent('set term png')
-   writeToCurrent('set output \''.. fname .. '\'')
+function gnuplot.pngfigure(fname,n)
+   filefigure(fname,'png',n)
 end
 
 function gnuplot.figprint(fname)
    local suffix = fname:match('.+%.(.+)')
    local term = nil
-   if suffix == 'eps' then term = 'postscript eps enhanced color'
-   elseif suffix == 'png' then term = 'png'
-   else error('only eps and png for figprint')
+   if suffix == 'eps' then
+      term = 'postscript eps enhanced color'
+   elseif suffix == 'png' then
+      term = 'png'
+   else
+      error('only eps and png for figprint')
    end
    writeToCurrent('set term ' .. term)
    writeToCurrent('set output \''.. fname .. '\'')
-   writeToCurrent('refresh')
-   writeToCurrent('set term ' .. _gptable.term .. ' ' .. _gptable.current .. '\n')
+   refreshCurrent()
+   writeToCurrent('unset output')
+   writeToCurrent('set term ' .. _gptable[_gptable.current].term .. ' ' .. _gptable.current .. '\n')
 end
 
 function gnuplot.figure(n)
-   local nfigures = #_gptable
-   if not n or _gptable[n] == nil then -- we want new figure
-      n = n or #_gptable+1
-      _gptable[n] = torch.PipeFile(getexec() .. ' -persist ','w')
-   end
-   _gptable.current = n
-   writeToCurrent('set term ' .. _gptable.term .. ' ' .. n .. '\n')
+   local gp = getfigure(n)
+   writeToCurrent('set term ' .. _gptable[_gptable.current].term .. ' ' .. _gptable.current .. '\n')
    writeToCurrent('raise')
-   return n
+   return _gptable.current
 end
 
 function gnuplot.plotflush(n)
-   if not n then n = _gptable.current end
-   if not n then return end
-   if _gptable[n] == nil then return end
-   local _gp = _gptable[n]
-   _gp:writeString('unset output\n')
-   _gp:synchronize()
+   if not n then
+      n = _gptable.current
+   end
+   if not n or _gptable[n] == nil then
+      print('no figure ' ..  tostring(n))
+      return
+   end
+   local gp = _gptable[n]
+   --xprint(gp)
+   if gp.fname then
+      writeToPlot(gp,'set output "' .. gp.fname .. '"')
+      writeToPlot(gp,'refresh')
+      writeToPlot(gp,'unset output')
+   end
 end
 
 local function gnulplot(legend,x,y,format)
    local hdr,data = gnuplot_string(legend,x,y,format)
-   --writeToCurrent('set pointsize 2')
    writeToCurrent(hdr)
    writeToCurrent(data)
 end
 local function gnusplot(legend,x,y,z)
    local hdr,data = gnu_splot_string(legend,x,y,z)
-   --writeToCurrent('set pointsize 2')
    writeToCurrent(hdr)
    writeToCurrent(data)
 end
 local function gnuimagesc(x,palette)
    local hdr,data = gnu_imagesc_string(x,palette)
-   --writeToCurrent('set pointsize 2')
    writeToCurrent(hdr)
    writeToCurrent(data)
 end
@@ -521,49 +573,44 @@ function gnuplot.xlabel(label)
       print('gnuplot.xlabel disabled')
       return
    end
-   local _gp = getCurrentPlot()
    writeToCurrent('set xlabel "' .. label .. '"')
-   writeToCurrent('refresh')
+   refreshCurrent()
 end
 function gnuplot.ylabel(label)
    if not _gptable.hasrefresh then
       print('gnuplot.ylabel disabled')
       return
    end
-   local _gp = getCurrentPlot()
    writeToCurrent('set ylabel "' .. label .. '"')
-   writeToCurrent('refresh')
+   refreshCurrent()
 end
 function gnuplot.zlabel(label)
    if not _gptable.hasrefresh then
       print('gnuplot.zlabel disabled')
       return
    end
-   local _gp = getCurrentPlot()
    writeToCurrent('set zlabel "' .. label .. '"')
-   writeToCurrent('refresh')
+   refreshCurrent()
 end
 function gnuplot.title(label)
    if not _gptable.hasrefresh then
       print('gnuplot.title disabled')
       return
    end
-   local _gp = getCurrentPlot()
    writeToCurrent('set title "' .. label .. '"')
-   writeToCurrent('refresh')
+   refreshCurrent()
 end
 function gnuplot.grid(toggle)
    if not _gptable.hasrefresh then
       print('gnuplot.grid disabled')
       return
    end
-   local _gp = getCurrentPlot()
    if toggle then
       writeToCurrent('set grid')
-      writeToCurrent('refresh')
+      refreshCurrent()
    else
       writeToCurrent('unset grid')
-      writeToCurrent('refresh')
+      refreshCurrent()
    end
 end
 function gnuplot.movelegend(hloc,vloc)
@@ -578,7 +625,7 @@ function gnuplot.movelegend(hloc,vloc)
       error('horizontal location is unknown : plot.movelegend expects 2 strings as location {left|right|center}{bottom|top|middle}')
    end
    writeToCurrent('set key ' .. hloc .. ' ' .. vloc)
-   writeToCurrent('refresh')
+   refreshCurrent()
 end
 function gnuplot.gnuplotraw(str)
    writeToCurrent(str)
