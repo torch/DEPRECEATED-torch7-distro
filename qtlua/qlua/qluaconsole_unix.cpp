@@ -361,7 +361,7 @@ rtty_lex(const char *s, int end, int &q)
           }
           break;
         case -2: // identifier
-          if (s[p] == '(') {
+          if (s[p] == '(' || s[p] == '{') {
             state = -5;
           } else if (!isalnum(s[p]) && s[p]!='_' && s[p]!='.' && s[p]!=':') {
             state = -1; continue;
@@ -392,7 +392,7 @@ rtty_lex(const char *s, int end, int &q)
           }
           break;
         case -5: // opening function
-          if (s[p] != '(') {
+          if (s[p] != ' ') {
             state = -1;
           }
           break;
@@ -428,10 +428,12 @@ rtty_complete(const char *text, int start, int end)
     // copy keyword
     int len = end - start - 1;
     char *keyword = (char *)malloc(sizeof(char)*(len+1));
-    for (int i=0; i<len; i++) {
+    int i=0;
+    for (; i<len; i++) {
+      if (rl_line_buffer[start+i] == '(') break;
       keyword[i] = rl_line_buffer[start+i];
     }
-    keyword[len] = NULL;
+    keyword[i] = 0;
     // get help for keyword
     if (console && console->lua) {
       QtLuaLocker lua(console->lua, 250);
@@ -445,6 +447,7 @@ rtty_complete(const char *text, int start, int end)
         }
       }
     }
+    // done
     return 0;
   }
   // no completion unless in identifier
