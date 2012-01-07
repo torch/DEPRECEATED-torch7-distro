@@ -1,4 +1,5 @@
-===== Torch Package Reference Manual =====
+====== Torch Package Reference Manual ======
+{{anchor:torch.reference.dok}}
 
 The **''torch''** package contains basic classes used everywhere in ''Torch7''.
 

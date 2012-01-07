@@ -125,13 +125,22 @@ function dok.stylize(html, package)
    return styled
 end
 
+local function adddok(...)
+   local tt = {}
+   local arg = {...}
+   for i=1,#arg do
+      table.insert(tt,arg[i])
+   end
+   return table.concat(tt,'\n')
+end
 function dok.html2funcs(html, package)
    local funcs = {}
    local next = html:gfind('<div class="level%d">(.-)</div>')
    for body in next do
-      local func = body:gfind('<a name="' .. package .. '%.(.-)">.-</a>')()
-      if func then
-         funcs[func] = dok.stylize(body, package)
+      for func in body:gfind('<a name="' .. package .. '%.(.-)">.-</a>') do
+         if func then
+            funcs[func] = adddok(funcs[func],dok.stylize(body, package))
+         end
       end
    end
    return funcs
@@ -154,13 +163,14 @@ function dok.refresh()
                      pkg = _G._torchimport[package]
                   end
                   -- level 0: the package itself
-                  dok.inline[pkg] = funcs['dok'] or funcs['reference.dok'] or funcs['overview.dok']
+                  dok.inline[pkg] = dok.inline[pkg] or funcs['dok'] or funcs['reference.dok'] or funcs['overview.dok']
                   -- next levels
                   for key,symb in pairs(pkg) do
                      -- level 1: global functions and objects
                      local entry = (key):lower()
-                     if funcs[entry] then
-                        dok.inline[string2symbol(package .. '.' .. key)] = funcs[entry]
+                     if funcs[entry] or funcs[entry..'.dok'] then
+                        local sym = string2symbol(package .. '.' .. key)
+                        dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
                      end
                      -- level 2: objects' methods
                      if type(pkg[key]) == 'table' then
@@ -174,8 +184,10 @@ function dok.refresh()
                         end
                         for subkey,subsymb in pairs(entries) do
                            local entry = (key .. '.' .. subkey):lower()
-                           if funcs[entry] then
-                              dok.inline[string2symbol(package .. '.' .. key .. '.' .. subkey)] = funcs[entry]
+                           if funcs[entry] or funcs[entry..'.dok'] then
+                              local sym = string2symbol(package .. '.' .. key .. '.' .. subkey)
+                              dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
+                              --dok.inline[string2symbol(package .. '.' .. key .. '.' .. subkey)] = funcs[entry]
                            end
                         end
                      end

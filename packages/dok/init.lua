@@ -436,7 +436,7 @@ function dok.dok2html(txt)
    txt = dok.cleanText(txt)
 
    -- close section
-   if isection then
+   if issection then
       txt = txt .. '\n\002/div\003\n'
    end
 
