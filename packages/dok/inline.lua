@@ -1,4 +1,7 @@
-
+--------------------------------------------------------------------------------
+-- inline help
+-- that file defines all the tools and goodies to generate inline help
+--------------------------------------------------------------------------------
 dok.inline = {}
 
 paths.install_dok = paths.concat(paths.install_html, '..', 'dok')
@@ -199,7 +202,11 @@ function dok.refresh()
    end
 end
 
-function dok.help(symbol)
+--------------------------------------------------------------------------------
+-- help() is the main user-side function: prints help for any given
+-- symbol that has an anchor defined in a .dok file.
+--------------------------------------------------------------------------------
+function dok.help(symbol, asstring)
    -- no symbol? global help
    if not symbol then
       print('help(symbol): get help on a specific symbol \n'
@@ -212,11 +219,199 @@ function dok.help(symbol)
    -- we generate help for all packages loaded)
    dok.refresh()
    local inline = dok.inline[symbol]
-   if inline then
-      print(inline)
+   if asstring then
+      return inline
    else
-      print('undocumented symbol')
+      if inline then
+         print(style.banner)
+         print(inline)
+         print(style.banner)
+      else
+         if type(symbol) == 'function' then
+            pcall(symbol)
+         else
+            print('undocumented symbol')
+         end
+      end
    end
 end
 
 help = dok.help
+
+--------------------------------------------------------------------------------
+-- standard usage function: used to display automated help for functions
+--
+-- @param funcname     function name
+-- @param description  description of the function
+-- @param example      usage example
+-- @param ...          [optional] arguments
+--------------------------------------------------------------------------------
+function dok.usage(funcname, description, example, ...)
+   local str = style.banner .. '\n'
+
+   local help = help(string2symbol(funcname), true)
+   if help then
+      str = str .. help
+   else
+      str = str .. style.title .. funcname:upper() .. style.none .. '\n'
+      if description then
+         str = str .. '\n' .. description .. '\n'
+      end
+   end
+
+   str = str .. '\n' .. style.list .. 'usage:\n' .. style.pre
+
+   -- named arguments:
+   local args = {...}
+   if args[1].tabled then
+      args = args[1].tabled 
+   end
+   if args[1].arg then
+      str = str .. funcname .. '{\n'
+      for i,param in ipairs(args) do
+         local key
+         if param.req then
+            key = '    ' .. param.arg .. ' = ' .. param.type
+         else
+            key = '    [' .. param.arg .. ' = ' .. param.type .. ']'
+         end
+         -- align:
+         while key:len() < 40 do
+            key = key .. ' '
+         end
+         str = str .. key .. '-- ' .. param.help 
+         if param.default or param.default == false then
+            str = str .. '  [default = ' .. tostring(param.default) .. ']'
+         elseif param.defaulta then
+            str = str .. '  [default == ' .. param.defaulta .. ']'
+         end
+         str = str.. '\n'
+      end
+      str = str .. '}\n'
+
+   -- unnamed args:
+   else
+      local idx = 1
+      while true do
+         local param
+         str = str .. funcname .. '(\n'
+         while true do
+            param = args[idx]
+            idx = idx + 1
+            if not param or param == '' then break end
+            local key
+            if param.req then
+               key = '    ' .. param.type
+            else
+               key = '    [' .. param.type .. ']'
+            end
+            -- align:
+            while key:len() < 40 do
+               key = key .. ' '
+            end
+            str = str .. key .. '-- ' .. param.help .. '\n'
+         end
+         str = str .. ')\n'
+         if not param then break end
+      end
+   end
+   str = str .. style.none
+
+   if example then
+      str = str .. '\n' .. style.pre .. example .. style.none .. '\n'
+   end
+
+   str = str .. style.banner
+   return str
+end
+
+--------------------------------------------------------------------------------
+-- standard argument function: used to handle named arguments, and 
+-- display automated help for functions
+--------------------------------------------------------------------------------
+function dok.unpack(args, funcname, description, ...)
+   -- put args in table
+   local defs = {...}
+
+   -- generate usage string as a closure:
+   -- this way the function only gets called when an error occurs
+   local fusage = function() 
+                     local example
+                     if #defs > 1 then
+                        example = funcname .. '{' .. defs[2].arg .. '=' .. defs[2].type .. ', '
+                           .. defs[1].arg .. '=' .. defs[1].type .. '}\n'
+                        example = example .. funcname .. '(' .. defs[1].type .. ',' .. ' ...)'
+                     end
+                     return dok.usage(funcname, description, example, {tabled=defs})
+                  end
+   local usage = {}
+   setmetatable(usage, {__tostring=fusage})
+
+   -- get args
+   local iargs = {}
+   if #args == 0 then 
+      print(usage)
+      error('error')
+   elseif #args == 1 and type(args[1]) == 'table' and #args[1] == 0 
+                     and not (torch and torch.typename(args[1]) ~= nil) then
+      -- named args
+      iargs = args[1]
+   else
+      -- ordered args
+      for i = 1,select('#',...) do
+         iargs[defs[i].arg] = args[i]
+      end
+   end
+
+   -- check/set arguments
+   local dargs = {}
+   for i = 1,#defs do
+      local def = defs[i]
+      -- is value requested ?
+      if def.req and iargs[def.arg] == nil then
+         print(c.Red .. 'missing argument: ' .. def.arg .. c.none)
+         print(usage)
+         error('error')
+      end
+      -- get value or default
+      dargs[def.arg] = iargs[def.arg]
+      if dargs[def.arg] == nil then
+         dargs[def.arg] = def.default
+      end
+      if dargs[def.arg] == nil and def.defaulta then
+         dargs[def.arg] = dargs[def.defaulta]
+      end
+      dargs[i] = dargs[def.arg]
+   end
+
+   -- return usage too
+   dargs.usage = usage
+
+   -- stupid lua bug: we return all args by hand
+   if dargs[65] then
+      error('<dok.unpack> oups, cant deal with more than 64 arguments :-)')
+   end
+
+   -- return modified args
+   return dargs,
+   dargs[1], dargs[2], dargs[3], dargs[4], dargs[5], dargs[6], dargs[7], dargs[8], 
+   dargs[9], dargs[10], dargs[11], dargs[12], dargs[13], dargs[14], dargs[15], dargs[16],
+   dargs[17], dargs[18], dargs[19], dargs[20], dargs[21], dargs[22], dargs[23], dargs[24],
+   dargs[25], dargs[26], dargs[27], dargs[28], dargs[29], dargs[30], dargs[31], dargs[32],
+   dargs[33], dargs[34], dargs[35], dargs[36], dargs[37], dargs[38], dargs[39], dargs[40],
+   dargs[41], dargs[42], dargs[43], dargs[44], dargs[45], dargs[46], dargs[47], dargs[48],
+   dargs[49], dargs[50], dargs[51], dargs[52], dargs[53], dargs[54], dargs[55], dargs[56],
+   dargs[57], dargs[58], dargs[59], dargs[60], dargs[61], dargs[62], dargs[63], dargs[64]
+end
+
+--------------------------------------------------------------------------------
+-- prints an error with nice formatting. If domain is provided, it is used as
+-- following: <domain> msg
+--------------------------------------------------------------------------------
+function dok.error(message, domain)
+   if domain then
+      message = '<' .. domain .. '> ' .. message
+   end
+   local col_msg = c.Red .. tostring(message) .. c.none
+   error(col_msg)
+end
