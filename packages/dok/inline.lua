@@ -256,7 +256,7 @@ function dok.usage(funcname, description, example, ...)
    if help then
       str = str .. help
    else
-      str = str .. style.title .. funcname:upper() .. style.none .. '\n'
+      str = str .. style.title .. funcname .. style.none .. '\n'
       if description then
          str = str .. '\n' .. description .. '\n'
       end
