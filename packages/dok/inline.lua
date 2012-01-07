@@ -94,8 +94,8 @@ function dok.stylize(html, package)
    -- (0) useless white space
    styled = styled:gsub('^%s+','')
    -- (1) function title
-   styled = style.banner .. '\n' .. styled
-   styled = styled:gsub('<a.-name="(.-)">.-</a>%s*', function(title) return style.title .. title:upper() .. style.none .. '\n' end)
+   styled = '\n' .. style.banner .. '\n' .. styled
+   styled = styled:gsub('<a.-name=".-">%s+(.-)</a>%s*', function(title) return style.title .. title .. style.none .. '\n' end)
    -- (2) lists
    styled = styled:gsub('<ul>(.+)</ul>', function(list) 
                                             return list:gsub('<li>%s*(.-)%s*</li>%s*', style.list .. '%1\n')
@@ -121,7 +121,7 @@ function dok.stylize(html, package)
    styled = maxcols(styled)
    -- (-) conclude
    styled = styled:gsub('%s*$','')
-   styled = styled .. '\n' .. style.banner
+   --styled = styled .. '\n' .. style.banner
    return styled
 end
 
@@ -135,11 +135,11 @@ local function adddok(...)
 end
 function dok.html2funcs(html, package)
    local funcs = {}
-   local next = html:gfind('<div class="level%d">(.-)</div>')
-   for body in next do
+   local next = html:gfind('<h%d>(<a.-name=".-">.-</a>)%s*</h%d>\n<div class="level%d">(.-)</div>')
+   for title,body in next do
       for func in body:gfind('<a name="' .. package .. '%.(.-)">.-</a>') do
          if func then
-            funcs[func] = adddok(funcs[func],dok.stylize(body, package))
+            funcs[func] = adddok(funcs[func],dok.stylize(title .. '\n' .. body:gsub('<a.-name="(.-)"></a>','') , package))
          end
       end
    end
