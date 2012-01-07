@@ -171,10 +171,12 @@ just replace ''Tensor'' by the name of the Tensor variant (like ''CharTensor'').
 Here are several ways to construct a new ''Tensor''.
 
 ====  torch.Tensor() ====
+{{anchor:torch.Tensor}}
 
 Returns an empty tensor.
 
 ====  torch.Tensor(tensor) ====
+{{anchor:torch.Tensor}}
 
 Returns a new tensor which reference the same [[#torch.Tensor.storage|Storage]]
 than the given ''tensor''. The [[#torch.Tensor.size|size]],
@@ -210,10 +212,12 @@ elements of the given ''tensor'', and vice-versa. No memory copy!
 
 
 ====  torch.Tensor(sz1 [,sz2 [,sz3 [,sz4]]]]) ====
+{{anchor:torch.Tensor}}
 
 Create a tensor up to 4 dimensions. The tensor size will be ''sz1 x sz2 x sx3 x sz4''.
 
 ====  torch.Tensor(sizes, [strides]) ====
+{{anchor:torch.Tensor}}
 
 Create a tensor of any number of dimensions. The [[Storage|LongStorage]]
 ''sizes'' gives the size in each dimension of the tensor. The optional
@@ -244,6 +248,7 @@ Note that //negative strides are not allowed//, and, if given as argument when c
 as //choose the right stride such that the Tensor is contiguous in memory//.
 
 ====  torch.Tensor(storage, [storageOffset, sizes, [strides]]) ====
+{{anchor:torch.Tensor}}
 
 Returns a tensor which uses the existing [[Storage|Storage]]
 ''storage'', starting at position ''storageOffset'' (>=1).  The size of each
@@ -288,12 +293,14 @@ elements of the new ''Tensor'', and vice-versa. There is no memory copy!
 </file>
 
 ====  torch.Tensor(storage, [storageOffset, sz1 [, st1 ... [, sz4 [, st4]]]]) ====
+{{anchor:torch.Tensor}}
 
 Convenience constructor (for the previous constructor) assuming a number of
 dimensions inferior or equal to 4. ''szi'' is the size in the ''i-th'' dimension, and ''sti'' it
 the stride in the ''i-th'' dimension.
 
 ==== torch.Tensor(table) =====
+{{anchor:torch.Tensor}}
 
 The argument is assumed to be a Lua array of numbers. The constructor
 returns a new Tensor of the size of the table, containing all the table
@@ -751,6 +758,7 @@ x = torch.Tensor(y, 1, 10)
 </file>
 
 ====  [self] set(tensor) ====
+{{anchor:torch.Tensor.set}}
 
 The ''Tensor'' is now going to "view" the same [[#torch.Tensor.storage|storage]]
 than the given ''tensor''. As the result, any modification in the elements of
@@ -781,6 +789,7 @@ vice-versa. This is an efficient method, as there is no memory copy!
 </file>
 
 ====  [self] set(storage, [storageOffset, sizes, [strides]]) ====
+{{anchor:torch.Tensor.set}}
 
 The ''Tensor'' is now going to "view" the given
 [[Storage|''storage'']], starting at position ''storageOffset'' (>=1)
@@ -822,6 +831,7 @@ If only ''storage'' is provided, the whole storage will be viewed as a 1D Tensor
 </file>
 
 ====  [self] set(storage, [storageOffset, sz1 [, st1 ... [, sz4 [, st4]]]]) ====
+{{anchor:torch.Tensor.set}}
 
 This is a "shorcut" for previous method.
 It works up to 4 dimensions. ''szi'' is the size of the ''i''-th dimension of the tensor.
@@ -884,7 +894,7 @@ Fill the tensor with zeros.
 </file>
 
 =====  Resizing =====
-{{anchor:torch.Tensor.resize}}
+{{anchor:torch.Tensor.resize.dok}}
 
 **When resizing to a larger size**, the underlying [[Storage|Storage]] is resized to fit
 all the elements of the ''Tensor''. 
@@ -900,10 +910,12 @@ might have been completely changed. In particular, //the elements of the resized
 Resize the ''tensor'' as the given ''tensor'' (of the same type). 
 
 ====  [self] resize(sizes) ====
+{{anchor:torch.Tensor.resize}}
 
 Resize the ''tensor'' according to the given [[Storage|LongStorage]] ''size''.
 
 ====  [self] resize(sz1 [,sz2 [,sz3 [,sz4]]]]) ====
+{{anchor:torch.Tensor.resize}}
 
 Convenience method of the previous method, working for a number of dimensions up to 4.
 
@@ -1195,10 +1207,11 @@ An additional dimension of size ''size'' is appended in the returned tensor.
 These functions apply a function to each element of the tensor on which the
 method is called (self). These methods are much faster than using a ''for''
 loop in ''Lua''. The results is stored in ''self'' (if the function returns
-something). A similar function exists in the [[..:lab:start#map|lab]]
+something). A similar function exists in the [[..:lab:index#map|lab]]
 package, but where a new tensor containing the result is returned instead.
 
 ====  [self] apply(function) ====
+{{anchor:torch.Tensor.apply}}
 
 Apply the given function to all elements of self.
 
@@ -1285,6 +1298,7 @@ Example:
 </file>
 
 ====  [self] map2(tensor1, tensor2, function(x, xt1, xt2)) ====
+{{anchor:torch.Tensor.map2}}
 
 Apply the given function to all elements of self, ''tensor1'' and ''tensor2''. The number of elements of all tensors
 must match, but sizes do not matter.
@@ -1345,128 +1359,152 @@ Example:
 These functions apply a function to the tensor, and return self.
 
 ====  [self] log() ====
-#TensorLog
+{{anchor:torch.Tensor.Log}}
 
 Computes the natural logarithm.
 
 ====  [self] log1p() ====
-#TensorLog1p
+{{anchor:torch.Tensor.Log1p}}
 
-''log1p(x)'' computes [[#TensorLog|log(1+x)]], with precision more
+''log1p(x)'' computes [[#torch.Tensor.Log|log(1+x)]], with precision more
 accurate than standard ''log()'' function for small value of ''x''.
 
 ====  [self] exp() ====
-#TensorExp
+{{anchor:torch.Tensor.Exp}}
 
 Computes the exponential function.
 
 ====  [self] cos() ====
+{{anchor:torch.Tensor.cos}}
 
 Computes the cosine function.
 
 ====  [self] acos() ====
+{{anchor:torch.Tensor.acos}}
 
 Computes the arc cosine function.
 
 ====  [self] cosh() ====
+{{anchor:torch.Tensor.cosh}}
 
 Computes the hyperbolic cosine function.
 
 ====  [self] sin() ====
+{{anchor:torch.Tensor.sin}}
 
 Computes the sinusoid function.
 
 ====  [self] asin() ====
+{{anchor:torch.Tensor.asin}}
 
 Computes the arc sinusoid function.
 
 ====  [self] sinh() ====
+{{anchor:torch.Tensor.sinh}}
 
 Computes the hyperbolic sinusoid function.
 
 ====  [self] tan() ====
+{{anchor:torch.Tensor.tanh}}
 
 Computes the tangent function.
 
 ====  [self] atan() ====
+{{anchor:torch.Tensor.atan}}
 
 Computes the arc tangent function.
 
 ====  [self] tanh() ====
+{{anchor:torch.Tensor.tanh}}
 
 Computes the hyperbolic tangent function.
 
 ====  [self] pow(value) ====
+{{anchor:torch.Tensor.pow}}
 
 Computes the power to the given ''value''.
 
 ====  [self] sqrt() ====
+{{anchor:torch.Tensor.sqrt}}
 
 Computes the square root. Values must be positive.
 
 ====  [self] ceil() ====
+{{anchor:torch.Tensor.ceil}}
 
 For each tensor value, computes the smallest integral value greater than or equal to this value.
 
 ====  [self] floor() ====
+{{anchor:torch.Tensor.floor}}
 
 For each tensor value, computes the largest integral value less than or equal to this value.
 
 ====  [self] abs() ====
+{{anchor:torch.Tensor.abs}}
 
 Computes the absolute value.
 
 =====  Basic statistics =====
 
 This functions return a statistic (scalar) on the full tensor. For more complex statistics
-see the [[..:lab:start|lab]] package.
+see the [[..:lab:index|lab]] package.
 
 ====  [number] sum() ====
+{{anchor:torch.Tensor.sum}}
 
 Returns the sum of all the elements in the tensor.
 
 ====  [number] mean() ====
+{{anchor:torch.Tensor.mean}}
 
 Returns the mean of all the elements in the tensor.
 
 ====  [number] max() ====
+{{anchor:torch.Tensor.max}}
 
 Returns the maximum value of the tensor.
 
 ====  [number] min() ====
+{{anchor:torch.Tensor.min}}
 
 Returns the minimum value of the tensor.
 
 ====  [number] std() ====
+{{anchor:torch.Tensor.std}}
 
 Returns the unbiased standard deviation estimator of the elements in the tensor. (The normalization
 factor is (n-1) and not n, where n is the number of elements in the tensor).
 
 ====  [number] var() ====
+{{anchor:torch.Tensor.var}}
 
 Returns the unbiased variance estimator of the elements in the tensor. (The normalization
 factor is (n-1) and not n, where n is the number of elements in the tensor).
 
 ====  [number] norm([p])  ====
+{{anchor:torch.Tensor.norm}}
 
 Returns the p-norm of the elements of the tensor seen as a vector.
 Default value for ''p'' is ''2''.
 
 ====  [number] dist(tensor, [value])   ====
+{{anchor:torch.Tensor.dist}}
 
 Returns the p-norm of the difference between self and the given ''tensor''.
 
 =====  Basic operations =====
-#TensorBasicOperations
+{{anchor:torch.Tensor.BasicOperations.dok}}
 
 All this operation affect the tensor on which the method is called (self).
 No additional memory is created.
 
 ====  [self] add(value) ====
+{{anchor:torch.Tensor.add}}
 
 Add the given value to all elements in the tensor.
 
 ====  [self] add(tensor) ====
+{{anchor:torch.Tensor.add}}
 
 Add the given ''tensor'' to self. The number of elements must match, but sizes do not matter.
 <file>
@@ -1481,6 +1519,7 @@ Add the given ''tensor'' to self. The number of elements must match, but sizes d
 </file>
 
 ====  [self] add(value, tensor) ====
+{{anchor:torch.Tensor.add}}
 
 Multiply elements of ''tensor'' by the scalar ''value'' and add it to self.
 The number of elements must match, but sizes do not matter.
@@ -1496,10 +1535,12 @@ The number of elements must match, but sizes do not matter.
 </file>
 
 ====  [self] mul(value) ====
+{{anchor:torch.Tensor.mul}}
 
 Multiply all elements in the tensor by the given ''value''.
 
 ====  [self] cmul(tensor) ====
+{{anchor:torch.Tensor.cmul}}
 
 Element-wise multiplication of ''tensor'' by self. The number of elements must match, but sizes do not matter.
 <file>
@@ -1514,6 +1555,7 @@ Element-wise multiplication of ''tensor'' by self. The number of elements must m
 </file>
 
 ====  [self] addcmul(value, tensor1, tensor2) ====
+{{anchor:torch.Tensor.addcmul}}
 
 Performs the element-wise multiplication of ''tensor1'' by ''tensor1'', multiply the result by the scalar ''value''
 and add it to self. The number of elements must match, but sizes do not matter.
@@ -1530,10 +1572,12 @@ and add it to self. The number of elements must match, but sizes do not matter.
 </file>
 
 ====  [self] div(value) ====
+{{anchor:torch.Tensor.div}}
 
 Divide all elements in the tensor by the given ''value''.
 
 ====  [self] cdiv(tensor) ====
+{{anchor:torch.Tensor.cdiv}}
 
 Performs the element-wise division of self by ''tensor''.
 The number of elements must match, but sizes do not matter.
@@ -1550,6 +1594,7 @@ The number of elements must match, but sizes do not matter.
 </file>
 
 ====  [self] addcdiv(value, tensor1, tensor2) ====
+{{anchor:torch.Tensor.addcdiv}}
 
 Performs the element-wise division of ''tensor1'' by ''tensor1'', multiply the result by the scalar ''value''
 and add it to self. The number of elements must match, but sizes do not matter.
@@ -1567,6 +1612,7 @@ and add it to self. The number of elements must match, but sizes do not matter.
 </file>
 
 ====  [number] dot(tensor) ====
+{{anchor:torch.Tensor.dot}}
 
 Performs the dot product between ''tensor'' and self. The number of elements must match: both tensors are seen
 as a 1D vector.
@@ -1577,7 +1623,8 @@ as a 1D vector.
 24
 </file>
 
-====  addT2dotT1(value, mat, vec) ====
+====  addmv(value, mat, vec) ====
+{{anchor:torch.Tensor.addmv}}
 
 Performs a matrix-vector multiplication between ''mat'' (2D tensor) and ''vec'' (1D tensor), multiply by the scalar ''value'' and add
 it to self. In other words,
@@ -1601,7 +1648,8 @@ vector of size ''m''  and self must be a vector of size ''n''.
 [torch.Tensor of dimension 3]
 </file>
 
-====  addT1outT1(value, vec1, vec2) ====
+====  addr(value, vec1, vec2) ====
+{{anchor:torch.Tensor.addr}}
 
 Performs the outer-product between ''vec1'' (1D tensor) and ''vec2'' (1D tensor), multiply the resulting matrix
 by the scalar ''value'' and add the result to self (which must be a 2D tensor).
@@ -1627,7 +1675,8 @@ If ''vec1'' is a vector of size ''n'' and ''vec2'' is a vector of size ''m'', th
 [torch.Tensor of dimension 3x2]
 </file>
 
-====  addT2dotT2(value, mat1, mat2) ====
+====  addmm(value, mat1, mat2) ====
+{{anchor:torch.Tensor.addmm}}
 
 Performs a matrix-matrix multiplication between ''mat1'' (2D tensor) and ''mat2'' (2D tensor), multiply the resulting
 matrix by the scalar ''value'' and add the result to self (2D tensor).
@@ -1638,35 +1687,13 @@ self = self + value * mat1*mat2
 
 If ''mat1'' is a ''n x m'' matrix, ''mat2'' a ''m x p'' matrix, self must be a ''n x p'' matrix.
 
-====  addT4dotT2(value, t4, t2) ====
-
-Performs a tensor multiplication between ''t4'' (4D tensor) and ''t2'' (2D tensor), multiply the resulting
-matrix by the scalar ''value'' and add the result to self (2D tensor).
-In other words,
-<file>
-self = self + value * t4*t2
-</file>
-
-If ''t4'' is a ''n x m x p x q'' tensor, ''t2'' a ''p x q'' matrix, self must be a ''n x m'' matrix.
-
-====  addT2outT2(value, mat1, mat2) ====
-
-Performs the outer product between ''mat1'' (2D tensor) and ''mat2'' (2D tensor), multiply the resulting
-matrix by the scalar ''value'' and add the result to self (4D tensor).
-In other words,
-<file>
-self_ijkl = self_ijkl + value * mat1_ij * mat2_kl
-</file>
-
-If ''mat1'' is a ''n x m'' matrix, ''mat2'' a ''p x q'' matrix, self must be a ''n x m x p x q'' tensor.
-
 =====  Overloaded operators =====
 
 It is possible to use basic mathematic operators like ''+'', ''-'', ''/'' and =*=
 with tensors.  These operators are provided as a convenience. While they
 might be handy, they create and return a new tensor containing the
 results. They are thus not as fast as the operations available in the
-[[#TensorBasicOperations|previous section]].
+[[#torch.Tensor.BasicOperations.dok|previous section]].
 
 ====  Addition and substraction ====
 
