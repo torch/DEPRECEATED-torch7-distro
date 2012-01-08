@@ -228,9 +228,9 @@ function dok.help(symbol, asstring)
       return inline
    else
       if inline then
-         print(style.banner)
+         --print(style.banner)
          print(inline)
-         print(style.banner)
+         --print(style.banner)
       else
          if type(symbol) == 'function' then
             pcall(symbol)
