@@ -361,7 +361,9 @@ rtty_lex(const char *s, int end, int &q)
           }
           break;
         case -2: // identifier
-          if (!isalnum(s[p]) && s[p]!='_' && s[p]!='.' && s[p]!=':') {
+          if (s[p] == '(' || s[p] == '{') {
+            state = -5;
+          } else if (!isalnum(s[p]) && s[p]!='_' && s[p]!='.' && s[p]!=':') {
             state = -1; continue;
           }
           break;
@@ -389,6 +391,11 @@ rtty_lex(const char *s, int end, int &q)
               state = -1;
           }
           break;
+        case -5: // opening function
+          if (s[p] != ' ') {
+            state = -1;
+          }
+          break;
         }
       p += 1;
     }
@@ -414,8 +421,36 @@ rtty_complete(const char *text, int start, int end)
   // default filename completion in string
   if (state == -3) 
     return 0;
-  // no completion unless in identifier
+  // no default completion
   rl_attempted_completion_over = 1;
+  // help completion if opening function
+  if (state == -5) {
+    // copy keyword
+    int len = end - start - 1;
+    char *keyword = (char *)malloc(sizeof(char)*(len+1));
+    int i=0;
+    for (; i<len; i++) {
+      if (rl_line_buffer[start+i] == '(') break;
+      keyword[i] = rl_line_buffer[start+i];
+    }
+    keyword[i] = 0;
+    // get help for keyword
+    if (console && console->lua) {
+      QtLuaLocker lua(console->lua, 250);
+      struct lua_State *L = lua;
+      if (lua) {
+        lua_getfield(L, LUA_GLOBALSINDEX, "help");
+        if (lua_gettop(L)) {
+          printf("\n");
+          lua_pushstring(L, keyword);
+          lua_pcall(L, 1, 0, 0);
+        }
+      }
+    }
+    // done
+    return 0;
+  }
+  // no completion unless in identifier
   if (state != -2 || start >= end) 
     return 0;
   // complete 

@@ -218,6 +218,9 @@ function dok.help(symbol, asstring)
    -- always refresh (takes time, but insures that 
    -- we generate help for all packages loaded)
    dok.refresh()
+   if type(symbol) == 'string' then
+      symbol = string2symbol(symbol)
+   end
    local inline = dok.inline[symbol]
    if asstring then
       return inline
@@ -253,7 +256,7 @@ function dok.usage(funcname, description, example, ...)
    if help then
       str = str .. help
    else
-      str = str .. style.title .. funcname:upper() .. style.none .. '\n'
+      str = str .. style.title .. funcname .. style.none .. '\n'
       if description then
          str = str .. '\n' .. description .. '\n'
       end
