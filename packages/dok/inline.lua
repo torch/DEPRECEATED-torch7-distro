@@ -36,18 +36,38 @@ dok.colors = {
 }
 local c = dok.colors
 
-local style = {
-   banner = '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++',
-   list = c.blue .. '> ' .. c.none,
-   title = c.Magenta,
-   pre = c.cyan,
-   em = c.Black,
-   bold = c.Black,
-   img = c.red,
-   link = c.red,
-   code = c.green,
-   none = c.none
-}
+local style = {}
+function dok.usecolors()
+   style = {
+      banner = '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++',
+      list = c.blue .. '> ' .. c.none,
+      title = c.Magenta,
+      pre = c.cyan,
+      em = c.Black,
+      bold = c.Black,
+      img = c.red,
+      link = c.red,
+      code = c.green,
+      error = c.Red,
+      none = c.none
+   }
+end
+function dok.dontusecolors()
+   style = {
+      banner = '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++',
+      list = '> ',
+      title = '',
+      pre = '',
+      em = '',
+      bold = '',
+      img = '',
+      link = '',
+      code = '',
+      error = '',
+      none = ''
+   }
+end
+dok.usecolors()
 
 local function uncleanText(txt)
    txt = txt:gsub('&#39;', "'")
@@ -209,6 +229,12 @@ end
 -- symbol that has an anchor defined in a .dok file.
 --------------------------------------------------------------------------------
 function dok.help(symbol, asstring)
+   -- color detect
+   if qtide then
+      dok.dontusecolors()
+   else
+      dok.usecolors()
+   end
    -- no symbol? global help
    if not symbol then
       print('help(symbol): get help on a specific symbol \n'
@@ -375,7 +401,7 @@ function dok.unpack(args, funcname, description, ...)
       local def = defs[i]
       -- is value requested ?
       if def.req and iargs[def.arg] == nil then
-         print(c.Red .. 'missing argument: ' .. def.arg .. c.none)
+         print(style.error .. 'missing argument: ' .. def.arg .. style.none)
          print(usage)
          error('error')
       end
@@ -418,6 +444,6 @@ function dok.error(message, domain)
    if domain then
       message = '<' .. domain .. '> ' .. message
    end
-   local col_msg = c.Red .. tostring(message) .. c.none
+   local col_msg = style.error .. tostring(message) .. style.none
    error(col_msg)
 end
