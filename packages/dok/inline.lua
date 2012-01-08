@@ -42,6 +42,7 @@ local style = {
    title = c.Magenta,
    pre = c.cyan,
    em = c.Black,
+   bold = c.Black,
    img = c.red,
    link = c.red,
    code = c.green,
@@ -109,6 +110,7 @@ function dok.stylize(html, package)
    styled = styled:gsub('<pre.->(.-)</pre>', style.pre .. '%1' .. style.none)
    -- (5) formatting
    styled = styled:gsub('<em>(.-)</em>', style.em .. '%1' .. style.none)
+   styled = styled:gsub('<b>(.-)</b>', style.bold .. '%1' .. style.none)
    -- (6) links
    styled = styled:gsub('<a.->(.-)</a>', style.none .. '%1' .. style.none)
    -- (7) images
