@@ -396,9 +396,9 @@
       dimension = lab_checklongargs(L, 2);                              \
     }                                                                   \
     else if(narg >= 1                                                   \
-            && lab_islongargs(L, 2))                                    \
+            && lab_islongargs(L, 1))                                    \
     {                                                                   \
-      dimension = lab_checklongargs(L, 2);                              \
+      dimension = lab_checklongargs(L, 1);                              \
     }                                                                   \
     else                                                                \
       luaL_error(L, "invalid arguments: [tensor] (storage | dim1 [dim2...])"); \
@@ -414,4 +414,87 @@
     THLongStorage_free(dimension);                                      \
                                                                         \
     return 1;                                                           \
+  }
+
+#define LAB_IMPLEMENT_oTTxN(NAME)                                     \
+  static int lab_(NAME)(lua_State *L)                                 \
+  {                                                                   \
+    THTensor *r_ = NULL, *t = NULL;                                   \
+    int narg = lua_gettop(L);                                         \
+                                                                      \
+    if(narg == 1                                                      \
+       && lua_isnumber(L, 1))                                         \
+    {                                                                 \
+      lua_pushnumber(L, (real)(NAME((real)lua_tonumber(L, 1))));      \
+      return 1;                                                       \
+    }                                                                 \
+    else if(narg == 1                                                 \
+            && luaT_isudata(L, 1, torch_(Tensor_id)))                 \
+    {                                                                 \
+      t = luaT_toudata(L, 1, torch_(Tensor_id));                      \
+    }                                                                 \
+    else if(narg == 2                                                 \
+            && luaT_isudata(L, 1, torch_(Tensor_id))                  \
+            && luaT_isudata(L, 2, torch_(Tensor_id)))                 \
+    {                                                                 \
+      r_ = luaT_toudata(L, 1, torch_(Tensor_id));                     \
+      t = luaT_toudata(L, 2, torch_(Tensor_id));                      \
+    }                                                                 \
+    else                                                              \
+      luaL_error(L, "invalid arguments: ([tensor] tensor | number)"); \
+                                                                      \
+    if(r_)                                                            \
+      THTensor_(retain)(r_);                                          \
+    else                                                              \
+      r_ = THTensor_(new)();                                          \
+    luaT_pushudata(L, r_, torch_(Tensor_id));                         \
+                                                                      \
+    THLab_(NAME)(r_, t);                                              \
+                                                                      \
+    return 1;                                                         \
+  }
+
+#define LAB_IMPLEMENT_oTTNxNN(NAME)                                   \
+  static int lab_(NAME)(lua_State *L)                                 \
+  {                                                                   \
+    THTensor *r_ = NULL, *t = NULL;                                   \
+    real value = 0;                                                   \
+    int narg = lua_gettop(L);                                         \
+                                                                      \
+    if(narg == 2                                                      \
+       && lua_isnumber(L, 1)                                          \
+       && lua_isnumber(L, 2))                                         \
+    {                                                                 \
+      lua_pushnumber(L, (real)(NAME((real)lua_tonumber(L, 1),         \
+                                    (real)lua_tonumber(L, 2))));      \
+      return 1;                                                       \
+    }                                                                 \
+    else if(narg == 2                                                 \
+            && luaT_isudata(L, 1, torch_(Tensor_id))                  \
+            && lua_isnumber(L, 2))                                    \
+    {                                                                 \
+      t = luaT_toudata(L, 1, torch_(Tensor_id));                      \
+      value = lua_tonumber(L, 2);                                     \
+    }                                                                 \
+    else if(narg == 3                                                 \
+            && luaT_isudata(L, 1, torch_(Tensor_id))                  \
+            && luaT_isudata(L, 2, torch_(Tensor_id))                  \
+            && lua_isnumber(L, 3))                                    \
+    {                                                                 \
+      r_ = luaT_toudata(L, 1, torch_(Tensor_id));                     \
+      t = luaT_toudata(L, 2, torch_(Tensor_id));                      \
+      value = lua_tonumber(L, 3);                                     \
+    }                                                                 \
+    else                                                              \
+      luaL_error(L, "invalid arguments: ([tensor] tensor | number)"); \
+                                                                      \
+    if(r_)                                                            \
+      THTensor_(retain)(r_);                                          \
+    else                                                              \
+      r_ = THTensor_(new)();                                          \
+    luaT_pushudata(L, r_, torch_(Tensor_id));                         \
+                                                                      \
+    THLab_(NAME)(r_, t, value);                                       \
+                                                                      \
+    return 1;                                                         \
   }

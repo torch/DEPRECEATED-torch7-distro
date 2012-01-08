@@ -1116,82 +1116,24 @@ static int lab_(logspace)(lua_State *L)
 LAB_IMPLEMENT_oTL(rand)
 LAB_IMPLEMENT_oTL(randn)
 
-#define LAB_IMPLEMENT_MATH_FUNC(NAME)                         \
-  static int lab_(NAME##_)(lua_State *L)                      \
-  {                                                           \
-    THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));  \
-    THTensor *t = luaT_checkudata(L, 2, torch_(Tensor_id));   \
-                                                              \
-    THLab_(NAME)(r_, t);                                      \
-                                                              \
-    lua_settop(L, 1);                                         \
-    return 1;                                                 \
-  }                                                           \
-                                                              \
-  static int lab_(NAME)(lua_State *L)                         \
-  {                                                           \
-    int n = lua_gettop(L);				      \
-    if(n == 1)						      \
-    {							      \
-      if (lua_isnumber(L, 1))                                 \
-        {                                                     \
-          real in = lua_tonumber(L, 1);                       \
-          real out = NAME(in);                                \
-          lua_pushnumber(L, out);                             \
-          return 1;                                           \
-        }                                                     \
-      luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id)); \
-      lua_insert(L, 1);					      \
-    }							      \
-    else if (n != 2)					      \
-    {							      \
-      luaL_error(L, "bad arguments: [tensor, ] tensor");      \
-    }							      \
-    return lab_(NAME##_)(L);                                  \
-  }                                                           \
-                                                              \
+LAB_IMPLEMENT_oTTxN(log)
+LAB_IMPLEMENT_oTTxN(log1p)
+LAB_IMPLEMENT_oTTxN(exp)
+LAB_IMPLEMENT_oTTxN(cos)
+LAB_IMPLEMENT_oTTxN(acos)
+LAB_IMPLEMENT_oTTxN(cosh)
+LAB_IMPLEMENT_oTTxN(sin)
+LAB_IMPLEMENT_oTTxN(asin)
+LAB_IMPLEMENT_oTTxN(sinh)
+LAB_IMPLEMENT_oTTxN(tan)
+LAB_IMPLEMENT_oTTxN(atan)
+LAB_IMPLEMENT_oTTxN(tanh)
+LAB_IMPLEMENT_oTTxN(sqrt)
+LAB_IMPLEMENT_oTTxN(ceil)
+LAB_IMPLEMENT_oTTxN(floor)
+LAB_IMPLEMENT_oTTxN(abs)
 
-LAB_IMPLEMENT_MATH_FUNC(log)
-LAB_IMPLEMENT_MATH_FUNC(log1p)
-LAB_IMPLEMENT_MATH_FUNC(exp)
-LAB_IMPLEMENT_MATH_FUNC(cos)
-LAB_IMPLEMENT_MATH_FUNC(acos)
-LAB_IMPLEMENT_MATH_FUNC(cosh)
-LAB_IMPLEMENT_MATH_FUNC(sin)
-LAB_IMPLEMENT_MATH_FUNC(asin)
-LAB_IMPLEMENT_MATH_FUNC(sinh)
-LAB_IMPLEMENT_MATH_FUNC(tan)
-LAB_IMPLEMENT_MATH_FUNC(atan)
-LAB_IMPLEMENT_MATH_FUNC(tanh)
-LAB_IMPLEMENT_MATH_FUNC(sqrt)
-LAB_IMPLEMENT_MATH_FUNC(ceil)
-LAB_IMPLEMENT_MATH_FUNC(floor)
-LAB_IMPLEMENT_MATH_FUNC(abs)
-
-static int lab_(pow_)(lua_State *L)
-{
-  THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-  THTensor *t = luaT_checkudata(L, 2, torch_(Tensor_id));
-  real value = (real)luaL_checknumber(L, 3);
-  THLab_(pow)(r_, t, value);
-  lua_settop(L, 1);
-  return 1;
-}
-
-static int lab_(pow)(lua_State *L)
-{
-  int n = lua_gettop(L);
-  if (n == 2 )
-  {
-    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-    lua_insert(L, 1);
-  }
-  else if (n != 3)
-  {
-    luaL_error(L, "bad arguments: [tensor, ] tensor, power");
-  }
-  return lab_(pow_)(L);
-}
+LAB_IMPLEMENT_oTTNxNN(pow)
 
 #endif
 
