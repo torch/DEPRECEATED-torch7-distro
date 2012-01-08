@@ -239,10 +239,12 @@ function dok.help(symbol, asstring)
    end
    -- no symbol? global help
    if not symbol then
-      print('help(symbol): get help on a specific symbol \n'
-            .. 'or checkout the complete help:\n'
-            .. style.link .. paths.concat(paths.install_html,'index.html')
-            .. style.none)
+      print(style.banner)
+      print(style.title .. 'help(symbol)' .. style.none 
+            .. '\n\nget inline help on a specific symbol\n'
+            .. '\nto browse the complete html documentation, call: '
+            .. style.title .. 'browse()' .. style.none)
+      print(style.banner)
       return
    end
    -- always refresh (takes time, but insures that 
@@ -270,6 +272,25 @@ function dok.help(symbol, asstring)
 end
 
 help = dok.help
+
+--------------------------------------------------------------------------------
+-- browse() is a simpler function that simply triggers a browser
+--------------------------------------------------------------------------------
+function dok.browse()
+   -- color detect
+   if qtide then
+      dok.dontusecolors()
+   else
+      dok.usecolors()
+   end
+   -- trigger browser
+   require 'qtide'
+   qtide.help()
+   package.loaded.qtide = false
+   qtide = nil
+end
+
+browse = dok.browse
 
 --------------------------------------------------------------------------------
 -- standard usage function: used to display automated help for functions
