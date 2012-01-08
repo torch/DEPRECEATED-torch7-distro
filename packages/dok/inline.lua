@@ -187,32 +187,34 @@ function dok.refresh()
                   if type(pkg) ~= 'table' then -- unsafe import, use protected import
                      pkg = _G._torchimport[package]
                   end
-                  -- level 0: the package itself
-                  dok.inline[pkg] = dok.inline[pkg] or funcs['dok'] or funcs['reference.dok'] or funcs['overview.dok']
-                  -- next levels
-                  for key,symb in pairs(pkg) do
-                     -- level 1: global functions and objects
-                     local entry = (key):lower()
-                     if funcs[entry] or funcs[entry..'.dok'] then
-                        local sym = string2symbol(package .. '.' .. key)
-                        dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
-                     end
-                     -- level 2: objects' methods
-                     if type(pkg[key]) == 'table' then
-                        local entries = {}
-                        for k,v in pairs(pkg[key]) do
-                           entries[k] = v
+                  if pkg then
+                     -- level 0: the package itself
+                     dok.inline[pkg] = dok.inline[pkg] or funcs['dok'] or funcs['reference.dok'] or funcs['overview.dok']
+                     -- next levels
+                     for key,symb in pairs(pkg) do
+                        -- level 1: global functions and objects
+                        local entry = (key):lower()
+                        if funcs[entry] or funcs[entry..'.dok'] then
+                           local sym = string2symbol(package .. '.' .. key)
+                           dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
                         end
-                        local mt = getmetatable(pkg[key]) or {}
-                        for k,v in pairs(mt) do
-                           entries[k] = v
-                        end
-                        for subkey,subsymb in pairs(entries) do
-                           local entry = (key .. '.' .. subkey):lower()
-                           if funcs[entry] or funcs[entry..'.dok'] then
-                              local sym = string2symbol(package .. '.' .. key .. '.' .. subkey)
-                              dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
-                              --dok.inline[string2symbol(package .. '.' .. key .. '.' .. subkey)] = funcs[entry]
+                        -- level 2: objects' methods
+                        if type(pkg[key]) == 'table' then
+                           local entries = {}
+                           for k,v in pairs(pkg[key]) do
+                              entries[k] = v
+                           end
+                           local mt = getmetatable(pkg[key]) or {}
+                           for k,v in pairs(mt) do
+                              entries[k] = v
+                           end
+                           for subkey,subsymb in pairs(entries) do
+                              local entry = (key .. '.' .. subkey):lower()
+                              if funcs[entry] or funcs[entry..'.dok'] then
+                                 local sym = string2symbol(package .. '.' .. key .. '.' .. subkey)
+                                 dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
+                                 --dok.inline[string2symbol(package .. '.' .. key .. '.' .. subkey)] = funcs[entry]
+                              end
                            end
                         end
                      end
