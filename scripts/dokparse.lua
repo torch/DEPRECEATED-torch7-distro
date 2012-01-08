@@ -32,6 +32,7 @@ addtocsubsections(toc, sections)
 toc = table.concat(toc, '\n')
 
 local navhome = '<a href="' .. rootdir .. '/index.html">Torch7 Documentation</a>'
+navhome = navhome .. ' > <a href="index.html">' .. title .. '</a>'
 
 local templatehtml = io.open(doktemplate):read('*all')
 local txthtml = dok.dok2html(txt)
@@ -40,6 +41,7 @@ templatehtml = templatehtml:gsub('%%CONTENTS%%', txthtml)
 templatehtml = templatehtml:gsub('%%TITLE%%', title)
 templatehtml = templatehtml:gsub('%%NAVLINE%%',navhome)
 templatehtml = templatehtml:gsub('%%TOC%%', toc)
+templatehtml = templatehtml:gsub('%%LASTMODIFIED%%','Generated at ' .. os.date())
 io.open(htmldst, 'w'):write(templatehtml)
 
 io.open(dokdst, 'w'):write(txt)
