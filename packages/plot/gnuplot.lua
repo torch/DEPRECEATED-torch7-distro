@@ -497,6 +497,9 @@ function gnuplot.closeall()
 end
 
 local function filefigure(fname,term,n)
+   if not _gptable.hasrefresh then
+      print('Plotting to files is disabled in gnuplot 4.2, install gnuplot 4.4')
+   end
    local gp = getfigure(n)
    gp.fname = fname
    gp.term = term
