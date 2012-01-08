@@ -187,32 +187,34 @@ function dok.refresh()
                   if type(pkg) ~= 'table' then -- unsafe import, use protected import
                      pkg = _G._torchimport[package]
                   end
-                  -- level 0: the package itself
-                  dok.inline[pkg] = dok.inline[pkg] or funcs['dok'] or funcs['reference.dok'] or funcs['overview.dok']
-                  -- next levels
-                  for key,symb in pairs(pkg) do
-                     -- level 1: global functions and objects
-                     local entry = (key):lower()
-                     if funcs[entry] or funcs[entry..'.dok'] then
-                        local sym = string2symbol(package .. '.' .. key)
-                        dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
-                     end
-                     -- level 2: objects' methods
-                     if type(pkg[key]) == 'table' then
-                        local entries = {}
-                        for k,v in pairs(pkg[key]) do
-                           entries[k] = v
+                  if pkg then
+                     -- level 0: the package itself
+                     dok.inline[pkg] = dok.inline[pkg] or funcs['dok'] or funcs['reference.dok'] or funcs['overview.dok']
+                     -- next levels
+                     for key,symb in pairs(pkg) do
+                        -- level 1: global functions and objects
+                        local entry = (key):lower()
+                        if funcs[entry] or funcs[entry..'.dok'] then
+                           local sym = string2symbol(package .. '.' .. key)
+                           dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
                         end
-                        local mt = getmetatable(pkg[key]) or {}
-                        for k,v in pairs(mt) do
-                           entries[k] = v
-                        end
-                        for subkey,subsymb in pairs(entries) do
-                           local entry = (key .. '.' .. subkey):lower()
-                           if funcs[entry] or funcs[entry..'.dok'] then
-                              local sym = string2symbol(package .. '.' .. key .. '.' .. subkey)
-                              dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
-                              --dok.inline[string2symbol(package .. '.' .. key .. '.' .. subkey)] = funcs[entry]
+                        -- level 2: objects' methods
+                        if type(pkg[key]) == 'table' then
+                           local entries = {}
+                           for k,v in pairs(pkg[key]) do
+                              entries[k] = v
+                           end
+                           local mt = getmetatable(pkg[key]) or {}
+                           for k,v in pairs(mt) do
+                              entries[k] = v
+                           end
+                           for subkey,subsymb in pairs(entries) do
+                              local entry = (key .. '.' .. subkey):lower()
+                              if funcs[entry] or funcs[entry..'.dok'] then
+                                 local sym = string2symbol(package .. '.' .. key .. '.' .. subkey)
+                                 dok.inline[sym] = adddok(funcs[entry..'.dok'],funcs[entry])
+                                 --dok.inline[string2symbol(package .. '.' .. key .. '.' .. subkey)] = funcs[entry]
+                              end
                            end
                         end
                      end
@@ -237,10 +239,12 @@ function dok.help(symbol, asstring)
    end
    -- no symbol? global help
    if not symbol then
-      print('help(symbol): get help on a specific symbol \n'
-            .. 'or checkout the complete help:\n'
-            .. style.link .. paths.concat(paths.install_html,'index.html')
-            .. style.none)
+      print(style.banner)
+      print(style.title .. 'help(symbol)' .. style.none 
+            .. '\n\nget inline help on a specific symbol\n'
+            .. '\nto browse the complete html documentation, call: '
+            .. style.title .. 'browse()' .. style.none)
+      print(style.banner)
       return
    end
    -- always refresh (takes time, but insures that 
@@ -258,7 +262,7 @@ function dok.help(symbol, asstring)
          print(inline)
          print(style.banner)
       else
-         if type(symbol) == 'function' then
+         if type(symbol) == 'function' or type(symbol) == 'table' then
             pcall(symbol)
          else
             print('undocumented symbol')
@@ -268,6 +272,25 @@ function dok.help(symbol, asstring)
 end
 
 help = dok.help
+
+--------------------------------------------------------------------------------
+-- browse() is a simpler function that simply triggers a browser
+--------------------------------------------------------------------------------
+function dok.browse()
+   -- color detect
+   if qtide then
+      dok.dontusecolors()
+   else
+      dok.usecolors()
+   end
+   -- trigger browser
+   require 'qtide'
+   qtide.help()
+   package.loaded.qtide = false
+   qtide = nil
+end
+
+browse = dok.browse
 
 --------------------------------------------------------------------------------
 -- standard usage function: used to display automated help for functions
