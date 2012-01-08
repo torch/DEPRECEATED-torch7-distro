@@ -380,3 +380,38 @@
                                                                         \
     return 1;                                                           \
   }
+
+#define LAB_IMPLEMENT_oTL(NAME)                                         \
+  static int lab_(NAME)(lua_State *L)                                   \
+  {                                                                     \
+    THTensor *r_ = NULL;                                                \
+    THLongStorage *dimension = NULL;                                    \
+    int narg = lua_gettop(L);                                           \
+                                                                        \
+    if(narg >= 2                                                        \
+       && luaT_isudata(L, 1, torch_(Tensor_id))                         \
+       && lab_islongargs(L, 2))                                         \
+    {                                                                   \
+      r_ = luaT_toudata(L, 1, torch_(Tensor_id));                       \
+      dimension = lab_checklongargs(L, 2);                              \
+    }                                                                   \
+    else if(narg >= 1                                                   \
+            && lab_islongargs(L, 2))                                    \
+    {                                                                   \
+      dimension = lab_checklongargs(L, 2);                              \
+    }                                                                   \
+    else                                                                \
+      luaL_error(L, "invalid arguments: [tensor] (storage | dim1 [dim2...])"); \
+                                                                        \
+    if(r_)                                                              \
+      THTensor_(retain)(r_);                                            \
+    else                                                                \
+      r_ = THTensor_(new)();                                            \
+    luaT_pushudata(L, r_, torch_(Tensor_id));                           \
+                                                                        \
+    THLab_(NAME)(r_, dimension);                                        \
+                                                                        \
+    THLongStorage_free(dimension);                                      \
+                                                                        \
+    return 1;                                                           \
+  }

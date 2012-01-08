@@ -241,49 +241,8 @@ static int lab_(cross)(lua_State *L)
   return 1;
 }
 
-static int lab_(zeros_)(lua_State *L)
-{
-  THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-  THLongStorage *dimension = lab_checklongargs(L, 2);
-
-  THLab_(zeros)(r_, dimension);
-
-  THLongStorage_free(dimension);
-  lua_settop(L, 1);  
-  return 1;
-}
-
-static int lab_(zeros)(lua_State *L)
-{
-  if (lua_type(L,1) == LUA_TNUMBER || ( lua_gettop(L) == 1 && luaT_isudata(L,1, torch_LongStorage_id)))
-  {
-    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-    lua_insert(L, 1);
-  }
-  return lab_(zeros_)(L);
-}
-
-static int lab_(ones_)(lua_State *L)
-{
-  THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-  THLongStorage *dimension = lab_checklongargs(L, 2);
-
-  THLab_(ones)(r_, dimension);
-
-  THLongStorage_free(dimension);
-  lua_settop(L, 1);  
-  return 1;
-}
-
-static int lab_(ones)(lua_State *L)
-{
-  if (lua_type(L,1) == LUA_TNUMBER || ( lua_gettop(L) == 1 && luaT_isudata(L,1, torch_LongStorage_id)))
-  {
-    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-    lua_insert(L, 1);
-  }
-  return lab_(ones_)(L);
-}
+LAB_IMPLEMENT_oTL(zeros)
+LAB_IMPLEMENT_oTL(ones)
 
 static int lab_(diag_)(lua_State *L)
 {
@@ -1026,28 +985,8 @@ static int lab_(svd)(lua_State *L)
   return 0;
 }
 
-static int lab_(mean_)(lua_State *L)
-{
-  THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-  THTensor *t = luaT_checkudata(L, 2, torch_(Tensor_id));
-  int dimension = (int)(luaL_optnumber(L, 3, THTensor_(nDimension)(t)))-1;
 
-  THLab_(mean)(r_, t, dimension);
-
-  lua_settop(L, 1);  
-  return 1;
-}
-
-static int lab_(mean)(lua_State *L)
-{
-  int n = lua_gettop(L);
-  if (n == 1 || (n == 2 && lua_type(L,2) == LUA_TNUMBER))
-  {
-    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-    lua_insert(L, 1);
-  }
-  return lab_(mean_)(L);
-}
+LAB_IMPLEMENT_oTToI(mean)
 
 static int lab_(std_)(lua_State *L)
 {
@@ -1122,26 +1061,9 @@ static int lab_(dist)(lua_State *L)
   return 1;
 }
 
-static int lab_(meanall)(lua_State *L)
-{
-  THTensor *t = luaT_checkudata(L, 1, torch_(Tensor_id));  
-  lua_pushnumber(L, THLab_(meanall)(t));
-  return 1;
-}
-
-static int lab_(varall)(lua_State *L)
-{
-  THTensor *t = luaT_checkudata(L, 1, torch_(Tensor_id));  
-  lua_pushnumber(L, THLab_(varall)(t));
-  return 1;
-}
-
-static int lab_(stdall)(lua_State *L)
-{
-  THTensor *t = luaT_checkudata(L, 1, torch_(Tensor_id));  
-  lua_pushnumber(L, THLab_(stdall)(t));
-  return 1;
-}
+LAB_IMPLEMENT_rNT(meanall)
+LAB_IMPLEMENT_rNT(varall)
+LAB_IMPLEMENT_rNT(stdall)
 
 static int lab_(linspace_)(lua_State *L)
 {
@@ -1191,49 +1113,8 @@ static int lab_(logspace)(lua_State *L)
   return lab_(logspace_)(L);
 }
 
-static int lab_(rand_)(lua_State *L)
-{
-  THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-  THLongStorage *dimension = lab_checklongargs(L, 2);
-
-  THLab_(rand)(r_, dimension);
-
-  THLongStorage_free(dimension);
-  lua_settop(L, 1);  
-  return 1;
-}
-
-static int lab_(rand)(lua_State *L)
-{
-  if (lua_type(L,1) == LUA_TNUMBER || ( lua_gettop(L) == 1 && luaT_isudata(L,1, torch_LongStorage_id)))
-  {
-    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-    lua_insert(L, 1);
-  }
-  return lab_(rand_)(L);
-}
-
-static int lab_(randn_)(lua_State *L)
-{
-  THTensor *r_ = luaT_checkudata(L, 1, torch_(Tensor_id));
-  THLongStorage *dimension = lab_checklongargs(L, 2);
-
-  THLab_(randn)(r_, dimension);
-
-  THLongStorage_free(dimension);
-  lua_settop(L, 1);  
-  return 1;
-}
-
-static int lab_(randn)(lua_State *L)
-{
-  if (lua_type(L,1) == LUA_TNUMBER || ( lua_gettop(L) == 1 && luaT_isudata(L,1, torch_LongStorage_id)))
-  {
-    luaT_pushudata(L, THTensor_(new)(), torch_(Tensor_id));
-    lua_insert(L, 1);
-  }
-  return lab_(randn_)(L);
-}
+LAB_IMPLEMENT_oTL(rand)
+LAB_IMPLEMENT_oTL(randn)
 
 #define LAB_IMPLEMENT_MATH_FUNC(NAME)                         \
   static int lab_(NAME##_)(lua_State *L)                      \
@@ -1324,9 +1205,7 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"cumprod", lab_(cumprod)},
   {"trace", lab_(trace)},
   {"cross", lab_(cross)},
-  {"zeros_", lab_(zeros_)},
   {"zeros", lab_(zeros)},
-  {"ones_", lab_(ones_)},
   {"ones", lab_(ones)},
   {"diag", lab_(diag)},
   {"eye", lab_(eye)},
@@ -1375,9 +1254,7 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"stdall", lab_(stdall)},
   {"linspace", lab_(linspace)},
   {"logspace", lab_(logspace)},
-  {"rand_", lab_(rand_)},
   {"rand", lab_(rand)},
-  {"randn_", lab_(randn_)},
   {"randn", lab_(randn)},
   {"addmv", lab_(addmv)},
   {"maxall", lab_(maxall)},

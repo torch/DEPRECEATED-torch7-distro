@@ -30,6 +30,28 @@ THLongStorage* lab_checklongargs(lua_State *L, int index)
   return storage;
 }
 
+int lab_islongargs(lua_State *L, int index)
+{
+  int narg = lua_gettop(L)-index+1;
+
+  if(narg == 1 && luaT_toudata(L, index, torch_LongStorage_id))
+  {
+    return 1;
+  }
+  else
+  {
+    int i;
+
+    for(i = index; i < index+narg; i++)
+    {
+      if(!lua_isnumber(L, i))
+        return 0;
+    }
+    return 1;
+  }
+  return 0;
+}
+
 void lab_utils_init(lua_State *L)
 {
   torch_LongStorage_id = luaT_checktypename2id(L, "torch.LongStorage");
