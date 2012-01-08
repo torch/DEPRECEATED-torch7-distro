@@ -4,4 +4,4 @@ require 'lab'
 gnuplot = {}
 torch.include('plot','gnuplot.lua')
 
-plot = gnuplot
+--plot = gnuplot

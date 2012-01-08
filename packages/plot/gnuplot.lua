@@ -125,7 +125,7 @@ local function getgnuplotdefaultterm(os)
    elseif os == 'mac' and gnuplothasterm('x11') then
       return  'x11'
    else
-      print('Can not find any of the default terminals for ' .. os .. ' you can manually set terminal by gnuplot.setgnuplotterminal("terminal-name")')
+      print('Can not find any of the default terminals for ' .. os .. ' you can manually set terminal by gnuplot.setterm("terminal-name")')
       return nil
    end
 end
@@ -161,11 +161,11 @@ function gnuplot.setgnuplotexe(exe)
    local os = findos()
    local term = getgnuplotdefaultterm(os)
    if term == nil then
-      print('You have manually set the gnuplot exe and I can not find default terminals, run gnuplot.setgnuplotterminal("terminal-name") to set term type')
+      print('You have manually set the gnuplot exe and I can not find default terminals, run gnuplot.setterm("terminal-name") to set term type')
    end
 end
 
-function gnuplot.setgnuplotterminal(term)
+function gnuplot.setterm(term)
    if gnuplothasterm(term) then
       _gptable.defaultterm = term
    else
@@ -630,7 +630,7 @@ function gnuplot.movelegend(hloc,vloc)
    writeToCurrent('set key ' .. hloc .. ' ' .. vloc)
    refreshCurrent()
 end
-function gnuplot.gnuplotraw(str)
+function gnuplot.raw(str)
    writeToCurrent(str)
 end
 
