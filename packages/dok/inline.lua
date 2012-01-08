@@ -230,7 +230,7 @@ function dok.help(symbol, asstring)
       if inline then
          --print(style.banner)
          print(inline)
-         --print(style.banner)
+         print(style.banner)
       else
          if type(symbol) == 'function' then
             pcall(symbol)
@@ -252,12 +252,13 @@ help = dok.help
 -- @param ...          [optional] arguments
 --------------------------------------------------------------------------------
 function dok.usage(funcname, description, example, ...)
-   local str = style.banner .. '\n'
+   local str = ''
 
    local help = help(string2symbol(funcname), true)
    if help then
       str = str .. help
    else
+      str = str .. style.banner .. '\n'
       str = str .. style.title .. funcname .. style.none .. '\n'
       if description then
          str = str .. '\n' .. description .. '\n'
