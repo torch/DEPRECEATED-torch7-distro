@@ -21,6 +21,8 @@ static const void* torch_LongStorage_id;
 
 static const void* lab_default_tensor_id;
 
+#include "generic/labmacros.h"
+
 #include "generic/lab.c"
 #include "THGenerateAllTypes.h"
 
