@@ -24,7 +24,7 @@ end \
 # by default, import torch+lab globally
 IMPORT_TORCH="import 'torch'"
 IMPORT_LAB="import 'lab'"
-IMPORT_PLOT="import('plot',true)"
+IMPORT_PLOT="import 'gnuplot'"
 IMPORT_DOK="require 'dok'"
 
 # nicer prompt (self-promotion) + copyright

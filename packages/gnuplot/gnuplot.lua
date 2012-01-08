@@ -71,7 +71,7 @@ local function gnuplothasterm(term)
 end
 
 local function findgnuplotversion(exe)
-   ff = io.popen(exe .. '  --version','r')
+   local ff = io.popen(exe .. '  --version','r')
    local ss = ff:read('*l')
    ff:close()
    local v,vv = ss:match('(%d).(%d)')
