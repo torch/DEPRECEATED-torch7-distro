@@ -415,6 +415,24 @@ rtty_compentry(const char *text, int state)
   return strdup(b.constData());
 }
 
+static char *
+rtty_dummycomp(const char *text, int state)
+{
+  static int st = 0;
+  if (state == 0) {
+    st = 0;
+  }
+  if (st == 2) {
+    return 0;
+  } else if (st == 1) {
+    st = 2;
+    return strdup("/");
+  } else if (st == 0) {
+    st = 1;
+    return strdup("\\");
+  }
+}
+
 static char **
 rtty_complete(const char *text, int start, int end)
 {
@@ -435,6 +453,16 @@ rtty_complete(const char *text, int start, int end)
       keyword[i] = rl_line_buffer[start+i];
     }
     keyword[i] = 0;
+    // prev keyword
+    static char *prevkw = NULL;
+    if (prevkw == NULL || strcmp(prevkw,keyword) != 0) {
+      if (prevkw != NULL) free(prevkw);
+      prevkw = strdup(keyword);
+      return 0;
+    } else {
+      if (prevkw != NULL) free(prevkw);
+      prevkw = strdup(keyword);
+    }
     // get help for keyword
     if (console && console->lua) {
       QtLuaLocker lua(console->lua, 250);
@@ -449,7 +477,8 @@ rtty_complete(const char *text, int start, int end)
       }
     }
     // done
-    return 0;
+    char **result = rl_completion_matches(text, rtty_dummycomp);
+    return result;
   }
   // no completion unless in identifier
   if (state != -2 || start >= end) 
