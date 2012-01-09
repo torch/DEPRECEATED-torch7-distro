@@ -394,6 +394,7 @@ rtty_lex(const char *s, int end, int &q)
         case -5: // opening function
           if (s[p] != ' ') {
             state = -1;
+            p--;
           }
           break;
         }
