@@ -26,6 +26,12 @@ static const void* lab_default_tensor_id;
 #include "generic/lab.c"
 #include "THGenerateAllTypes.h"
 
+#include "generic/labconv.c"
+#include "THGenerateAllTypes.h"
+
+#include "generic/lablapack.c"
+#include "THGenerateFloatTypes.h"
+
 static int lab_setdefaulttensortype(lua_State *L)
 {
   const void *id;
