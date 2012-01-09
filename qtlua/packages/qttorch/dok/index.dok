@@ -1,20 +1,20 @@
-QTTorch Package Reference Manual
+======  QTTorch Package Reference Manual ====== 
 
 Package ''qttorch'' declares two functions
 that convert ''torch.Tensor'' to ''QImage'' and vice-versa.
 
 Loading this package automatically loads
-packages [[..:torch:start|torch]] 
-and [[..:qt:start|qt]].
+packages [[..:torch:index|torch]] 
+and [[..:qt:index|qt]].
 
 
 ====  qt.QImage.fromTensor(tensor) ====
-#qimagefromtensor
+{{anchor:qimagefromtensor}}
 
 ''qt.QImage.fromTensor(tensor)''
 
-Return a new [[..:qtgui:start#qimage|QImage]] filled 
-with data from a torch [[..:torch:start#Tensor|Tensor]].
+Return a new [[..:qtgui:index#qimage|QImage]] filled 
+with data from a torch [[..:torch:index#Tensor|Tensor]].
 
 Tensor ''tensor'' must have 2 or 3 dimensions.
   * The first dimension defines the image width.
@@ -25,12 +25,12 @@ Each component is a floating point number in range 0 to 1.
 
 
 ====  qimage:toTensor(arg) ====
-#qimagetotensor
+{{anchor:qimagetotensor}}
 
 ''qimage.toTensor(tensor)''
 
-Fill the [[..:torch:start#Tensor|Tensor]] ''tensor'' with data 
-from [[..:qtgui:start#qimage|QImage]] ''qimage''.
+Fill the [[..:torch:index#Tensor|Tensor]] ''tensor'' with data 
+from [[..:qtgui:index#qimage|QImage]] ''qimage''.
 Tensor ''tensor'' must have 2 or 3 dimensions.
 The first two dimensions must be equal to the 
 image width and height respectively.

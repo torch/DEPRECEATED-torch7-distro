@@ -51,6 +51,7 @@ x = torch.DoubleStorage(10)
 The data in the ''Storage'' is //uninitialized//.
 
 ===== torch.TYPEStorage(table) =====
+{{anchor:torch.Storage}}
 
 The argument is assumed to be a Lua array of numbers. The constructor returns a new storage of the specified 'TYPE', 
 of the size of the table, containing all the table elements converted
@@ -138,6 +139,7 @@ $ cat hello.txt
 Returns the number of elements in the storage. Equivalent to [[#torch.Storage.size|size()]].
 
 =====  [number] self[index] =====
+{{anchor:torch.Storage.__index__}}
 
 Returns or set the element at position ''index'' in the storage. Valid range
 of ''index'' is 1 to [[#torch.Storage.size|size()]].

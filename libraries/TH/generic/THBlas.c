@@ -77,9 +77,9 @@ void THBlas_(copy)(long n, real *x, long incx, real *y, long incy)
 #if defined(USE_LAPACK) && (defined(TH_REAL_IS_DOUBLE) || defined(TH_REAL_IS_FLOAT))
   if( (n <= INT_MAX) && (incx <= INT_MAX) && (incy <= INT_MAX) )
   {
-    int i_n = (int)i_n;
-    int i_incx = (int)i_incx;
-    int i_incy = (int)i_incy;
+    int i_n = (int)n;
+    int i_incx = (int)incx;
+    int i_incy = (int)incy;
 
 #if defined(TH_REAL_IS_DOUBLE)
     extern void dcopy_(int *n, double *x, int *incx, double *y, int *incy);

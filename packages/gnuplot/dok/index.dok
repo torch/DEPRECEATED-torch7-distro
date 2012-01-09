@@ -1,0 +1,260 @@
+======= Plotting Package Manual with Gnuplot =======
+{{anchor:gnuplot.dok}}
+
+A plotting package to visualize [[..:torch:index#Tensor|Tensor]] objects.
+Functions fall into several types of categories:
+  * [[#gnuplot.line.dok|Line plotting]]
+  * [[#gnuplot.surface.dok|Plotting 3D surfaces]]
+  * [[#gnuplot.image.dok|Plotting matrices as images]]
+  * [[#gnuplot.histogram.dok|Plotting histogram of data]]
+  * [[#gnuplot.files.dok|Plotting directly into files]]
+  * [[#gnuplot.commons.dok|Common operations to decorate plots]]
+
+The plotting package currently uses [[http://gnuplot.info|gnuplot]] as
+a backend to display data. In particular, ''Gnuplot'' version ''4.4''
+or above is suggested for full support of all functionality.
+
+By default, plot package will search for terminal in following order
+  * '' windows '' terminal if operating system is windows
+  * '' wxt '', '' x11 ''  terminal if operating system is linux
+  * '' aqua '', '' x11 '' terminal if operating system is mac
+
+It is also possible to manually set any terminal type using
+[[#gnuplot.setterm|gnuplot.setterm]]. Interactivity is
+dependent on the terminal being used. By default, ''x11'' and ''wxt
+support'' different interactive operations like, zooming, panning,
+rotating...
+
+The ''Gnuplot'' port uses ''pipes'' to communicate with ''gnuplot'',
+therefore each plotting session is persistent and additional commands
+can be sent. For advanced users [[#gnuplot.raw|gnuplot.raw]]
+provides a free form interface to gnuplot.
+
+====== Line Plotting ======
+{{anchor:gnuplot.line.dok}}
+
+Line plotting functionality covers many configurations from simplest
+case of plotting a single vector to displaying multiple lines at once
+with custom line specifictions.
+
+=====  gnuplot.plot(x) =====
+{{anchor:gnuplot.plot}}
+Plot vector '' x '' using dots of first default ''Gnuplot'' type.
+
+<file lua>
+x=lab.linspace(-2*math.pi,2*math.pi)
+gnuplot.plot(lab.sin(x))
+</file>
+{{plot_x.png?400}}
+
+In more general form, plot vector '' y vs x '' using the format
+specified. The possible entries of format string can be
+  * '.' for dots
+  * '+' for points
+  * '-' for lines
+  * '+-' for points and lines
+  * '~' for using smoothed lines with cubic interpolation
+  * '|' for using boxes
+
+<file lua>
+x=lab.linspace(-2*math.pi,2*math.pi)
+gnuplot.plot('Sin',x/math.pi,lab.sin(x),'|')
+</file>
+{{plot_xyf.png?400}}
+
+To plot multiple curves at a time, one can pass each plot struct in a table.
+
+<file lua>
+x=lab.linspace(-2*math.pi,2*math.pi)
+gnuplot.plot({'Cos',x/math.pi,lab.cos(x),'~'},{'Sin',x/math.pi,lab.sin(x),'|'})
+</file>
+{{plot_sincos.png?400}}
+
+====== Plotting 3D Surfaces ======
+{{anchor:gnuplot.surface.dok}}
+
+Surface plotting creates a 3D surface plot of a given matrix '' z
+''. Entries of '' z '' are used as height values. It is also possible
+to specify '' x '' and '' y '' locations corresponding to each point
+in '' z ''. If a terminal with interactive capabilities is being used
+by ''Gnuplot'' backend (like ''x11'' or ''wxt''), then rotating,
+zooming is also possible.
+
+=====  gnuplot.splot(z) =====
+{{anchor:gnuplot.splot}}
+
+Plot surface '' z '' in 3D.
+<file lua>
+x=lab.linspace(-1,1)
+xx = torch.Tensor(x:size(1),x:size(1)):zero():addr(1,x,x)
+xx = xx*math.pi*6
+gnuplot.splot(lab.sin(xx))
+</file>
+{{plot_splot.png?400}}
+
+It is also possible to specify the ''x'' and ''y'' locations of each
+point in ''z'' by ''gnuplot.splot(x,y,z)''. In this ''x'' and ''y'' has
+to be the same shape as ''z''.
+
+One can also display multiple surfaces at a time.
+
+<file lua>
+x=lab.linspace(-1,1)
+xx = torch.Tensor(x:size(1),x:size(1)):zero():addr(1,x,x)
+xx = xx*math.pi*2
+gnuplot.splot({lab.sin(xx)},{lab.sin(xx)+2})
+</file>
+{{plot_splot2.png?400}}
+
+======  Plotting Matrices as Images ======
+{{anchor:gnuplot.image.dok}}
+
+A given matrix can be plotted using 2D contour plot on a surface.
+
+=====  gnuplot.imagesc(z, ['color' or 'gray']) =====
+{{anchor:gnuplot.imagesc}}
+
+Plot surface '' z '' using contour plot. The second argument defines
+the color palette for the display. By default, grayscale colors are
+used, however, one can also use any color palette available in
+''Gnuplot''.
+
+<file lua>
+x=lab.linspace(-1,1)
+xx = torch.Tensor(x:size(1),x:size(1)):zero():addr(1,x,x)
+xx = xx*math.pi*6
+gnuplot.imagesc(lab.sin(xx),'color')
+</file>
+{{plot_imagesc.png?400}}
+
+====== Histograms ======
+{{anchor:gnuplot.histogram.dok}}
+
+Given a tensor, the distribution of values can be plotted using
+''gnuplot.hist'' function.
+
+=====  gnuplot.hist(x, [nbins, min, max]) =====
+{{anchor:gnuplot.hist}}
+
+Plot the histogram of values in ''N-D'' tensor ''x'', optionally using ''nbins''
+number of bins and only using values between ''min'' and ''max''.
+
+<file lua>
+gnuplot.hist(lab.randn(100000),100)
+</file>
+{{plot_hist.png?400}}
+
+====== Plotting Directly into Files ======
+{{anchor:gnuplot.files.dok}}
+
+Any of the above plotting utilities can also be used for directly
+plotting into ''eps'' or ''png'' files. A final gnuplot.plotflush()
+command ensures that all output is written to the file properly.
+
+<file lua>
+gnuplot.epsfigure('test.eps')
+gnuplot.plot({'Sin Curve',lab.sin(lab.linspace(-5,5))})
+gnuplot.xlabel('X')
+gnuplot.ylabel('Y')
+gnuplot.plotflush()
+</file>
+
+====== Common Operations ======
+{{anchor:gnuplot.commons.dok}}
+
+It is possible to manage multiple plots at a time, printing plots to
+png, or eps files or creating plots directly on png or eps files.
+
+There are also several handy operations for decorating plots which are
+common to many of the plotting functions.
+
+
+=====  gnuplot.setgnuplotexe(exe) =====
+{{anchor:gnuplot.setgnuplotexe}}
+
+Manually set the location of gnuplot executable.
+
+=====  gnuplot.setterm(teerm) =====
+{{anchor:gnuplot.setterm}}
+
+Manually set the gnuplot terminal.
+
+=====  gnuplot.closeall() =====
+{{anchor:gnuplot.closeall}}
+
+Close all gnuplot active connections. This will not be able to close
+open windows, since on the backend gnuplot also can not close windows.
+
+=====  gnuplot.figure([n]) =====
+{{anchor:gnuplot.figure}}
+
+Select (or create) a new figure with id ''n''. Note that until a plot
+command is given, the window will not be created. When ''n'' is
+skipped, a new figure is created with the next consecutive id.
+
+=====  gnuplot.epsfigure(fname) =====
+{{anchor:gnuplot.epsfigure}}
+
+Creates a figure directly on the ''eps'' file given with
+''fname''. This uses ''Gnuplot'' terminal ''postscricpt eps enhanced color''.
+
+=====  gnuplot.pngfigure(fname) =====
+{{anchor:gnuplot.pngfigure}}
+
+Creates a figure directly on the ''png'' file given with
+''fname''. This uses ''Gnuplot'' terminal ''png''.
+
+=====  gnuplot.plotflush([n]) =====
+{{anchor:gnuplot.plotflush}}
+
+This command sends ''unset output'' to underlying gnuplot. Usefull for
+flushing file based terminals.
+
+=====  gnuplot.figprint(fname) =====
+{{anchor:gnuplot.figprint}}
+
+Prints the current figure to the given file with name ''fname''. Only
+''png'' or ''eps'' files are supported.
+
+=====  gnuplot.xlabel(label) =====
+{{anchor:gnuplot.xlabel}}
+
+Sets the label of ''x'' axis to ''label''. Only supported for gnuplot
+version 4.4 and above.
+
+=====  gnuplot.ylabel(label) =====
+{{anchor:gnuplot.ylabel}}
+
+Sets the label of ''y'' axis to ''label''. Only supported for gnuplot
+version 4.4 and above.
+
+=====  gnuplot.zlabel(label) =====
+{{anchor:gnuplot.zlabel}}
+
+Sets the label of ''z'' axis to ''label''. Only supported for gnuplot
+version 4.4 and above.
+
+=====  gnuplot.title(title) =====
+{{anchor:gnuplot.title}}
+
+Sets the title of the plot to ''title''. Only supported for gnuplot
+version 4.4 and above.
+
+=====  gnuplot.grid(toggle) =====
+{{anchor:gnuplot.grid}}
+
+If ''toggle'' is ''true'' then a grid is displayed, else it is
+hidden. Only supported for gnuplot version 4.4 and above.
+
+=====  gnuplot.movelegend(hloc,vloc) =====
+{{anchor:gnuplot.movelegend}}
+
+Set the location of legend key. ''hloc'' can be '''left', 'right' or
+'center'''. ''vloc'' can be '''top', 'bottom' or 'middle'''. Only
+supported for gnuplot version 4.4 and above.
+
+=====  gnuplot.raw(command) =====
+{{anchor:gnuplot.raw}}
+
+This command is useful for advanced users of gnuplot. ''command'' is
+directly passed to gnuplot without any formatting.

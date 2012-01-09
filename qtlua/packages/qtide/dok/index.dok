@@ -1,4 +1,4 @@
-QtIde Package Reference Manual
+======  QtIde Package Reference Manual ====== 
 
 A package implementing 
 the QLua Integrated Development Environment (IDE),
@@ -10,7 +10,7 @@ it is under heavy development.
 
 
 ====  Functions ====
-#qtidefunctions
+{{anchor:qtidefunctions}}
 
 ===  qtide.editor([filename]) ===
 
@@ -55,7 +55,7 @@ Not yet implemented
 
 
 ===  qtide.start([style]) ===
-#qtidestart
+{{anchor:qtidestart}}
 
 Starts the QLua Integrated Development Environment (IDE)
 and ensure that the main window is visible.
@@ -75,7 +75,7 @@ The recognized IDE styles are:
 
 
 ===  qtide.setup([style]) ===
-#qtidesetup
+{{anchor:qtidesetup}}
 
 This function is called by [[#qtidestart|qtide.start()]]
 to setup the IDE style. You can call it directly if you
@@ -87,11 +87,11 @@ a graphic console.
 
 
 ===  qt.QLuaIde ===
-#qluaide
+{{anchor:qluaide}}
 
 Object ''qt.qLuaIde'' represetns the global state of the IDE.
 This is the unique instance of class ''qt.QLuaIde''
-which inherits [[..:qt:start#qobject|qt.QObject]].
+which inherits [[..:qt:index#qobject|qt.QObject]].
 Most of its capabilities are conveniently
 accessible using the functions defined
 by the [[#qtidefunctions|package ''qtide]].
@@ -152,7 +152,7 @@ This signal is emitted when the "Help Index" menu is selected.
 
 
 ===  qt.QLuaMainWindow ===
-#qluamainwindow
+{{anchor:qluamainwindow}}
 
 This subclass of ''QMainWindow'' implements common 
 functionalities shared by all main windows defined
@@ -174,7 +174,7 @@ in various subclasses of ''qt.QLuaMainWindow''.
 
 
 ===  qt.QLuaEditor ===
-#qluaeditor
+{{anchor:qluaeditor}}
 
 This subclass of [[#qluamainwindow|qt.QLuaMainWindow]]
 implements the QLua editor windows using 
@@ -198,7 +198,7 @@ This property contains the name of the file being edited.
 
 
 ===  qt.QLuaBrowser ===
-#qluabrowser
+{{anchor:qluabrowser}}
 
 This subclass of [[#qluamainwindow|qt.QLuaMainWindow]]
 implements the QLua web browser windows using the Qt WebKit interface.
@@ -207,7 +207,7 @@ implements the QLua web browser windows using the Qt WebKit interface.
 ==  qluabrowser.url ==
 
 This property contains a qt variant 
-of type [[..:qt:start#qurl|qt.QUrl]] 
+of type [[..:qt:index#qurl|qt.QUrl]] 
 representing the URL displayed by the browser.
 
 ==  qluabrowser.html ==
@@ -219,7 +219,7 @@ representing the HTML text displayed by the browser.
 
 
 ===  qt.QLuaSdiMain ===
-#qluasdimain
+{{anchor:qluasdimain}}
 
 This subclass of [[#qluamainwindow|qt.QLuaMainWindow]]
 implements the QLua console window.
@@ -241,14 +241,8 @@ implementing the part of the main console
 where the Lua output is shown.
 
 
-
-
-
-
-
-
 ===  qt.QLuaMdiMain ===
-#qluamdimain
+{{anchor:qluamdimain}}
 
 This subclass of [[#qluamainwindow|qt.QLuaMainWindow]]
 aggregates selected windows into a single main window
@@ -279,10 +273,8 @@ and aggregates them into the mdi main window.
 ==  qt.qLuaMdiMain:activate(qwidget) ==
 
 
-
-
 ===  qt.QLuaTextEdit ===
-#qluatextedit
+{{anchor:qluatextedit}}
 
 Class ''QLuaTextEdit'' is a text editor widget derived 
 from ''QPlainTextEdit'' with support for line numbers, 
@@ -313,7 +305,7 @@ find dialog, replace dialog, and printing.
 
 
 ===  qt.QLuaConsoleWidget ===
-#qluaconsolewidget
+{{anchor:qluaconsolewidget}}
 
 Class ''QLuaConsoleWidget'' is a subclass of 
 [[#qluatextedit|qt.QLuaTextEdit]]
@@ -340,7 +332,7 @@ Shows the bottom of the text displayed in the console window.
 
 
 ===  qt.qLuaIde ===
-#qtqluaide
+{{anchor:qtqluaide}}
 
 Expression ''qt.qLuaIde'' refers to the unique instance
 of class [[#qluaide|qt.QLuaIde]].

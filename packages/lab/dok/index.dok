@@ -1,55 +1,59 @@
-Lab Package Reference Manual
+====== Lab Package Reference Manual ======
+{{anchor:lab.reference.dok}}
 
 A Linear Algebra package consisting of Matlab-like  functions
-for manipulating [[..:torch:start#Tensor|Tensor]] objects.
+for manipulating [[..:torch:index#Tensor|Tensor]] objects.
 Functions fall into several types of categories:
-constructors like [[#zeros|zeros]], [[#ones|ones]]
-or extractors like  [[#diag|diag]]  and [[#triu|triu]],
-element-wise operations like [[#abs|abs]] and [[#pow|pow]],
-column or row-wise operations like [[#sum|sum]] and [[#max|max]],
-or matrix-wide operations like [[#trace|trace]] and [[#norm|norm]].
+  * [[#lab.construction.dok|constructors]] like [[#lab.zeros|zeros]], [[#lab.ones|ones]]
+  * extractors like  [[#lab.diag|diag]]  and [[#lab.triu|triu]],
+  * [[#lab.elementwise.dok|element-wise]] operations like [[#lab.abs|abs]] and [[#lab.pow|pow]],
+  * [[#lab.columnwise.dok|column or row-wise operations]] like [[#lab.sum|sum]] and [[#lab.max|max]],
+  * [[#lab.matrixwide.dok|matrix-wide operations]] like [[#lab.trace|trace]] and [[#lab.norm|norm]].
+  * [[#lab.conv.dok|Convolution and cross-correlation]] operations like [[#lab.conv2|conv2]].
+  * [[#lab.linalg.dok|Basic linear algebra operations]] like [[#lab.eig|eigen value/vector calculation]], [[#lab.svd|singular value decomposition (svd)]] and [[#lab.gesv|linear system solution]].
 
+By default all lab operations allocate a new tensor to return the result. However, all lab function also support passing the resulting tensor as the first argument, in which case the resulting tensor will be resized accordingly and filled with result.
 
+For example, ''lab.conv2'' function can be used in the following manner.
+<file lua>
 
-======  Construction or extraction functions ======
-#construction
+x = lab.rand(100,100)
+k = lab.rand(10,10)
+res1 = lab.conv2(x,k)
 
-=====  lab.new(...)       =====
-#new
+res2 = torch.Tensor()
+lab.conv2(res2,x,k)
 
-''x=lab.new([value],[value],...)'' returns a vector ''x'' initialized with the given values.
-
-''x=lab.new({[value],[value],...},{[value],[value],...},...)'' returns a matrix ''x'' initialized with the given values.
-
-<file>
-> print(lab.new(1,2,3))
-
- 1
- 2
- 3
-[torch.Tensor of dimension 3]
-
-> print(lab.new({1,2},{3,4},{5,6}))
-
- 1  2
- 3  4
- 5  6
-[torch.Tensor of dimension 3x2]
+=res2:dist(res1)
+0
 
 </file>
 
+The advantage of second case is, same ''res2'' tensor can be used successively in a loop without any new allocation.
 
-=====  lab.cat(x_1,x_2,..,x_n,[dimension])       =====
-#cat
+<file lua>
+-- no new memory allocations...
+for i=1,100 do
+    lab.conv2(res2,x,k)
+end
+=res2:dist(res1)
+0
+</file>
 
-''x=lab.cat(x_1,x_2,...,x_n,[dimension])'' returns a vector ''x'' which is the concatenation of vectors x_1,..x_n along dimension ''dimension''. 
+======  Construction or extraction functions ======
+{{anchor:lab.construction.dok}}
 
-If ''dimension'' is not specified it is the last dimension of x_i.
+=====  lab.cat( [res,] x_1, x_2, [dimension] )       =====
+{{anchor:lab.cat}}
 
-For all x_i, the other dimensions have to be equal.
+''x=lab.cat(x_1,x_2,[dimension])'' returns a tensor ''x'' which is the concatenation of tensors x_1 and x_2 along dimension ''dimension''. 
+
+If ''dimension'' is not specified it is 1.
+
+The other dimensions of x_1 and x_2 have to be equal.
 
 Examples:
-<file>
+<file lua>
 > print(lab.cat(lab.ones(3),lab.zeros(2)))
 
  1
@@ -60,41 +64,45 @@ Examples:
 [torch.Tensor of dimension 5]
 
 
-> print(lab.cat(lab.ones(2,3),lab.zeros(2,2)))
+> print(lab.cat(lab.ones(3,2),lab.zeros(2,2)))
 
- 1  1  1  0  0
- 1  1  1  0  0
-[torch.Tensor of dimension 2x5]
+ 1  1
+ 1  1
+ 1  1
+ 0  0
+ 0  0
+[torch.DoubleTensor of dimension 5x2]
 
 
 > print(lab.cat(lab.ones(2,2),lab.zeros(2,2)))
-
- 1  1  0  0
- 1  1  0  0
-[torch.Tensor of dimension 2x4]
-
-> print(lab.cat(lab.ones(2,2),lab.zeros(2,2),1))
-
  1  1
  1  1
  0  0
  0  0
-[torch.Tensor of dimension 4x2]
+[torch.DoubleTensor of dimension 4x2]
 
-> print(lab.cat(lab.ones(2,2),lab.zeros(2,2),lab.rand(2,3)))
+> print(lab.cat(lab.ones(2,2),lab.zeros(2,2),2))
+ 1  1  0  0
+ 1  1  0  0
+[torch.DoubleTensor of dimension 2x4]
 
- 1.0000  1.0000  0.0000  0.0000  0.9978  0.1596  0.8195
- 1.0000  1.0000  0.0000  0.0000  0.2049  0.2406  0.8279
-[torch.Tensor of dimension 2x7]
 
+> print(lab.cat(lab.cat(lab.ones(2,2),lab.zeros(2,2)),lab.rand(3,2)))
+
+ 1.0000  1.0000
+ 1.0000  1.0000
+ 0.0000  0.0000
+ 0.0000  0.0000
+ 0.3227  0.0493
+ 0.9161  0.1086
+ 0.2206  0.7449
+[torch.DoubleTensor of dimension 7x2]
 
 </file>
 
 
-
-
-=====  lab.diag(x)       =====
-#diag
+=====  lab.diag( [res,] x)       =====
+{{anchor:lab.diag}}
 
 ''y=lab.diag(x)'' when x is of dimension 1 returns a diagonal matrix with diagonal elements constructed from x.
 
@@ -105,53 +113,61 @@ with elements constructed from the diagonal of x.
 wher k=0 is the main diagonal, k>0 is above the main diagonal and k<0 
 is below the main diagonal.
 
-=====  lab.eye(n)         =====
-#eye
+=====  lab.eye( [res,] n)         =====
+{{anchor:lab.eye}}
 
 ''y=lab.eye(n)'' returns the n-by-n identity matrix.
 
 ''y=lab.eye(m,n)'' returns an m-by-n identity matrix with ones on the diagonal and zeros elsewhere.
 
 
-=====  lab.linspace(x1,x2)     =====
+=====  lab.linspace( [res,] x1,x2)     =====
+{{anchor:lab.linspace}}
+
 ''y=lab.linspace(x1,x2)'' returns a one-dimensional tensor of size 100 equally spaced points between x1 and x2.
 
 ''y=lab.linspace(x1,x2,n)'' returns a one-dimensional tensor of n equally spaced points between x1 and x2.
 
 
-=====  lab.logspace(x)    =====
+=====  lab.logspace( [res,] x1, x2)    =====
+{{anchor:lab.logspace}}
 
 ''y=lab.logspace(x1,x2)'' returns a one-dimensional tensor of 50 logarithmically eqally spaced points between x1 and x2.
 
 ''y=lab.logspace(x1,x2,n)'' returns a one-dimensional tensor of n logarithmically equally spaced points between x1 and x2.
 
-=====  lab.ones(n)        =====
-#ones
+=====  lab.ones( [res,] m)  =====
+{{anchor:lab.ones}}
 
 ''y=lab.ones(n)'' returns a one-dimensional tensor of size n filled with ones.
 
 ''y=lab.ones(m,n)'' returns a mxn tensor filled with ones.
 
-=====  lab.rand(x)        =====
-#rand
+''y=lab.ones(m,n,k)'' returns a mxnxk tensor filled with ones.
+
+''y=lab.ones(d1,...,d_n)'' returns an n-dimensional tensor with sizes d1, ..., d_n filled with ones.
+
+=====  lab.rand( [res,] m [, n, k, ...])        =====
+{{anchor:lab.rand}}
 
 ''y=lab.rand(n)'' returns a one-dimensional tensor of size n filled with random numbers from a uniform distribution on the interval (0,1).
 
 ''y=lab.rand(m,n)'' returns a mxn tensor of random numbers from a uniform distribution on the interval (0,1).
 
-=====  lab.randn(x)       =====
-#randn
+=====  lab.randn( [res,] m [, n, k, ...])       =====
+{{anchor:lab.randn}}
 
 ''y=lab.randn(n)'' returns a one-dimensional tensor of size n filled with random numbers from a normal distribution with mean zero and variance one.
 
 ''y=lab.randn(m,n)'' returns a mxn tensor of random numbers from a normal distribution with mean zero and variance one.
 
-=====  lab.range(n,m)       =====
+=====  lab.range([res,] n,m)       =====
+{{anchor:lab.range}}
 
 ''y=lab.range(n,m)'' returns a tensor of size m-n+1x1 with integer 
 values n to m.
 
-<file>
+<file lua>
 > print(lab.range(2,5))
 
  2
@@ -161,28 +177,36 @@ values n to m.
 [torch.Tensor of dimension 4]
 </file>
 
-=====  lab.randperm(n)      =====
+''y=lab.range(n,m,incr)'' returns a tensor filled in range n to m with incr increments.
+<file lua>
+print(lab.range(2,5,1.2))
+ 2.0000
+ 3.2000
+ 4.4000
+[torch.DoubleTensor of dimension 3]
+</file>
+
+=====  lab.randperm([res,] n)      =====
+{{anchor:lab.randperm}}
 
 ''y=lab.randperm(n)'' returns a randomly ordered nx1 tensor of the integers from 1 to n.
 
-=====  lab.repmat(x,m,n)      =====
+=====  lab.reshape([res,] x,m,n)     =====
+{{anchor:lab.reshape}}
 
-''y=lab.repmat(x,m,n)'' returns a tensor y consisting of mxn tiled copies of x.
+''y=lab.reshape(x,m,n)'' returns a new mxn tensor y whose elements
+are taken rowwise from x, which must have m*n elements. The elements are copied into the new tensor.
 
-=====  lab.reshape(x,m,n)     =====
-
-''y=lab.reshape(x,m,n)'' returns an mxn tensor y whose elements
-are taken columwise from x, which must have m*n elements.  
-
-=====  lab.tril(x) =====
+=====  lab.tril([res,] x) =====
+{{anchor:lab.tril}}
 
 ''y=lab.tril(x)'' returns the lower triangular part of x, the other elements of y are set to 0.
 
 ''lab.tril(x,k)'' returns the elements on and below the k-th diagonal of x as non-zero.   k=0 is the main diagonal, k>0 is above the main diagonal and k<0 
 is below the main diagonal.
 
-=====  lab.triu(x) =====
-#triu
+=====  lab.triu([res,] x) =====
+{{anchor:lab.triu}}
 
 ''y=lab.triu(x)'' returns the upper triangular part of x,
 the other elements of y are set to 0.
@@ -190,153 +214,102 @@ the other elements of y are set to 0.
 ''lab.triu(x,k)'' returns the elements on and above the k-th diagonal of x as non-zero.   k=0 is the main diagonal, k>0 is above the main diagonal and k<0 
 is below the main diagonal.
 
-
-
-=====  lab.zeros(x) =====
-#zeros
+=====  lab.zeros([res,] x) =====
+{{anchor:lab.zeros}}
 
 ''y=lab.zeros(n)'' returns a one-dimensional tensor of size n filled with zeros.
 
 ''y=lab.zeros(m,n)'' returns a mxn tensor filled with zeros.
 
 
-
-
 ======  Element-wise operations  ======
-#elementwise
+{{anchor:lab.elementwise.dok}}
 
-=====  lab.abs(x) =====
-#abs
+=====  lab.abs([res,] x) =====
+{{anchor:lab.abs}}
 
 ''y=lab.abs(x)'' returns the absolute values of the elements of x.
 
-=====  lab.acos(x) =====
+=====  lab.acos([res,] x) =====
+{{anchor:lab.acos}}
 
 ''y=lab.acos(x)'' returns the arcosine of the elements of x.
 
-=====  lab.asin(x)       =====
+=====  lab.asin([res,] x)       =====
+{{anchor:lab.asin}}
 
 ''y=lab.asin(x)'' returns the arcsine  of the elements of x.
 
-=====  lab.atan(x)       =====
+=====  lab.atan([res,] x)       =====
+{{anchor:lab.atan}}
 
 ''y=lab.atan(x)'' returns the arctangent of the elements of x.
 
-=====  lab.ceil(x)       =====
+=====  lab.ceil([res,] x)       =====
+{{anchor:lab.ceil}}
 
 ''y=lab.ceil(x)'' returns the values of the elements of x rounded up to the nearest integers.
 
-=====  lab.cos(x)        =====
+=====  lab.cos([res,] x)        =====
+{{anchor:lab.cos}}
 
 ''y=lab.cos(x)'' returns the cosine of the elements of x.
 
-=====  lab.cosh(x)       =====
+=====  lab.cosh([res,] x)       =====
+{{anchor:lab.cosh}}
 
 ''y=lab.cosh(x)'' returns the hyberbolic cosine of the elements of x.
 
-
-=====  lab.exp(x) =====
+=====  lab.exp[res,] (x) =====
+{{anchor:lab.exp}}
 
 ''y=lab.exp(x)'' returns, for each element in x,  e (the base of natural logarithms) raised to the power of the element in x.
 
-
-=====  lab.floor(x) =====
+=====  lab.floor([res,] x) =====
+{{anchor:lab.floor}}
 
 ''y=lab.floor(x)'' returns the values of the elements of x rounded down to the nearest integers.
 
-
-=====  lab.log(x)         =====
+=====  lab.log[res,] (x)         =====
+{{anchor:lab.log}}
 
 ''y=lab.log(x)'' returns the natural logarithm of the elements of x.
 
-=====  lab.map(x,f) =====
-#map
-
-''y = lab.map(x,f)'' returns a new ''Tensor'' ''f(x)'': ''f()'' is applied successively to each element of ''x''.
-
-<file>
-> x = lab.rand(5,5)
-> print(x)
-
- 0.2828  0.2709  0.0191  0.1217  0.0161
- 0.4847  0.6586  0.3027  0.6749  0.4945
- 0.2003  0.9536  0.3208  0.9612  0.9265
- 0.5415  0.1827  0.6799  0.3222  0.7285
- 0.7835  0.5920  0.8516  0.2312  0.1857
-[torch.Tensor of dimension 5x5]
-
-> = lab.map(x, math.cos)
-
- 0.9603  0.9635  0.9998  0.9926  0.9999
- 0.8848  0.7909  0.9545  0.7807  0.8802
- 0.9800  0.5788  0.9490  0.5725  0.6007
- 0.8569  0.9834  0.7776  0.9486  0.7462
- 0.7084  0.8298  0.6588  0.9734  0.9828
-[torch.Tensor of dimension 5x5]
-</file>
-
-''f'' must return a number or ''nil''. If it returns ''nil'', the corresponding value in the returned ''Tensor'' will be ''0''.
-This behavior is slightly different from the behavior of [[..:torch:start#TensorApplyFunction|map]] functions provided in the [[..:torch:start|torch'' package]],
-which do not modify the destination tensor if the function returns ''nil''.
-<file>
-> x = lab.rand(5,5)
-> print(x)
-
- 0.0446  0.5119  0.4007  0.9743  0.0957
- 0.4649  0.7575  0.4963  0.5474  0.5009
- 0.5523  0.8003  0.2841  0.0048  0.9853
- 0.5080  0.1222  0.3049  0.8647  0.2566
- 0.6863  0.8243  0.3053  0.9196  0.6050
-[torch.Tensor of dimension 5x5]
-
-> = lab.map(x, function(z)
->> if z > 0.5 then return 1 end -- nothing returned otherwise!
->> end
->> )
-
- 0  1  0  1  0
- 0  1  0  1  1
- 1  1  0  0  1
- 1  0  0  1  0
- 1  1  0  1  1
-[torch.Tensor of dimension 5x5]
-</file>
-
-=====  lab.pow(x)         =====
-#pow
+=====  lab.pow([res,] x)         =====
+{{anchor:lab.pow}}
 
 ''y=lab.pow(x,n)'' returns the elements of x to the power of n.
 
-
-=====  lab.sin(x)         =====
+=====  lab.sin([res,] x)         =====
+{{anchor:lab.sin}}
 
 ''y=lab.sin(x)'' returns the sine  of the elements of x.
 
-=====  lab.sinh(x)        =====
+=====  lab.sinh([res,] x)        =====
+{{anchor:lab.sinh}}
 
 ''y=lab.sinh(x)'' returns the hyperbolic sine of the elements of x.
 
-
-
-=====  lab.sqrt(x) =====
+=====  lab.sqrt([res,] x) =====
+{{anchor:lab.sqrt}}
 
 ''y=lab.sqrt(x)'' returns the square root of the elements of x.
 
-
-
-=====  lab.tan(x) =====
+=====  lab.tan([res,] x) =====
+{{anchor:lab.tan}}
 
 ''y=lab.abs(x)'' returns the tangent of the elements of x.
 
-=====  lab.tanh(x) =====
+=====  lab.tanh([res,] x) =====
+{{anchor:lab.tanh}}
 
 ''y=lab.tanh(x)'' returns the hyperbolic tangent of the elements of x.
 
-
-
 ======  Column or row-wise operations  (dimension-wise operations) ======
+{{anchor:lab.columnwise.dok}}
 
-=====  lab.cross(a,b)      =====
+=====  lab.cross([res,] a,b)      =====
+{{anchor:lab.cross}}
 
 ''y=lab.cross(a,b)'' returns the cross product of the tensors a and b.
 a and b must be 3 element vectors. 
@@ -349,67 +322,72 @@ a and b must have the same size,
 and both a:size(n) and b:size(n) must be 3.
 
 
-=====  lab.cumprod(x)    =====
+=====  lab.cumprod([res,] x)    =====
+{{anchor:lab.cumprod}}
 
-''y=lab.cumprod(x)'' returns the cumulative product of the elements of x, performing the operation over the first dimension.
+''y=lab.cumprod(x)'' returns the cumulative product of the elements of x, performing the operation over the last dimension.
 
 ''y=lab.cumprod(x,n)'' returns the cumulative product of the elements of x, performing the operation over dimension n.
 
-=====  lab.cumsum(x)     =====
+=====  lab.cumsum([res,] x)     =====
+{{anchor:lab.cumsum}}
 
 ''y=lab.cumsum(x)'' returns the cumulative product of the elements of x, performing the operation over the first dimension.
 
 ''y=lab.cumsum(x,n)'' returns the cumulative product of the elements of x, performing the operation over dimension n.
 
-=====  lab.max(x) =====
-#max 
+=====  lab.max([resval, resind, ] x) =====
+{{anchor:lab.max}}
 
 ''y,i=lab.max(x)'' returns a tensor y of the largest element in 
-each column of x, and a tensor i of  their corresponding indices in x.
+each row of x, and a tensor i of  their corresponding indices in x.
 
-''y,i=lab.max(x,2)'' performs the max operation for each row and
+''y,i=lab.max(x,1)'' performs the max operation for each row and
 ''y,i=lab.max(x,n)'' performs the max operation over the dimension n.
 
 
-=====  lab.mean(x) =====
+=====  lab.mean([res,] x) =====
+{{anchor:lab.mean}}
 
 ''y=lab.mean(x)'' returns a tensor y of the mean of the elements in 
-each column of x.
+each row of x.
 
 ''y=lab.mean(x,2)'' performs the mean operation for each row and
 ''y=lab.mean(x,n)'' performs the mean operation over the dimension n.
 
-=====  lab.min(x) =====
+=====  lab.min([resval, resind, ] x) =====
+{{anchor:lab.min}}
 
 ''y,i=lab.min(x)'' returns a tensor y of the smallest element in 
-each column of x, and a tensor i of  their corresponding indices in x.
+each row of x, and a tensor i of  their corresponding indices in x.
 
 ''y,i=lab.min(x,2)'' performs the min operation for each row and
 ''y,i=lab.min(x,n)'' performs the min operation over the dimension n.
 
 
-=====  lab.prod(x)        =====
+=====  lab.prod([res,] x)        =====
+{{anchor:lab.prod}}
 
 ''y=lab.prod(x)'' returns a tensor y of the product of the elements in 
-each column of x. 
+each row of x. 
 
 ''y=lab.prod(x,2)'' performs the prod operation for each row and
 ''y=lab.prod(x,n)'' performs the prod operation over the dimension n.
 
-
-=====  lab.sort(x) =====
+=====  lab.sort([resval, resind, ] x) =====
+{{anchor:lab.sort}}
 
 ''y,i=lab.sort(x)'' returns a tensor y of the sorted 
-columns of x, and a tensor i of the corresponding indices from x.
+rows of x, and a tensor i of the corresponding indices from x.
 
 ''y,i=lab.sort(x,2)'' performs the sort operation for each row and
 ''y,i=lab.sort(x,n)'' performs the sort operation over the dimension n.
 
-
-=====  lab.std(x) =====
+=====  lab.std([res,] x) =====
+{{anchor:lab.std}}
 
 ''y=lab.std(x)'' returns a tensor y of the standard deviation of the elements in 
-each column of x.
+each row of x.
 
 ''lab.std(x)'' normalizes by (n-1) where n is the number of elements.  This
 makes lab.sum(lab.pow(lab.std(x),2)) 
@@ -423,21 +401,20 @@ is a sample from a normal distribution.
 ''y=lab.std(x,flag,n)'' performs the std operation over the dimension n.
 
 
-=====  lab.sum(x) =====
-#sum
+=====  lab.sum([res,] x) =====
+{{anchor:lab.sum}}
 
 ''y=lab.sum(x)'' returns a tensor y of the sum of the elements in 
-each column of x.
+each row of x.
 
 ''y=lab.sum(x,2)'' performs the sum operation for each row and
 ''y=lab.sum(x,n)'' performs the sum operation over the dimension n.
 
-
-
-=====  lab.var(x) =====
+=====  lab.var([res,] x) =====
+{{anchor:lab.var}}
 
 ''y=lab.var(x)'' returns a tensor y of the standard deviation of the elements in 
-each column of x.
+each row of x.
 
 ''lab.var(x)'' normalizes by (n-1) where n is the number of elements.  This
 makes lab.sum(lab.var(x)) 
@@ -450,12 +427,11 @@ is a sample from a normal distribution.
 
 ''y=lab.var(x,flag,n)'' performs the var operation over the dimension n.
 
-
-
 ======  Matrix-wide operations  (tensor-wide operations) ======
+{{anchor:lab.matrixwide.dok}}
 
 =====  lab.norm(x)        =====
-#norm 
+{{anchor:lab.norm}}
 
 ''y=lab.norm(x)'' returns the 2-norm of the tensor x. 
 
@@ -463,31 +439,340 @@ is a sample from a normal distribution.
 
 
 =====  lab.dist(x,y)        =====
-#dist
+{{anchor:lab.dist}}
 
 ''y=lab.dist(x,y)'' returns the 2-norm of (x-y). 
 
 ''y=lab.dist(x,y,p)'' returns the p-norm of (x-y). 
 
 =====  lab.numel(x)      =====
+{{anchor:lab.numel}}
 
 ''y=lab.numel(x)'' returns the count of the number of elements in the matrix x.
 
 =====  lab.trace(x) =====
-#trace
+{{anchor:lab.trace}}
 
 ''y=lab.trace(x)'' returns the trace (sum of the diagonal elements) 
 of a matrix x. This is  equal  to the sum of the eigenvalues of x.
 The returned value ''y'' is a number, not a tensor.
 
+====== Convolution Operations ======
+{{anchor:lab.conv.dok}}
+
+These function implement convolution or cross-correlation of an input
+image (or set of input images) with a kernel (or set of kernels). The
+convolution function in Torch can handle different types of
+input/kernel dimensions and produces corresponding outputs. The
+general form of operations always remain the same.
+
+===== lab.conv2([res,] x, k, ['f' or 'v']) =====
+{{anchor:lab.conv2}}
+
+This function computes 2 dimensional convolutions between '' x '' and '' k ''. These operations are similar to BLAS operations when number of dimensions of input and kernel are reduced by 2.
+
+  * '' x ''  and '' k '' are 2D : convolution of a single image with a single kernel (2D output). This operation is similar to multiplication of two scalars.
+  * '' x ''  and '' k '' are 3D : convolution of each input slice with every kernel (4D output). This operation is similar to outer product of two vectors.
+  * '' x (p x m x n) '' 3D, '' k (q x p x ki x kj)'' 4D : convolution of all input slices with the corresponding slice of kernel. Output is 3D '' (q x m x n) ''. This operation is similar to matrix vector product of matrix '' k '' and vector '' x ''.
+  * '' x '' 2D and '' k '' 3D. Input is convolved with all kernels, output is 3D. This operation is similar to scalar/vector multiplication.
+  * '' x '' 3D and '' k '' 2D. Every input is convolved with the same kernel '' k '', output is 3D. This operation is similar to vector/scalar multiplication.
+
+The last argument controls if the convolution is a full ('f') or valid ('v') convolution. The default is 'valid' convolution.
+
+<file lua>
+x=lab.rand(100,100)
+k=lab.rand(10,10)
+c = lab.conv2(x,k)
+=c:size()
+
+ 91
+ 91
+[torch.LongStorage of size 2]
+
+c = lab.conv2(x,k,'f')
+=c:size()
+
+ 109
+ 109
+[torch.LongStorage of size 2]
+
+</file>
+
+===== lab.xcorr2([res,] x, k, ['f' or 'v']) =====
+{{anchor:lab.xcorr2}}
+
+This function operates with same options and input/output
+configurations as [[#lab.conv2|lab.conv2]], but performs
+cross-correlation of the input with the kernel '' k ''.
+
+===== lab.conv3([res,] x, k, ['f' or 'v']) =====
+{{anchor:lab.conv3}}
+
+This function computes 3 dimensional convolutions between '' x '' and '' k ''. These operations are similar to BLAS operations when number of dimensions of input and kernel are reduced by 3.
+
+  * '' x ''  and '' k '' are 3D : convolution of a single image with a single kernel (3D output). This operation is similar to multiplication of two scalars.
+  * '' x ''  and '' k '' are 4D : convolution of each input slice with every kernel (5D output). This operation is similar to outer product of two vectors.
+  * '' x (p x m x n x o) '' 4D, '' k (q x p x ki x kj x kk)'' 5D : convolution of all input slices with the corresponding slice of kernel. Output is 4D '' (q x m x n x o) ''. This operation is similar to matrix vector product of matrix '' k '' and vector '' x ''.
+  * '' x '' 3D and '' k '' 4D. Input is convolved with all kernels, output is 4D. This operation is similar to scalar/vector multiplication.
+  * '' x '' 4D and '' k '' 3D. Every input is convolved with the same kernel '' k '', output is 4D. This operation is similar to vector/scalar multiplication.
+
+The last argument controls if the convolution is a full ('f') or valid ('v') convolution. The default is 'valid' convolution.
+
+<file lua>
+x=lab.rand(100,100,100)
+k=lab.rand(10,10,10)
+c = lab.conv3(x,k)
+=c:size()
+
+ 91
+ 91
+ 91
+[torch.LongStorage of size 3]
+
+c = lab.conv3(x,k,'f')
+=c:size()
+
+ 109
+ 109
+ 109
+[torch.LongStorage of size 3]
+
+</file>
+
+===== lab.xcorr3([res,] x, k, ['f' or 'v']) =====
+{{anchor:lab.xcorr3}}
+
+This function operates with same options and input/output
+configurations as [[#lab.conv3|lab.conv3]], but performs
+cross-correlation of the input with the kernel '' k ''.
+
+====== Eigenvalues, SVD, Linear System Solution ======
+{{anchor:lab.linalg.dok}}
+
+Functions in this section are implemented with an interface to LAPACK
+libraries. If LAPACK libraries are not found during compilation step,
+then these functions will not be available.
+
+It has to be noted that, since original LAPACK interface is FORTRAN
+which uses column-major storage for matrices as opposed to row-major
+format used by Torch and all other C based libraries, the order in
+definition of equations are always defined in terms of transposed
+version compared to originial LAPACK.
+
+===== lab.gesv([resa, resb,] a,b) =====
+{{anchor:lab.gesv}}
+
+Solution of '' XA=B '' and ''A'' has to be square and non-singular. ''
+A '' is '' m x m '', '' X '' is '' k x m '', '' B '' is '' k x m ''.
+
+<file lua>
+a=torch.Tensor({{6.80, -2.11,  5.66,  5.97,  8.23},
+                {-6.05, -3.30,  5.36, -4.44,  1.08},
+                {-0.45,  2.58, -2.70,  0.27,  9.04},
+                {8.32,  2.71,  4.35,  -7.17,  2.14},
+                {-9.67, -5.14, -7.26,  6.08, -6.87}})
+
+b=torch.Tensor({{4.02,  6.19, -8.22, -7.57, -3.03},
+                {-1.56,  4.00, -8.67,  1.75,  2.86},
+                {9.81, -4.09, -4.57, -8.61,  8.99}})
+
+=b
+ 4.0200  6.1900 -8.2200 -7.5700 -3.0300
+-1.5600  4.0000 -8.6700  1.7500  2.8600
+ 9.8100 -4.0900 -4.5700 -8.6100  8.9900
+[torch.DoubleTensor of dimension 3x5]
+
+=a
+ 6.8000 -2.1100  5.6600  5.9700  8.2300
+-6.0500 -3.3000  5.3600 -4.4400  1.0800
+-0.4500  2.5800 -2.7000  0.2700  9.0400
+ 8.3200  2.7100  4.3500 -7.1700  2.1400
+-9.6700 -5.1400 -7.2600  6.0800 -6.8700
+[torch.DoubleTensor of dimension 5x5]
+
+x=lab.gesv(a,b)
+=x
+-0.8007 -0.6952  0.5939  1.3217  0.5658
+-0.3896 -0.5544  0.8422 -0.1038  0.1057
+ 0.9555  0.2207  1.9006  5.3577  4.0406
+[torch.DoubleTensor of dimension 3x5]
+
+=b:dist(x*a)
+1.1682163181673e-14
+
+</file>
+
+===== lab.gels([resa, resb,] a,b) =====
+{{anchor:lab.gels}}
+
+Solution of least squares and least norm  problems for a full rank '' A '' that is '' n x m''.
+  * If '' n %%<=%% m '', then solve '' ||XA-B||_F ''.
+  * If '' n > m '' , then solve '' min ||X||_F s.t. XA=B ''.
+
+On return, first '' n '' columns of '' X '' matrix contains the solution and the rest contains residual information. Square root of sum squares of elements of each row of '' X '' starting at column '' n +1 '' is the residual for corresponding row.
+
+<file lua>
+
+a=torch.Tensor({{ 1.44, -9.96, -7.55,  8.34,  7.08, -5.45},
+                {-7.84, -0.28,  3.24,  8.09,  2.52, -5.70},
+                {-4.39, -3.24,  6.27,  5.28,  0.74, -1.19},
+                {4.53,  3.83, -6.64,  2.06, -2.47,  4.70}})
+
+b=torch.Tensor({{8.58,  8.26,  8.48, -5.28,  5.72,  8.93},
+                {9.35, -4.43, -0.70, -0.26, -7.36, -2.52}})
+
+=a
+ 1.4400 -9.9600 -7.5500  8.3400  7.0800 -5.4500
+-7.8400 -0.2800  3.2400  8.0900  2.5200 -5.7000
+-4.3900 -3.2400  6.2700  5.2800  0.7400 -1.1900
+ 4.5300  3.8300 -6.6400  2.0600 -2.4700  4.7000
+[torch.DoubleTensor of dimension 4x6]
+
+=b
+ 8.5800  8.2600  8.4800 -5.2800  5.7200  8.9300
+ 9.3500 -4.4300 -0.7000 -0.2600 -7.3600 -2.5200
+[torch.DoubleTensor of dimension 2x6]
+
+x = lab.gels(a,b)
+=x
+ -0.4506  -0.8492   0.7066   0.1289  13.1193  -4.8214
+  0.2497  -0.9020   0.6323   0.1351  -7.4922  -7.1361
+[torch.DoubleTensor of dimension 2x6]
+
+=b:dist(x:narrow(2,1,4)*a)
+17.390200628863
+
+=math.sqrt(x:narrow(2,5,2):pow(2):sum())
+17.390200628863
+
+</file>
+
+===== lab.eig([rese, resv,] a, [, 'n' or 'v']) =====
+{{anchor:lab.eig}}
+
+Eigen values and eigen vectors of a symmetric real matrix '' A '' of
+size '' m x m ''. This function calculates all eigenvalues (and
+vectors) of '' A '' such that '' A = V' diag(e) V ''. Since the input
+matrix '' A '' is supposed to be symmetric, only lower triangular
+portion is used.
+
+Last argument defines computation of eigenvectors or eigenvalues
+only. If '' n '', only eignevalues are computed. If '' v '', both
+eigenvalues and eigenvectors are computed.
+
+<file lua>
+
+a=torch.Tensor({{ 1.96,  0.00,  0.00,  0.00,  0.00},
+                {-6.49,  3.80,  0.00,  0.00,  0.00},
+                {-0.47, -6.39,  4.17,  0.00,  0.00},
+		{-7.20,  1.50, -1.51,  5.70,  0.00},
+		{-0.65, -6.34,  2.67,  1.80, -7.10}})
+
+=a
+ 1.9600  0.0000  0.0000  0.0000  0.0000
+-6.4900  3.8000  0.0000  0.0000  0.0000
+-0.4700 -6.3900  4.1700  0.0000  0.0000
+-7.2000  1.5000 -1.5100  5.7000  0.0000
+-0.6500 -6.3400  2.6700  1.8000 -7.1000
+[torch.DoubleTensor of dimension 5x5]
+
+e = lab.eig(a)
+=e
+-11.0656
+ -6.2287
+  0.8640
+  8.8655
+ 16.0948
+[torch.DoubleTensor of dimension 5]
+
+e,v = lab.eig(a,'v')
+=e
+-11.0656
+ -6.2287
+  0.8640
+  8.8655
+ 16.0948
+[torch.DoubleTensor of dimension 5]
+
+=v
+-0.2981 -0.5078 -0.0816 -0.0036 -0.8041
+-0.6075 -0.2880 -0.3843 -0.4467  0.4480
+ 0.4026 -0.4066 -0.6600  0.4553  0.1725
+-0.3745 -0.3572  0.5008  0.6204  0.3108
+ 0.4896 -0.6053  0.3991 -0.4564  0.1622
+[torch.DoubleTensor of dimension 5x5]
+
+=v:t()*lab.diag(e)*v
+ 1.9600 -6.4900 -0.4700 -7.2000 -0.6500
+-6.4900  3.8000 -6.3900  1.5000 -6.3400
+-0.4700 -6.3900  4.1700 -1.5100  2.6700
+-7.2000  1.5000 -1.5100  5.7000  1.8000
+-0.6500 -6.3400  2.6700  1.8000 -7.1000
+[torch.DoubleTensor of dimension 5x5]
+
+=a:dist(lab.tril(v:t()*lab.diag(e)*v))
+1.0365583460733e-14
+
+</file>
+
+===== lab.svd([resu, ress, resv] a, [, 's' or 'a']) =====
+{{anchor:lab.svd}}
+
+Singular value decomposition of a real matrix '' A '' of size '' n x m
+'' such that '' V S U = A ''.
 
 
+<file lua>
 
+a=torch.Tensor({{8.79,  6.11, -9.15,  9.57, -3.49,  9.84},
+		{9.93,  6.91, -7.93,  1.64,  4.02,  0.15},
+		{9.83,  5.04,  4.86,  8.83,  9.80, -8.99},
+		{5.45, -0.27,  4.85,  0.74, 10.00, -6.02},
+		{3.16,  7.98,  3.01,  5.80,  4.27, -5.31}})
 
+=a
+  8.7900   6.1100  -9.1500   9.5700  -3.4900   9.8400
+  9.9300   6.9100  -7.9300   1.6400   4.0200   0.1500
+  9.8300   5.0400   4.8600   8.8300   9.8000  -8.9900
+  5.4500  -0.2700   4.8500   0.7400  10.0000  -6.0200
+  3.1600   7.9800   3.0100   5.8000   4.2700  -5.3100
+[torch.DoubleTensor of dimension 5x6]
 
+> u,s,v = lab.svd(a)
+=u
+-0.5911 -0.3976 -0.0335 -0.4297 -0.4697  0.2934
+ 0.2632  0.2438 -0.6003  0.2362 -0.3509  0.5763
+ 0.3554 -0.2224 -0.4508 -0.6859  0.3874 -0.0209
+ 0.3143 -0.7535  0.2334  0.3319  0.1587  0.3791
+ 0.2299 -0.3636 -0.3055  0.1649 -0.5183 -0.6526
+[torch.DoubleTensor of dimension 5x6]
 
+=s
+ 27.4687
+ 22.6432
+  8.5584
+  5.9857
+  2.0149
+[torch.DoubleTensor of dimension 5]
 
+=v
+-0.2514  0.8148 -0.2606  0.3967 -0.2180
+-0.3968  0.3587  0.7008 -0.4507  0.1402
+-0.6922 -0.2489 -0.2208  0.2513  0.5891
+-0.3662 -0.3686  0.3859  0.4342 -0.6265
+-0.4076 -0.0980 -0.4933 -0.6227 -0.4396
+[torch.DoubleTensor of dimension 5x5]
 
+=v*lab.diag(s)*u
+  8.7900   6.1100  -9.1500   9.5700  -3.4900   9.8400
+  9.9300   6.9100  -7.9300   1.6400   4.0200   0.1500
+  9.8300   5.0400   4.8600   8.8300   9.8000  -8.9900
+  5.4500  -0.2700   4.8500   0.7400  10.0000  -6.0200
+  3.1600   7.9800   3.0100   5.8000   4.2700  -5.3100
+[torch.DoubleTensor of dimension 5x6]
 
+=a:dist(v*lab.diag(s)*u)
+2.8643014414996e-14
 
+</file>
 

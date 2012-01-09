@@ -1,4 +1,4 @@
-QtSvg Bindings
+====== QtSvg Bindings ====== 
 
 The package ''qtsvg'' 
 contains bindings for classes defined by the Qt module
@@ -6,19 +6,19 @@ contains bindings for classes defined by the Qt module
 
 Besides the capabilites reported below,
 all qt variants inherit a set 
-of [[..:qt:start#QVariants|default methods]],
+of [[..:qt:index#QVariants|default methods]],
 and all qt object classes inherit the capabilities from their 
 superclasses and automatically expose 
-[[..:qt:start#QObjects|properties, slots and signals]].
+[[..:qt:index#QObjects|properties, slots and signals]].
 
 You can also use the function 
-[[..:qtwidget:start#qtwidgetnewpdf|qtwidget.newpdf]],
+[[..:qtwidget:index#qtwidgetnewpdf|qtwidget.newpdf]],
 defined in module ''qtwidget'',
 to easily generate SVG files. 
 
 
 ====  qtsvg.loadsvg(filename) ====
-#qtsvg_loadsvg
+{{anchor:qtsvg_loadsvg}}
 
 Returns a Qt object of 
 class [[#qsvgrenderer|qt.QSvgRenderer]]
@@ -26,13 +26,13 @@ representing the SVG file ''filename''.
 
 
 ====  qtsvg.paintsvg(port,svg,...) ====
-#qtsvg_paintsvg
+{{anchor:qtsvg_paintsvg}}
 
 Draws a SVG image.
 
 Argument ''port'' must be a 
-[[..:qtwidget:start#qtluapainter|qt.QtLuaPainter]] or a 
-[[..:qtwidget:start#highlevel|qtwidget'' high level port descriptor]].
+[[..:qtwidget:index#qtluapainter|qt.QtLuaPainter]] or a 
+[[..:qtwidget:index#highlevel|qtwidget'' high level port descriptor]].
 Argument ''svg'' can be the SVG filename or
 an instance of class [[#qsvgrenderer|qt.QSvgRenderer]]
 such as those returned by function [[#qtsvg_loadsvg|qtsvg.loadsvg]].
@@ -41,7 +41,7 @@ as those for the C++ function ''QSvgRenderer::render''.
 
 
 ====  qt.QSvgWidget ====
-#qsvgwidget
+{{anchor:qsvgwidget}}
 
 Class 
 [[http://doc.trolltech.com/4.4/qsvgwidget.html|QSvgWidget]]
@@ -59,7 +59,7 @@ you must use slot ''qsvgwidget:load()'' to load SVG data.
 
 The optional argument ''parent'' specifies the widget parent.
 New widgets are always created from the main thread using
-the [[..:qt:start#qtqcall|thread hopping]] mechanism.
+the [[..:qt:index#qtqcall|thread hopping]] mechanism.
 When argument ''parent'' is ''nil'' or not specified,
 the new widget is owned by the Lua interpreter 
 and is automatically destroyed when the garbage collector
@@ -72,7 +72,7 @@ associated with this widget.
 
 
 ====  qt.QSvgRenderer ====
-#qsvgrenderer
+{{anchor:qsvgrenderer}}
 
 Class 
 [[http://doc.trolltech.com/4.4/qsvgrenderer.html|QSvgRenderer]]
@@ -97,13 +97,13 @@ determines that it is no longer referenced.
 
 
 ====  qt.QtLuaSvgGenerator ====
-#qtluasvggenerator
+{{anchor:qtluasvggenerator}}
 
 This is a thin wrapper around the Qt class
 [[http://doc.trolltech.com/4.4/qsvggenerator.html|QSvgGenerator]].
 
 You should use instead function 
-[[..:qtwidget:start#qtwidgetnewpdf|qtwidget.newpdf]]
+[[..:qtwidget:index#qtwidgetnewpdf|qtwidget.newpdf]]
 to easily generate SVG files.
 
 ===  qt.QtLuaSvgGenerator([filename],[parent]) ===
@@ -122,12 +122,12 @@ and is automatically destroyed when the garbage collector
 determines that it is no longer referenced.
 
 ===  qtluasvggenerator:data() ===
-#qtluasvggeneratordata
+{{anchor:qtluasvggeneratordata}}
 
 Assuming the ''qtluasvggenerator'' was created without the ''filename'' argument,
-this function returns a [[..:qtcore:start#qbytearray|qt.QByteArray]]
+this function returns a [[..:qtcore:index#qbytearray|qt.QByteArray]]
 containing the generated SVG data.  This data may be incomplete
-until [[..:qtwidget:start#painterclose|painter:close()]] has
+until [[..:qtwidget:index#painterclose|painter:close()]] has
 been closed on all painters operating on ''qtluasvggenerator''.
 
 ===  qtluasvggenerator.description ===
@@ -142,7 +142,7 @@ the contents of the ''<title>'' tag of the SVG file.
 
 ===  qtluasvggenerator.size ===
 
-This property contains a [[..:qtcore:start#qsize|qt.QSize]] 
+This property contains a [[..:qtcore:index#qsize|qt.QSize]] 
 variant containing the size of the drawable area.
 This information is shown in the ''viewBox'' attribute of the ''<svg>'' tag.
 

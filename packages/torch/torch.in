@@ -9,6 +9,10 @@ PREFIX=@Torch_INSTALL_BIN@
 IMPORTF="\
 function import(package, forced) \
    require(package) \
+   if _G[package] then \
+      _G._torchimport = _G._torchimport or {} \
+      _G._torchimport[package] = _G[package] \
+   end \
    for k,v in pairs(_G[package]) do \
       if not _G[k] or forced then \
          _G[k] = v \
@@ -20,7 +24,8 @@ end \
 # by default, import torch+lab globally
 IMPORT_TORCH="import 'torch'"
 IMPORT_LAB="import 'lab'"
-IMPORT_PLOT="import('plot',true)"
+IMPORT_PLOT="import 'gnuplot'"
+IMPORT_DOK="require 'dok'"
 
 # nicer prompt (self-promotion) + copyright
 PROMPT="_PROMPT='torch> ' _PROMPT2=' ... > '"
@@ -149,7 +154,7 @@ end \
 "
 
 # concat all symbols defined above
-INIT="$COPYRIGHT $PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB $IMPORT_PLOT $PRINT $WHO"
+INIT="$COPYRIGHT $PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB $IMPORT_PLOT $IMPORT_DOK $PRINT $WHO"
 
 # try to run qlua, and default to lua if not available
 # all the functions defined above are executed before
@@ -159,12 +164,15 @@ then
     if [ $DISPLAY ];
     then
         echo "Try the IDE: torch -ide"
+        echo "Type help() for more info"
         $PREFIX/qlua -e "$INIT" -i $*;
     else
         echo "Unable to connect X11 server (disabling graphics)"
+        echo "Type help() for more info"
         $PREFIX/qlua -nographics -e "$INIT" -i $*;
     fi
 else 
     echo "Install Qt4 and rebuild Torch7 for graphics capability"
+    echo "Type help() for more info"
     $PREFIX/lua -e "$INIT" -i $*;
 fi

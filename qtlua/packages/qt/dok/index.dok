@@ -1,4 +1,4 @@
-QtLua and Qt Package Reference Manual
+======  QtLua and Qt Package Reference Manual ====== 
 
 The package ''qt'' is available when you run the Lua
 interpreter using the [[#qlua|qlua]] program. 
@@ -15,30 +15,30 @@ are automatically exposed in the Lua interpreter.
 Signals can be connected to Lua functions.
 
 The packages 
-[[..:qtcore:start|qtcore]],
-[[..:qtgui:start|qtgui]], and
-[[..:qtuiloader:start|qtuiloader]]
+[[..:qtcore:index|qtcore]],
+[[..:qtgui:index|qtgui]], and
+[[..:qtuiloader:index|qtuiloader]]
 provide bindings for the classes defined 
 by the corresponding Qt libraries.
 
 The packages
-[[..:qtwidget:start|qtwidget]] and
-[[..:qttorch:start|qttorch]]
+[[..:qtwidget:index|qtwidget]] and
+[[..:qttorch:index|qttorch]]
 are used for the ''qlua'' implementation of 
-package [[..:graphics:start|graphics]].
+package [[..:graphics:index|graphics]].
 
 
 ======  Program qlua ======
-#qlua
+{{anchor:qlua}}
 
 Program ''qlua'' is a compatible replacement for 
 the standard interpreter program ''lua''
 with several new capabilities:
 
   * New packages provides a rich interface with the Qt4 library:
-[[#qt|qt]], [[..:qtwidget:start|qtwidget]], 
-[[..:qttorch:start|qttorch]], 
-[[..:qtuiloader:start|qtuiloader]].
+[[#qt|qt]], [[..:qtwidget:index|qtwidget]], 
+[[..:qttorch:index|qttorch]], 
+[[..:qtuiloader:index|qtuiloader]].
 
   * The Lua interpreter runs in a dedicated thread.
 The main thread remains in charge of graphical interface and
@@ -49,8 +49,8 @@ active while the interpreter is running.
 Therefore one can program a complete integrated development 
 environment including a graphical console.
 
-  * When using ''qlua'', packages [[..:graphics:start|graphics]] 
-and [[..:gfx:start|gfx]] produce drawings using Qt
+  * When using ''qlua'', packages [[..:graphics:index|graphics]] 
+and [[..:gfx:index|gfx]] produce drawings using Qt
 instead of using the Cairo library.
 
 
@@ -137,7 +137,7 @@ using functions [[#qtqcall|qt.qcall]] or [[#qtxqcall|qt.xqcall]].
 
 
 ======  Package qt ======
-#qt
+{{anchor:qt}}
 
 When you run program ''qlua'', 
 the package ''qt'' is readily accessible using ''require('qt')''
@@ -150,7 +150,7 @@ The [[#QtLua|QtLua API]] also provides a means to name
 an arbitrary Qt object and publish it inside the package ''qt''.
 
 =====  Qt Variants =====
-#QVariants
+{{anchor:QVariants}}
 
 Values represented by the Qt class 
 [[http://doc.trolltech.com/4.4/qvariant.html|QVariant]]
@@ -199,7 +199,7 @@ The value ''nil'' is returned when the data type
 cannot be meaningfully converted to a numeric value.
 
 ====  qtdata:tobool() ====
-#qttobool
+{{anchor:qttobool}}
 
 Function ''qtdata:tobool()'' returns a boolean value
 associated with the value contained in the Qt variant.
@@ -210,7 +210,7 @@ or is currently allocated.
 
 
 ====  qtdata:type() ====
-#qtdatatype
+{{anchor:qtdatatype}}
 
 Function ''qtdata:type()'' returns a string naming 
 the type of the value contained in the Qt variant.
@@ -222,7 +222,7 @@ returns ''nil''.
 
 
 ====  qtdata:isa(typename) ====
-#qtdataisa 
+{{anchor:qtdataisa }}
 
 Function ''qtdata:isa(typename)'' returns a boolean
 value indicating whether the Qt variant
@@ -233,7 +233,7 @@ class named ''typename''.
 
 
 =====  Qt Objects =====
-#QObjects
+{{anchor:QObjects}}
 
 Critical Qt classes are subclasses of class 
 [[http://doc.trolltech.com/4.4/qobject.html|QObject]].
@@ -255,7 +255,7 @@ Such values have a special treatment:
 These metatables are available in the ''qt'' package
 and follow the same inheritance pattern as 
 the Qt object class hierarchy.
-Class [[..:qtcore:start#qobject|qt.QObject]] sits at the top
+Class [[..:qtcore:index#qobject|qt.QObject]] sits at the top
 of this hierarchy.
 
   * Slots, signals and properties are automatically
@@ -367,14 +367,14 @@ whenever numerical types are expected.
 Inheritance ensures that all methods exposed
 by a class are also exposed by its subclasses.
 Methods exposed by the ''QObject'' class,
-such as [[..:qtcore:start#qobjectdeletelater|deleteLater()]],
+such as [[..:qtcore:index#qobjectdeletelater|deleteLater()]],
 are inherited by all Qt object classes.
 
 
 ====  Named Children ====
 
 All Qt objects can be given a name 
-represented by property [[..:qtcore:start#qobjectobjectname|objectName]].
+represented by property [[..:qtcore:index#qobjectobjectname|objectName]].
 The named children of a Qt object can be accessed by
 name using the indexation syntax.
 However, when the name of a child conflicts with a property
@@ -416,7 +416,7 @@ by selecting a particular signal using its signature.
 </file>
 
 ===  Receiving Signals ===
-#signalreceive
+{{anchor:signalreceive}}
 
 Qt signals can be connected to Lua functions 
 using [[#qtconnectf|qt.connect(...)]].
@@ -449,7 +449,7 @@ or because function [[#qtdoevents|qt.doevents()]] is called.
 =====  Objects =====
 
 ====  qt.qApp ====
-#qtqapp
+{{anchor:qtqapp}}
 
 Expression ''qt.qApp'' refers to the application object
 which orchestrates the operation of the [[#qlua|qlua]] program.
@@ -497,7 +497,7 @@ was launched with the option ''-nographics''.
 
 
 ====  qt.qConsole ====
-#qtqconsole
+{{anchor:qtqconsole}}
 
 Expression ''qt.qConsole'' refers to the console object
 which handles console input and output for the [[#qlua|qlua]] program.
@@ -554,7 +554,7 @@ and waits for new commands on the console.
 
 
 ====  qt.qEngine ====
-#qtqengine
+{{anchor:qtqengine}}
 
 Expression ''qt.qEngine'' refers to the Lua execution engine.
 This object is an instance of class [[#QtLuaEngine|QtLuaEngine]].
@@ -591,7 +591,7 @@ caused by the evaluation of interactive Lua expressions.
 =====  Functions =====
 
 ====  qt.connect(qobject, signature, function, [direct] ) ====
-#qtconnectf
+{{anchor:qtconnectf}}
 
 Expression ''qt.connect(qobject, signature, func)''
 connects the signal ''signature'' from Qt object ''qobject''
@@ -629,13 +629,13 @@ to the signaling object because the garbage collector
 will find that the object is in use.  Future versions of QtLua
 may address this weakness of the interface between the Lua 
 garbage collector and the Qt static memory allocation.  
-In the mean time, be careful to [[..:qtcore:start#qobjectdeletelater|delete]]
+In the mean time, be careful to [[..:qtcore:index#qobjectdeletelater|delete]]
 or [[#qtdisconnectf|disconnect]] connected objects as soon
 as you do not need them anymore.
 
 
 ====  qt.connect(qobject1, signature1, qobject2, signature2) ====
-#qtconnecto
+{{anchor:qtconnecto}}
 
 Expression ''qt.connect(qobject1, signature1, qobject2, signature2)'' 
 connects signal ''signature1'' from Qt object ''qobject1'' to slot 
@@ -644,7 +644,7 @@ This is similar to the Qt function
 [[http://doc.trolltech.com/4.4/qobject.html#connect|QObject::connect(...)]].
 
 ====  qt.disconnect(qobject, signature, function) ====
-#qtdisconnectf
+{{anchor:qtdisconnectf}}
 
 Expression ''qt.disconnect(qobject, signature, func)''
 disconnects the signal ''signature'' from Qt object ''qobject''
@@ -655,7 +655,7 @@ will then be disconnected.
 
 
 ====  qt.disconnect(qobject1, signature1, qobject2, signature2) ====
-#qtdisconnecto
+{{anchor:qtdisconnecto}}
 
 Expression ''qt.disconnect(qobject1, signature1, qobject2, signature2)'' 
 connects signal ''signature1'' from Qt object ''qobject1'' from 
@@ -668,7 +668,7 @@ This is similar to the Qt function
 
 
 ====  qt.doevents([waitflag]) ====
-#qtdoevents
+{{anchor:qtdoevents}}
 
 Function ''qt.doevents()'' processes all pending events 
 and executes the functions associated with all queued signals.
@@ -689,7 +689,7 @@ for the current thread.
 
 
 ====  qt.isa(arg, typename) ====
-#qtisa
+{{anchor:qtisa}}
 
 If the Lua value ''arg'' represents a Qt object or variant,
 expression ''qt.isa(arg,typename)'' returns a boolean indicating
@@ -712,7 +712,7 @@ with signals are not executed.
 
 
 ====  qt.qcall(qobject, function, ... ) ====
-#qtqcall
+{{anchor:qtqcall}}
 
 Expression ''qt.qcall(qobject, f, ...)'' executes 
 function ''f'' from the thread owning the Qt object ''qobject''.
@@ -773,7 +773,7 @@ than searching a shared library along ''package.cpath''.
 
 
 ====  qt.type(arg) ====
-#qttype
+{{anchor:qttype}}
 
 If the Lua value ''arg'' represents a Qt object or variant,
 expression ''qt.type(arg)'' returns a string containing the type of 
@@ -782,7 +782,7 @@ Otherwise it simply returns ''nil''.
 
 
 ====  qt.xqcall(qobject, function, ..., errorhandler) ====
-#qtxqcall
+{{anchor:qtxqcall}}
 
 Expression ''qt.xqcall(qobject, f, ..., handler)'' 
 is a thread hopping analogous to the standard \
@@ -800,7 +800,7 @@ followed by the values returned by the error handler.
 
 
 ======  QtLua API ======
-#QtLua
+{{anchor:QtLua}}
 
 This section describes the QtLua API.
 Classe [[#QtLuaEngine|QtLuaEngine]] and [[#QtLuaLocker|QtLuaLocker]]
@@ -814,7 +814,7 @@ functions written in C or C++.
 
 
 =====  Class QtLuaEngine =====
-#QtLuaEngine
+{{anchor:QtLuaEngine}}
 
 Class ''QtLuaEngine'' is a ''QObject'' subclass representing a Lua interpreter.
 This object can be used to add a Lua interpreter to any Qt application
@@ -1040,7 +1040,7 @@ properly recognized as an object class.
 
 
 =====  Class QtLuaLocker =====
-#QtLuaLocker
+{{anchor:QtLuaLocker}}
 
 Class [[#QtLuaLocker|QtLuaLocker]] provides means
 to directly access the Lua state =lua_State*= using the Lua API.
@@ -1102,7 +1102,7 @@ the code to run for an extended period of time.
 
 
 =====  The luaQ functions  =====
-#luaQ
+{{anchor:luaQ}}
 
 The ''luaQ'' functions complete the Lua API with
 facilities related to the QtLua interface.
@@ -1142,7 +1142,7 @@ This is similar to calling
 </file>
 
 ====  luaQ_checkqobject&lt;TYPE&gt; ====
-#luaqcheckqobject
+{{anchor:luaqcheckqobject}}
 
 ''TYPE* luaQ_checkqobject&lt;TYPE&gt;(lua_State *L, int index)''
 
@@ -1151,7 +1151,7 @@ in the stack does not represent a [[#QObjects|Qt object]] of class ''TYPE''.
 Otherwise it returns a pointer to the object.
 
 ====  luaQ_checkqvariant&lt;TYPE&gt; ====
-#luaqcheckqvariant
+{{anchor:luaqcheckqvariant}}
 
 ''TYPE luaQ_checkqvariant&lt;TYPE&gt;(lua_State *L, int index)''
 
@@ -1266,7 +1266,7 @@ whenever the signal occurs.
 
 
 ====  luaQ_pcall ====
-#luaqpcall
+{{anchor:luaqpcall}}
 
 ''int luaQ_pcall(lua_State *L, int na, int nr, int eh, QObject *obj = 0)''
 
@@ -1324,7 +1324,7 @@ a metatable for a Qt object class ''TYPE'':
 
 
 ====  luaQ_pushqt ====
-#luaqpushqt
+{{anchor:luaqpushqt}}
 
 ''void luaQ_pushqt(lua_State *L)''
 
