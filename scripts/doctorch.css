@@ -176,6 +176,9 @@ margin-left:0px;
 	font-size:110%;
 }
 
+.torchdoc #contents {
+    text-align:justify;
+}
 .torchdoc #contents code.a:link {
 	background-color:#F9F7F3;
 	color:#FF0000;
@@ -200,7 +203,7 @@ margin-left:0px;
 
 .torchdoc #contents h1 {
 	font-size: 120%;
-	color: #334d55;
+	color: ##111111;
 	border-bottom: 1px #ccc solid;
 	padding-bottom: 0;
 	margin-bottom: 1em;
@@ -208,15 +211,15 @@ margin-left:0px;
 
 .torchdoc #contents h2 {
 	font-size: 120%;
-	color: #334d55;
+	color: ##111111;
 	border-bottom: 1px #ccc dashed;
 	padding-bottom: 0;
 	margin-bottom: 1em;
 }
 
 .torchdoc #contents h3 {
-	font-size: 100%;
-	color: #334d55;
+	font-size: 120%;
+	color: ##111111;
 	border-bottom: 1px #ccc dashed;
 	padding-bottom: 0;
 	margin-bottom: 1em;	
