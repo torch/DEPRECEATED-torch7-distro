@@ -8,7 +8,7 @@ end
 
 local argtypes = {}
 
-argtypes.tensor = {declare=function(arg)
+argtypes.Tensor = {declare=function(arg)
                               return string.format("THTensor *arg%d = NULL;", arg.i)
                            end,
 
@@ -36,7 +36,40 @@ argtypes.tensor = {declare=function(arg)
                                    error('a tensor cannot be optional if not returned')
                                 elseif arg.returned then
                                    table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
-                                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));'))                                         
+                                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                                end
+                                return table.concat(txt, '\n')
+                             end}
+
+argtypes.LongTensor = {declare=function(arg)
+                              return string.format("THLongTensor *arg%d = NULL;", arg.i)
+                           end,
+
+                   check=function(arg, idx)
+                            return string.format("luaT_isudata(L, %d, torch_LongTensor_id)", idx)
+                         end,
+
+                   read = function(arg, idx)
+                             return string.format("arg%d = luaT_toudata(L, %d, torch_LongTensor_id);", arg.i, idx)
+                          end,
+                   
+                   carg = function(arg, idx)
+                             return string.format('arg%d', arg.i)
+                          end,
+
+                   process = function(arg)
+                                local txt = {}
+                                if arg.default and arg.returned then
+                                   table.insert(txt, string.format('if(arg%d)', arg.i))
+                                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
+                                   table.insert(txt, 'else')
+                                   table.insert(txt, string.format('arg%d = THLongTensor_new()', arg.i))
+                                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
+                                elseif arg.default then
+                                   error('a tensor cannot be optional if not returned')
+                                elseif arg.returned then
+                                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
+                                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
                                 end
                                 return table.concat(txt, '\n')
                              end}
@@ -63,6 +96,28 @@ argtypes.integer = {declare=function(arg)
                                  end
                               end}
 
+argtypes.real = {declare=function(arg)
+                               return string.format("real arg%d = %d;", arg.i, arg.default or 0)
+                            end,
+
+                    check = function(arg, idx)
+                               return string.format("lua_isnumber(L, %d)", idx)
+                            end,
+
+                    read = function(arg, idx)
+                              return string.format("arg%d = (real)lua_tonumber(L, %d);", arg.i, idx)
+                           end,
+
+                    carg = function(arg, idx)
+                              return string.format('arg%d', arg.i)
+                           end,
+
+                    process = function(arg)
+                                 if arg.returned then
+                                    return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
+                                 end
+                              end}
+
 function bit(p)
    return 2 ^ (p - 1)  -- 1-based indexing                                                          
 end
@@ -86,11 +141,15 @@ function generateinterface(name, args)
       arg.i = i
       assert(argtypes[arg.name], 'unknown type ' .. arg.name)
       table.insert(txt, argtypes[arg.name].declare(arg))
+      local name = arg.name
+      if arg.returned then
+         name = string.format('*%s*', name)
+      end
       if arg.default then
          nopt = nopt + 1
-         table.insert(txtargs, string.format('[%s]', arg.name))
+         table.insert(txtargs, string.format('[%s]', name))
       else
-         table.insert(txtargs, arg.name)
+         table.insert(txtargs, name)
       end
       table.insert(cargs, argtypes[arg.name].carg(arg))
    end
@@ -152,7 +211,40 @@ function generateinterface(name, args)
    
 end
 
-generateinterface("cross", {{name="tensor", default=true, returned=true},
-                            {name="tensor"},
-                            {name="tensor"},
-                            {name="integer", default=0}})
+-- generateinterface("zero", {{name="tensor", returned=true}})
+
+-- generateinterface("cross", {{name="tensor", default=true, returned=true},
+--                             {name="tensor"},
+--                             {name="tensor"},
+--                             {name="integer", default=0}})
+
+-- generateinterface("cadd", {{name="tensor", default=true, returned=true},
+--                            {name="tensor"},
+--                            {name="real", default=1},
+--                            {name="tensor"}})
+
+-- generateinterface("fill", {{name="tensor", returned=true},
+--                            {name="real"}})
+
+-- generateinterface("dot", {{name="tensor", returned=true},
+--                            {name="real"}})
+
+-- generateinterface("addcmul", {{name="tensor", default=true, returned=true},
+--                               {name="tensor"},
+--                               {name="real", default=1},
+--                               {name="tensor"},
+--                               {name="tensor"}})
+
+-- generateinterface("addmv", {{name="tensor", default=true, returned=true},
+--                             {name="real", default=1},
+--                             {name="tensor"},
+--                             {name="real", default=1},
+--                             {name="tensor"},
+--                             {name="tensor"}})
+
+generateinterface("min", {{name="Tensor", default=true, returned=true},
+                          {name="LongTensor", default=true, returned=true},
+                          {name="Tensor"},
+                          {name="integer", default=0}})
+
+--      luaL_error(L, "invalid arguments: [tensor longtensor] tensor [dimension]"); \
