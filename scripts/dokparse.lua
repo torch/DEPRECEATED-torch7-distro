@@ -26,7 +26,7 @@ local function addtocsubsections(toc, section)
    table.insert(toc, string.format('<ul>'))
    for k,v in pairs(section.subsections) do
       table.insert(toc, string.format('<li><a class="toclink" id="link_%s">%s</a></li>', dok.link2wikilink(v.title):gsub('%.','-'), v.title))
-      table.insert(js, '$("#link_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").click(function() { hideall(); $("#div_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); });')
+      table.insert(js, '$("#link_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").click(function() { hideall(); $("#div_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); $(".par_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); });')
       if v.subsections and #v.subsections > 0 then
          addtocsubsections(toc, v)
       end
