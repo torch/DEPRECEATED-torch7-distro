@@ -121,7 +121,7 @@ function dok.stylize(html, package)
    styled = '\n' .. style.banner .. '\n' .. styled
    styled = styled:gsub('<a.-name=".-">%s+(.-)</a>%s*', function(title) return style.title .. title .. style.none .. '\n' end)
    -- (2) lists
-   styled = styled:gsub('<ul>(.+)</ul>', function(list) 
+   styled = styled:gsub('<ul>(.-)</ul>', function(list) 
                                             return list:gsub('<li>%s*(.-)%s*</li>%s*', style.list .. '%1\n')
                                          end)
    -- (3) code
