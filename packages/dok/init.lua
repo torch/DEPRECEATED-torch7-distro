@@ -247,7 +247,7 @@ function dok.dok2html(txt)
                                 end
                                 rank = math.max(1, 6-#rank)
                                 title = title:gsub('[=]+$', '')
-                                return closesection .. '\002h' .. rank .. '\003\002a name="' .. dok.link2wikilink(title) .. '"\003' .. dok.cleanText(title) .. '\002/a\003\002/h' .. rank .. '\003\n\002div class="level' .. rank .. '"\003\n'
+                                return closesection .. '\002div class="level' .. rank .. '" id="div_' .. dok.link2wikilink(title):gsub('%.','-') .. '"\003\n' .. '\002h' .. rank .. '\003\002a id="' .. dok.link2wikilink(title) .. '"\003' .. dok.cleanText(title) .. '\002/a\003\002/h' .. rank .. '\003\n'
                              else
                                 return line
                              end

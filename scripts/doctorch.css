@@ -68,7 +68,7 @@ a:visited {
 3. If font sizing is changed in differing amounts on each div instead of on the overall design (ie: #sidebar1 is given a 70% font size and #contents is given an 85% font size), this will proportionately change each of the divs overall size. You may want to adjust based on your final font sizing.
 */
 .torchdoc #container {
-	width: 800px;  /* this width will create a container that will fit in an 800px browser window if text is left at browser default font sizes */
+	width: 700px;  /* this width will create a container that will fit in an 700px browser window if text is left at browser default font sizes */
 	background: #FFFFFF;
 	margin: 0 auto; /* the auto margins (in conjunction with a width) center the page */
 	text-align: left; /* this overrides the text-align: center on the body element. */
@@ -121,7 +121,8 @@ a:visited {
 .torchdoc #toc {
           font-size: 70%;
           width: 200px;
-          float: right;
+          position: absolute;
+          right: 0px;
           background-color: #fff;
           padding-bottom: 1em;
           padding-top: 1em;
@@ -146,6 +147,8 @@ padding:0px;
 .torchdoc #toc li{
 border:0px solid green;
 margin-left:0px;
+color:#0000FF;
+cursor: pointer;
 }
 
 .clearfooterfloat {
