@@ -470,7 +470,7 @@ function dok.dok2html(txt)
    -- put back links
    txt = txt:gsub('\017(%d+)\017', function(id)
                                       id = tonumber(id)
-                                      return '<a href="' .. dok.linkURL(link[id]) ..  '">' .. dok.linkText(link[id]) .. '</a>'
+                                      return '<a href="' .. dok.linkURL(link[id]) ..  '" class="anchor">' .. dok.linkText(link[id]) .. '</a>'
                                    end)
 
    -- put back anchors

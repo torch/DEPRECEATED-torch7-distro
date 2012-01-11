@@ -18,16 +18,55 @@ local txt = io.open(src):read('*all')
 local sections = dok.parseSection(txt)
 
 local js = {}
-table.insert(js, 'function hideall() { for (var i=0; i<=6; i++) { $(".level"+i).hide(); }; };')
-table.insert(js, '$(function() { hideall(); $(".topdiv").show(); });')
-table.insert(js, '$(function() {$("#toc").jScrollPane({autoReinitialise: true});});')
+table.insert(js, '')
+table.insert(js, [[
+                   // hide all
+                   function hideall() { 
+                         for (var i=0; i<=6; i++) { 
+                            $(".level"+i).hide(); 
+                         }; 
+                   };
+
+                   // show all
+                   function showall() { 
+                         for (var i=0; i<=6; i++) { 
+                            $(".level"+i).show(); 
+                         };
+                   };
+
+                   // when doc is ready:
+                   $(function() {
+                           // hide all sections
+                           hideall(); 
+
+                           // show top section
+                           $(".topdiv").show(); 
+
+                           // hash?
+                           if (window.location.hash) {
+                              showall();
+                              $(document).scrollTo(window.location.hash);
+                           }
+
+                           // add scrollbar to menu
+                           $("#toc").jScrollPane();
+                   });
+
+                   // catch all clicks
+                   $('.anchor').click(
+                      function() {
+                            showall();
+                            $(document).scrollTo(window.location.hash);
+                      }
+                   );
+               ]])
 
 local toc = {}
 local function addtocsubsections(toc, section)
    table.insert(toc, string.format('<ul>'))
    for k,v in pairs(section.subsections) do
       table.insert(toc, string.format('<li><a class="toclink" id="link_%s">%s</a></li>', dok.link2wikilink(v.title):gsub('%.','-'), v.title))
-      table.insert(js, '$("#link_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").click(function() { hideall(); $("#div_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); $(".par_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); });')
+      table.insert(js, '$("#link_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").click(function() { window.location.hash = ""; hideall(); $("#div_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); $(".par_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); });')
       if v.subsections and #v.subsections > 0 then
          addtocsubsections(toc, v)
       end
