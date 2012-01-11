@@ -17,11 +17,16 @@ local txt = io.open(src):read('*all')
 
 local sections = dok.parseSection(txt)
 
+local js = {}
+table.insert(js, 'function hideall() { for (var i=0; i<=6; i++) { $(".level"+i).hide(); }; };')
+table.insert(js, '$(function() { hideall(); $(".topdiv").show(); });')
+
 local toc = {}
 local function addtocsubsections(toc, section)
    table.insert(toc, string.format('<ul>'))
    for k,v in pairs(section.subsections) do
-      table.insert(toc, string.format('<li><a href="#%s">%s</a></li>', dok.link2wikilink(v.title), v.title))
+      table.insert(toc, string.format('<li><a class="toclink" id="link_%s">%s</a></li>', dok.link2wikilink(v.title):gsub('%.','-'), v.title))
+      table.insert(js, '$("#link_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").click(function() { hideall(); $("#div_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); $(".par_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); });')
       if v.subsections and #v.subsections > 0 then
          addtocsubsections(toc, v)
       end
@@ -30,6 +35,7 @@ local function addtocsubsections(toc, section)
 end
 addtocsubsections(toc, sections)
 toc = table.concat(toc, '\n')
+js = table.concat(js, '\n')
 
 local navhome = '<a href="' .. rootdir .. '/index.html">Torch7 Documentation</a>'
 navhome = navhome .. ' > <a href="index.html">' .. title .. '</a>'
@@ -39,9 +45,10 @@ local txthtml = dok.dok2html(txt)
 templatehtml = templatehtml:gsub('%%CONTENTS%%', txthtml)
 --local title = src:gsub('^.*/', ''):gsub('%..-$', '')
 templatehtml = templatehtml:gsub('%%TITLE%%', title)
-templatehtml = templatehtml:gsub('%%NAVLINE%%',navhome)
+templatehtml = templatehtml:gsub('%%NAVLINE%%', navhome)
 templatehtml = templatehtml:gsub('%%TOC%%', toc)
-templatehtml = templatehtml:gsub('%%LASTMODIFIED%%','Generated at ' .. os.date())
+templatehtml = templatehtml:gsub('%%JS%%', js)
+templatehtml = templatehtml:gsub('%%LASTMODIFIED%%','Generated on ' .. os.date())
 io.open(htmldst, 'w'):write(templatehtml)
 
 io.open(dokdst, 'w'):write(txt)

@@ -14,5 +14,7 @@ classes also handle //serialization//.
 
 [[Tester|Tester]] is provided as a generic testing framework and it is also used by [[..:nn:index|nn]] package.
 
+[[CmdLine|CmdLine]] is provided as a command line argument parsing utility.
+
 Finally, ''Torch'' provides some [[Utility|utility functions]] for creating and handling ''Torch'' //classes//.
 

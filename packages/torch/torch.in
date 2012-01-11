@@ -101,6 +101,18 @@ end \
 # lua tables, and objects.
 PRINT="\
 function print(obj,...) \
+   local function sizestr(x) \
+         local strt = {} \
+         table.insert(strt, _G.torch.typename(x):match('torch%.(.+)') .. ' ( ') \
+         for i=1,x:nDimension() do \
+            table.insert(strt, x:size(i)) \
+            if i ~= x:nDimension() then \
+               table.insert(strt, 'x') \
+            end \
+         end \
+         table.insert(strt,' ) ') \
+         return table.concat(strt) \
+   end \
    if _G.type(obj) == 'table' then \
       local mt = _G.getmetatable(obj) \
       if mt and mt.__tostring__ then \
@@ -122,7 +134,9 @@ function print(obj,...) \
          local idx = 1 \
          for k,v in pairs(obj) do \
             if idx > 1 then _G.io.write(',\n') end \
-            if _G.type(v) == 'userdata' then \
+            if _G.type(v) == 'userdata' and _G.torch.typename(v):find('torch%.(.*Tensor)') ~= nil then \
+               _G.io.write(tab .. '[' .. k .. ']' .. ' = ' .. sizestr(v)) \
+            elseif _G.type(v) == 'userdata' then \
                _G.io.write(tab .. '[' .. k .. ']' .. ' = <userdata>') \
             else \
                local tostr = _G.tostring(v):gsub('\n','\\n') \

@@ -88,3 +88,24 @@ function Sequential:share(mlp,...)
       self.modules[i]:share(mlp.modules[i],...); 
    end
 end
+
+function Sequential:parameters()
+   local function tinsert(from, to)
+      if type(from) == 'table' then
+         for i=1,#from do
+            tinsert(from[i],to)
+         end
+      else
+         table.insert(from,to)
+      end
+   end
+   local w = {}
+   local gw = {}
+   for i=1,#self.modules do
+      local mw,mgw = self.modules[i]:parameters()
+      tinsert(mw,w)
+      tinsert(mgw,gw)
+   end
+   return w,gw
+end
+

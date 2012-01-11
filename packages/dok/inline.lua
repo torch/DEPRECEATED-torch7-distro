@@ -121,7 +121,7 @@ function dok.stylize(html, package)
    styled = '\n' .. style.banner .. '\n' .. styled
    styled = styled:gsub('<a.-name=".-">%s+(.-)</a>%s*', function(title) return style.title .. title .. style.none .. '\n' end)
    -- (2) lists
-   styled = styled:gsub('<ul>(.+)</ul>', function(list) 
+   styled = styled:gsub('<ul>(.-)</ul>', function(list) 
                                             return list:gsub('<li>%s*(.-)%s*</li>%s*', style.list .. '%1\n')
                                          end)
    -- (3) code
@@ -160,7 +160,7 @@ local function adddok(...)
 end
 function dok.html2funcs(html, package)
    local funcs = {}
-   local next = html:gfind('<h%d>(<a.-name=".-">.-</a>)%s*</h%d>\n<div class="level%d">(.-)</div>')
+   local next = html:gfind('<div class="level%d%s.-".->\n<h%d>(<a.-id=".-">.-</a>)%s*</h%d>(.-)</div>')
    for title,body in next do
       for func in body:gfind('<a name="' .. package .. '%.(.-)">.-</a>') do
          if func then

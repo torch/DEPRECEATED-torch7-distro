@@ -235,6 +235,8 @@ function dok.dok2html(txt)
                                        end)
 
    -- parse sections (no fancy stuff allowed)
+   local stack = {}
+   local first = true
    txt = txt:gsub('.-\n', function(line)
                              local rank, title = line:match('^=([=]+)(.*)=[=]+%s-$')
                              if title then
@@ -247,7 +249,20 @@ function dok.dok2html(txt)
                                 end
                                 rank = math.max(1, 6-#rank)
                                 title = title:gsub('[=]+$', '')
-                                return closesection .. '\002h' .. rank .. '\003\002a name="' .. dok.link2wikilink(title) .. '"\003' .. dok.cleanText(title) .. '\002/a\003\002/h' .. rank .. '\003\n\002div class="level' .. rank .. '"\003\n'
+                                local classes = ''
+                                if stack[rank-1] then
+                                   for i = 1,rank-1 do
+                                      if stack[i] then
+                                         classes = classes .. ' ' .. stack[i]
+                                      end
+                                   end
+                                end
+                                if first then
+                                   classes = classes .. ' ' .. 'topdiv'
+                                end
+                                first = false
+                                stack[rank] = 'par_' .. dok.link2wikilink(title):gsub('%.','-')
+                                return closesection .. '\002div class="level' .. rank .. classes .. '" id="div_' .. dok.link2wikilink(title):gsub('%.','-') .. '"\003\n' .. '\002h' .. rank .. '\003\002a id="' .. dok.link2wikilink(title) .. '"\003' .. dok.cleanText(title) .. '\002/a\003\002/h' .. rank .. '\003\n'
                              else
                                 return line
                              end
