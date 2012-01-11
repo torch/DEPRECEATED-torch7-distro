@@ -160,7 +160,7 @@ local function adddok(...)
 end
 function dok.html2funcs(html, package)
    local funcs = {}
-   local next = html:gfind('<h%d>(<a.-name=".-">.-</a>)%s*</h%d>\n<div class="level%d">(.-)</div>')
+   local next = html:gfind('<div class="level%d%s.-".->\n<h%d>(<a.-id=".-">.-</a>)%s*</h%d>(.-)</div>')
    for title,body in next do
       for func in body:gfind('<a name="' .. package .. '%.(.-)">.-</a>') do
          if func then
