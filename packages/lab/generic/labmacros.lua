@@ -123,36 +123,38 @@ argtypes.integer = {
               end
 }
 
-argtypes.real = {
-
-   declare=function(arg)
-              return string.format("real arg%d = %d;", arg.i, arg.default or 0)
-           end,
-
-   check = function(arg, idx)
-              return string.format("lua_isnumber(L, %d)", idx)
-           end,
-
-   read = function(arg, idx)
-             return string.format("arg%d = (real)lua_tonumber(L, %d);", arg.i, idx)
-          end,
-
-   carg = function(arg, idx)
-             return string.format('arg%d', arg.i)
-          end,
-
-   precall = function(arg)
-                if arg.returned then
-                   return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
-                end
+for _,typename in ipairs({"real", "char", "short", "int", "long", "float", "double"}) do
+   argtypes[typename] = {
+      
+      declare=function(arg)
+                 return string.format("%s arg%d = %d;", typename, arg.i, arg.default or 0)
+              end,
+      
+      check = function(arg, idx)
+                 return string.format("lua_isnumber(L, %d)", idx)
+              end,
+      
+      read = function(arg, idx)
+                return string.format("arg%d = (%s)lua_tonumber(L, %d);", arg.i, typename, idx)
              end,
-
-   postcall = function(arg)
-                 if arg.creturned then
-                    return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
+      
+      carg = function(arg, idx)
+                return string.format('arg%d', arg.i)
+             end,
+      
+      precall = function(arg)
+                   if arg.returned then
+                      return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
+                   end
+                end,
+      
+      postcall = function(arg)
+                    if arg.creturned then
+                       return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
+                    end
                  end
-              end
-}
+   }
+end
 
 argtypes.boolean = {
 
@@ -169,7 +171,7 @@ argtypes.boolean = {
            end,
 
    read = function(arg, idx)
-             return string.format("arg%d = lua_boolean(L, %d);", arg.i, idx)
+             return string.format("arg%d = lua_toboolean(L, %d);", arg.i, idx)
           end,
 
    carg = function(arg, idx)
@@ -332,7 +334,7 @@ local function writecall(txt, args, cfuncname, cargs, argcreturned)
    table.insert(txt, string.format('return %d;', nret))
 end
 
-function generateinterface(luafuncname, ...)
+function cinterface(luafuncname, ...)
    local txt = {}
    local varargs = {...}
 
@@ -399,47 +401,13 @@ function generateinterface(luafuncname, ...)
    end
 
    table.insert(txt, '}')
+   table.insert(txt, '')
    
    --   beautify(txt)
    print(table.concat(txt, '\n'))
    
 end
 
--- generateinterface("zero", {{name="tensor", returned=true}})
-
--- generateinterface("cross", {{name="tensor", default=true, returned=true},
---                             {name="tensor"},
---                             {name="tensor"},
---                             {name="integer", default=0}})
-
--- generateinterface("cadd", {{name="tensor", default=true, returned=true},
---                            {name="tensor"},
---                            {name="real", default=1},
---                            {name="tensor"}})
-
--- generateinterface("fill", {{name="tensor", returned=true},
---                            {name="real"}})
-
--- generateinterface("dot", {{name="tensor", returned=true},
---                            {name="real"}})
-
--- generateinterface("addcmul", {{name="tensor", default=true, returned=true},
---                               {name="tensor"},
---                               {name="real", default=1},
---                               {name="tensor"},
---                               {name="tensor"}})
-
--- generateinterface("addmv", {{name="tensor", default=true, returned=true},
---                             {name="real", default=1},
---                             {name="tensor"},
---                             {name="real", default=1},
---                             {name="tensor"},
---                             {name="tensor"}})
-
--- generateinterface("min", {{name="Tensor", default=true, returned=true},
---                           {name="LongTensor", default=true, returned=true},
---                           {name="Tensor"},
---                           {name="integer", default=0}})
 
 local function lname(name)
    return string.format('lab_(%s)', name)
@@ -449,24 +417,242 @@ local function cname(name)
    return string.format('THLab_(%s)', name)
 end
 
--- generateinterface(lname("sort"),
---                   cname("sort"),
---                   {{name="Tensor", default=true, returned=true},
---                    {name="LongTensor", default=true, returned=true},
---                    {name="Tensor"},
---                    {name="integer", default=0},
---                    {name="boolean", default=0}})
+print('/* WARNING: autogenerated file */')
+print()
 
--- generateinterface(lname("dot"),
---                   cname("dot"),
---                   {{name="Tensor"},
---                    {name="Tensor"},
---                    {name="real", creturned=true}})
+cinterface(lname("zero"),
+           cname("zero"),
+           {{name="Tensor", returned=true}})
 
-generateinterface(lname("sin"),
-                  cname("sin"),
-                  {{name="Tensor", default=true, returned=true},
-                   {name="Tensor"}},
-                  "sin",
-                  {{name="real"},
-                   {name="real", creturned=true}})
+cinterface(lname("fill"),
+           cname("fill"),
+           {{name="Tensor", returned=true},
+            {name="real"}})
+
+cinterface(lname("dot"),
+           cname("dot"),
+           {{name="Tensor"},
+            {name="Tensor"},
+            {name="real", creturned=true}})
+
+for _,name in ipairs({"minall", "maxall", "sumall"}) do
+   cinterface(lname(name),
+              cname(name),
+              {{name="Tensor"},            
+               {name="real", creturned=true}})
+end
+
+cinterface(lname("mul"),
+           cname("mul"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="real"}})
+
+cinterface(lname("div"),
+           cname("div"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="real"}})
+
+cinterface(lname("cmul"),
+           cname("cmul"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="Tensor"}})
+
+cinterface(lname("cdiv"),
+           cname("cdiv"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="Tensor"}})
+
+cinterface(lname("addcmul"),
+           cname("addcmul"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="real", default=1},
+            {name="Tensor"},
+            {name="Tensor"}})
+
+cinterface(lname("addcdiv"),
+           cname("addcdiv"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="real", default=1},
+            {name="Tensor"},
+            {name="Tensor"}})
+
+for _,name in ipairs({"addmv", "addmm", "addr"}) do
+   cinterface(lname(name),
+              cname(name),
+              {{name="Tensor", default=true, returned=true},
+               {name="real", default=1},
+               {name="Tensor"},
+               {name="real", default=1},
+               {name="Tensor"},
+               {name="Tensor"}})
+end
+
+cinterface(lname("numel"),
+           cname("numel"),
+           {{name="Tensor"},
+            {name="real", creturned=true}})
+
+for _,name in ipairs({"sum", "prod", "cumsum", "cumprod"}) do
+   cinterface(lname(name),
+              cname(name),
+              {{name="Tensor", default=true, returned=true},
+               {name="Tensor"},
+               {name="integer", default=0}})
+end
+
+cinterface(lname("trace"),
+           cname("trace"),
+           {{name="Tensor"},
+            {name="real", creturned=true}})
+
+cinterface(lname("cross"),
+           cname("cross"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="Tensor"},
+            {name="integer", default=0}})
+
+cinterface(lname("diag"),
+           cname("diag"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="long", default=0}})
+
+cinterface(lname("eye"),
+           cname("eye"),
+           {{name="Tensor", default=true, returned=true},
+            {name="long"},
+            {name="long", default=0}})
+
+cinterface(lname("range"),
+           cname("range"),
+           {{name="Tensor", default=true, returned=true},
+            {name="real"},
+            {name="real"},
+            {name="real", default=0}})
+
+cinterface(lname("randperm"),
+           cname("randperm"),
+           {{name="Tensor", default=true, returned=true},
+            {name="long"}})
+
+cinterface(lname("sort"),
+           cname("sort"),
+           {{name="Tensor", default=true, returned=true},
+            {name="LongTensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="integer", default=0},
+            {name="boolean", default=0}})
+
+
+cinterface(lname("tril"),
+           cname("tril"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="integer", default=0}})
+
+cinterface(lname("triu"),
+           cname("triu"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="integer", default=0}})
+
+cinterface(lname("cat"),
+           cname("cat"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="Tensor"},
+            {name="integer", default=0}})
+
+print("#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)")
+
+cinterface(lname("mean"),
+           cname("mean"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="integer", default=0}})
+
+cinterface(lname("std"),
+           cname("std"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="integer", default=0},
+            {name="boolean", default=false}})
+
+cinterface(lname("var"),
+           cname("var"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="integer", default=0},
+            {name="boolean", default=false}})
+
+cinterface(lname("norm"),
+           cname("norm"),
+           {{name="Tensor"},
+            {name="real", default=2},
+            {name="real", creturned=true}})
+
+cinterface(lname("dist"),
+           cname("dist"),
+           {{name="Tensor"},
+            {name="Tensor"},
+            {name="real", default=2},
+            {name="real", creturned=true}})
+
+for _,name in ipairs({"meanall", "varall", "stdall"}) do
+   cinterface(lname(name),
+              cname(name),
+              {{name="Tensor"},
+               {name="real", creturned=true}})
+end
+
+cinterface(lname("linspace"),
+           cname("linspace"),
+           {{name="Tensor", default=true, returned=true},
+            {name="real"},
+            {name="real"},
+            {name="long", default=100}})
+
+cinterface(lname("logspace"),
+           cname("logspace"),
+           {{name="Tensor", default=true, returned=true},
+            {name="real"},
+            {name="real"},
+            {name="long", default=100}})
+
+for _,name in ipairs({"log", "log1p", "exp",
+                      "cos", "acos", "cosh",
+                      "sin", "asin", "sinh",
+                      "tan", "atan", "tanh",
+                      "sqrt",
+                      "ceil", "floor",
+                      "abs"}) do
+
+   cinterface(lname(name),
+              cname(name),
+              {{name="Tensor", default=true, returned=true},
+               {name="Tensor"}},
+              name,
+              {{name="real"},
+               {name="real", creturned=true}})
+   
+end
+
+cinterface(lname("pow"),
+           cname("pow"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="real"}},
+           "pow",
+           {{name="real"},
+            {name="real"},
+            {name="real", creturned=true}})
+
+print("#endif")
+
