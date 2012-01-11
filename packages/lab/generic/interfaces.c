@@ -2,3202 +2,3518 @@
 
 static int lab_(zero)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: *Tensor*");
-  if(argset == 1)
-  {
-    THTensor_(retain)(arg1);
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(zero)(arg1);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: *Tensor*");
+if(argset == 1)
+{
+THTensor_(retain)(arg1);
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(zero)(arg1);
+return 1;
+}
+return 0;
 }
 
 static int lab_(fill)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-  }
-  else
-    luaL_error(L, "expected arguments: *Tensor* real");
-  if(argset == 1)
-  {
-    THTensor_(retain)(arg1);
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(fill)(arg1,arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+}
+else
+luaL_error(L, "expected arguments: *Tensor* real");
+if(argset == 1)
+{
+THTensor_(retain)(arg1);
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(fill)(arg1,arg2);
+return 1;
+}
+return 0;
 }
 
 static int lab_(dot)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor Tensor");
-  if(argset == 1)
-  {
-    arg3 = THLab_(dot)(arg1,arg2);
-    lua_pushnumber(L, (lua_Number)arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: Tensor Tensor");
+if(argset == 1)
+{
+arg3 = THLab_(dot)(arg1,arg2);
+lua_pushnumber(L, (lua_Number)arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(minall)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor");
-  if(argset == 1)
-  {
-    arg2 = THLab_(minall)(arg1);
-    lua_pushnumber(L, (lua_Number)arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: Tensor");
+if(argset == 1)
+{
+arg2 = THLab_(minall)(arg1);
+lua_pushnumber(L, (lua_Number)arg2);
+return 1;
+}
+return 0;
 }
 
 static int lab_(maxall)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor");
-  if(argset == 1)
-  {
-    arg2 = THLab_(maxall)(arg1);
-    lua_pushnumber(L, (lua_Number)arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: Tensor");
+if(argset == 1)
+{
+arg2 = THLab_(maxall)(arg1);
+lua_pushnumber(L, (lua_Number)arg2);
+return 1;
+}
+return 0;
 }
 
 static int lab_(sumall)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor");
-  if(argset == 1)
-  {
-    arg2 = THLab_(sumall)(arg1);
-    lua_pushnumber(L, (lua_Number)arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: Tensor");
+if(argset == 1)
+{
+arg2 = THLab_(sumall)(arg1);
+lua_pushnumber(L, (lua_Number)arg2);
+return 1;
+}
+return 0;
+}
+
+static int lab_(add)(lua_State *L)
+{
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+THTensor *arg4 = NULL;
+THTensor *arg5 = NULL;
+real arg6 = 1;
+THTensor *arg7 = NULL;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 3);
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 2;
+arg5 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg7 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 2;
+arg4 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg7 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 2;
+arg5 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg6 = (real)lua_tonumber(L, 2);
+arg7 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 2;
+arg4 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg6 = (real)lua_tonumber(L, 3);
+arg7 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor real | [*Tensor*] Tensor [real] Tensor");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(add)(arg1,arg2,arg3);
+return 1;
+}
+else if(argset == 2)
+{
+if(arg4)
+THTensor_(retain)(arg4);
+else
+arg4 = THTensor_(new)();
+luaT_pushudata(L, arg4, torch_(Tensor_id));
+THLab_(cadd)(arg4,arg5,arg6,arg7);
+return 1;
+}
+return 0;
 }
 
 static int lab_(mul)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 3);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(mul)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 3);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(mul)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(div)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 3);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(div)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 3);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(div)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(cmul)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  THTensor *arg3 = NULL;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor Tensor");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(cmul)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+THTensor *arg3 = NULL;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor Tensor");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(cmul)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(cdiv)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  THTensor *arg3 = NULL;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor Tensor");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(cdiv)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+THTensor *arg3 = NULL;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor Tensor");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(cdiv)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(addcmul)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 1;
-  THTensor *arg4 = NULL;
-  THTensor *arg5 = NULL;
-  if(narg == 3
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-     && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg4 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 2);
-    arg4 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 3);
-    arg4 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [real] Tensor Tensor");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(addcmul)(arg1,arg2,arg3,arg4,arg5);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 1;
+THTensor *arg4 = NULL;
+THTensor *arg5 = NULL;
+if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 2);
+arg4 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 5
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 3);
+arg4 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [real] Tensor Tensor");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(addcmul)(arg1,arg2,arg3,arg4,arg5);
+return 1;
+}
+return 0;
 }
 
 static int lab_(addcdiv)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 1;
-  THTensor *arg4 = NULL;
-  THTensor *arg5 = NULL;
-  if(narg == 3
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-     && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg4 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 2);
-    arg4 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 3);
-    arg4 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [real] Tensor Tensor");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(addcdiv)(arg1,arg2,arg3,arg4,arg5);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 1;
+THTensor *arg4 = NULL;
+THTensor *arg5 = NULL;
+if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 2);
+arg4 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 5
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 3);
+arg4 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [real] Tensor Tensor");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(addcdiv)(arg1,arg2,arg3,arg4,arg5);
+return 1;
+}
+return 0;
 }
 
 static int lab_(addmv)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 1;
-  THTensor *arg3 = NULL;
-  real arg4 = 1;
-  THTensor *arg5 = NULL;
-  THTensor *arg6 = NULL;
-  if(narg == 3
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-     && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && lua_isnumber(L, 1)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 2);
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 3);
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && lua_isnumber(L, 1)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 3);
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else if(narg == 6
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && lua_isnumber(L, 4)
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-          && luaT_isudata(L, 6, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 4);
-    arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 6, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] [real] Tensor [real] Tensor Tensor");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(addmv)(arg1,arg2,arg3,arg4,arg5,arg6);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 1;
+THTensor *arg3 = NULL;
+real arg4 = 1;
+THTensor *arg5 = NULL;
+THTensor *arg6 = NULL;
+if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 4
+&& lua_isnumber(L, 1)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 5
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 2);
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 5
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 3);
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else if(narg == 5
+&& lua_isnumber(L, 1)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 3);
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else if(narg == 6
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isnumber(L, 4)
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+&& luaT_isudata(L, 6, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 4);
+arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 6, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] [real] Tensor [real] Tensor Tensor");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(addmv)(arg1,arg2,arg3,arg4,arg5,arg6);
+return 1;
+}
+return 0;
 }
 
 static int lab_(addmm)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 1;
-  THTensor *arg3 = NULL;
-  real arg4 = 1;
-  THTensor *arg5 = NULL;
-  THTensor *arg6 = NULL;
-  if(narg == 3
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-     && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && lua_isnumber(L, 1)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 2);
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 3);
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && lua_isnumber(L, 1)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 3);
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else if(narg == 6
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && lua_isnumber(L, 4)
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-          && luaT_isudata(L, 6, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 4);
-    arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 6, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] [real] Tensor [real] Tensor Tensor");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(addmm)(arg1,arg2,arg3,arg4,arg5,arg6);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 1;
+THTensor *arg3 = NULL;
+real arg4 = 1;
+THTensor *arg5 = NULL;
+THTensor *arg6 = NULL;
+if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 4
+&& lua_isnumber(L, 1)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 5
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 2);
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 5
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 3);
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else if(narg == 5
+&& lua_isnumber(L, 1)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 3);
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else if(narg == 6
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isnumber(L, 4)
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+&& luaT_isudata(L, 6, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 4);
+arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 6, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] [real] Tensor [real] Tensor Tensor");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(addmm)(arg1,arg2,arg3,arg4,arg5,arg6);
+return 1;
+}
+return 0;
 }
 
 static int lab_(addr)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 1;
-  THTensor *arg3 = NULL;
-  real arg4 = 1;
-  THTensor *arg5 = NULL;
-  THTensor *arg6 = NULL;
-  if(narg == 3
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-     && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && lua_isnumber(L, 1)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 2);
-    arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 3);
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else if(narg == 5
-          && lua_isnumber(L, 1)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && luaT_isudata(L, 4, torch_(Tensor_id))
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 3);
-    arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
-  }
-  else if(narg == 6
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && lua_isnumber(L, 4)
-          && luaT_isudata(L, 5, torch_(Tensor_id))
-          && luaT_isudata(L, 6, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg4 = (real)lua_tonumber(L, 4);
-    arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
-    arg6 = luaT_toudata(L, 6, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] [real] Tensor [real] Tensor Tensor");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(addr)(arg1,arg2,arg3,arg4,arg5,arg6);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 1;
+THTensor *arg3 = NULL;
+real arg4 = 1;
+THTensor *arg5 = NULL;
+THTensor *arg6 = NULL;
+if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 4
+&& lua_isnumber(L, 1)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 5
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 2);
+arg5 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 4, torch_(Tensor_id));
+}
+else if(narg == 5
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 3);
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else if(narg == 5
+&& lua_isnumber(L, 1)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& luaT_isudata(L, 4, torch_(Tensor_id))
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 3);
+arg5 = luaT_toudata(L, 4, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 5, torch_(Tensor_id));
+}
+else if(narg == 6
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isnumber(L, 4)
+&& luaT_isudata(L, 5, torch_(Tensor_id))
+&& luaT_isudata(L, 6, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg4 = (real)lua_tonumber(L, 4);
+arg5 = luaT_toudata(L, 5, torch_(Tensor_id));
+arg6 = luaT_toudata(L, 6, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] [real] Tensor [real] Tensor Tensor");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(addr)(arg1,arg2,arg3,arg4,arg5,arg6);
+return 1;
+}
+return 0;
 }
 
 static int lab_(numel)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor");
-  if(argset == 1)
-  {
-    arg2 = THLab_(numel)(arg1);
-    lua_pushnumber(L, (lua_Number)arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: Tensor");
+if(argset == 1)
+{
+arg2 = THLab_(numel)(arg1);
+lua_pushnumber(L, (lua_Number)arg2);
+return 1;
+}
+return 0;
 }
 
 static int lab_(sum)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2)-1;
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3)-1;
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(sum)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(sum)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(prod)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2)-1;
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3)-1;
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(prod)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(prod)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(cumsum)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2)-1;
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3)-1;
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(cumsum)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(cumsum)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(cumprod)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2)-1;
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3)-1;
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(cumprod)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(cumprod)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
+}
+
+static int lab_(min)(lua_State *L)
+{
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THLongTensor *arg2 = NULL;
+THTensor *arg3 = NULL;
+long arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_LongTensor_id)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_LongTensor_id)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_LongTensor_id)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_LongTensor_id)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isnumber(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 4)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] [*LongTensor*] Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+if(arg2)
+THLongTensor_retain(arg2);
+else
+arg2 = THLongTensor_new();
+luaT_pushudata(L, arg2, torch_LongTensor_id);
+THLab_(min)(arg1,arg2,arg3,arg4);
+return 2;
+}
+return 0;
+}
+
+static int lab_(max)(lua_State *L)
+{
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THLongTensor *arg2 = NULL;
+THTensor *arg3 = NULL;
+long arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_LongTensor_id)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_LongTensor_id)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_LongTensor_id)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_LongTensor_id)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isnumber(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 4)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] [*LongTensor*] Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+if(arg2)
+THLongTensor_retain(arg2);
+else
+arg2 = THLongTensor_new();
+luaT_pushudata(L, arg2, torch_LongTensor_id);
+THLab_(max)(arg1,arg2,arg3,arg4);
+return 2;
+}
+return 0;
 }
 
 static int lab_(trace)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor");
-  if(argset == 1)
-  {
-    arg2 = THLab_(trace)(arg1);
-    lua_pushnumber(L, (lua_Number)arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: Tensor");
+if(argset == 1)
+{
+arg2 = THLab_(trace)(arg1);
+lua_pushnumber(L, (lua_Number)arg2);
+return 1;
+}
+return 0;
 }
 
 static int lab_(cross)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  THTensor *arg3 = NULL;
-  long arg4 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 3)-1;
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && lua_isnumber(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 4)-1;
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor Tensor [integer]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(cross)(arg1,arg2,arg3,arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+THTensor *arg3 = NULL;
+long arg4 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isnumber(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 4)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(cross)(arg1,arg2,arg3,arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(diag)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [long]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(diag)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [long]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(diag)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(eye)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  long arg2 = 0;
-  long arg3 = 0;
-  if(narg == 1
-     && lua_isnumber(L, 1)
-    )
-  {
-    argset = 1;
-    arg2 = (long)lua_tonumber(L, 1);
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (long)lua_tonumber(L, 2);
-  }
-  else if(narg == 2
-          && lua_isnumber(L, 1)
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = (long)lua_tonumber(L, 1);
-    arg3 = (long)lua_tonumber(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (long)lua_tonumber(L, 2);
-    arg3 = (long)lua_tonumber(L, 3);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] long [long]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(eye)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+long arg2 = 0;
+long arg3 = 0;
+if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 1;
+arg2 = (long)lua_tonumber(L, 1);
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (long)lua_tonumber(L, 2);
+}
+else if(narg == 2
+&& lua_isnumber(L, 1)
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = (long)lua_tonumber(L, 1);
+arg3 = (long)lua_tonumber(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (long)lua_tonumber(L, 2);
+arg3 = (long)lua_tonumber(L, 3);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] long [long]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(eye)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(range)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 2
-     && lua_isnumber(L, 1)
-     && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = (real)lua_tonumber(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = (real)lua_tonumber(L, 3);
-  }
-  else if(narg == 3
-          && lua_isnumber(L, 1)
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = (real)lua_tonumber(L, 2);
-    arg4 = (real)lua_tonumber(L, 3);
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-          && lua_isnumber(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = (real)lua_tonumber(L, 3);
-    arg4 = (real)lua_tonumber(L, 4);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] real real [real]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(range)(arg1,arg2,arg3,arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 2
+&& lua_isnumber(L, 1)
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = (real)lua_tonumber(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = (real)lua_tonumber(L, 3);
+}
+else if(narg == 3
+&& lua_isnumber(L, 1)
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = (real)lua_tonumber(L, 2);
+arg4 = (real)lua_tonumber(L, 3);
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+&& lua_isnumber(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = (real)lua_tonumber(L, 3);
+arg4 = (real)lua_tonumber(L, 4);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] real real [real]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(range)(arg1,arg2,arg3,arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(randperm)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  long arg2 = 0;
-  if(narg == 1
-     && lua_isnumber(L, 1)
-    )
-  {
-    argset = 1;
-    arg2 = (long)lua_tonumber(L, 1);
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (long)lua_tonumber(L, 2);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] long");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(randperm)(arg1,arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+long arg2 = 0;
+if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 1;
+arg2 = (long)lua_tonumber(L, 1);
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (long)lua_tonumber(L, 2);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] long");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(randperm)(arg1,arg2);
+return 1;
+}
+return 0;
 }
 
 static int lab_(sort)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THLongTensor *arg2 = NULL;
-  THTensor *arg3 = NULL;
-  long arg4 = 0;
-  int arg5 = 1;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_LongTensor_id)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_LongTensor_id)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 2)-1;
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 3)-1;
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_LongTensor_id)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 3)-1;
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_LongTensor_id)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && lua_isnumber(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 4)-1;
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isboolean(L, 2)
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg5 = lua_toboolean(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isboolean(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = lua_toboolean(L, 3);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_LongTensor_id)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isboolean(L, 3)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg5 = lua_toboolean(L, 3);
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_LongTensor_id)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && lua_isboolean(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg5 = lua_toboolean(L, 4);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isboolean(L, 3)
-    )
-  {
-    argset = 1;
-    arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 2)-1;
-    arg5 = lua_toboolean(L, 3);
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && lua_isboolean(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 3)-1;
-    arg5 = lua_toboolean(L, 4);
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_LongTensor_id)
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && lua_isboolean(L, 4)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 3)-1;
-    arg5 = lua_toboolean(L, 4);
-  }
-  else if(narg == 5
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_LongTensor_id)
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && lua_isnumber(L, 4)
-          && lua_isboolean(L, 5)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 4)-1;
-    arg5 = lua_toboolean(L, 5);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] [*LongTensor*] Tensor [integer] [boolean]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    if(arg2)
-      THLongTensor_retain(arg2);
-    else
-      arg2 = THLongTensor_new();
-    luaT_pushudata(L, arg2, torch_LongTensor_id);
-    THLab_(sort)(arg1,arg2,arg3,arg4,arg5);
-    return 2;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THLongTensor *arg2 = NULL;
+THTensor *arg3 = NULL;
+long arg4 = 0;
+int arg5 = 1;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_LongTensor_id)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_LongTensor_id)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_LongTensor_id)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_LongTensor_id)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isnumber(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 4)-1;
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isboolean(L, 2)
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg5 = lua_toboolean(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isboolean(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = lua_toboolean(L, 3);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_LongTensor_id)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isboolean(L, 3)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg5 = lua_toboolean(L, 3);
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_LongTensor_id)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isboolean(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg5 = lua_toboolean(L, 4);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isboolean(L, 3)
+)
+{
+argset = 1;
+arg3 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 2)-1;
+arg5 = lua_toboolean(L, 3);
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& lua_isboolean(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+arg5 = lua_toboolean(L, 4);
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_LongTensor_id)
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& lua_isboolean(L, 4)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+arg5 = lua_toboolean(L, 4);
+}
+else if(narg == 5
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_LongTensor_id)
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isnumber(L, 4)
+&& lua_isboolean(L, 5)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_LongTensor_id);
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 4)-1;
+arg5 = lua_toboolean(L, 5);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] [*LongTensor*] Tensor [integer] [boolean]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+if(arg2)
+THLongTensor_retain(arg2);
+else
+arg2 = THLongTensor_new();
+luaT_pushudata(L, arg2, torch_LongTensor_id);
+THLab_(sort)(arg1,arg2,arg3,arg4,arg5);
+return 2;
+}
+return 0;
 }
 
 static int lab_(tril)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2)-1;
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3)-1;
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(tril)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(tril)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(triu)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2)-1;
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3)-1;
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(triu)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(triu)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(cat)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  THTensor *arg3 = NULL;
-  long arg4 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 3)-1;
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && luaT_isudata(L, 3, torch_(Tensor_id))
-          && lua_isnumber(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
-    arg4 = (long)lua_tonumber(L, 4)-1;
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor Tensor [integer]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(cat)(arg1,arg2,arg3,arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+THTensor *arg3 = NULL;
+long arg4 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 3)-1;
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& luaT_isudata(L, 3, torch_(Tensor_id))
+&& lua_isnumber(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = luaT_toudata(L, 3, torch_(Tensor_id));
+arg4 = (long)lua_tonumber(L, 4)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(cat)(arg1,arg2,arg3,arg4);
+return 1;
+}
+return 0;
 }
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 static int lab_(mean)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2)-1;
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3)-1;
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(mean)(arg1,arg2,arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2)-1;
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3)-1;
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(mean)(arg1,arg2,arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(std)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  int arg4 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && lua_isboolean(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg4 = lua_toboolean(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isboolean(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = lua_toboolean(L, 3);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isboolean(L, 3)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2)-1;
-    arg4 = lua_toboolean(L, 3);
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && lua_isboolean(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3)-1;
-    arg4 = lua_toboolean(L, 4);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer] boolean");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(std)(arg1,arg2,arg3,arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+int arg4 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isboolean(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = lua_toboolean(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isboolean(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = lua_toboolean(L, 3);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isboolean(L, 3)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2)-1;
+arg4 = lua_toboolean(L, 3);
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& lua_isboolean(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3)-1;
+arg4 = lua_toboolean(L, 4);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer] boolean");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(std)(arg1,arg2,arg3,arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(var)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  long arg3 = 0;
-  int arg4 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && lua_isboolean(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg4 = lua_toboolean(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isboolean(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg4 = lua_toboolean(L, 3);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isboolean(L, 3)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 2)-1;
-    arg4 = lua_toboolean(L, 3);
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-          && lua_isboolean(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (long)lua_tonumber(L, 3)-1;
-    arg4 = lua_toboolean(L, 4);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer] boolean");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(var)(arg1,arg2,arg3,arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+long arg3 = 0;
+int arg4 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isboolean(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg4 = lua_toboolean(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isboolean(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg4 = lua_toboolean(L, 3);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isboolean(L, 3)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 2)-1;
+arg4 = lua_toboolean(L, 3);
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+&& lua_isboolean(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (long)lua_tonumber(L, 3)-1;
+arg4 = lua_toboolean(L, 4);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor [integer] boolean");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(var)(arg1,arg2,arg3,arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(norm)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 2;
-  real arg3 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor [real]");
-  if(argset == 1)
-  {
-    arg3 = THLab_(norm)(arg1,arg2);
-    lua_pushnumber(L, (lua_Number)arg3);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 2;
+real arg3 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+}
+else
+luaL_error(L, "expected arguments: Tensor [real]");
+if(argset == 1)
+{
+arg3 = THLab_(norm)(arg1,arg2);
+lua_pushnumber(L, (lua_Number)arg3);
+return 1;
+}
+return 0;
 }
 
 static int lab_(dist)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 2;
-  real arg4 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 3);
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor Tensor [real]");
-  if(argset == 1)
-  {
-    arg4 = THLab_(dist)(arg1,arg2,arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 2;
+real arg4 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 3);
+}
+else
+luaL_error(L, "expected arguments: Tensor Tensor [real]");
+if(argset == 1)
+{
+arg4 = THLab_(dist)(arg1,arg2,arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(meanall)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor");
-  if(argset == 1)
-  {
-    arg2 = THLab_(meanall)(arg1);
-    lua_pushnumber(L, (lua_Number)arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: Tensor");
+if(argset == 1)
+{
+arg2 = THLab_(meanall)(arg1);
+lua_pushnumber(L, (lua_Number)arg2);
+return 1;
+}
+return 0;
 }
 
 static int lab_(varall)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor");
-  if(argset == 1)
-  {
-    arg2 = THLab_(varall)(arg1);
-    lua_pushnumber(L, (lua_Number)arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: Tensor");
+if(argset == 1)
+{
+arg2 = THLab_(varall)(arg1);
+lua_pushnumber(L, (lua_Number)arg2);
+return 1;
+}
+return 0;
 }
 
 static int lab_(stdall)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else
-    luaL_error(L, "expected arguments: Tensor");
-  if(argset == 1)
-  {
-    arg2 = THLab_(stdall)(arg1);
-    lua_pushnumber(L, (lua_Number)arg2);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else
+luaL_error(L, "expected arguments: Tensor");
+if(argset == 1)
+{
+arg2 = THLab_(stdall)(arg1);
+lua_pushnumber(L, (lua_Number)arg2);
+return 1;
+}
+return 0;
 }
 
 static int lab_(linspace)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  real arg3 = 0;
-  long arg4 = 100;
-  if(narg == 2
-     && lua_isnumber(L, 1)
-     && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = (real)lua_tonumber(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = (real)lua_tonumber(L, 3);
-  }
-  else if(narg == 3
-          && lua_isnumber(L, 1)
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = (real)lua_tonumber(L, 2);
-    arg4 = (long)lua_tonumber(L, 3);
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-          && lua_isnumber(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = (real)lua_tonumber(L, 3);
-    arg4 = (long)lua_tonumber(L, 4);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] real real [long]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(linspace)(arg1,arg2,arg3,arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+real arg3 = 0;
+long arg4 = 100;
+if(narg == 2
+&& lua_isnumber(L, 1)
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = (real)lua_tonumber(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = (real)lua_tonumber(L, 3);
+}
+else if(narg == 3
+&& lua_isnumber(L, 1)
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = (real)lua_tonumber(L, 2);
+arg4 = (long)lua_tonumber(L, 3);
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+&& lua_isnumber(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = (real)lua_tonumber(L, 3);
+arg4 = (long)lua_tonumber(L, 4);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] real real [long]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(linspace)(arg1,arg2,arg3,arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(logspace)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  real arg2 = 0;
-  real arg3 = 0;
-  long arg4 = 100;
-  if(narg == 2
-     && lua_isnumber(L, 1)
-     && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = (real)lua_tonumber(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = (real)lua_tonumber(L, 3);
-  }
-  else if(narg == 3
-          && lua_isnumber(L, 1)
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg2 = (real)lua_tonumber(L, 1);
-    arg3 = (real)lua_tonumber(L, 2);
-    arg4 = (long)lua_tonumber(L, 3);
-  }
-  else if(narg == 4
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && lua_isnumber(L, 2)
-          && lua_isnumber(L, 3)
-          && lua_isnumber(L, 4)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = (real)lua_tonumber(L, 2);
-    arg3 = (real)lua_tonumber(L, 3);
-    arg4 = (long)lua_tonumber(L, 4);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] real real [long]");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(logspace)(arg1,arg2,arg3,arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+real arg2 = 0;
+real arg3 = 0;
+long arg4 = 100;
+if(narg == 2
+&& lua_isnumber(L, 1)
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = (real)lua_tonumber(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = (real)lua_tonumber(L, 3);
+}
+else if(narg == 3
+&& lua_isnumber(L, 1)
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg2 = (real)lua_tonumber(L, 1);
+arg3 = (real)lua_tonumber(L, 2);
+arg4 = (long)lua_tonumber(L, 3);
+}
+else if(narg == 4
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+&& lua_isnumber(L, 3)
+&& lua_isnumber(L, 4)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = (real)lua_tonumber(L, 2);
+arg3 = (real)lua_tonumber(L, 3);
+arg4 = (long)lua_tonumber(L, 4);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] real real [long]");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(logspace)(arg1,arg2,arg3,arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(log)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(log)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = log(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(log)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = log(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(log1p)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(log1p)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = log1p(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(log1p)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = log1p(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(exp)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(exp)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = exp(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(exp)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = exp(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(cos)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(cos)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = cos(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(cos)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = cos(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(acos)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(acos)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = acos(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(acos)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = acos(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(cosh)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(cosh)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = cosh(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(cosh)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = cosh(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(sin)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(sin)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = sin(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(sin)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = sin(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(asin)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(asin)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = asin(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(asin)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = asin(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(sinh)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(sinh)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = sinh(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(sinh)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = sinh(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(tan)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(tan)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = tan(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(tan)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = tan(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(atan)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(atan)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = atan(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(atan)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = atan(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(tanh)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(tanh)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = tanh(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(tanh)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = tanh(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(sqrt)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(sqrt)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = sqrt(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(sqrt)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = sqrt(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(ceil)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(ceil)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = ceil(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(ceil)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = ceil(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(floor)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(floor)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = floor(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(floor)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = floor(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(abs)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  if(narg == 1
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-  }
-  else if(narg == 2
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-  }
-  else if(narg == 1
-          && lua_isnumber(L, 1)
-    )
-  {
-    argset = 2;
-    arg3 = (real)lua_tonumber(L, 1);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(abs)(arg1,arg2);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg4 = abs(arg3);
-    lua_pushnumber(L, (lua_Number)arg4);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+if(narg == 1
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+}
+else if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+}
+else if(narg == 1
+&& lua_isnumber(L, 1)
+)
+{
+argset = 2;
+arg3 = (real)lua_tonumber(L, 1);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor | real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(abs)(arg1,arg2);
+return 1;
+}
+else if(argset == 2)
+{
+arg4 = abs(arg3);
+lua_pushnumber(L, (lua_Number)arg4);
+return 1;
+}
+return 0;
 }
 
 static int lab_(pow)(lua_State *L)
 {
-  int narg = lua_gettop(L);
-  int argset = 0;
-  THTensor *arg1 = NULL;
-  THTensor *arg2 = NULL;
-  real arg3 = 0;
-  real arg4 = 0;
-  real arg5 = 0;
-  real arg6 = 0;
-  if(narg == 2
-     && luaT_isudata(L, 1, torch_(Tensor_id))
-     && lua_isnumber(L, 2)
-    )
-  {
-    argset = 1;
-    arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 2);
-  }
-  else if(narg == 3
-          && luaT_isudata(L, 1, torch_(Tensor_id))
-          && luaT_isudata(L, 2, torch_(Tensor_id))
-          && lua_isnumber(L, 3)
-    )
-  {
-    argset = 1;
-    arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
-    arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
-    arg3 = (real)lua_tonumber(L, 3);
-  }
-  else if(narg == 2
-          && lua_isnumber(L, 1)
-          && lua_isnumber(L, 2)
-    )
-  {
-    argset = 2;
-    arg4 = (real)lua_tonumber(L, 1);
-    arg5 = (real)lua_tonumber(L, 2);
-  }
-  else
-    luaL_error(L, "expected arguments: [*Tensor*] Tensor real | real real");
-  if(argset == 1)
-  {
-    if(arg1)
-      THTensor_(retain)(arg1);
-    else
-      arg1 = THTensor_(new)();
-    luaT_pushudata(L, arg1, torch_(Tensor_id));
-    THLab_(pow)(arg1,arg2,arg3);
-    return 1;
-  }
-  else if(argset == 2)
-  {
-    arg6 = pow(arg4,arg5);
-    lua_pushnumber(L, (lua_Number)arg6);
-    return 1;
-  }
-  return 0;
+int narg = lua_gettop(L);
+int argset = 0;
+THTensor *arg1 = NULL;
+THTensor *arg2 = NULL;
+real arg3 = 0;
+real arg4 = 0;
+real arg5 = 0;
+real arg6 = 0;
+if(narg == 2
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& lua_isnumber(L, 2)
+)
+{
+argset = 1;
+arg2 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 2);
+}
+else if(narg == 3
+&& luaT_isudata(L, 1, torch_(Tensor_id))
+&& luaT_isudata(L, 2, torch_(Tensor_id))
+&& lua_isnumber(L, 3)
+)
+{
+argset = 1;
+arg1 = luaT_toudata(L, 1, torch_(Tensor_id));
+arg2 = luaT_toudata(L, 2, torch_(Tensor_id));
+arg3 = (real)lua_tonumber(L, 3);
+}
+else if(narg == 2
+&& lua_isnumber(L, 1)
+&& lua_isnumber(L, 2)
+)
+{
+argset = 2;
+arg4 = (real)lua_tonumber(L, 1);
+arg5 = (real)lua_tonumber(L, 2);
+}
+else
+luaL_error(L, "expected arguments: [*Tensor*] Tensor real | real real");
+if(argset == 1)
+{
+if(arg1)
+THTensor_(retain)(arg1);
+else
+arg1 = THTensor_(new)();
+luaT_pushudata(L, arg1, torch_(Tensor_id));
+THLab_(pow)(arg1,arg2,arg3);
+return 1;
+}
+else if(argset == 2)
+{
+arg6 = pow(arg4,arg5);
+lua_pushnumber(L, (lua_Number)arg6);
+return 1;
+}
+return 0;
 }
 
 #endif

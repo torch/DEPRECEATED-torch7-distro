@@ -442,6 +442,17 @@ for _,name in ipairs({"minall", "maxall", "sumall"}) do
                {name="real", creturned=true}})
 end
 
+cinterface(lname("add"),
+           cname("add"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="real"}},
+           cname("cadd"),
+           {{name="Tensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="real", default=1},
+            {name="Tensor"}})
+
 cinterface(lname("mul"),
            cname("mul"),
            {{name="Tensor", default=true, returned=true},
@@ -505,6 +516,20 @@ for _,name in ipairs({"sum", "prod", "cumsum", "cumprod"}) do
                {name="Tensor"},
                {name="integer", default=0}})
 end
+
+cinterface(lname("min"),
+           cname("min"),
+           {{name="Tensor", default=true, returned=true},
+            {name="LongTensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="integer", default=0}})
+
+cinterface(lname("max"),
+           cname("max"),
+           {{name="Tensor", default=true, returned=true},
+            {name="LongTensor", default=true, returned=true},
+            {name="Tensor"},
+            {name="integer", default=0}})
 
 cinterface(lname("trace"),
            cname("trace"),
