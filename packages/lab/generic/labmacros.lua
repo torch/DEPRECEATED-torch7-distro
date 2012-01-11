@@ -1,187 +1,193 @@
---- oTToNTToA
-
--- rTaoTaTaoNaTaTaoA
-
 local argtypes = {}
 
-argtypes.Tensor = {declare=function(arg)
-                              return string.format("THTensor *arg%d = NULL;", arg.i)
-                           end,
+argtypes.Tensor = {
 
-                   check=function(arg, idx)
-                            return string.format("luaT_isudata(L, %d, torch_(Tensor_id))", idx)
-                         end,
+   declare=function(arg)
+              return string.format("THTensor *arg%d = NULL;", arg.i)
+           end,
+   
+   check=function(arg, idx)
+            return string.format("luaT_isudata(L, %d, torch_(Tensor_id))", idx)
+         end,
 
-                   read = function(arg, idx)
-                             return string.format("arg%d = luaT_toudata(L, %d, torch_(Tensor_id));", arg.i, idx)
-                          end,
-                   
-                   carg = function(arg, idx)
-                             return string.format('arg%d', arg.i)
-                          end,
+   read = function(arg, idx)
+             return string.format("arg%d = luaT_toudata(L, %d, torch_(Tensor_id));", arg.i, idx)
+          end,
+   
+   carg = function(arg, idx)
+             return string.format('arg%d', arg.i)
+          end,
 
-                   precall = function(arg)
-                                local txt = {}
-                                if arg.default and arg.returned then
-                                   table.insert(txt, string.format('if(arg%d)', arg.i))
-                                   table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
-                                   table.insert(txt, 'else')
-                                   table.insert(txt, string.format('arg%d = THTensor_(new)();', arg.i))
-                                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
-                                elseif arg.default then
-                                   error('a tensor cannot be optional if not returned')
-                                elseif arg.returned then
-                                   table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
-                                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
-                                end
-                                return table.concat(txt, '\n')
-                             end,
+   precall = function(arg)
+                local txt = {}
+                if arg.default and arg.returned then
+                   table.insert(txt, string.format('if(arg%d)', arg.i))
+                   table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
+                   table.insert(txt, 'else')
+                   table.insert(txt, string.format('arg%d = THTensor_(new)();', arg.i))
+                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                elseif arg.default then
+                   error('a tensor cannot be optional if not returned')
+                elseif arg.returned then
+                   table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
+                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                end
+                return table.concat(txt, '\n')
+             end,
 
-                   postcall = function(arg)
-                                local txt = {}
-                                if arg.creturned then
-                                   -- this next line is actually debatable
-                                   table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
-                                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
-                                end
-                                return table.concat(txt, '\n')
-                             end
-                }
-
-argtypes.LongTensor = {declare=function(arg)
-                              return string.format("THLongTensor *arg%d = NULL;", arg.i)
-                           end,
-
-                   check=function(arg, idx)
-                            return string.format("luaT_isudata(L, %d, torch_LongTensor_id)", idx)
-                         end,
-
-                   read = function(arg, idx)
-                             return string.format("arg%d = luaT_toudata(L, %d, torch_LongTensor_id);", arg.i, idx)
-                          end,
-                   
-                   carg = function(arg, idx)
-                             return string.format('arg%d', arg.i)
-                          end,
-
-                   precall = function(arg)
-                                local txt = {}
-                                if arg.default and arg.returned then
-                                   table.insert(txt, string.format('if(arg%d)', arg.i))
-                                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
-                                   table.insert(txt, 'else')
-                                   table.insert(txt, string.format('arg%d = THLongTensor_new();', arg.i))
-                                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
-                                elseif arg.default then
-                                   error('a tensor cannot be optional if not returned')
-                                elseif arg.returned then
-                                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
-                                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
-                                end
-                                return table.concat(txt, '\n')
-                             end,
-
-                   postcall = function(arg)
-                                 local txt = {}
-                                 if arg.creturned then
-                                    -- this next line is actually debatable
-                                    table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
-                                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
-                                 end
-                                 return table.concat(txt, '\n')
-                              end
+   postcall = function(arg)
+                 local txt = {}
+                 if arg.creturned then
+                    -- this next line is actually debatable
+                    table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
+                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                 end
+                 return table.concat(txt, '\n')
+              end
 }
 
-argtypes.integer = {declare=function(arg)
-                               return string.format("long arg%d = %d;", arg.i, arg.default or 0)
-                            end,
+argtypes.LongTensor = {
 
-                    check = function(arg, idx)
-                               return string.format("lua_isnumber(L, %d)", idx)
-                            end,
+   declare=function(arg)
+              return string.format("THLongTensor *arg%d = NULL;", arg.i)
+           end,
+   
+   check=function(arg, idx)
+            return string.format("luaT_isudata(L, %d, torch_LongTensor_id)", idx)
+         end,
 
-                    read = function(arg, idx)
-                              return string.format("arg%d = (long)lua_tonumber(L, %d)-1;", arg.i, idx)
-                           end,
+   read = function(arg, idx)
+             return string.format("arg%d = luaT_toudata(L, %d, torch_LongTensor_id);", arg.i, idx)
+          end,
+   
+   carg = function(arg, idx)
+             return string.format('arg%d', arg.i)
+          end,
 
-                    carg = function(arg, idx)
-                              return string.format('arg%d', arg.i)
-                           end,
+   precall = function(arg)
+                local txt = {}
+                if arg.default and arg.returned then
+                   table.insert(txt, string.format('if(arg%d)', arg.i))
+                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
+                   table.insert(txt, 'else')
+                   table.insert(txt, string.format('arg%d = THLongTensor_new();', arg.i))
+                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
+                elseif arg.default then
+                   error('a tensor cannot be optional if not returned')
+                elseif arg.returned then
+                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
+                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
+                end
+                return table.concat(txt, '\n')
+             end,
 
-                    precall = function(arg)
-                                 if arg.returned then
-                                    return string.format('lua_pushnumber(L, (lua_Number)arg%d+1);', arg.i)
-                                 end
-                              end,
+   postcall = function(arg)
+                 local txt = {}
+                 if arg.creturned then
+                    -- this next line is actually debatable
+                    table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
+                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
+                 end
+                 return table.concat(txt, '\n')
+              end
+}
 
-                    postcall = function(arg)
-                                  if arg.creturned then
-                                     return string.format('lua_pushnumber(L, (lua_Number)arg%d+1);', arg.i)
-                                  end
-                               end
-                 }
+argtypes.integer = {
 
-argtypes.real = {declare=function(arg)
-                               return string.format("real arg%d = %d;", arg.i, arg.default or 0)
-                            end,
+   declare=function(arg)
+              return string.format("long arg%d = %d;", arg.i, arg.default or 0)
+           end,
 
-                    check = function(arg, idx)
-                               return string.format("lua_isnumber(L, %d)", idx)
-                            end,
+   check = function(arg, idx)
+              return string.format("lua_isnumber(L, %d)", idx)
+           end,
 
-                    read = function(arg, idx)
-                              return string.format("arg%d = (real)lua_tonumber(L, %d);", arg.i, idx)
-                           end,
+   read = function(arg, idx)
+             return string.format("arg%d = (long)lua_tonumber(L, %d)-1;", arg.i, idx)
+          end,
 
-                    carg = function(arg, idx)
-                              return string.format('arg%d', arg.i)
-                           end,
+   carg = function(arg, idx)
+             return string.format('arg%d', arg.i)
+          end,
 
-                    precall = function(arg)
-                                 if arg.returned then
-                                    return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
-                                 end
-                              end,
+   precall = function(arg)
+                if arg.returned then
+                   return string.format('lua_pushnumber(L, (lua_Number)arg%d+1);', arg.i)
+                end
+             end,
 
-                    postcall = function(arg)
-                                  if arg.creturned then
-                                     return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
-                                  end
-                               end
-                 }
+   postcall = function(arg)
+                 if arg.creturned then
+                    return string.format('lua_pushnumber(L, (lua_Number)arg%d+1);', arg.i)
+                 end
+              end
+}
 
-argtypes.boolean = {declare=function(arg)
-                               local default = 0
-                               if arg.default then
-                                  default = 1
-                               end
-                               return string.format("int arg%d = %d;", arg.i, default or 0)
-                            end,
+argtypes.real = {
 
-                    check = function(arg, idx)
-                               return string.format("lua_isboolean(L, %d)", idx)
-                            end,
+   declare=function(arg)
+              return string.format("real arg%d = %d;", arg.i, arg.default or 0)
+           end,
 
-                    read = function(arg, idx)
-                              return string.format("arg%d = lua_boolean(L, %d);", arg.i, idx)
-                           end,
+   check = function(arg, idx)
+              return string.format("lua_isnumber(L, %d)", idx)
+           end,
 
-                    carg = function(arg, idx)
-                              return string.format('arg%d', arg.i)
-                           end,
+   read = function(arg, idx)
+             return string.format("arg%d = (real)lua_tonumber(L, %d);", arg.i, idx)
+          end,
 
-                    precall = function(arg)
-                                 if arg.returned then
-                                    return string.format('lua_pushboolean(L, arg%d);', arg.i)
-                                 end
-                              end,
+   carg = function(arg, idx)
+             return string.format('arg%d', arg.i)
+          end,
 
-                    postcall = function(arg)
-                                  if arg.creturned then
-                                     return string.format('lua_pushboolean(L, arg%d);', arg.i)
-                                  end
-                               end
-                 }
+   precall = function(arg)
+                if arg.returned then
+                   return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
+                end
+             end,
+
+   postcall = function(arg)
+                 if arg.creturned then
+                    return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
+                 end
+              end
+}
+
+argtypes.boolean = {
+
+   declare=function(arg)
+              local default = 0
+              if arg.default then
+                 default = 1
+              end
+              return string.format("int arg%d = %d;", arg.i, default or 0)
+           end,
+
+   check = function(arg, idx)
+              return string.format("lua_isboolean(L, %d)", idx)
+           end,
+
+   read = function(arg, idx)
+             return string.format("arg%d = lua_boolean(L, %d);", arg.i, idx)
+          end,
+
+   carg = function(arg, idx)
+             return string.format('arg%d', arg.i)
+          end,
+
+   precall = function(arg)
+                if arg.returned then
+                   return string.format('lua_pushboolean(L, arg%d);', arg.i)
+                end
+             end,
+
+   postcall = function(arg)
+                 if arg.creturned then
+                    return string.format('lua_pushboolean(L, arg%d);', arg.i)
+                 end
+              end
+}
 
 local function bit(p)
    return 2 ^ (p - 1)  -- 1-based indexing                                                          
@@ -206,19 +212,14 @@ local function beautify(txt)
    end
 end
 
-function generateinterface(luafuncname, cfuncname, args)
-   local txt = {}
-
-   table.insert(txt, string.format("static int %s(lua_State *L)", luafuncname))
-   table.insert(txt, "{")
-   table.insert(txt, "int narg = lua_gettop(L);")
-
-   local nopt = 0
+local function writeheaders(txt, args, argoffset)
    local txtargs = {}
    local cargs = {}
    local argcreturned
+   argoffset = argoffset or 0
+
    for i,arg in ipairs(args) do
-      arg.i = i
+      arg.i = i+argoffset
       assert(argtypes[arg.name], 'unknown type ' .. arg.name)
       table.insert(txt, argtypes[arg.name].declare(arg))
       local name = arg.name
@@ -226,7 +227,6 @@ function generateinterface(luafuncname, cfuncname, args)
          name = string.format('*%s*', name)
       end
       if arg.default then
-         nopt = nopt + 1
          table.insert(txtargs, string.format('[%s]', name))
       elseif not arg.creturned then
          table.insert(txtargs, name)
@@ -246,6 +246,19 @@ function generateinterface(luafuncname, cfuncname, args)
          table.insert(cargs, argtypes[arg.name].carg(arg))
       end
    end
+   return txtargs, cargs, argcreturned
+end
+
+local function writechecks(txt, args, argset)
+   local multiargset = argset
+   argset = argset or 1
+
+   local nopt = 0
+   for i,arg in ipairs(args) do
+      if arg.default then
+         nopt = nopt + 1
+      end
+   end
 
    for variant=0,math.pow(2, nopt)-1 do
       local opt = 0
@@ -261,7 +274,7 @@ function generateinterface(luafuncname, cfuncname, args)
          end
       end
 
-      if variant == 0 then
+      if variant == 0 and argset == 1 then
          table.insert(txt, string.format('if(narg == %d', #currentargs))
       else
          table.insert(txt, string.format('else if(narg == %d', #currentargs))
@@ -273,6 +286,10 @@ function generateinterface(luafuncname, cfuncname, args)
       table.insert(txt, ')')
       table.insert(txt, '{')
 
+      if multiargset then
+         table.insert(txt, string.format('argset = %d;', argset))
+      end
+
       for stackidx, arg in ipairs(currentargs) do
          table.insert(txt, argtypes[arg.name].read(arg, stackidx))
       end
@@ -280,10 +297,9 @@ function generateinterface(luafuncname, cfuncname, args)
       table.insert(txt, '}')
 
    end
+end
 
-   table.insert(txt, 'else')
-   table.insert(txt, string.format('luaL_error(L, "expected arguments: %s");', table.concat(txtargs, ' ')))
-
+local function writecall(txt, args, cfuncname, cargs, argcreturned)
    for _,arg in ipairs(args) do
       local precall = argtypes[arg.name].precall(arg)
       if not precall or not precall:match('^%s*$') then
@@ -314,9 +330,77 @@ function generateinterface(luafuncname, cfuncname, args)
       end
    end
    table.insert(txt, string.format('return %d;', nret))
+end
+
+function generateinterface(luafuncname, ...)
+   local txt = {}
+   local varargs = {...}
+
+   assert(#varargs > 0 and #varargs % 2 == 0, 'must provide both the C function name and the corresponding arguments')
+
+   table.insert(txt, string.format("static int %s(lua_State *L)", luafuncname))
+   table.insert(txt, "{")
+   table.insert(txt, "int narg = lua_gettop(L);")
+
+   if #varargs == 24 then
+      local cfuncname = varargs[1]
+      local args = varargs[2]
+      
+      local txtargs, cargs, argcreturned = writeheaders(txt, args)
+      writechecks(txt, args)
+      
+      table.insert(txt, 'else')
+      table.insert(txt, string.format('luaL_error(L, "expected arguments: %s");', table.concat(txtargs, ' ')))
+
+      writecall(txt, args, cfuncname, cargs, argcreturned)
+   else
+      local allcfuncname = {}
+      local allargs = {}
+      local alltxtargs = {}
+      local allcargs = {}
+      local allargcreturned = {}
+
+      table.insert(txt, "int argset = 0;")
+
+      for k=1,#varargs/2 do
+         allcfuncname[k] = varargs[(k-1)*2+1]
+         allargs[k] = varargs[(k-1)*2+2]
+      end
+
+      local argoffset = 0
+      for k=1,#varargs/2 do
+         alltxtargs[k], allcargs[k], allargcreturned[k] = writeheaders(txt, allargs[k], argoffset)
+         argoffset = argoffset + #allargs[k]
+      end
+
+      for k=1,#varargs/2 do
+         writechecks(txt, allargs[k], k)
+      end
+
+      table.insert(txt, 'else')
+      local allconcattxtargs = {}
+      for k=1,#varargs/2 do
+         table.insert(allconcattxtargs, table.concat(alltxtargs[k], ' '))
+      end
+      table.insert(txt, string.format('luaL_error(L, "expected arguments: %s");', table.concat(allconcattxtargs, ' | ')))
+
+      for k=1,#varargs/2 do
+         if k == 1 then
+            table.insert(txt, string.format('if(argset == %d)', k))
+         else
+            table.insert(txt, string.format('else if(argset == %d)', k))
+         end
+         table.insert(txt, '{')
+         writecall(txt, allargs[k], allcfuncname[k], allcargs[k], allargcreturned[k])
+         table.insert(txt, '}')
+      end
+
+      table.insert(txt, 'return 0;')
+   end
+
    table.insert(txt, '}')
    
---   beautify(txt)
+   --   beautify(txt)
    print(table.concat(txt, '\n'))
    
 end
@@ -365,7 +449,7 @@ local function cname(name)
    return string.format('THLab_(%s)', name)
 end
 
--- generateinterface(luaname("sort"),
+-- generateinterface(lname("sort"),
 --                   cname("sort"),
 --                   {{name="Tensor", default=true, returned=true},
 --                    {name="LongTensor", default=true, returned=true},
@@ -373,10 +457,16 @@ end
 --                    {name="integer", default=0},
 --                    {name="boolean", default=0}})
 
-generateinterface(lname("dot"),
-                  cname("dot"),
-                  {{name="Tensor"},
-                   {name="Tensor"},
-                   {name="real", creturned=true}})
+-- generateinterface(lname("dot"),
+--                   cname("dot"),
+--                   {{name="Tensor"},
+--                    {name="Tensor"},
+--                    {name="real", creturned=true}})
 
---      luaL_error(L, "invalid arguments: [tensor longtensor] tensor [dimension]"); \
+generateinterface(lname("sin"),
+                  cname("sin"),
+                  {{name="Tensor", default=true, returned=true},
+                   {name="Tensor"}},
+                  "sin",
+                  {{name="real"},
+                   {name="real", creturned=true}})
