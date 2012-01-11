@@ -1,4 +1,4 @@
-SET(src DiskFile.c File.c MemoryFile.c PipeFile.c Storage.c Tensor.c Timer.c utils.c init.c)
+SET(src DiskFile.c File.c MemoryFile.c PipeFile.c Storage.c Tensor.c Timer.c utils.c init.c TensorMath.c)
 SET(luasrc init.lua File.lua Tensor.lua CmdLine.lua Tester.lua)
 
 SET(src ${src})

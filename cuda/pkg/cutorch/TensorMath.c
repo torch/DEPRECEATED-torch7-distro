@@ -11,11 +11,12 @@ static const void *torch_CudaStorage_id = NULL;
 #define torch_Tensor_id TH_CONCAT_3(torch_,Real,Tensor_id)
 #define STRING_torchTensor TH_CONCAT_STRING_3(torch.,Real,Tensor)
 
+/*
 #define TH_GENERIC_FILE "generic/TensorMath.c"
 #include "generic/TensorMath.c"
 #undef TH_GENERIC_FILE
-
+*/
 void cutorch_CudaTensorMath_init(lua_State* L)
 {
-  torch_CudaTensorMath_init(L);
+/*  torch_CudaTensorMath_init(L); */
 }

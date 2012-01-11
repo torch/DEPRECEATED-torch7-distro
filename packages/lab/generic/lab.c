@@ -118,7 +118,6 @@ static const struct luaL_Reg lab_(stuff__) [] = {
   {"eye", lab_(eye)},
   {"range", lab_(range)},
   {"randperm", lab_(randperm)},
-  {"reshape_", lab_(reshape_)},
   {"reshape", lab_(reshape)},
   {"sort", lab_(sort)},
   {"tril", lab_(tril)},

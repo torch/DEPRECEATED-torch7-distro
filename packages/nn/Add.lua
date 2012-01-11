@@ -47,7 +47,7 @@ end
 function Add:accGradParameters(input, gradOutput, scale)
    scale = scale or 1
    if self.gradBias:size(1) == 1 then
-      self.gradBias[1] = self.gradBias[1] + scale*gradOutput:sum();
+      self.gradBias[1] = self.gradBias[1] + scale*gradOutput:sumall();
    else
       self.gradBias:add(scale, gradOutput)
    end
