@@ -19,7 +19,7 @@ local sections = dok.parseSection(txt)
 
 local js = {}
 table.insert(js, 'function hideall() { for (var i=0; i<=6; i++) { $(".level"+i).hide(); }; };')
-table.insert(js, '$(function() { hideall(); $(".level1").show(); });')
+table.insert(js, '$(function() { hideall(); $(".topdiv").show(); });')
 
 local toc = {}
 local function addtocsubsections(toc, section)
