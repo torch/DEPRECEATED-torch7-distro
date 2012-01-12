@@ -29,9 +29,10 @@ table.insert(js, [[
 
                    // show all
                    function showall() { 
-                         for (var i=0; i<=6; i++) { 
+                         for (var i=6; i>=0; i=i-1) { 
                             $(".level"+i).show(); 
                          };
+			 window,scrollTo(0,0);
                    };
 
                    // on window resize
@@ -81,7 +82,11 @@ local function addtocsubsections(toc, section)
    table.insert(toc, string.format('<ul>'))
    for k,v in pairs(section.subsections) do
       table.insert(toc, string.format('<li><a class="toclink" id="link_%s">%s</a></li>', dok.link2wikilink(v.title):gsub('%.','-'), v.title))
-      table.insert(js, '$("#link_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").click(function() { window.location.hash = ""; hideall(); $("#div_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); $(".par_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); });')
+      if #toc == 2 then
+	 table.insert(js, '$("#link_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").click(function() { showall(); });')
+      else
+	 table.insert(js, '$("#link_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").click(function() { window.location.hash = ""; hideall(); $("#div_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); $(".par_' .. dok.link2wikilink(v.title):gsub('%.','-') .. '").show(); });')
+      end
       if v.subsections and #v.subsections > 0 then
          addtocsubsections(toc, v)
       end
