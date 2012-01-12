@@ -21,8 +21,10 @@ static const void* torch_LongStorage_id;
 
 static const void* lab_default_tensor_id;
 
-#include "generic/lab.c"
-#include "THGenerateAllTypes.h"
+#include "interfaces.c"
+
+/* #include "generic/lab.c" */
+/* #include "THGenerateAllTypes.h" */
 
 #include "generic/labconv.c"
 #include "THGenerateAllTypes.h"
@@ -266,6 +268,14 @@ static const struct luaL_Reg lab_stuff__ [] = {
 
 void lab_init(lua_State *L)
 {
+  lab_ByteTensor_init(L);
+  lab_CharTensor_init(L);
+  lab_ShortTensor_init(L);
+  lab_IntTensor_init(L);
+  lab_LongTensor_init(L);
+  lab_FloatTensor_init(L);
+  lab_DoubleTensor_init(L);
+
   luaL_register(L, NULL, lab_stuff__);
   lab_default_tensor_id = torch_DoubleTensor_id; /* obviously, this must be done after the "generic" stuff */
 }

@@ -178,7 +178,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    interface:wrap("randperm",
                   cname("randperm"),
                   {{name=Tensor, default=true, returned=true, userpostcall=function(arg)
-                                                                              return string.format("TH%s_add(%s);", Tensor:gsub('Tensor', 'Lab'), arg:carg())
+                                                                              return string.format("TH%s_add(%s, %s, 1);", Tensor:gsub('Tensor', 'Lab'), arg:carg(), arg:carg())
                                                                            end},
                    {name="long"}})
 
@@ -296,7 +296,22 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
 
    end
 
-   interface:register(string.format("%s_stuff", Tensor))
+   interface:register(string.format("lab_%s_stuff", Tensor))
 
+   interface:print(string.gsub([[
+static void lab_Tensor_init(lua_State *L)
+{
+  torch_Tensor_id = luaT_checktypename2id(L, "torch.Tensor");
+  torch_LongStorage_id = luaT_checktypename2id(L, "torch.LongStorage");
+
+  /* register everything into the "lab" field of the tensor metaclass */
+  luaT_pushmetaclass(L, torch_Tensor_id);
+  lua_pushstring(L, "lab");
+  lua_newtable(L);
+  luaL_register(L, NULL, lab_Tensor_stuff);
+  lua_rawset(L, -3);
+  lua_pop(L, 1);
+}
+]], 'Tensor', Tensor))
 end
 print(interface:text())

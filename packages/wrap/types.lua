@@ -78,7 +78,7 @@ wrap.argtypes.IndexTensor = {
    read = function(arg, idx)
              local txt = {}
              table.insert(txt, string.format("arg%d = luaT_toudata(L, %d, torch_LongTensor_id);", arg.i, idx))
-             table.insert(txt, string.format("THLongTensor_add(arg%d, -1);", arg.i));
+             table.insert(txt, string.format("THLongLab_add(arg%d, arg%d, -1);", arg.i, arg.i));
              return table.concat(txt, '\n')
           end,
    
@@ -94,15 +94,15 @@ wrap.argtypes.IndexTensor = {
                 local txt = {}
                 if arg.default and arg.returned then
                    table.insert(txt, string.format('if(arg%d)', arg.i))
-                   table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
+                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
                    table.insert(txt, 'else')
-                   table.insert(txt, string.format('arg%d = THTensor_(new)();', arg.i))
-                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                   table.insert(txt, string.format('arg%d = THLongTensor_new();', arg.i))
+                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
                 elseif arg.default then
                    error('a tensor cannot be optional if not returned')
                 elseif arg.returned then
-                   table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
-                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
+                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
                 end
                 return table.concat(txt, '\n')
              end,
@@ -110,12 +110,12 @@ wrap.argtypes.IndexTensor = {
    postcall = function(arg)
                  local txt = {}
                  if arg.creturned or arg.returned then
-                    table.insert(txt, string.format("THLongTensor_add(arg%d, 1);", arg.i));
+                    table.insert(txt, string.format("THLongLab_add(arg%d, arg%d, 1);", arg.i, arg.i));
                  end
                  if arg.creturned then
                     -- this next line is actually debatable
-                    table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
-                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                    table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
+                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
                  end
                  return table.concat(txt, '\n')
               end
