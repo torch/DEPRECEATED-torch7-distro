@@ -97,11 +97,32 @@ addtocsubsections(toc, sections)
 toc = table.concat(toc, '\n')
 js = table.concat(js, '\n')
 
+-- get the title of first section
+local function gettitlefromsections(sections)
+   local txttitle = sections.title
+   if not txttitle or #txttitle == 0 then
+      for i=1,#sections.subsections do
+	 return gettitlefromsections(sections.subsections[i])
+      end
+   else
+      return txttitle
+   end
+   error('could not find title')
+end
+local txttitle = gettitlefromsections(sections)
+
+
+-- create navigation line
 local navhome = '<a href="' .. rootdir .. '/index.html">Torch7 Documentation</a>'
 navhome = navhome .. ' > <a href="index.html">' .. title .. '</a>'
 
+if not htmldst:match('index.html') then
+   navhome = navhome .. ' > <a href="' .. htmldst .. '">' .. txttitle .. '</a>'
+end
+
+-- create web page
 local templatehtml = io.open(doktemplate):read('*all')
-local txthtml,txttitle = dok.dok2html(txt)
+local txthtml = dok.dok2html(txt)
 
 -- swap anchors and divs
 txthtml = txthtml:gsub('<div(.-)<a name(.-)<p>', function(c1,c2)

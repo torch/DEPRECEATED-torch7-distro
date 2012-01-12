@@ -135,15 +135,18 @@ a:visited {
 .torchdoc #toc ul{
     border:0px solid red;
     margin-left:10px;
-    list-style:none;
+    /*list-style:none;*/
     padding:0px;
+    list-style-type:disc;
 }
 
 .torchdoc #toc li{
     border:0px solid green;
     margin-left:0px;
-    color:#0000FF;
+    color:#0000AA;
     cursor: pointer;
+    list-style-type:none;
+    padding-left:0px;
 }
 
 .clearfooterfloat {

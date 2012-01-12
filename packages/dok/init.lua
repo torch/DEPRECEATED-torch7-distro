@@ -220,7 +220,6 @@ function dok.dok2html(txt)
    local pict = {}
    local foot = {}
    local issection = false;
-   local firsttitle = ''
 
    txt = txt .. '\n' -- blank line to close lists and tabulars
 
@@ -260,7 +259,6 @@ function dok.dok2html(txt)
                                 end
                                 if first then
                                    classes = classes .. ' ' .. 'topdiv'
-				   firsttitle = title
                                 end
                                 first = false
                                 stack[rank] = 'par_' .. dok.link2wikilink(title):gsub('%.','-')
@@ -505,5 +503,5 @@ function dok.dok2html(txt)
                                       return '<pre class="file">' .. file[id] .. '</pre>'
                                    end)
 
-   return txt,firsttitle
+   return txt
 end
