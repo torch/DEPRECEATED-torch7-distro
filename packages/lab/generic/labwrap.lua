@@ -177,7 +177,9 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
 
    interface:wrap("randperm",
                   cname("randperm"),
-                  {{name=Tensor, default=true, returned=true},
+                  {{name=Tensor, default=true, returned=true, userpostcall=function(arg)
+                                                                              return string.format("TH%s_add(%s);", Tensor:gsub('Tensor', 'Lab'), arg:carg())
+                                                                           end},
                    {name="long"}})
 
    interface:wrap("sort",

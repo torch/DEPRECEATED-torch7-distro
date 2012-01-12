@@ -177,6 +177,19 @@ function CInterface:__writeheaders(txt, args, argoffset)
          table.insert(cargs, arg:carg())
       end
    end
+
+   for _,arg in ipairs(args) do
+      if arg.userhead then
+         if type(arg.userhead) == 'string' then
+            table.insert(txt, arg.userhead)
+         elseif type(arg.userhead) == 'function' then
+            tableinsertcheck(txt, arg:userhead())
+         else
+            error('userhead must be a string or a function')
+         end
+      end
+   end
+
    return helpargs, cargs, argcreturned
 end
 
@@ -234,6 +247,18 @@ function CInterface:__writechecks(txt, args, argset)
          tableinsertcheck(txt, arg:init())
       end
 
+      for _,arg in ipairs(args) do
+         if arg.usercheck then
+            if type(arg.usercheck) == 'string' then
+               table.insert(txt, arg.usercheck)
+            elseif type(arg.usercheck) == 'function' then
+               tableinsertcheck(txt, arg:usercheck())
+            else
+               error('usercheck must be a string or a function')
+            end
+         end
+      end
+
       table.insert(txt, '}')
 
    end
@@ -246,6 +271,18 @@ function CInterface:__writecall(txt, args, cfuncname, cargs, argcreturned)
       tableinsertcheck(txt, arg:precall())
    end
 
+   for _,arg in ipairs(args) do
+      if arg.userprecall then
+         if type(arg.userprecall) == 'string' then
+            table.insert(txt, arg.userprecall)
+         elseif type(arg.userprecall) == 'function' then
+            tableinsertcheck(txt, arg:userprecall())
+         else
+            error('userprecall must be a string or a function')
+         end
+      end
+   end
+
    if argcreturned then
       table.insert(txt, string.format('%s = %s(%s);', argtypes[argcreturned.name].creturn(argcreturned), cfuncname, table.concat(cargs, ',')))
    else
@@ -254,6 +291,18 @@ function CInterface:__writecall(txt, args, cfuncname, cargs, argcreturned)
 
    for _,arg in ipairs(args) do
       tableinsertcheck(txt, postcall)
+   end
+
+   for _,arg in ipairs(args) do
+      if arg.userpostcall then
+         if type(arg.userpostcall) == 'string' then
+            table.insert(txt, arg.userpostcall)
+         elseif type(arg.userpostcall) == 'function' then
+            tableinsertcheck(txt, arg:userpostcall())
+         else
+            error('userpostcall must be a string or a function')
+         end
+      end
    end
 
    local nret = 0
