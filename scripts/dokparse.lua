@@ -65,14 +65,14 @@ table.insert(js, [[
                            // show top section
                            $(".topdiv").show(); 
 
+                           // autosize at startup
+                           autosize();
+
                            // hash?
                            if (window.location.hash) {
                               showall();
                               $(document).scrollTo(window.location.hash);
                            }
-
-                           // autosize at startup
-                           autosize();
                    });
                ]])
 
