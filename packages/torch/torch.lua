@@ -1,7 +1,7 @@
 
 local function sizestr(x)
    local strt = {}
-   table.insert(strt, _G.torch.typename(x):match('torch%.(.+)') .. ' -size: ')
+   table.insert(strt, _G.torch.typename(x):match('torch%.(.+)') .. ' - size: ')
    for i=1,x:nDimension() do
       table.insert(strt, x:size(i))
       if i ~= x:nDimension() then
@@ -78,12 +78,10 @@ for k,v in pairs(_G) do
    _G._preloaded_[k] = true
 end
 
-
 -- print:
 -- a smarter print for Lua, the default Lua print is quite terse
 -- this new print is much more verbose, automatically recursing through
 -- lua tables, and objects.
-
 function print(obj,...)
    local m = getmaxlen(obj)
    if _G.type(obj) == 'table' then
@@ -130,4 +128,3 @@ function print(obj,...)
       _G.io.write('\n')
    end
 end
-
