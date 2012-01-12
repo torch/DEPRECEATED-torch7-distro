@@ -21,6 +21,9 @@ function import(package, forced) \
 end \
 "
 
+TOOLS="\
+torch.include('torch','torch.lua') \
+"
 # by default, import torch+lab globally
 IMPORT_TORCH="import 'torch'"
 IMPORT_LAB="import 'lab'"
@@ -31,144 +34,8 @@ IMPORT_DOK="require 'dok'"
 PROMPT="_PROMPT='torch> ' _PROMPT2=' ... > '"
 COPYRIGHT="print 'Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU'"
 
-# who:
-# a simple function that prints all the symbols defined by the user
-# very much like Matlab's who function
-WHO="\
-function who() \
-   local m = 0 \
-   local p = _G._preloaded_ \
-   for k,v in pairs(_G) do \
-      if k:len() > m then \
-         m = k:len() \
-      end \
-   end \
-   local function printsymb(sys) \
-      for k,v in pairs(_G) do \
-         if (sys and p[k]) or (not sys and not p[k]) then \
-            io.write(k) \
-            for i = 1,m-k:len()+4 do \
-               io.write(' ') \
-            end \
-            local tp = type(_G[k]) \
-            if tp == 'userdata' then \
-               tp = torch.typename(_G[k]) \
-               if tp:find('torch.*Tensor') then \
-                  tp = tp .. ' - size: ' \
-                  if _G[k]:dim() > 0 then \
-                     for i = 1,_G[k]:dim() do \
-                        tp = tp .. _G[k]:size(i) \
-                        if i ~= _G[k]:dim() then \
-                           tp = tp .. 'x' \
-                        end \
-                     end \
-                  else \
-                     tp = tp .. '0' \
-                  end \
-               end \
-               if tp:find('torch.*Storage') then \
-                  tp = tp .. ' - size: ' .. _G[k]:size() \
-               end \
-            elseif tp == 'table' then \
-               tp = tp .. ' - size: ' .. #_G[k] \
-            elseif tp == 'string' then \
-               local tostr = _G[k]:gsub('\n','\\n') \
-               if #tostr>40 then \
-                  tostr = tostr:sub(1,40) \
-               end \
-               tp = tp .. ' = \"' .. tostr .. '\"' \
-            end \
-            print('[' .. tp .. ']') \
-         end \
-      end \
-   end \
-   print('== System Variables ==') \
-   printsymb(true) \
-   print('== User Variables ==') \
-   printsymb(false) \
-   print('==') \
-end \
-\
-_G._preloaded_ = {} \
-for k,v in pairs(_G) do \
-   _G._preloaded_[k] = true \
-end \
-"
-
-# print:
-# a smarter print for Lua, the default Lua print is quite terse
-# this new print is much more verbose, automatically recursing through
-# lua tables, and objects.
-PRINT="\
-function print(obj,...) \
-   local function sizestr(x) \
-         local strt = {} \
-         table.insert(strt, _G.torch.typename(x):match('torch%.(.+)') .. ' ( ') \
-         for i=1,x:nDimension() do \
-            table.insert(strt, x:size(i)) \
-            if i ~= x:nDimension() then \
-               table.insert(strt, 'x') \
-            end \
-         end \
-         table.insert(strt,' ) ') \
-         return table.concat(strt) \
-   end \
-   if _G.type(obj) == 'table' then \
-      local mt = _G.getmetatable(obj) \
-      if mt and mt.__tostring__ then \
-         _G.io.write(mt.__tostring__(obj)) \
-      else \
-         local tos = _G.tostring(obj) \
-         local obj_w_usage = false \
-         if tos and not _G.string.find(tos,'table: ') then \
-            if obj.usage and _G.type(obj.usage) == 'string' then \
-               _G.io.write(obj.usage) \
-               _G.io.write('\n\nFIELDS:\n') \
-               obj_w_usage = true \
-            else \
-               _G.io.write(tos .. ':\n') \
-            end \
-         end \
-         _G.io.write('{') \
-         local tab = '' \
-         local idx = 1 \
-         for k,v in pairs(obj) do \
-            if idx > 1 then _G.io.write(',\n') end \
-            if _G.type(v) == 'userdata' and _G.torch.typename(v):find('torch%.(.*Tensor)') ~= nil then \
-               _G.io.write(tab .. '[' .. k .. ']' .. ' = ' .. sizestr(v)) \
-            elseif _G.type(v) == 'userdata' then \
-               _G.io.write(tab .. '[' .. k .. ']' .. ' = <userdata>') \
-            else \
-               local tostr = _G.tostring(v):gsub('\n','\\n') \
-               if #tostr>40 then \
-                  local tostrshort = tostr:sub(1,40) \
-                  _G.io.write(tab .. '[' .. _G.tostring(k) .. ']' .. ' = ' .. tostrshort .. ' ... ') \
-               else \
-                  _G.io.write(tab .. '[' .. _G.tostring(k) .. ']' .. ' = ' .. tostr) \
-               end \
-            end \
-            tab = ' ' \
-            idx = idx + 1 \
-         end \
-         _G.io.write('}') \
-         if obj_w_usage then \
-            _G.io.write('') \
-         end \
-      end \
-   else \
-      _G.io.write(_G.tostring(obj)) \
-   end \
-   if _G.select('#',...) > 0 then \
-      _G.io.write('    ') \
-      print(...) \
-   else \
-      _G.io.write('\n') \
-   end \
-end \
-"
-
 # concat all symbols defined above
-INIT="$COPYRIGHT $PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB $IMPORT_PLOT $IMPORT_DOK $PRINT $WHO"
+INIT="$COPYRIGHT $PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB $IMPORT_PLOT $IMPORT_DOK $TOOLS" # $PRINT $WHO"
 
 # try to run qlua, and default to lua if not available
 # all the functions defined above are executed before
