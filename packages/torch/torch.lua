@@ -1,15 +1,16 @@
 
 local function sizestr(x)
    local strt = {}
-   table.insert(strt, _G.torch.typename(x):match('torch%.(.+)') .. ' - size: ')
-   for i=1,x:nDimension() do
-      table.insert(strt, x:size(i))
-      if i ~= x:nDimension() then
-	 table.insert(strt, 'x')
-      end
-   end
    if x:nDimension() == 0 then
-      table.insert(strt, '-')
+      table.insert(strt, _G.torch.typename(x):match('torch%.(.+)') .. ' - empty')
+   else
+      table.insert(strt, _G.torch.typename(x):match('torch%.(.+)') .. ' - size: ')
+      for i=1,x:nDimension() do
+         table.insert(strt, x:size(i))
+         if i ~= x:nDimension() then
+            table.insert(strt, 'x')
+         end
+      end
    end
    return table.concat(strt)
 end
