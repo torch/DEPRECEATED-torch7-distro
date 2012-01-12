@@ -34,6 +34,29 @@ table.insert(js, [[
                          };
                    };
 
+                   // on window resize
+                   function autosize() {
+                         // menu width (does it fit?)
+                         if ($(window).width() < ($('#container').width() + 2*$('#toc').width())) {
+                            $("#toc").css("float","left");
+                            $("#toc").css("position","relative");
+                            $("#toc").css("max-height", $(window).height() * 0.7);
+                         } else {
+                            $("#toc").css("float","none");
+                            $("#toc").css("position","fixed");
+                            $("#toc").css("max-height", $(window).height() * 0.7);
+                         }
+                   };
+                   $(window).resize(autosize);
+
+                   // catch all anchor links
+                   $('.anchor').click(
+                      function() {
+                            showall();
+                            $(document).scrollTo(window.location.hash);
+                      }
+                   );
+
                    // when doc is ready:
                    $(function() {
                            // hide all sections
@@ -48,17 +71,9 @@ table.insert(js, [[
                               $(document).scrollTo(window.location.hash);
                            }
 
-                           // add scrollbar to menu
-                           $("#toc").jScrollPane();
+                           // autosize at startup
+                           autosize();
                    });
-
-                   // catch all clicks
-                   $('.anchor').click(
-                      function() {
-                            showall();
-                            $(document).scrollTo(window.location.hash);
-                      }
-                   );
                ]])
 
 local toc = {}
