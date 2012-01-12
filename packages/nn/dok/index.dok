@@ -31,7 +31,7 @@ easy with a simple for loop to [[#nn.DoItYourself|train a neural network yoursel
 A neural network is called a [[#nn.Module|Module]] (or simply
 //module// in this documentation) in Torch. ''Module'' is an abstract
 class which defines four main methods:
-  * [[#nn.Module.forward|forward(input)]] which computes the output of the module given the ''input'' [[..:torch:index#Tensor|Tensor]].
+  * [[#nn.Module.forward|forward(input)]] which computes the output of the module given the ''input'' [[..:torch:tensor|Tensor]].
   * [[#nn.Module.backward|backward(input, gradOutput)]] which computes the gradients of the module with respect to its own parameters, and its own inputs.
   * [[#nn.Module.zeroGradParameters|zeroGradParameters()]] which zeroes the gradient with respect to the parameters of the module.
   * [[#nn.Module.updateParameters|updateParameters(learningRate)]] which updates the parameters after one has computed the gradients with ''backward()''
@@ -149,7 +149,7 @@ complex neural networks.
 {{anchor:nn.Module}}
 
 ''Module'' is an abstract class which defines fundamental methods necessary
-for a training a neural network. Modules are [[..:torch:index#FileSerialization|serializable]].
+for a training a neural network. Modules are [[..:torch:file#torch.file.serialization|serializable]].
 
 Modules contain two states variables: [[#nn.ModuleOutput|output]] and
 [[#nn.ModuleGradInput|gradInput]].
@@ -159,7 +159,7 @@ Modules contain two states variables: [[#nn.ModuleOutput|output]] and
 
 Takes an ''input'' object, and computes the corresponding ''output'' of the
 module. In general ''input'' and ''output'' are
-[[..:torch:index#Tensor|Tensors]]. However, some special sub-classes
+[[..:torch:tensor|Tensors]]. However, some special sub-classes
 like [[#nn.TableLayers|table layers]] might expect something else. Please,
 refer to each module specification for further information.
 
@@ -176,7 +176,7 @@ This is necessary for optimization reasons. If you do not respect
 this rule, ''backward()'' will compute incorrect gradients.
 
 In general ''input'' and ''gradOutput''  and ''gradInput'' are
-[[..:torch:index#Tensor|Tensors]]. However, some special sub-classes
+[[..:torch:tensor|Tensors]]. However, some special sub-classes
 like [[#nn.TableLayers|table layers]] might expect something else. Please,
 refer to each module specification for further information.
 
@@ -308,7 +308,7 @@ a ''Module''. The object pointer is //never// supposed to change. However, its
 contents (including its size if it is a Tensor) are supposed to change.
 
 In general state variables are
-[[..:torch:index#Tensor|Tensors]]. However, some special sub-classes
+[[..:torch:tensor|Tensors]]. However, some special sub-classes
 like [[#nn.TableLayers|table layers]] contain something else. Please,
 refer to each module specification for further information.
 
@@ -393,7 +393,7 @@ which gives the output:
 
 ''module'' = ''Parallel(inputDimension,outputDimension)''
 
-Creates a container module that applies its ''ith'' child module to the  ''ith'' slice of the input Tensor by using [[..:torch:index#TensorSelect|select]] 
+Creates a container module that applies its ''ith'' child module to the  ''ith'' slice of the input Tensor by using [[..:torch:tensor#torch.tensor.select|select]] 
 on dimension ''inputDimension''. It concatenates the results of its contained modules together along dimension ''outputDimension''.
 
 Example:
@@ -1808,19 +1808,19 @@ function. [[#nn.AbsCriterion|AbsCriterion]] and
 [[#nn.ClassNLLCriterion|ClassNLLCriterion]] is the criterion of choice when
 dealing with classification.
 
-Criterions are [[..:torch:index#FileSerialization|serializable]].
+Criterions are [[..:torch:file#torch.file.serialization|serializable]].
 
 =====  Criterion =====
 {{anchor:nn.Criterion}}
 
 This is an abstract class which declares methods defined in all criterions.
-This class is [[..:torch:index#nn.FileSerialization|serializable]].
+This class is [[..:torch:file#torch.file.serialization|serializable]].
 
 ====  [output] forward(input, target) ====
 {{anchor:nn.Criterion.forward}}
 
 Given an ''input'' and a ''target'', compute the loss function associated to the criterion and return the
-result. In general ''input'' and ''target'' are [[..:torch:index#Tensor|tensors]], but some specific criterions
+result. In general ''input'' and ''target'' are [[..:torch:tensor|tensors]], but some specific criterions
 might require some other type of object.
 
 The ''output'' returned should be a scalar in general.
@@ -1831,7 +1831,7 @@ The state variable [[#nn.Criterion.output|self.output]] should be updated after 
 {{anchor:nn.Criterion.backward}}
 
 Given an ''input'' and a ''target'', compute the gradients of the loss function associated to the criterion and
-return the result.In general ''input'', ''target'' and ''gradInput'' are [[..:torch:index#Tensor|tensors]], but some specific criterions
+return the result.In general ''input'', ''target'' and ''gradInput'' are [[..:torch:tensor|tensors]], but some specific criterions
 might require some other type of object.
 
 The state variable [[#nn.Criterion.gradInput|self.gradInput]] should be updated after a call to ''backward()''.
@@ -2237,7 +2237,7 @@ which does the job for you is provided as standard.
 {{anchor:nn.StochasticGradient.dok}}
 
 ''StochasticGradient'' is a high-level class for training [[#nn.Module|neural networks]], using a stochastic gradient
-algorithm. This class is [[..:torch:index#FileSerialization|serializable]].
+algorithm. This class is [[..:torch:file#torch.file.serialization|serializable]].
 
 ====  StochasticGradient(module, criterion) ====
 {{anchor:nn.StochasticGradient}}

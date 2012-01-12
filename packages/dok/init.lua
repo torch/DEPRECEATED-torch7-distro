@@ -262,7 +262,7 @@ function dok.dok2html(txt)
                                 end
                                 first = false
                                 stack[rank] = 'par_' .. dok.link2wikilink(title):gsub('%.','-')
-                                return closesection .. '\002div class="level' .. rank .. classes .. '" id="div_' .. dok.link2wikilink(title):gsub('%.','-') .. '"\003\n' .. '\002h' .. rank .. '\003\002a id="' .. dok.link2wikilink(title) .. '"\003' .. dok.cleanText(title) .. '\002/a\003\002/h' .. rank .. '\003\n'
+                                return closesection .. '\002div class="level' .. rank .. classes .. '" id="div_' .. dok.link2wikilink(title):gsub('%.','-') .. '"\003\n' .. '\002h' .. rank .. '\003\002a id="' .. dok.link2wikilink(title) .. '"\003' .. dok.cleanText(title) .. '\002/a\003\002/h' .. rank .. '\003\002a name="mybogusanchor"\003\002/a\003\n'
                              else
                                 return line
                              end
@@ -505,8 +505,8 @@ function dok.dok2html(txt)
 
    -- swap anchors and divs
    txt = txt:gsub('<div(.-)<a name(.-)<p>', function(c1,c2)
-                                                 return '<a name' .. c2 .. '\n<div' .. c1 .. '<p>'
-                                              end)
+                                               return '<a name' .. c2 .. '\n<div' .. c1 .. '<p>'
+                                            end)
 
    return txt
 end
