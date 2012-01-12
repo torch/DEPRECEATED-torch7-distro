@@ -8,6 +8,9 @@ local function sizestr(x)
 	 table.insert(strt, 'x')
       end
    end
+   if x:nDimension() == 0 then
+      table.insert(strt, '-')
+   end
    return table.concat(strt)
 end
 
