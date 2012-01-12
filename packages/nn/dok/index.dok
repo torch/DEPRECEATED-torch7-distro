@@ -446,7 +446,7 @@ for i=1,10000 do     -- Train for a few iterations
 end
 </file>
 =====  Simple layers =====
-{anchor:nn.simplelayers.dok}}
+{{anchor:nn.simplelayers.dok}}
 ====  Linear ====
 {{anchor:nn.Linear}}
 
