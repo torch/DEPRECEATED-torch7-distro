@@ -96,7 +96,7 @@ local navhome = '<a href="' .. rootdir .. '/index.html">Torch7 Documentation</a>
 navhome = navhome .. ' > <a href="index.html">' .. title .. '</a>'
 
 local templatehtml = io.open(doktemplate):read('*all')
-local txthtml = dok.dok2html(txt)
+local txthtml,txttitle = dok.dok2html(txt)
 
 -- swap anchors and divs
 txthtml = txthtml:gsub('<div(.-)<a name(.-)<p>', function(c1,c2)
@@ -104,7 +104,7 @@ txthtml = txthtml:gsub('<div(.-)<a name(.-)<p>', function(c1,c2)
                                                  end)
 
 templatehtml = templatehtml:gsub('%%CONTENTS%%', txthtml)
-templatehtml = templatehtml:gsub('%%TITLE%%', title)
+templatehtml = templatehtml:gsub('%%TITLE%%', txttitle)
 templatehtml = templatehtml:gsub('%%NAVLINE%%', navhome)
 templatehtml = templatehtml:gsub('%%TOC%%', toc)
 templatehtml = templatehtml:gsub('%%JS%%', js)
