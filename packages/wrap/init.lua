@@ -134,6 +134,12 @@ local function beautify(txt)
    end
 end
 
+local function tableinsertcheck(tbl, stuff)
+   if stuff and not stuff:match('^%s*$') then
+      table.insert(tbl, stuff)
+   end
+end
+
 function CInterface:__writeheaders(txt, args, argoffset)
    local argtypes = self.argtypes
    local helpargs = {}
@@ -143,9 +149,11 @@ function CInterface:__writeheaders(txt, args, argoffset)
 
    for i,arg in ipairs(args) do
       arg.i = i+argoffset
+      arg.args = args -- in case we want to do stuff depending on other args
       assert(argtypes[arg.name], 'unknown type ' .. arg.name)
-      table.insert(txt, argtypes[arg.name].declare(arg))
-      local helpname = argtypes[arg.name].helpname(arg)
+      setmetatable(arg, {__index=argtypes[arg.name]})
+      tableinsertcheck(txt, arg:declare())
+      local helpname = arg:helpname()
       if arg.returned then
          helpname = string.format('*%s*', helpname)
       end
@@ -166,7 +174,7 @@ function CInterface:__writeheaders(txt, args, argoffset)
          end
          argcreturned = arg
       else
-         table.insert(cargs, argtypes[arg.name].carg(arg))
+         table.insert(cargs, arg:carg())
       end
    end
    return helpargs, cargs, argcreturned
@@ -188,11 +196,14 @@ function CInterface:__writechecks(txt, args, argset)
    for variant=0,math.pow(2, nopt)-1 do
       local opt = 0
       local currentargs = {}
+      local optargs = {}
       for i,arg in ipairs(args) do
          if arg.default then
             opt = opt + 1
             if hasbit(variant, bit(opt)) then
                table.insert(currentargs, arg)
+            else
+               table.insert(optargs, arg)
             end
          elseif not arg.creturned then
             table.insert(currentargs, arg)
@@ -206,7 +217,7 @@ function CInterface:__writechecks(txt, args, argset)
       end
 
       for stackidx, arg in ipairs(currentargs) do
-         table.insert(txt, string.format("&& %s", argtypes[arg.name].check(arg, stackidx)))
+         table.insert(txt, string.format("&& %s", arg:check(stackidx)))
       end
       table.insert(txt, ')')
       table.insert(txt, '{')
@@ -216,7 +227,11 @@ function CInterface:__writechecks(txt, args, argset)
       end
 
       for stackidx, arg in ipairs(currentargs) do
-         table.insert(txt, argtypes[arg.name].read(arg, stackidx))
+         tableinsertcheck(txt, arg:read(stackidx))
+      end
+
+      for _,arg in ipairs(optargs) do
+         tableinsertcheck(txt, arg:init())
       end
 
       table.insert(txt, '}')
@@ -228,10 +243,7 @@ function CInterface:__writecall(txt, args, cfuncname, cargs, argcreturned)
    local argtypes = self.argtypes
 
    for _,arg in ipairs(args) do
-      local precall = argtypes[arg.name].precall(arg)
-      if not precall or not precall:match('^%s*$') then
-         table.insert(txt, precall)
-      end
+      tableinsertcheck(txt, arg:precall())
    end
 
    if argcreturned then
@@ -241,10 +253,7 @@ function CInterface:__writecall(txt, args, cfuncname, cargs, argcreturned)
    end
 
    for _,arg in ipairs(args) do
-      local postcall = argtypes[arg.name].postcall(arg)
-      if not postcall or not postcall:match('^%s*$') then
-         table.insert(txt, postcall)
-      end
+      tableinsertcheck(txt, postcall)
    end
 
    local nret = 0

@@ -27,6 +27,12 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
       return string.format('TH%sLab_%s', Tensor:gsub('Tensor', ''), name)
    end
 
+   local function lastdim(argn)
+      return function(arg)
+                return string.format("TH%s_nDimension(%s)", Tensor, arg.args[argn]:carg())
+             end
+   end
+   
    interface:wrap("zero",
                   cname("zero"),
                   {{name=Tensor, returned=true}})
@@ -121,22 +127,22 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
                      cname(name),
                      {{name=Tensor, default=true, returned=true},
                       {name=Tensor},
-                      {name="integer", default=0}})
+                      {name="index", default=lastdim(2)}})
    end
 
    interface:wrap("min",
                   cname("min"),
                   {{name=Tensor, default=true, returned=true},
-                   {name="LongTensor", default=true, returned=true},
+                   {name="IndexTensor", default=true, returned=true},
                    {name=Tensor},
-                   {name="integer", default=0}})
+                   {name="index", default=lastdim(3)}})
 
    interface:wrap("max",
                   cname("max"),
                   {{name=Tensor, default=true, returned=true},
-                   {name="LongTensor", default=true, returned=true},
+                   {name="IndexTensor", default=true, returned=true},
                    {name=Tensor},
-                   {name="integer", default=0}})
+                   {name="index", default=lastdim(3)}})
 
    interface:wrap("trace",
                   cname("trace"),
@@ -148,7 +154,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
                   {{name=Tensor, default=true, returned=true},
                    {name=Tensor},
                    {name=Tensor},
-                   {name="integer", default=0}})
+                   {name="index", default=lastdim(2)}})
 
    interface:wrap("diag",
                   cname("diag"),
@@ -167,7 +173,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
                   {{name=Tensor, default=true, returned=true},
                    {name=real},
                    {name=real},
-                   {name=real, default=0}})
+                   {name=real, default=1}})
 
    interface:wrap("randperm",
                   cname("randperm"),
@@ -177,9 +183,9 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    interface:wrap("sort",
                   cname("sort"),
                   {{name=Tensor, default=true, returned=true},
-                   {name="LongTensor", default=true, returned=true},
+                   {name="IndexTensor", default=true, returned=true},
                    {name=Tensor},
-                   {name="integer", default=0},
+                   {name="index", default=lastdim(3)},
                    {name="boolean", default=0}})
 
 
@@ -187,42 +193,41 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
                   cname("tril"),
                   {{name=Tensor, default=true, returned=true},
                    {name=Tensor},
-                   {name="integer", default=0}})
+                   {name="int", default=0}})
 
    interface:wrap("triu",
                   cname("triu"),
                   {{name=Tensor, default=true, returned=true},
                    {name=Tensor},
-                   {name="integer", default=0}})
+                   {name="int", default=0}})
 
    interface:wrap("cat",
                   cname("cat"),
                   {{name=Tensor, default=true, returned=true},
                    {name=Tensor},
                    {name=Tensor},
-                   {name="integer", default=0}})
+                   {name="index", default=lastdim(2)}})
 
-   interface:print("#if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)")
    if Tensor == 'FloatTensor' or Tensor == 'DoubleTensor' then
 
       interface:wrap("mean",
                      cname("mean"),
                      {{name=Tensor, default=true, returned=true},
                       {name=Tensor},
-                      {name="integer", default=0}})
+                      {name="index", default=lastdim(2)}})
 
       interface:wrap("std",
                      cname("std"),
                      {{name=Tensor, default=true, returned=true},
                       {name=Tensor},
-                      {name="integer", default=0},
+                      {name="index", default=lastdim(2)},
                       {name="boolean", default=false}})
 
       interface:wrap("var",
                      cname("var"),
                      {{name=Tensor, default=true, returned=true},
                       {name=Tensor},
-                      {name="integer", default=0},
+                      {name="index", default=lastdim(2)},
                       {name="boolean", default=false}})
 
       interface:wrap("norm",
