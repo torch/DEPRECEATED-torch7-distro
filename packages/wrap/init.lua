@@ -2,6 +2,115 @@ wrap = {}
 
 dofile(debug.getinfo(1).source:gsub('init%.lua$', 'types.lua'):gsub('^@', ''))
 
+local CInterface = {}
+wrap.CInterface = CInterface
+
+function CInterface.new()
+   self = {}
+   self.txt = {}
+   self.registry = {}
+   self.argtypes = wrap.argtypes
+   setmetatable(self, {__index=CInterface})
+   return self
+end
+
+function CInterface:luaname2wrapname(name)
+   return string.format("wrapper_%s", name)
+end
+
+function CInterface:print(str)
+   table.insert(self.txt, str)
+end
+
+function CInterface:wrap(luaname, ...)
+   local txt = self.txt
+   local varargs = {...}
+
+   assert(#varargs > 0 and #varargs % 2 == 0, 'must provide both the C function name and the corresponding arguments')
+
+   -- add function to the registry
+   table.insert(self.registry, {name=luaname, wrapname=self:luaname2wrapname(luaname)})
+
+   table.insert(txt, string.format("static int %s(lua_State *L)", self:luaname2wrapname(luaname)))
+   table.insert(txt, "{")
+   table.insert(txt, "int narg = lua_gettop(L);")
+
+   if #varargs == 2 then
+      local cfuncname = varargs[1]
+      local args = varargs[2]
+      
+      local helpargs, cargs, argcreturned = self:__writeheaders(txt, args)
+      self:__writechecks(txt, args)
+      
+      table.insert(txt, 'else')
+      table.insert(txt, string.format('luaL_error(L, "expected arguments: %s");', table.concat(helpargs, ' ')))
+
+      self:__writecall(txt, args, cfuncname, cargs, argcreturned)
+   else
+      local allcfuncname = {}
+      local allargs = {}
+      local allhelpargs = {}
+      local allcargs = {}
+      local allargcreturned = {}
+
+      table.insert(txt, "int argset = 0;")
+
+      for k=1,#varargs/2 do
+         allcfuncname[k] = varargs[(k-1)*2+1]
+         allargs[k] = varargs[(k-1)*2+2]
+      end
+
+      local argoffset = 0
+      for k=1,#varargs/2 do
+         allhelpargs[k], allcargs[k], allargcreturned[k] = self:__writeheaders(txt, allargs[k], argoffset)
+         argoffset = argoffset + #allargs[k]
+      end
+
+      for k=1,#varargs/2 do
+         self:__writechecks(txt, allargs[k], k)
+      end
+
+      table.insert(txt, 'else')
+      local allconcathelpargs = {}
+      for k=1,#varargs/2 do
+         table.insert(allconcathelpargs, table.concat(allhelpargs[k], ' '))
+      end
+      table.insert(txt, string.format('luaL_error(L, "expected arguments: %s");', table.concat(allconcathelpargs, ' | ')))
+
+      for k=1,#varargs/2 do
+         if k == 1 then
+            table.insert(txt, string.format('if(argset == %d)', k))
+         else
+            table.insert(txt, string.format('else if(argset == %d)', k))
+         end
+         table.insert(txt, '{')
+         self:__writecall(txt, allargs[k], allcfuncname[k], allcargs[k], allargcreturned[k])
+         table.insert(txt, '}')
+      end
+
+      table.insert(txt, 'return 0;')
+   end
+
+   table.insert(txt, '}')
+   table.insert(txt, '')
+end
+
+function CInterface:register(name)
+   local txt = self.txt
+   table.insert(txt, string.format('static const struct luaL_Reg %s [] = {', name))
+   for _,reg in ipairs(self.registry) do
+      table.insert(txt, string.format('{"%s", %s},', reg.name, reg.wrapname))
+   end
+   table.insert(txt, '{NULL, NULL}')
+   table.insert(txt, '};')
+   table.insert(txt, '')
+   self.registry = {}
+end
+
+function CInterface:text()
+   return table.concat(self.txt, '\n')
+end
+
 local function bit(p)
    return 2 ^ (p - 1)  -- 1-based indexing                                                          
 end
@@ -25,7 +134,8 @@ local function beautify(txt)
    end
 end
 
-local function writeheaders(txt, args, argoffset)
+function CInterface:__writeheaders(txt, args, argoffset)
+   local argtypes = self.argtypes
    local helpargs = {}
    local cargs = {}
    local argcreturned
@@ -33,11 +143,11 @@ local function writeheaders(txt, args, argoffset)
 
    for i,arg in ipairs(args) do
       arg.i = i+argoffset
-      assert(wrap.argtypes[arg.name], 'unknown type ' .. arg.name)
-      table.insert(txt, wrap.argtypes[arg.name].declare(arg))
-      local helpname = wrap.argtypes[arg.name].helpname(arg)
+      assert(argtypes[arg.name], 'unknown type ' .. arg.name)
+      table.insert(txt, argtypes[arg.name].declare(arg))
+      local helpname = argtypes[arg.name].helpname(arg)
       if arg.returned then
-         name = string.format('*%s*', helpname)
+         helpname = string.format('*%s*', helpname)
       end
       if arg.default then
          table.insert(helpargs, string.format('[%s]', helpname))
@@ -56,13 +166,15 @@ local function writeheaders(txt, args, argoffset)
          end
          argcreturned = arg
       else
-         table.insert(cargs, wrap.argtypes[arg.name].carg(arg))
+         table.insert(cargs, argtypes[arg.name].carg(arg))
       end
    end
    return helpargs, cargs, argcreturned
 end
 
-local function writechecks(txt, args, argset)
+function CInterface:__writechecks(txt, args, argset)
+   local argtypes = self.argtypes
+
    local multiargset = argset
    argset = argset or 1
 
@@ -94,7 +206,7 @@ local function writechecks(txt, args, argset)
       end
 
       for stackidx, arg in ipairs(currentargs) do
-         table.insert(txt, string.format("&& %s", wrap.argtypes[arg.name].check(arg, stackidx)))
+         table.insert(txt, string.format("&& %s", argtypes[arg.name].check(arg, stackidx)))
       end
       table.insert(txt, ')')
       table.insert(txt, '{')
@@ -104,7 +216,7 @@ local function writechecks(txt, args, argset)
       end
 
       for stackidx, arg in ipairs(currentargs) do
-         table.insert(txt, wrap.argtypes[arg.name].read(arg, stackidx))
+         table.insert(txt, argtypes[arg.name].read(arg, stackidx))
       end
 
       table.insert(txt, '}')
@@ -112,22 +224,24 @@ local function writechecks(txt, args, argset)
    end
 end
 
-local function writecall(txt, args, cfuncname, cargs, argcreturned)
+function CInterface:__writecall(txt, args, cfuncname, cargs, argcreturned)
+   local argtypes = self.argtypes
+
    for _,arg in ipairs(args) do
-      local precall = wrap.argtypes[arg.name].precall(arg)
+      local precall = argtypes[arg.name].precall(arg)
       if not precall or not precall:match('^%s*$') then
          table.insert(txt, precall)
       end
    end
 
    if argcreturned then
-      table.insert(txt, string.format('%s = %s(%s);', wrap.argtypes[argcreturned.name].creturn(argcreturned), argcreturned.i, cfuncname, table.concat(cargs, ',')))
+      table.insert(txt, string.format('%s = %s(%s);', argtypes[argcreturned.name].creturn(argcreturned), cfuncname, table.concat(cargs, ',')))
    else
       table.insert(txt, string.format('%s(%s);', cfuncname, table.concat(cargs, ',')))
    end
 
    for _,arg in ipairs(args) do
-      local postcall = wrap.argtypes[arg.name].postcall(arg)
+      local postcall = argtypes[arg.name].postcall(arg)
       if not postcall or not postcall:match('^%s*$') then
          table.insert(txt, postcall)
       end
@@ -143,79 +257,5 @@ local function writecall(txt, args, cfuncname, cargs, argcreturned)
       end
    end
    table.insert(txt, string.format('return %d;', nret))
-end
-
-function wrap.cinterface(luafuncname, ...)
-   local txt = {}
-   local varargs = {...}
-
-   assert(#varargs > 0 and #varargs % 2 == 0, 'must provide both the C function name and the corresponding arguments')
-
-   table.insert(txt, string.format("static int %s(lua_State *L)", luafuncname))
-   table.insert(txt, "{")
-   table.insert(txt, "int narg = lua_gettop(L);")
-
-   if #varargs == 2 then
-      local cfuncname = varargs[1]
-      local args = varargs[2]
-      
-      local helpargs, cargs, argcreturned = writeheaders(txt, args)
-      writechecks(txt, args)
-      
-      table.insert(txt, 'else')
-      table.insert(txt, string.format('luaL_error(L, "expected arguments: %s");', table.concat(helpargs, ' ')))
-
-      writecall(txt, args, cfuncname, cargs, argcreturned)
-   else
-      local allcfuncname = {}
-      local allargs = {}
-      local allhelpargs = {}
-      local allcargs = {}
-      local allargcreturned = {}
-
-      table.insert(txt, "int argset = 0;")
-
-      for k=1,#varargs/2 do
-         allcfuncname[k] = varargs[(k-1)*2+1]
-         allargs[k] = varargs[(k-1)*2+2]
-      end
-
-      local argoffset = 0
-      for k=1,#varargs/2 do
-         allhelpargs[k], allcargs[k], allargcreturned[k] = writeheaders(txt, allargs[k], argoffset)
-         argoffset = argoffset + #allargs[k]
-      end
-
-      for k=1,#varargs/2 do
-         writechecks(txt, allargs[k], k)
-      end
-
-      table.insert(txt, 'else')
-      local allconcathelpargs = {}
-      for k=1,#varargs/2 do
-         table.insert(allconcathelpargs, table.concat(allhelpargs[k], ' '))
-      end
-      table.insert(txt, string.format('luaL_error(L, "expected arguments: %s");', table.concat(allconcathelpargs, ' | ')))
-
-      for k=1,#varargs/2 do
-         if k == 1 then
-            table.insert(txt, string.format('if(argset == %d)', k))
-         else
-            table.insert(txt, string.format('else if(argset == %d)', k))
-         end
-         table.insert(txt, '{')
-         writecall(txt, allargs[k], allcfuncname[k], allcargs[k], allargcreturned[k])
-         table.insert(txt, '}')
-      end
-
-      table.insert(txt, 'return 0;')
-   end
-
-   table.insert(txt, '}')
-   table.insert(txt, '')
-   
-   --   beautify(txt)
-   print(table.concat(txt, '\n'))
-   
 end
 

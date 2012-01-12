@@ -55,7 +55,7 @@ wrap.argtypes.Tensor = {
 }
 
 for _,typename in ipairs({"ByteTensor", "CharTensor", "ShortTensor", "IntTensor", "LongTensor",
-                          "FloatTensor", "TensorDouble"}) do
+                          "FloatTensor", "DoubleTensor"}) do
 
    wrap.argtypes[typename] = {
 
@@ -147,6 +147,45 @@ wrap.argtypes.integer = {
    postcall = function(arg)
                  if arg.creturned then
                     return string.format('lua_pushnumber(L, (lua_Number)arg%d+1);', arg.i)
+                 end
+              end
+}
+
+wrap.argtypes.byte = {
+
+   helpname = function(arg)
+               return "byte"
+            end,
+
+   declare = function(arg)
+              return string.format("unsigned char arg%d = %d;", arg.i, arg.default or 0)
+           end,
+
+   check = function(arg, idx)
+              return string.format("lua_isnumber(L, %d)", idx)
+           end,
+
+   read = function(arg, idx)
+             return string.format("arg%d = (unsigned char)lua_tonumber(L, %d);", arg.i, idx)
+          end,
+
+   carg = function(arg, idx)
+             return string.format('arg%d', arg.i)
+          end,
+
+   creturn = function(arg, idx)
+                return string.format('arg%d', arg.i)
+             end,
+
+   precall = function(arg)
+                if arg.returned then
+                   return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
+                end
+             end,
+
+   postcall = function(arg)
+                 if arg.creturned then
+                    return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
                  end
               end
 }
