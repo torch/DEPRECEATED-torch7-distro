@@ -210,6 +210,7 @@ function CInterface:__writechecks(txt, args, argset)
       local opt = 0
       local currentargs = {}
       local optargs = {}
+      local hasvararg = false
       for i,arg in ipairs(args) do
          if arg.default then
             opt = opt + 1
@@ -223,10 +224,30 @@ function CInterface:__writechecks(txt, args, argset)
          end
       end
 
-      if variant == 0 and argset == 1 then
-         table.insert(txt, string.format('if(narg == %d', #currentargs))
+      for _,arg in ipairs(args) do
+         if arg.vararg then
+            if hasvararg then
+               error('Only one argument can be a "vararg"!')
+            end
+            hasvararg = true
+         end
+      end
+
+      if hasvararg and not currentargs[#currentargs].vararg then
+         error('Only the last argument can be a "vararg"')
+      end
+
+      local compop
+      if hasvararg then
+         compop = '>='
       else
-         table.insert(txt, string.format('else if(narg == %d', #currentargs))
+         compop = '=='
+      end
+
+      if variant == 0 and argset == 1 then
+         table.insert(txt, string.format('if(narg %s %d', compop, #currentargs))
+      else
+         table.insert(txt, string.format('else if(narg %s %d', compop, #currentargs))
       end
 
       for stackidx, arg in ipairs(currentargs) do
