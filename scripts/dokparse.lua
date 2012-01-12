@@ -97,16 +97,20 @@ navhome = navhome .. ' > <a href="index.html">' .. title .. '</a>'
 
 local templatehtml = io.open(doktemplate):read('*all')
 local txthtml = dok.dok2html(txt)
+
+-- swap anchors and divs
+txthtml = txthtml:gsub('<div(.-)<a name(.-)<p>', function(c1,c2)
+                                                    return '<a name' .. c2 .. '\n<div' .. c1 .. '<p>'
+                                                 end)
+
 templatehtml = templatehtml:gsub('%%CONTENTS%%', txthtml)
---local title = src:gsub('^.*/', ''):gsub('%..-$', '')
 templatehtml = templatehtml:gsub('%%TITLE%%', title)
 templatehtml = templatehtml:gsub('%%NAVLINE%%', navhome)
 templatehtml = templatehtml:gsub('%%TOC%%', toc)
 templatehtml = templatehtml:gsub('%%JS%%', js)
 templatehtml = templatehtml:gsub('%%LASTMODIFIED%%','Generated on ' .. os.date())
+
 io.open(htmldst, 'w'):write(templatehtml)
-
 io.open(dokdst, 'w'):write(txt)
-
 
 -- all in html?
