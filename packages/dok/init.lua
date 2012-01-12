@@ -503,5 +503,10 @@ function dok.dok2html(txt)
                                       return '<pre class="file">' .. file[id] .. '</pre>'
                                    end)
 
+   -- swap anchors and divs
+   txt = txt:gsub('<div(.-)<a name(.-)<p>', function(c1,c2)
+                                                 return '<a name' .. c2 .. '\n<div' .. c1 .. '<p>'
+                                              end)
+
    return txt
 end

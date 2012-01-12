@@ -121,7 +121,7 @@ a:visited {
 .torchdoc #toc {
           font-size: 70%;
           width: 200px;
-          height: 70%;
+          max-height: 70%;
           overflow: auto;
           position: fixed;
           left: 0px;
