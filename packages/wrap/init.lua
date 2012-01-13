@@ -311,7 +311,7 @@ function CInterface:__writecall(txt, args, cfuncname, cargs, argcreturned)
    end
 
    for _,arg in ipairs(args) do
-      tableinsertcheck(txt, postcall)
+      tableinsertcheck(txt, arg:postcall())
    end
 
    for _,arg in ipairs(args) do
