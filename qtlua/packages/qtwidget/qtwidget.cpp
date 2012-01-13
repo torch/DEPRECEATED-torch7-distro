@@ -762,7 +762,8 @@ int luaopen_libqtwidget(lua_State *L)
   if (luaL_dostring(L, "require 'qt'"))
     lua_error(L);
   if (QApplication::type() == QApplication::Tty)
-    luaL_error(L, "Graphics have been disabled (running with -nographics)");
+    printf("qtwidget window functions will not be usable (running with -nographics)\n");
+  //luaL_error(L, "Graphics have been disabled (running with -nographics)");
 
   // register metatypes
   qRegisterMetaType<QPainter*>("QPainter*");
