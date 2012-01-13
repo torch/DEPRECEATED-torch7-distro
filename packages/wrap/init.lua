@@ -107,8 +107,14 @@ function CInterface:register(name)
    self.registry = {}
 end
 
-function CInterface:text()
+function CInterface:tostdio()
    return table.concat(self.txt, '\n')
+end
+
+function CInterface:tofile(filename)
+   local f = io.open(filename, 'w')
+   f:write(table.concat(self.txt, '\n'))
+   f:close()
 end
 
 local function bit(p)
