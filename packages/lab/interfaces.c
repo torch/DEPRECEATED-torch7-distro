@@ -22,19 +22,14 @@ static int lab_zero(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -49,7 +44,6 @@ static int lab_zero(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -87,19 +81,14 @@ static int lab_fill(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -114,7 +103,6 @@ static int lab_fill(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -162,19 +150,14 @@ static int lab_zeros(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -189,7 +172,6 @@ static int lab_zeros(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -237,19 +219,14 @@ static int lab_ones(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -264,7 +241,6 @@ static int lab_ones(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -317,19 +293,14 @@ static int lab_reshape(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -344,7 +315,6 @@ static int lab_reshape(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -382,19 +352,14 @@ static int lab_dot(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -409,7 +374,6 @@ static int lab_dot(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -444,19 +408,14 @@ static int lab_minall(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -471,7 +430,6 @@ static int lab_minall(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -506,19 +464,14 @@ static int lab_maxall(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -533,7 +486,6 @@ static int lab_maxall(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -568,19 +520,14 @@ static int lab_sumall(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -595,7 +542,6 @@ static int lab_sumall(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -712,19 +658,14 @@ static int lab_add(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -739,7 +680,6 @@ static int lab_add(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -791,19 +731,14 @@ static int lab_mul(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -818,7 +753,6 @@ static int lab_mul(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -870,19 +804,14 @@ static int lab_div(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -897,7 +826,6 @@ static int lab_div(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -949,19 +877,14 @@ static int lab_cmul(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -976,7 +899,6 @@ static int lab_cmul(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -1028,19 +950,14 @@ static int lab_cdiv(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -1055,7 +972,6 @@ static int lab_cdiv(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -1139,19 +1055,14 @@ static int lab_addcmul(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -1166,7 +1077,6 @@ static int lab_addcmul(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -1250,19 +1160,14 @@ static int lab_addcdiv(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -1277,7 +1182,6 @@ static int lab_addcdiv(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -1418,19 +1322,14 @@ static int lab_addmv(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -1445,7 +1344,6 @@ static int lab_addmv(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -1586,19 +1484,14 @@ static int lab_addmm(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -1613,7 +1506,6 @@ static int lab_addmm(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -1754,19 +1646,14 @@ static int lab_addr(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -1781,7 +1668,6 @@ static int lab_addr(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -1816,19 +1702,14 @@ static int lab_numel(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -1843,7 +1724,6 @@ static int lab_numel(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -1911,19 +1791,14 @@ static int lab_sum(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -1938,7 +1813,6 @@ static int lab_sum(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2006,19 +1880,14 @@ static int lab_prod(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2033,7 +1902,6 @@ static int lab_prod(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2101,19 +1969,14 @@ static int lab_cumsum(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2128,7 +1991,6 @@ static int lab_cumsum(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2196,19 +2058,14 @@ static int lab_cumprod(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2223,7 +2080,6 @@ static int lab_cumprod(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2344,19 +2200,14 @@ static int lab_min(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2371,7 +2222,6 @@ static int lab_min(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2492,19 +2342,14 @@ static int lab_max(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2519,7 +2364,6 @@ static int lab_max(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2554,19 +2398,14 @@ static int lab_trace(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2581,7 +2420,6 @@ static int lab_trace(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2658,19 +2496,14 @@ static int lab_cross(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2685,7 +2518,6 @@ static int lab_cross(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2751,19 +2583,14 @@ static int lab_diag(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2778,7 +2605,6 @@ static int lab_diag(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2844,19 +2670,14 @@ static int lab_eye(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2871,7 +2692,6 @@ static int lab_eye(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -2946,19 +2766,14 @@ static int lab_range(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -2973,7 +2788,6 @@ static int lab_range(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -3021,19 +2835,14 @@ static int lab_randperm(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -3048,7 +2857,6 @@ static int lab_randperm(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -3266,19 +3074,14 @@ static int lab_sort(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -3293,7 +3096,6 @@ static int lab_sort(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -3359,19 +3161,14 @@ static int lab_tril(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -3386,7 +3183,6 @@ static int lab_tril(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -3452,19 +3248,14 @@ static int lab_triu(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -3479,7 +3270,6 @@ static int lab_triu(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -3556,19 +3346,14 @@ static int lab_cat(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -3583,7 +3368,6 @@ static int lab_cat(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -13981,19 +13765,14 @@ static int lab_mean(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14008,7 +13787,6 @@ static int lab_mean(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14085,19 +13863,14 @@ static int lab_std(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14112,7 +13885,6 @@ static int lab_std(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14189,19 +13961,14 @@ static int lab_var(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14216,7 +13983,6 @@ static int lab_var(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14260,19 +14026,14 @@ static int lab_norm(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14287,7 +14048,6 @@ static int lab_norm(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14336,19 +14096,14 @@ static int lab_dist(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14363,7 +14118,6 @@ static int lab_dist(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14398,19 +14152,14 @@ static int lab_meanall(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14425,7 +14174,6 @@ static int lab_meanall(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14460,19 +14208,14 @@ static int lab_varall(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14487,7 +14230,6 @@ static int lab_varall(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14522,19 +14264,14 @@ static int lab_stdall(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14549,7 +14286,6 @@ static int lab_stdall(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14624,19 +14360,14 @@ static int lab_linspace(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14651,7 +14382,6 @@ static int lab_linspace(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14726,19 +14456,14 @@ static int lab_logspace(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14753,7 +14478,6 @@ static int lab_logspace(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14822,19 +14546,14 @@ static int lab_log(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14849,7 +14568,6 @@ static int lab_log(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -14918,19 +14636,14 @@ static int lab_log1p(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -14945,7 +14658,6 @@ static int lab_log1p(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15014,19 +14726,14 @@ static int lab_exp(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15041,7 +14748,6 @@ static int lab_exp(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15110,19 +14816,14 @@ static int lab_cos(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15137,7 +14838,6 @@ static int lab_cos(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15206,19 +14906,14 @@ static int lab_acos(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15233,7 +14928,6 @@ static int lab_acos(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15302,19 +14996,14 @@ static int lab_cosh(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15329,7 +15018,6 @@ static int lab_cosh(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15398,19 +15086,14 @@ static int lab_sin(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15425,7 +15108,6 @@ static int lab_sin(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15494,19 +15176,14 @@ static int lab_asin(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15521,7 +15198,6 @@ static int lab_asin(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15590,19 +15266,14 @@ static int lab_sinh(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15617,7 +15288,6 @@ static int lab_sinh(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15686,19 +15356,14 @@ static int lab_tan(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15713,7 +15378,6 @@ static int lab_tan(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15782,19 +15446,14 @@ static int lab_atan(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15809,7 +15468,6 @@ static int lab_atan(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15878,19 +15536,14 @@ static int lab_tanh(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -15905,7 +15558,6 @@ static int lab_tanh(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -15974,19 +15626,14 @@ static int lab_sqrt(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -16001,7 +15648,6 @@ static int lab_sqrt(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -16070,19 +15716,14 @@ static int lab_ceil(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -16097,7 +15738,6 @@ static int lab_ceil(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -16166,19 +15806,14 @@ static int lab_floor(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -16193,7 +15828,6 @@ static int lab_floor(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -16262,19 +15896,14 @@ static int lab_abs(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -16289,7 +15918,6 @@ static int lab_abs(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -16366,19 +15994,14 @@ static int lab_pow(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -16393,7 +16016,6 @@ static int lab_pow(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -16441,19 +16063,14 @@ static int lab_rand(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -16468,7 +16085,6 @@ static int lab_rand(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
@@ -16516,19 +16132,14 @@ static int lab_randn(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg == 0 || !lua_isstring(L, 1))
-    luaL_error(L, "trying to index a non-string value into lab package?");
-  else
+  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
     {
-      if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
-      {
-        if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
-          lua_pop(L, 1);
-        else
-          id = lab_default_tensor_id;
-      }
+      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+        lua_pop(L, 1);
+      else
+        id = lab_default_tensor_id;
     }
   }
   luaT_pushmetaclass(L, id);
@@ -16543,7 +16154,6 @@ static int lab_randn(lua_State *L)
     {
       lua_insert(L, 1);
       lua_pop(L, 2); /* the two tables we put on the stack above */
-      luaT_stackdump(L);
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
