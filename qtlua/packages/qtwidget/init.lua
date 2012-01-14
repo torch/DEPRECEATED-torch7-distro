@@ -4,8 +4,9 @@ require 'qtgui'
 require 'qtsvg'
 
 if qt and qt.qApp and qt.qApp:runsWithoutGraphics() then
-   print("qlua: not loading module qtwidget (running with -nographics)")
-   return
+   --print("qlua: not loading module qtwidget (running with -nographics)")
+   print('qlua: qtwidget window functions will not be usable (running with -nographics)')
+   --return
 end
 
 qt.require 'libqtwidget'
