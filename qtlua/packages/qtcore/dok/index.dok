@@ -1,4 +1,5 @@
 ====== QtCore Bindings ======
+{{anchor:qtcore.dok}}
 
 The package ''qtcore'' 
 contains bindings for classes defined by the Qt module
@@ -6,10 +7,10 @@ contains bindings for classes defined by the Qt module
 
 Besides the capabilites reported below,
 all qt variants inherit a set 
-of [[..:qt:index#QVariants|default methods]],
+of [[..:qt:index#qt.QVariants|default methods]],
 and all qt object classes inherit the capabilities from their 
 superclasses and automatically expose 
-[[..:qt:index#QObjects|properties, slots and signals]].
+[[..:qt:index#qt.QObjects|properties, slots and signals]].
 
 
 ====  qt.QByteArray ====
@@ -22,12 +23,14 @@ are automatically converted to QByteArray objects
 when such objects are needed.
 
 ==  qt.QByteArray(arg) ==
+{{anchor:qbytearray}}
 
 Expression ''qt.QByteArray(arg)'' returns a new byte array object.
 Argument ''arg'' may be a lua string or a table containing 
 the integer values of the successive bytes.
 
 ==  qbytearray:totable() ==
+{{anchor:qbytearray.totable}}
 
 Expression ''qbytearray:totable()'' returns a table
 containing the integer values of the bytes represented
@@ -42,6 +45,7 @@ provides an event loop for console Qt applications and serves
 as a base class for class [[..:qtgui:index#qapplication|QApplication]].
 
 ===  qt.QCoreApplication() ===
+{{anchor:qcoreapplication}}
 
 Returns the unique instance of class ''QCoreApplication''.make i
 
@@ -56,6 +60,8 @@ and [[http://doc.trolltech.com/4.4/qlinef.html|QLineF]]
 for details.
 
 ===  qt.QLine(table),  qt.QLineF(table) ===
+{{anchor:qline}}
+{{anchor:qlineF}}
 
 Expression ''qt.QLine(table)'' or ''qt.QLineF(table)'' 
 constructs a new ''qt.QLine'' or ''qt.QLineF'' object
@@ -64,6 +70,7 @@ are given by fields ''x1'', ''y1'', ''x2'', and ''y2''
 of table ''table''.
 
 ===  qline:totable() ===
+{{anchor:qline.totable}}
 
 Expression ''qline:totable()'' returns a table whose fields
 ''x1'', ''y1'', ''x2'', and ''y2'' contain the coordinates of the
@@ -75,13 +82,14 @@ endpoints of the ''qt.QLine'' or ''qt.QLineF'' object ''qline''.
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qobject.html|QObject]].
-is the base class of all [[..:qt:index#QObjects|Qt objects]].
+is the base class of all [[..:qt:index#qt.QObjects|Qt objects]].
 All Qt object classes have separate metatables following the 
 same inheritance pattern as the corresponding Qt classes. 
 The metatable [[#qobject|qt.QObject]] sits at the top
 of this hierarchy.
 
 ===  qobject:children() ===
+{{anchor:qobject.children}}
 
 Expression ''qobject:children()'' 
 returns a Qt value of class [[#qvariantlist|qt.QVariantList]]
@@ -98,6 +106,7 @@ interactive events.
 
 
 ===  qobject:dumpObjectInfo() ===
+{{anchor:qobjectdumobjectinfo}}
 
 Function ''qobject:dumpObjectInfo'' prints a human readable
 description of the object ''qobject''.
@@ -106,6 +115,7 @@ compiled in debug mode.
 
 
 ===  qobject:dumpObjectTree() ===
+{{anchor:qobjectdumobjecttree}}
 
 Function ''qobject:dumpObjectTree'' prints a human readable
 description of the object hierarchy containing ''qobject''.
@@ -128,15 +138,14 @@ In case of name conflicts, property and methods have precedence
 over named children.
 
 ===  qobject:parent() ===
+{{anchor:qobjectparent}}
 
 Expression ''qobject:parent()'' returns the parent of object ''qobject''
 if such a parent exists. Otherwise it returns ''nil''.
 
-
-
-
 ====  qt.QPoint, qt.QPointF ====
 {{anchor:qpoint}}
+{{anchor:qpointf}}
 
 Classes ''qt.QPoint'' and ''qt.QPointF'' represent common Qt classes.
 Please refer to the Qt documentation for classes
@@ -145,6 +154,8 @@ and [[http://doc.trolltech.com/4.4/qpointf.html|QPointF]]
 for details.
 
 ===  qt.QPoint(table),  qt.QPointF(table) ===
+{{anchor:qpoint}}
+{{anchor:qpointf}}
 
 Expression ''qt.QPoint(table)'' or ''qt.QPointF(table)''
 returns a new ''qt.QPoint'' or ''qt.QPointF'' object
@@ -152,6 +163,7 @@ initialized with the contents of fields ''x'' and ''y''
 from table ''table''.
 
 ===  qpoint:totable() ===
+{{anchor:qpoint.totable}}
 
 Expression ''qpoint:totable()'' returns a table whose fields ''x'' and ''y''
 contain the coordinates of the ''qt.QPoint'' or ''qt.QPointF'' object ''qpoint''.
@@ -159,6 +171,7 @@ contain the coordinates of the ''qt.QPoint'' or ''qt.QPointF'' object ''qpoint''
 
 ====  qt.QRect, qt.QRectF ====
 {{anchor:qrect}}
+{{anchor:qrectf}}
 
 Classes ''qt.QRect'' and ''qt.QRectF'' represent common Qt classes.
 Please refer to the Qt documentation for classes
@@ -167,6 +180,8 @@ and [[http://doc.trolltech.com/4.4/qrectf.html|QRectF]]
 for details.
 
 ===  qt.QRect(table),  qt.QRectF(table) ===
+{{anchor:qrect}}
+{{anchor:qrectf}}
 
 Expression ''qt.QRect(table)'' or ''qt.QRectF(table)''
 returns a new ''qt.QRect'' or ''qt.QRectF'' object
@@ -176,6 +191,7 @@ and whose width and height are specified
 by the table fields ''width'' and ''height''.
 
 ===  qrect:totable() ===
+{{anchor:qrect.totable}}
 
 Expression ''qrect:totable()'' returns a table
 whose fields ''x'' and ''y'' contain the origin of the rectangle ''qrect''
@@ -185,6 +201,7 @@ height of the rectangle.
 
 ====  qt.QSize, qt.QSizeF ====
 {{anchor:qsize}}
+{{anchor:qsizef}}
 
 Classes ''qt.QSize'' and ''qt.QSizeF'' represent common Qt classes.
 Please refer to the Qt documentation for classes
@@ -193,7 +210,7 @@ and [[http://doc.trolltech.com/4.4/qsizef.html|QSizeF]]
 for details.
 
 Example:
-<file>
+<file lua>
   require 'qtwidget'
   widget = qt.QWidget()
   widget.size = qt.QSize{width=320,height=200}
@@ -201,6 +218,8 @@ Example:
 </file>
 
 ===  qt.QSize(table),  qt.QSizeF(table) ===
+{{anchor:qsize}}
+{{anchor:qsizef}}
 
 Expression ''qt.QSize(table)'' or ''qt.QSizeF(table)''
 returns a new ''qt.QSize'' or ''qt.QSizeF'' object
@@ -208,6 +227,7 @@ initialized with the contents of fields ''width'' and ''height''
 from table ''table''.
 
 ===  qsize:totable() ===
+{{anchor:qsize.totable}}
 
 Expression ''qsize:totable()'' returns a table whose
 fields ''width'' and ''height'' are initialized with
@@ -224,6 +244,7 @@ are automatically converted to string objects
 when such objects are needed.
 
 ==  qt.QString(arg) ==
+{{anchor:qstring}}
 
 Expression ''qt.QString(arg)'' returns a new string object.
 Argument ''arg'' may be a lua string representing the string
@@ -231,12 +252,14 @@ in locale encoding or a table containing the unicode values
 for the string characters.
 
 ==  qstring:totable() ==
+{{anchor:qstring.totable}}
 
 Expression ''qurl:totable()'' returns a table
 containing the integer values of the successive 
 unicode characters represented by the string.
 
 ====  qt.QStringList ====
+{{anchor:qstringlist}}
 
 Class ''qt.QStringList'' represents Qt values of type 
 [[http://doc.trolltech.com/4.4/qstringlist.html|QStringList]] 
@@ -252,18 +275,19 @@ When the argument ''table'' is omitted,
 an empty string list is returned.
 
 Example
-<file>
+<file lua>
  require 'qt'
  a = qt.QStringList{"a","b","c"}
 </file>
 
 ===  qstringlist:totable() ===
+{{anchor:qstringlist.totable}}
 
 Expression ''qstringlist:totable()'' returns a Lua table
 containing the elements of ''qstringlist'' starting at position ''1''.
 
 Example
-<file>
+<file lua>
  require 'qt'
  a = qt.QStringList{"a","b","c"}
  return a:totable()[2]
@@ -281,7 +305,7 @@ for an explanation of the available
 slots, signals and properties.
 
 Example:
-<file>
+<file lua>
 require 'qt'
 timer = qt.QTimer()
 timer.singleShot = true
@@ -291,6 +315,7 @@ timer:start(2000) -- wait for 2 seconds...
 
 
 ===  qt.QTimer(parent) ===
+{{anchor:qtimer}}
 
 Expression ''qt.QTimer(parent)'' returns a 
 new ''QTimer'' object created from the current thread.
@@ -310,11 +335,13 @@ Class ''qt.QStringList'' represents Qt values of type
 containing an URL.
 
 ==  qt.QUrl(string) ==
+{{anchor:qurl}}
 
 Expression ''qt.QUrl(string)'' returns a 
 QUrl object from string ''string''.
 
 ==  qurl:tostring() ==
+{{anchor:qurl.tostring}}
 
 Expression ''qurl:tostring()'' returns a string 
 describing the QUrl object ''qurl''.
@@ -329,6 +356,7 @@ containing a list of values represented by class
 [[http://doc.trolltech.com/4.4/qvariant.html|QVariant]].
 
 ===  qt.QVariantList(table) ===
+{{anchor:qvariantlist}}
 
 Expression ''qt.QVariantList(table)'' creates a new ''QVariantList''
 initialized with the strings contained in 
@@ -337,18 +365,19 @@ When the argument ''table'' is omitted,
 an empty string list is returned.
 
 Example
-<file>
+<file lua>
  require 'qt'
  a = qt.QVariantList{"a",32}
 </file>
 
 ===  qvariantlist:totable() ===
+{{anchor:qvariantlist.totable}}
 
 Expression ''qvariantlist:totable()'' returns a Lua table
 containing the elements of ''qstringlist'' starting at position ''1''.
 
 Example
-<file>
+<file lua>
  require 'qt'
  a = qt.QVariantList{"a",2,3,4}
  return a:totable()[2]
@@ -365,6 +394,7 @@ containing a dictionary of named values represented by class
 
 
 ===  qt.QVariantMap(table) ===
+{{anchor:qvariantmap}}
 
 Expression ''qt.QVariantMap(table)'' creates a new ''QVariantMap''
 initialized with the contents of the table ''table''.
@@ -372,18 +402,19 @@ When the argument ''table'' is omitted,
 an empty map is returned.
 
 Example
-<file>
+<file lua>
  require 'qt'
  a = qt.QVariantMap{a=23,b=45,c="foo"}
 </file>
 
 ===  qvariantmap:totable() ===
+{{anchor:qvariantmap.totable}}
 
 Expression ''qvariantmap:totable()'' returns a Lua table
 containing the contents of the dictonary ''qvariantmap''.
 
 Example
-<file>
+<file lua>
  require 'qt'
  a = qt.QVariantMap{a=23,b=45,c="foo"}
  t = a:totable()

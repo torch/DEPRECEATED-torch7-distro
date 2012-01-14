@@ -1,4 +1,5 @@
-======  QtLua and Qt Package Reference Manual ====== 
+======  QtLua and Qt Package Reference Manual ======
+{{anchor:qtlua.overview.dok}}
 
 The package ''qt'' is available when you run the Lua
 interpreter using the [[#qlua|qlua]] program. 
@@ -8,7 +9,7 @@ Of course, a full understanding of this package ''qt'' requires
 a minimal familiarity with the Qt4 library. 
 
 Program [[#qlua|qlua]] relies in fact on 
-the [[#QtLua|QtLua]] C++ library which provides a Qt 
+the [[#qtlua|QtLua]] C++ library which provides a Qt 
 object that encapsulates a Lua interpreter
 All properties, slots and signals declared by the C++ Qt objects
 are automatically exposed in the Lua interpreter. 
@@ -21,13 +22,6 @@ The packages
 provide bindings for the classes defined 
 by the corresponding Qt libraries.
 
-The packages
-[[..:qtwidget:index|qtwidget]] and
-[[..:qttorch:index|qttorch]]
-are used for the ''qlua'' implementation of 
-package [[..:graphics:index|graphics]].
-
-
 ======  Program qlua ======
 {{anchor:qlua}}
 
@@ -35,34 +29,22 @@ Program ''qlua'' is a compatible replacement for
 the standard interpreter program ''lua''
 with several new capabilities:
 
-  * New packages provides a rich interface with the Qt4 library:
-[[#qt|qt]], [[..:qtwidget:index|qtwidget]], 
-[[..:qttorch:index|qttorch]], 
-[[..:qtuiloader:index|qtuiloader]].
+  * New packages provides a rich interface with the Qt4 library: [[#qt|qt]], [[..:qtwidget:index|qtwidget]], [[..:qttorch:index|qttorch]], [[..:qtuiloader:index|qtuiloader]].
 
-  * The Lua interpreter runs in a dedicated thread.
-The main thread remains in charge of graphical interface and
-user interaction. Therefore all graphical interfaces remain
-active while the interpreter is running.
+  * The Lua interpreter runs in a dedicated thread. The main thread remains in charge of graphical interface and user interaction. Therefore all graphical interfaces remain active while the interpreter is running.
 
   * Console output can be captured and emitted as Qt signals.
 Therefore one can program a complete integrated development 
 environment including a graphical console.
 
-  * When using ''qlua'', packages [[..:graphics:index|graphics]] 
-and [[..:gfx:index|gfx]] produce drawings using Qt
-instead of using the Cairo library.
-
-
 =====  Usage =====
+{{anchor:qlua.usage}}
 
-Program ''qlua'' accepts
-the same command line options and arguments as 
-the stand-alone Lua interpreter 
-[[..:LuaManual#LuaStandalone|lua]].
-It also accepts all the 
-[[http://doc.trolltech.com/4.4/qapplication.html#QApplication|Qt command line options]] 
-as well as a few specific options.
+Program ''qlua'' accepts the same command line options and arguments
+as the stand-alone Lua interpreter [[..:LuaManual#LuaStandalone|lua]].
+It also accepts all the
+[[http://doc.trolltech.com/4.4/qapplication.html#QApplication|Qt
+command line options]] as well as a few specific options.
 
 <file>
 Usage: qlua [options] [script <scriptargs>]
@@ -87,311 +69,272 @@ The most important Qt options are:
 </file>
 
 
-Option ''-nographics'' initializes the Qt 
-library for a text-only application.  
-This can be handy when executing scripts
-because it avoids unnecessary overhead.
+Option ''-nographics'' initializes the Qt library for a text-only
+application. This can be handy when executing scripts because it
+avoids unnecessary overhead.
 
-Option ''-onethread'' runs the Lua interpreter
-in the main thread instead of starting a dedicated thread. 
-As a consequence, while Lua is running,
-graphical are not handled, windows are not painted, 
-timers are not honored, etc., unless the Lua program
-calls [[#qtdoevents|qt.doevents()]] frequently enough.
-This is not the normal mode of operation of ''qlua''
-but this can be useful for debugging purposes.
-
+Option ''-onethread'' runs the Lua interpreter in the main thread
+instead of starting a dedicated thread.  As a consequence, while Lua
+is running, graphical operations are not handled, windows are not
+painted, timers are not honored, etc., unless the Lua program calls
+[[#qt.doevents|qt.doevents()]] frequently enough.  This is not the
+normal mode of operation of ''qlua'' but this can be useful for
+debugging purposes.
 
 =====  Components =====
+{{anchor:qlua.components}}
 
-Program ''qlua'' is a Qt program composed of three 
-objects working independently in separate threads.
+Program ''qlua'' is a Qt program composed of three objects working
+independently in separate threads.
 
-  * The [[#qtqconsole|console manager]] manages the interactive
-session using input and output on a terminal or inside a shell window.
-It can capture all output to the ''stdout'' file descriptor and
-publish it as Qt signal for use in graphical interfaces.
-It also manages the user input with Lua code completion.
+  * The [[#qt.qconsole|console manager]] manages the interactive session using input and output on a terminal or inside a shell window. It can capture all output to the ''stdout'' file descriptor and publish it as Qt signal for use in graphical interfaces.  It also manages the user input with Lua code completion.
 
-  * The [[#qtqengine|QtLua engine]] runs the Lua code and
-provides the integration with the Qt environment.
+  * The [[#qt.qengine|QtLua engine]] runs the Lua code and provides the integration with the Qt environment.
 
-  * The [[#qtqapp|application manager]] runs in the main thread.
-It handles the graphical user interface events and all the
-notifications emitted by the console manager and the lua engine.
+  * The [[#qt.qapp|application manager]] runs in the main thread. It handles the graphical user interface events and all the notifications emitted by the console manager and the lua engine.
 
 Running the Lua interpreter in a separate thread lets the main thread
-handle user interaction at all times. Windows are refreshed
-and user interfaces remain active while a Lua program is running.
+handle user interaction at all times. Windows are refreshed and user
+interfaces remain active while a Lua program is running.
 
-At times the Lua code needs to act on objects living in another thread.
-Potential synchronization problems are avoided using the 
-[[#qtqcall|"thread hopping"]] technique which allows the execution 
-of a Lua function in the target thread. 
-When the function returns, the Lua thread resumes the normal execution 
-of the Lua code.  Thread hopping happens automatically when invoking a 
-method defined by a Qt object. Thread hopping can also be performed manually 
-using functions [[#qtqcall|qt.qcall]] or [[#qtxqcall|qt.xqcall]].
-
-
+At times the Lua code needs to act on objects living in another
+thread.  Potential synchronization problems are avoided using the
+[[#qt.qcall|"thread hopping"]] technique which allows the execution of
+a Lua function in the target thread.  When the function returns, the
+Lua thread resumes the normal execution of the Lua code.  Thread
+hopping happens automatically when invoking a method defined by a Qt
+object. Thread hopping can also be performed manually using functions
+[[#qt.qcall|qt.qcall]] or [[#qtxqcall|qt.xqcall]].
 
 
 ======  Package qt ======
 {{anchor:qt}}
 
-When you run program ''qlua'', 
-the package ''qt'' is readily accessible using ''require('qt')''
-because the ''libqtlua'' library installs a suitable
-loading function in the array ''package.preload['qt']''.
+When you run program ''qlua'', the package ''qt'' is readily
+accessible using ''require('qt')'' because the ''libqtlua'' library
+installs a suitable loading function in the array
+''package.preload['qt']''.
 
-Package ''qt'' essentially contains the metatables associated 
-with Lua userdata values and a few useful functions.
-The [[#QtLua|QtLua API]] also provides a means to name
-an arbitrary Qt object and publish it inside the package ''qt''.
+Package ''qt'' essentially contains the metatables associated with Lua
+userdata values and a few useful functions.  The [[#QtLua|QtLua API]]
+also provides a means to name an arbitrary Qt object and publish it
+inside the package ''qt''.
 
 =====  Qt Variants =====
-{{anchor:QVariants}}
+{{anchor:qt.QVariants}}
 
-Values represented by the Qt class 
-[[http://doc.trolltech.com/4.4/qvariant.html|QVariant]]
-can be exposed to the Lua interpreter as userdata.
-Class ''QVariant'' defines in fact a container for
-a large number of standard Qt types with value semantics.
-In fact any type registered with the Qt macro 
-[[http://doc.trolltech.com/4.4/qmetatype.html|Q_DECLARE_METATYPE]] 
-can be represented by a Qt variant value.
+Values represented by the Qt class
+[[http://doc.trolltech.com/4.4/qvariant.html|QVariant]] can be exposed
+to the Lua interpreter as userdata.  Class ''QVariant'' defines in
+fact a container for a large number of standard Qt types with value
+semantics.  In fact any type registered with the Qt macro
+[[http://doc.trolltech.com/4.4/qmetatype.html|Q_DECLARE_METATYPE]] can
+be represented by a Qt variant value.
 
-Whenever a ''QVariant'' value is made accessible 
-to the Lua interpreter (see [[#luaqpushqt|luaQ_pushqt]]),
-the QtLua library ensures that there is a metatable 
-associated with all objects of that type. 
-Methods for each type can then be added
-to the class table ''qt.TypeName'' where ''TypeName'' 
-represent the type name.  
-If the class table contains a method named ''new'',
-this method is used to construct new values of that type
-using the syntax ''qt.Typename(...)''. 
+Whenever a ''QVariant'' value is made accessible to the Lua
+interpreter (see [[#luaqpushqt|luaQ_pushqt]]), the QtLua library
+ensures that there is a metatable associated with all objects of that
+type.  Methods for each type can then be added to the class table
+''qt.TypeName'' where ''TypeName'' represent the type name.  If the
+class table contains a method named ''new'', this method is used to
+construct new values of that type using the syntax
+''qt.Typename(...)''.
 
-The metatable defines the standard Lua hooks =__eq=
-to perform an equality test and =__tostring=
-to return a string representing the data.
-In addition, the following methods are 
-predefined in all class tables:
+The metatable defines the standard Lua hooks ''__eq'' to perform an
+equality test and ''__tostring'' to return a string representing the
+data.  In addition, the following methods are predefined in all class
+tables:
 
 ====  qtdata:tostring() ====
+{{anchor:qt.tostring}}
 
 Function ''qtdata:tostring()'' returns a Lua string
 representing the value contained in the Qt variant.
 
-  * Qt variants of type ''QString'' are converted to Lua strings 
-using the local multibyte encoding.
-  * Qt variants that can be converted to type ''QByteArray''
-are also transformed into Lua strings.
-  * Other types are represented using the type name
-followed by the hexadecimal representation of a pointer
-to the data.
+  * Qt variants of type ''QString'' are converted to Lua strings using the local multibyte encoding.
+  * Qt variants that can be converted to type ''QByteArray''are also transformed into Lua strings.
+  * Other types are represented using the type name followed by the hexadecimal representation of a pointer to the data.
 
 ====  qtdata:tonumber() ====
+{{anchor:qt.tonumber}}
 
-Function ''qtdata:tonumber()'' returns a Lua number
-representing the value contained in the Qt variant.
-The value ''nil'' is returned when the data type
-cannot be meaningfully converted to a numeric value.
+Function ''qtdata:tonumber()'' returns a Lua number representing the
+value contained in the Qt variant.  The value ''nil'' is returned when
+the data type cannot be meaningfully converted to a numeric value.
 
 ====  qtdata:tobool() ====
-{{anchor:qttobool}}
+{{anchor:qt.tobool}}
 
-Function ''qtdata:tobool()'' returns a boolean value
-associated with the value contained in the Qt variant.
-This is achieved by calling the Qt function ''QVariant::isNull''.
-In the case of object pointers, this function can be 
-used to determine if the object has been deleted
+Function ''qtdata:tobool()'' returns a boolean value associated with
+the value contained in the Qt variant.  This is achieved by calling
+the Qt function ''QVariant::isNull''.  In the case of object pointers,
+this function can be used to determine if the object has been deleted
 or is currently allocated.
 
 
 ====  qtdata:type() ====
-{{anchor:qtdatatype}}
+{{anchor:qt.type}}
 
-Function ''qtdata:type()'' returns a string naming 
-the type of the value contained in the Qt variant.
-In the case of object pointers, this function 
-returns a string of the form ''"ClassName*"''
-where ''ClassName'' represents the object class.
-If the object has been deleted, this function
-returns ''nil''.
+Function ''qtdata:type()'' returns a string naming the type of the
+value contained in the Qt variant.  In the case of object pointers,
+this function returns a string of the form ''"ClassName*"'' where
+''ClassName'' represents the object class.  If the object has been
+deleted, this function returns ''nil''.
 
 
 ====  qtdata:isa(typename) ====
-{{anchor:qtdataisa }}
+{{anchor:qt.isa }}
 
-Function ''qtdata:isa(typename)'' returns a boolean
-value indicating whether the Qt variant
-contains an object of type ''typename''.
-In the case of object pointers, this function
-returns true if the object inherits the qt object
-class named ''typename''.
+Function ''qtdata:isa(typename)'' returns a boolean value indicating
+whether the Qt variant contains an object of type ''typename''.  In
+the case of object pointers, this function returns true if the object
+inherits the qt object class named ''typename''.
 
 
 =====  Qt Objects =====
-{{anchor:QObjects}}
+{{anchor:qt.QObjects}}
 
-Critical Qt classes are subclasses of class 
-[[http://doc.trolltech.com/4.4/qobject.html|QObject]].
-Qt distinguishes some member functions of these classes,
-namely slots, signals and properties. Qt provides means
-to enumerate these slots, signals and properties at run time.
-Please refer to the Qt documentation on the 
-[[http://doc.trolltech.com/4.4/object.html|Qt object model]]
-for more details.
+Critical Qt classes are subclasses of class
+[[http://doc.trolltech.com/4.4/qobject.html|QObject]].  Qt
+distinguishes some member functions of these classes, namely slots,
+signals and properties. Qt provides means to enumerate these slots,
+signals and properties at run time.  Please refer to the Qt
+documentation on the [[http://doc.trolltech.com/4.4/object.html|Qt
+object model]] for more details.
 
-Instances of these classes are known as Qt objects.
-Pointers to Qt objects can be exposed to the Lua interpeter because
-Qt variants can contain values of type ''QObjectPointer''
-which is a guarded pointer to a Qt object.
+Instances of these classes are known as Qt objects.  Pointers to Qt
+objects can be exposed to the Lua interpeter because Qt variants can
+contain values of type ''QObjectPointer'' which is a guarded pointer
+to a Qt object.
 
 Such values have a special treatment:
 
-  * A distinct metatable is allocated for each Qt object class.
-These metatables are available in the ''qt'' package
-and follow the same inheritance pattern as 
-the Qt object class hierarchy.
-Class [[..:qtcore:index#qobject|qt.QObject]] sits at the top
-of this hierarchy.
+  * A distinct metatable is allocated for each Qt object class. These metatables are available in the ''qt'' package and follow the same inheritance pattern as the Qt object class hierarchy. Class [[..:qtcore:index#qobject|qt.QObject]] sits at the top of this hierarchy.
 
-  * Slots, signals and properties are automatically
-exposed to the Lua interpreter. This is achieved 
-using the information collected by the Qt precompiler ''moc''.
-
+  * Slots, signals and properties are automatically exposed to the Lua interpreter. This is achieved using the information collected by the Qt precompiler ''moc''.
 
 ====  Memory management ====
+{{anchor:qt.memorymanagement.dok}}
 
-Qt organizes the Qt objects hierarchically.
-An object can be an orphan or can be the child of another object.
-When a Qt object is deleted, all its descendants are deleted as well.
-When programming in C++, orphan objects must be deleted manually.
+Qt organizes the Qt objects hierarchically.  An object can be an
+orphan or can be the child of another object.  When a Qt object is
+deleted, all its descendants are deleted as well.  When programming in
+C++, orphan objects must be deleted manually.
 
 Two situations arise when a Qt object is exposed the Lua interpreter.
 
-  * An exposed Qt object may be deleted by C++ code, 
-either directly, or indirectly because one of its 
-ascendant has been deleted.
-The Lua userdata representing the object becomes a "zombie".
-Zombies can be detected using method [[#qttobool|tobool()]].
+  * An exposed Qt object may be deleted by C++ code, either directly, or indirectly because one of its ascendant has been deleted. The Lua userdata representing the object becomes a "zombie". Zombies can be detected using method [[#qt.tobool|tobool()]].
 
-  * An exposed Qt object may be deleted because the Lua
-garbage collector determines that the Lua program no longer
-needs this object.  Whether this happens is determined when
-the object is exposed to the Lua interpreter. 
-Such objects are said to be owned by Lua.
+  * An exposed Qt object may be deleted because the Lua garbage collector determines that the Lua program no longer needs this object.  Whether this happens is determined when the object is exposed to the Lua interpreter. Such objects are said to be owned by Lua.
 
-In general, orphan objects created from a Lua program are owned by Lua.
-Objects with a parent and orphan objects created from C++ code are
-not Lua owned and are not affected by the decisions 
-of the Lua garbage collector.
+In general, orphan objects created from a Lua program are owned by
+Lua.  Objects with a parent and orphan objects created from C++ code
+are not Lua owned and are not affected by the decisions of the Lua
+garbage collector.
 
 
 ====  Properties ====
+{{anchor:qt.properties.dok}}
 
-Qt object properties are automatically 
-available using the Lua indexation syntax
+Qt object properties are automatically available using the Lua
+indexation syntax
 
 Examples:
-<file>
+<file lua>
     widget.windowTitle="my window title"
     return widget.windowTitle
 </file>
 
-Properties are always manipulated from the thread owning the Qt object.
-If the Lua interpreter runs in a different thread, a 
-[[#qtqcall|thread hopping]] operation is performed 
-for the duration of the operation.
+Properties are always manipulated from the thread owning the Qt
+object.  If the Lua interpreter runs in a different thread, a
+[[#qt.qcall|thread hopping]] operation is performed for the duration
+of the operation.
 
-Property values are always represented as Qt variant objects.
-They are automatically converted into Lua strings or Lua numbers 
-when they are read. Conversely, Lua strings and Lua numbers
-are automatically converted into the desired type
-when a property is set.
+Property values are always represented as Qt variant objects.  They
+are automatically converted into Lua strings or Lua numbers when they
+are read. Conversely, Lua strings and Lua numbers are automatically
+converted into the desired type when a property is set.
 
-Property values with enumerated types registered using the Qt macro 
-[[http://doc.trolltech.com/4.4/qobject.html|Q_ENUMS]] 
-are automatically converted
-into strings representing the enumerated names and conversely.
-Property values with flag types declared using the Qt macro 
-[[http://doc.trolltech.com/4.4/qflags.htm|Q_DECLARE_FLAGS]]
-and registered using ''Q_ENUMS'' are automatically converted into Lua 
+Property values with enumerated types registered using the Qt macro
+[[http://doc.trolltech.com/4.4/qobject.html|Q_ENUMS]] are
+automatically converted into strings representing the enumerated names
+and conversely.  Property values with flag types declared using the Qt
+macro [[http://doc.trolltech.com/4.4/qflags.htm|Q_DECLARE_FLAGS]] and
+registered using ''Q_ENUMS'' are automatically converted into Lua
 string containing the relevant flag names separated by vertical bars.
 
 
 
 ====  Slots and Invokable Methods ====
+{{anchor:qt.slots.dok}}
 
-Publics and protected Qt slots can be called 
-using the Lua method invokation syntax.
+Public and protected Qt slots can be called using the Lua method
+invokation syntax.
 
 Examples:
-<file>
+<file lua>
        widget:setEnabled(true)
        widget:show()
 </file>
 
-Public and protected member functions whose c++ declaration 
-is marked with the Qt macro ''Q_INVOKABLE'' can also be invoked 
-using the standard Lua syntax.
+Public and protected member functions whose c++ declaration is marked
+with the Qt macro ''Q_INVOKABLE'' can also be invoked using the
+standard Lua syntax.
 
-When a member function has the same name as a property,
-the property takes precedence.
-When overloaded member functions are exposed in this fashion,
-the QtLua library makes a best effort to determine
-which function should be called. It first narrows the choices
-using the number of parameters. When several options remain,
-it chooses one on the basis of the types of the parameters.
-Member function arguments with default values are handled
-by considering implicit overloaded functions.
+When a member function has the same name as a property, the property
+takes precedence.  When overloaded member functions are exposed in
+this fashion, the QtLua library makes a best effort to determine which
+function should be called. It first narrows the choices using the
+number of parameters. When several options remain, it chooses one on
+the basis of the types of the parameters.  Member function arguments
+with default values are handled by considering implicit overloaded
+functions.
 
-It is always possible to work around these rules
-by selecting a particular member function using its signature.
-<file>
+It is always possible to work around these rules by selecting a
+particular member function using its signature.
+
+<file lua>
        widget['setEnabled(bool)'](widget, true)
 </file>
 
-Member functions exposes in this way are always invoked 
-from the thread owning the Qt object. If the Lua interpreter runs 
-in a different thread, a [[#qtqcall|thread hopping]] 
-operation is performed for the duration of the operation.
+Member functions exposes in this way are always invoked from the
+thread owning the Qt object. If the Lua interpreter runs in a
+different thread, a [[#qt.qcall|thread hopping]] operation is
+performed for the duration of the operation.
 
-Argument types and return values are automatically converted.
-Lua strings can be specified when a ''QByteArray'' 
-or a ''QString'' are expected. Lua numbers can be specified
-whenever numerical types are expected.
+Argument types and return values are automatically converted.  Lua
+strings can be specified when a ''QByteArray'' or a ''QString'' are
+expected. Lua numbers can be specified whenever numerical types are
+expected.
 
-Inheritance ensures that all methods exposed
-by a class are also exposed by its subclasses.
-Methods exposed by the ''QObject'' class,
-such as [[..:qtcore:index#qobjectdeletelater|deleteLater()]],
-are inherited by all Qt object classes.
-
+Inheritance ensures that all methods exposed by a class are also
+exposed by its subclasses.  Methods exposed by the ''QObject'' class,
+such as [[..:qtcore:index#qobjectdeletelater|deleteLater()]], are
+inherited by all Qt object classes.
 
 ====  Named Children ====
+{{anchor:qt.namedchildren.dok}}
 
-All Qt objects can be given a name 
-represented by property [[..:qtcore:index#qobjectobjectname|objectName]].
-The named children of a Qt object can be accessed by
-name using the indexation syntax.
-However, when the name of a child conflicts with a property
-or an exposed method, the property or the exposed method
-has precedence. Named children are searched in the whole
-descendency tree using the Qt function ''qFindChild''.
+All Qt objects can be given a name represented by property
+[[..:qtcore:index#qobjectobjectname|objectName]].  The named children
+of a Qt object can be accessed by name using the indexation syntax.
+However, when the name of a child conflicts with a property or an
+exposed method, the property or the exposed method has
+precedence. Named children are searched in the whole descendency tree
+using the Qt function ''qFindChild''.
 
 
 ====  Signals ====
+{{anchor:qt.signals.dok}}
 
 Lua programs can emit and receive Qt signals.
 
 ===  Emitting Signals ===
+{{anchor:qt.emttingsignals.dok}}
 
 Lua programs can emit signals using the function call syntax.
 Consider for example the following c++ class:
-<file>
+<file c++>
 class MyQObject : public QObject {
   Q_OBJECT
 ...
@@ -399,57 +342,64 @@ signals:
   void mysignal(QByteArray msg, int x=0);
 ...
 </file>
+
 Given an instance ''myqobject'' of this class, 
 a Lua program can emit signal ''mysignal'' 
 as follows 
-<file>
+
+<file lua>
   myqobject:mysignal("mymessage") -- or
   myqobject:mysignal("mymessage", 4)
 </file>
-Overloaded signals are resolved like method invokation.
-In particular, arguments with default values are handled
-by considering implicit overloaded functions.
-As for functions, it is always possible to work around these rules
-by selecting a particular signal using its signature.
-<file>
-  myqobject['mysignal(QByteArray,int)'](self,"message",3)
+
+Overloaded signals are resolved like method invokation.  In
+particular, arguments with default values are handled by considering
+implicit overloaded functions.  As for functions, it is always
+possible to work around these rules by selecting a particular signal
+using its signature.
+
+<file lua>
+myqobject['mysignal(QByteArray,int)'](self,"message",3)
 </file>
 
 ===  Receiving Signals ===
-{{anchor:signalreceive}}
+{{anchor:qt.receivingsignals.dok}}
 
 Qt signals can be connected to Lua functions 
-using [[#qtconnectf|qt.connect(...)]].
+using [[#qt.connect|qt.connect(...)]].
 
 For instance, the clause
-<file>
+
+<file lua>
   qt.connect(qobject,'mysignal(QByteArray)',
              function(s) print("mysignal("..s..")") end)
 </file>
-ensures that the specified lua function
-is called whenever the signal with signature 
-''mysignal(QByteArray)'' is emitted.
-Arguments with string types are converted to Lua strings,
-and arguments numerical types are converted to Lua numbers.
+
+ensures that the specified lua function is called whenever the signal
+with signature ''mysignal(QByteArray)'' is emitted.  Arguments with
+string types are converted to Lua strings, and arguments numerical
+types are converted to Lua numbers.
 
 Functions passed to ''qt.connect'' can of course be closures:
-<file>
+
+<file lua>
   local table = some_lua_object()
   qt.connect(qobject,'mysignal(QByteArray)',
              function(s) table:mysignalemitted(s) end)
 </file>
 
-When the signal occurs while the Lua interpreter is busy,
-the execution of the Lua function connected to the signal
-is delayed until the Lua interpreter becomes available,
-either because the execution of the current Lua code terminates
-or because function [[#qtdoevents|qt.doevents()]] is called.
+When the signal occurs while the Lua interpreter is busy, the
+execution of the Lua function connected to the signal is delayed until
+the Lua interpreter becomes available, either because the execution of
+the current Lua code terminates or because function
+[[#qt.doevents|qt.doevents()]] is called.
 
 
 =====  Objects =====
+{{anchor:qt.qobjects.dok}}
 
 ====  qt.qApp ====
-{{anchor:qtqapp}}
+{{anchor:qt.qapp}}
 
 Expression ''qt.qApp'' refers to the application object
 which orchestrates the operation of the [[#qlua|qlua]] program.
@@ -457,10 +407,12 @@ This object is the sole instance of class ''QLuaApplication''.
 A few exposed slots and properties are relevant for Lua programs.
 
 ===  qt.qApp:quit() ===
+{{anchor:qt.qapp.quit}}
 
 Function ''qt.qApp:quit()'' quits the ''qlua'' application.
 
 ===  qt.qApp:restart(bool) ===
+{{anchor:qt.qapp.restart}}
 
 Function ''qt.qApp:restart(bool)'' reinitializes
 and restarts the Lua interpreter. 
@@ -469,35 +421,39 @@ the command line arguments passed to the program
 [[#qlua|qlua]] are re-executed.
 
 ===  qt.qApp:about() ===
+{{anchor:qt.qapp.about}}
 
-Function ''qt.qApp:about()'' displays an about box dialog
-displaying the contents of the property ''qt.qApp.aboutMessage''.
+Function ''qt.qApp:about()'' displays an about box dialog displaying
+the contents of the property ''qt.qApp.aboutMessage''.
 
 ===  qt.qApp.aboutMessage ===
+{{anchor:qt.qapp.aboutmessage}}
 
-Property ''qt.qApp.aboutMessage'' contains an HTML string
-that is displayed in the about box when function
-''qt.qApp:about()'' is invoked.
+Property ''qt.qApp.aboutMessage'' contains an HTML string that is
+displayed in the about box when function ''qt.qApp:about()'' is
+invoked.
 
 ===  qt.qApp:readSettings(key) ===
+{{anchor:qt.qapp.readsettings}}
 
 Reads the preference settings associated with string ''key''.
 
 ===  qt.qApp:writeSettings(key,value) ===
+{{anchor:qt.qapp.writesettings}}
 
 Sets the preference settings associated with string ''key''
 to ''value''.  Argument ''value'' should be a Lua value
 that can be converted into a ''QVariant''.
 
-
 ===  qt.qApp:runsWithoutGraphics() ===
+{{anchor:qt.qapp.runswithoutgraphics}}
 
 This function returns ''true'' if the ''qlua'' interpreter
 was launched with the option ''-nographics''.
 
 
 ====  qt.qConsole ====
-{{anchor:qtqconsole}}
+{{anchor:qt.qconsole}}
 
 Expression ''qt.qConsole'' refers to the console object
 which handles console input and output for the [[#qlua|qlua]] program.
@@ -505,28 +461,30 @@ This object is the sole instance of class ''QLuaConsole''.
 A few exposed slots, signals and properties are relevant for Lua programs.
 
 ===  qt.qConsole.captureOutput ===
+{{anchor:qt.qconsole.captureoutput}}
 
 When the boolean property ''qt.qConsole.captureOutput'' is set,
 all output to the ''stdout'' file descriptor is
 captured and reexpressed by emitting signal
 ''consoleOutput(QByteArray)''.
 
-
 ===  qt.qConsole.printCapturedOutput ===
+{{anchor:qt.qconsole.printCapturedOutput}}
 
 When ''qt.qConsole.captureOutput'' is true,
 the boolean property ''qt.qConsole.printCapturedOutput'' determines
 whether the captured text is display on the console or not.
 
 ===  qt.qConsole:addToHistory(string) ===
+{{anchor:qt.qconsole.addToHistory}}
 
 Function call ''qt.qConsole:addToHistory(string)'' adds 
 ''string'' to the history of recent console input.
 This works only when [[#qlua|qlua]] is compiled
 with command line history support.
 
-
 ===  [QLuaConsole signal] consoleOutput(QByteArray) ===
+{{anchor:qt.consoleOutput}}
 
 When ''qt.qConsole.captureOutput'' is true, 
 signal ''consoleOutput(QByteArray)'' is emitted 
@@ -535,17 +493,20 @@ Capturing this signal can be useful to program a graphical
 replacement for the console.
 
 ===  [QLuaConsole signal] ttyInput(QByteArray) ===
+{{anchor:qt.ttyInput}}
 
 Signal ''ttyInput(QByteArray)'' is emitted whenever a new 
 input line has been validated by the user on the console.
 
 ===  [QLuaConsole signal] ttyEndOfFile() ===
+{{anchor:qt.ttyEndOfFile}}
 
 Signal ''ttyEndOfFile()'' is emitted whenever an end-of-file
 condition is detected on the console input. When this happens, 
 ''qlua'' asks the user if he really wants to quit the application.
 
 ===  [QLuaConsole signal] ttyBreak() ===
+{{anchor:qt.ttyBreak}}
 
 Signal ''ttyBreak()'' is emitted whenever the interrupt key sequence,
 typically ''Ctrl+C'' or ''Ctrl+Break'' is typed on the input console.
@@ -554,20 +515,22 @@ and waits for new commands on the console.
 
 
 ====  qt.qEngine ====
-{{anchor:qtqengine}}
+{{anchor:qt.qengine}}
 
 Expression ''qt.qEngine'' refers to the Lua execution engine.
-This object is an instance of class [[#QtLuaEngine|QtLuaEngine]].
+This object is an instance of class [[#qt.QtLuaEngine|QtLuaEngine]].
 A few exposed slots, signals and properties are relevant for Lua programs.
-See the documentation of class [[#QtLuaEngine|QtLuaEngine]]
+See the documentation of class [[#qt.QtLuaEngine|QtLuaEngine]]
 in the [[#QtLua|QtLua]] API section for more information.
 
 ===  qt.qEngine.lastErrorMessage ===
+{{anchor:qt.qengine.lastErrorMessage}}
 
 Read-only property ''qt.qEngine.lastErrorMessage'' contains the
 last error message generated by the Lua interpreter.
 
 ===  qt.qEngine.lastErrorLocation ===
+{{anchor:qt.qengine.lastErrorLocation}}
 
 Read-only property ''qt.qEngine.lastErrorLocation'' contains a
 ''QStringList'' whose elements describe the program locations
@@ -576,12 +539,14 @@ When a location corresponds to a line in a file,
 the string has the format ''"@filename:linenumber"''.
 
 ===  qt.qEngine.printResults ===
+{{anchor:qt.qengine.printResults}}
 
 Boolean property ''qt.qEngine.printResults'' indicates whether
 the Lua interpreter should print the results returned by
 the evaluation of interactive Lua expressions.
 
 ===  qt.qEngine.printErrors ===
+{{anchor:qt.qengine.printErrors}}
 
 Boolean property ''qt.qEngine.printErrors'' indicates whether
 the Lua interpreter should print the error messages
@@ -589,19 +554,19 @@ caused by the evaluation of interactive Lua expressions.
 
 
 =====  Functions =====
+{{anchor:qt.functions.dok}}
 
 ====  qt.connect(qobject, signature, function, [direct] ) ====
-{{anchor:qtconnectf}}
+{{anchor:qt.connect}}
 
-Expression ''qt.connect(qobject, signature, func)''
-connects the signal ''signature'' from Qt object ''qobject''
-to the Lua function ''func''.  Argument ''signature'' is 
-a string containing the full signature (c++ prototype)
-of the signal. The function is invoked whenever 
-the signal is emitted.
+Expression ''qt.connect(qobject, signature, func)'' connects the
+signal ''signature'' from Qt object ''qobject'' to the Lua function
+''func''.  Argument ''signature'' is a string containing the full
+signature (c++ prototype) of the signal. The function is invoked
+whenever the signal is emitted.
 
 Example:
-<file>
+<file lua>
 require 'qt'
 timer = qt.QTimer()
 timer.singleShot = true
@@ -609,33 +574,33 @@ qt.connect(timer,'timeout()', function() print("timeout") end)
 timer:start(2000) -- wait for 2 seconds...
 </file>
 
-See section [[#signalreceive|Receiving Signals]] for more details.
+See section [[#qt.recevingsignals.dok|Receiving Signals]] for more details.
 
 When the signal occurs while the Lua interpreter is busy,
 the execution of the Lua function connected to the signal
 is delayed until the Lua interpreter becomes available,
 either because the execution of the current Lua code terminates
-or because function [[#qtdoevents|qt.doevents()]] is called.
+or because function [[#qt.doevents|qt.doevents()]] is called.
 
 Setting the optional flag ''direct'' to ''true'' changes that when
 the Qt signal is emitted from the thread currently running a Lua program.
 It is then assumed that the signal is a consequence of the Lua 
 program execution and the function is called synchronously.
 
-//Warning// : 
-Function ''func'' remains allocated as long as the connection exists.
-Memory can be leaked if function ''func'' is a closure that points 
-to the signaling object because the garbage collector
-will find that the object is in use.  Future versions of QtLua
-may address this weakness of the interface between the Lua 
-garbage collector and the Qt static memory allocation.  
-In the mean time, be careful to [[..:qtcore:index#qobjectdeletelater|delete]]
-or [[#qtdisconnectf|disconnect]] connected objects as soon
-as you do not need them anymore.
+**//Warning//** : Function ''func'' remains allocated as long as the
+connection exists.  Memory can be leaked if function ''func'' is a
+closure that points to the signaling object because the garbage
+collector will find that the object is in use.  Future versions of
+QtLua may address this weakness of the interface between the Lua
+garbage collector and the Qt static memory allocation.  In the mean
+time, be careful to
+[[..:qtcore:index#qobjectdeletelater|delete]] or
+[[#qt.disconnect|disconnect]] connected objects as soon as you do not
+need them anymore.
 
 
 ====  qt.connect(qobject1, signature1, qobject2, signature2) ====
-{{anchor:qtconnecto}}
+{{anchor:qt.connect}}
 
 Expression ''qt.connect(qobject1, signature1, qobject2, signature2)'' 
 connects signal ''signature1'' from Qt object ''qobject1'' to slot 
@@ -644,7 +609,7 @@ This is similar to the Qt function
 [[http://doc.trolltech.com/4.4/qobject.html#connect|QObject::connect(...)]].
 
 ====  qt.disconnect(qobject, signature, function) ====
-{{anchor:qtdisconnectf}}
+{{anchor:qt.disconnect}}
 
 Expression ''qt.disconnect(qobject, signature, func)''
 disconnects the signal ''signature'' from Qt object ''qobject''
@@ -655,7 +620,7 @@ will then be disconnected.
 
 
 ====  qt.disconnect(qobject1, signature1, qobject2, signature2) ====
-{{anchor:qtdisconnecto}}
+{{anchor:qt.disconnect}}
 
 Expression ''qt.disconnect(qobject1, signature1, qobject2, signature2)'' 
 connects signal ''signature1'' from Qt object ''qobject1'' from 
@@ -668,51 +633,48 @@ This is similar to the Qt function
 
 
 ====  qt.doevents([waitflag]) ====
-{{anchor:qtdoevents}}
+{{anchor:qt.doevents}}
 
 Function ''qt.doevents()'' processes all pending events 
 and executes the functions associated with all queued signals.
 Calling this function periodically can be useful to
 ensure that queued signals are processed timely.
 
-Calling this function is very important when you run ''qlua'' 
-in single-threaded mode using option ''-onethread'',
-as graphic output will not be displayed properly 
-until ''qt.doevents()'' is called.
+Calling this function is very important when you run ''qlua'' in
+single-threaded mode using option ''-onethread'', as graphic output
+will not be displayed properly until ''qt.doevents()'' is called.
 
-Setting flags ''waitflag'' to ''true'' causes the
-function to wait until at least one event is 
-processed by the current thread.
-This can of course cause an infinite wait 
-when there are no event source
-for the current thread.
+Setting flags ''waitflag'' to ''true'' causes the function to wait
+until at least one event is processed by the current thread.  This can
+of course cause an infinite wait when there are no event source for
+the current thread.
 
 
 ====  qt.isa(arg, typename) ====
-{{anchor:qtisa}}
+{{anchor:qt.isa}}
 
 If the Lua value ''arg'' represents a Qt object or variant,
 expression ''qt.isa(arg,typename)'' returns a boolean indicating
 whether the Qt data is a subclass of type ''typename'',
-as if [[#qtdataisa|arg:isa(typename)]] had been called.
+as if [[#qt.isa|arg:isa(typename)]] had been called.
 Otherwise it simply returns ''nil''.
 
 
 ====  qt.pause() ====
+{{anchor:qt.pause}}
 
-Expression ''qt.pause()'' causes the interpreter to enter the mode ''Paused''. 
-When the interpreter pauses with ''qt.pause'', all events are
-processed and all Lua functions associated with signals are 
-executed whenever the signal occurs.  
+Expression ''qt.pause()'' causes the interpreter to enter the mode
+''Paused''.  When the interpreter pauses with ''qt.pause'', all events
+are processed and all Lua functions associated with signals are
+executed whenever the signal occurs.
 
-Note that calling ''qt.qEngine:stop(false)'' also 
-causes the interpreter to enter the mode ''Paused''.
-However, in that case, the Lua functions associated
-with signals are not executed.
+Note that calling ''qt.qEngine:stop(false)'' also causes the
+interpreter to enter the mode ''Paused''.  However, in that case, the
+Lua functions associated with signals are not executed.
 
 
 ====  qt.qcall(qobject, function, ... ) ====
-{{anchor:qtqcall}}
+{{anchor:qt.qcall}}
 
 Expression ''qt.qcall(qobject, f, ...)'' executes 
 function ''f'' from the thread owning the Qt object ''qobject''.
@@ -723,66 +685,62 @@ the specified arguments. Meanwhile the original thread
 processes events and waits. When the function ''f'' returns,
 the original thread resumes the execution.
 
-Like the standard Lua function [[..:LuaManual#pcallfarg|pcall]],
-this function returns multiple results. If an error occurs during the 
+Like the standard Lua function [[..:LuaManual#pcallfarg|pcall]], this
+function returns multiple results. If an error occurs during the
 execution, this function returns ''false'' plus the error message.
-Otherwise it returns ''true'' plus the results returned by function ''f''.
+Otherwise it returns ''true'' plus the results returned by function
+''f''.
 
-This function is the basis for the thread hopping mechanism
-that underlies the multi-thread operations in QtLua.
-Thread hopping happens automatically whenever one
-manipulates a slot or a property of a Qt object.
-It may occasionnally be useful to manually hop
-into an object thread in order to avoid the overhead
-of subsequent thread hopping operations: if the Lua
-interpreter is already running in the desired thread,
-the function ''f'' can be invoked directly without
+This function is the basis for the thread hopping mechanism that
+underlies the multi-thread operations in QtLua.  Thread hopping
+happens automatically whenever one manipulates a slot or a property of
+a Qt object.  It may occasionnally be useful to manually hop into an
+object thread in order to avoid the overhead of subsequent thread
+hopping operations: if the Lua interpreter is already running in the
+desired thread, the function ''f'' can be invoked directly without
 expensive synchronization.
 
-//Important// : Thread hopping only works if the 
+**//Important//** : Thread hopping only works if the 
 target thread runs an event loop, 
 using ''QThread::exec()'' or ''QEventLoop::exec()''.
 Execution of Lua program will stop if this is not the case.
 
-Within program [[#qlua|qlua]], 
-object [[#qtqapp|qt.qApp]] is always owned by the main thread
-in charge of the user interaction, 
-and object [[#qtqengine|qt.qEngine]]
-is always owned by the auxilliary thread in charge
-of the evaluation of Lua expressions.
+Within program [[#qlua|qlua]], object [[#qt.qapp|qt.qApp]] is always
+owned by the main thread in charge of the user interaction, and object
+[[#qt.qengine|qt.qEngine]] is always owned by the auxilliary thread in
+charge of the evaluation of Lua expressions.
 
 
 ====  qt.require(modulename) ====
+{{anchor:qt.require}}
 
-This function searches and loads the shared library ''modulename'' 
-almost like the standard lua function ''require''.  
-However this function ensures that the shared library
-is loaded in a way maximally compatible with C++ code.
-Symbols defined by the shared library are defined 
-in the global name space, that is, are available
-to resolve undefined symbols in other libraries.
-This is necessary for supporting the C++ RTTI features.
-This function also ensures that remains loaded when 
-the Lua state is closed. This is necessary when the shared 
-library defines classes whose instances outlive 
-the Lua interpreter.
+This function searches and loads the shared library ''modulename''
+almost like the standard lua function ''require''.  However this
+function ensures that the shared library is loaded in a way maximally
+compatible with C++ code.  Symbols defined by the shared library are
+defined in the global name space, that is, are available to resolve
+undefined symbols in other libraries.  This is necessary for
+supporting the C++ RTTI features.  This function also ensures that
+remains loaded when the Lua state is closed. This is necessary when
+the shared library defines classes whose instances outlive the Lua
+interpreter.
 
-This function supports none of the advanced search methods
-implemented by the usual function ''require'', other
-than searching a shared library along ''package.cpath''.
+This function supports none of the advanced search methods implemented
+by the usual function ''require'', other than searching a shared
+library along ''package.cpath''.
 
 
 ====  qt.type(arg) ====
-{{anchor:qttype}}
+{{anchor:qt.type}}
 
-If the Lua value ''arg'' represents a Qt object or variant,
-expression ''qt.type(arg)'' returns a string containing the type of 
-the Qt data as if [[#qtdatatype|arg:type()]] had been called.
-Otherwise it simply returns ''nil''.
+If the Lua value ''arg'' represents a Qt object or variant, expression
+''qt.type(arg)'' returns a string containing the type of the Qt data
+as if [[#qt.type|arg:type()]] had been called.  Otherwise it simply
+returns ''nil''.
 
 
 ====  qt.xqcall(qobject, function, ..., errorhandler) ====
-{{anchor:qtxqcall}}
+{{anchor:qt.xqcall}}
 
 Expression ''qt.xqcall(qobject, f, ..., handler)'' 
 is a thread hopping analogous to the standard \
@@ -802,19 +760,18 @@ followed by the values returned by the error handler.
 ======  QtLua API ======
 {{anchor:QtLua}}
 
-This section describes the QtLua API.
-Classe [[#QtLuaEngine|QtLuaEngine]] and [[#QtLuaLocker|QtLuaLocker]]
-provides a Lua interpreter for use in any Qt application
-with capabilities comparable to those of the 
-[[http://doc.trolltech.com/4.4/qtscript.html|QtScript]] 
-and additional support for multi-threaded execution.
-Additional functions with prefix [[#luaQ|luaQ]]
-provide the essential tools for manipulating Qt data in Lua 
-functions written in C or C++.
+This section describes the QtLua API.  Class
+[[#qt.QtLuaEngine|QtLuaEngine]] and [[#qt.QtLuaLocker|QtLuaLocker]] provides
+a Lua interpreter for use in any Qt application with capabilities
+comparable to those of the
+[[http://doc.trolltech.com/4.4/qtscript.html|QtScript]] and additional
+support for multi-threaded execution.  Additional functions with
+prefix [[#luaQ|luaQ]] provide the essential tools for manipulating Qt
+data in Lua functions written in C or C++.
 
 
 =====  Class QtLuaEngine =====
-{{anchor:QtLuaEngine}}
+{{anchor:qt.QtLuaEngine}}
 
 Class ''QtLuaEngine'' is a ''QObject'' subclass representing a Lua interpreter.
 This object can be used to add a Lua interpreter to any Qt application
@@ -823,45 +780,46 @@ with capabilities comparable to those of the
 and additional support for multi-threaded execution.
 
 Instances of this class can be in one of three state:
-  * State ''QtLuaEngine::Ready'' indicates that the interpreter
-is ready to accept new Lua commands.
-  * State ''QtLuaEngine::Running'' indicates that the interpreter
-is currently executing a Lua program.
-  * State ''QtLuaEngine::Paused'' indicates that the interpreter
-was suspended while executing a Lua program. One can then
-use the Lua debug library to investigage the Lua state.
+  * State ''QtLuaEngine::Ready'' indicates that the interpreter is ready to accept new Lua commands.
+  * State ''QtLuaEngine::Running'' indicates that the interpreter is currently executing a Lua program.
+  * State ''QtLuaEngine::Paused'' indicates that the interpreter was suspended while executing a Lua program. One can then use the Lua debug library to investigage the Lua state.
 
 Class ''QtLuaEngine'' provides member functions to 
 submit Lua strings to the interpreter and to collect 
 the evaluation results.  If these functions are invoked
 from the thread owning the Lua engine object,
 the Lua code is executed right away. 
-Otherwise a [[#qtqcall|thread hopping]] operation
+Otherwise a [[#qt.qcall|thread hopping]] operation
 ensures that the execution of a Lua program happens 
 in the thread owning the Lua engine object. 
 
-Class [[#QtLuaLocker|QtLuaLocker]] provides means
+Class [[#qt.QtLuaLocker|QtLuaLocker]] provides means
 to directly access the Lua state 
-[[..:LuaManual#luaState|=lua_State*=]] using 
+[[..:LuaManual#luaState|''lua_State*'']] using 
 the Lua API.
 
 
 ====  Constructor ====
+{{anchor:qt.qtluaengine.constructor}}
 
 ''QtLuaEngine::QtLuaEngine(QObject *parent = 0)''
 
-This is the constructor for class ''QtLuaEngine''.
-Argument ''parent'' is the optional parent object.
+This is the constructor for class ''QtLuaEngine''.  Argument
+''parent'' is the optional parent object.
 
 ====  Properties ====
+{{anchor:qt.qtluaengine.properties}}
 
 ''[QtLuaEngine property, readonly] QtLuaEngine::State state''
 
 The read-only property ''state'' contains the state of the Lua engine.
+
 State ''QtLuaEngine::Ready'' indicates that the interpreter
 is ready to accept new Lua commands.  
+
 State ''QtLuaEngine::Running'' indicates that the interpreter
 is currently executing a Lua program.
+
 State ''QtLuaEngine::Paused'' indicates that the interpreter
 was suspended while executing a Lua program.
 
@@ -922,6 +880,7 @@ instead of queuing them for further processing.
 
 
 ====  Signals ====
+{{anchor:qt.qtluaengine.signals}}
 
 ''[signal] void QtLuaEngine::stateChanged(int state)''
 
@@ -936,6 +895,7 @@ by functions ''eval'' or ''evaluate''.
 
 
 ====  Execution ====
+{{anchor:qt.qtluaengine.execution}}
 
 ''[slot] bool QtLuaEngine::eval(QByteArray s, bool async = false)''
 
@@ -947,7 +907,7 @@ When function ''eval'' is invoked from the thread owning
 the Lua engine object, the Lua code is executed right away. 
 Otherwise the execution of the Lua code is started
 in the thread owning the Lua engine object using
-[[#qtqcall|thread hopping]].  Function ''eval''
+[[#qt.qcall|thread hopping]].  Function ''eval''
 returns immediately if flag ''async'' is ''true''.
 Otherwise it processes Qt events and waits
 until the termination of the Lua code.
@@ -1040,10 +1000,10 @@ properly recognized as an object class.
 
 
 =====  Class QtLuaLocker =====
-{{anchor:QtLuaLocker}}
+{{anchor:qt.QtLuaLocker}}
 
-Class [[#QtLuaLocker|QtLuaLocker]] provides means
-to directly access the Lua state =lua_State*= using the Lua API.
+Class [[#qt.QtLuaLocker|QtLuaLocker]] provides means
+to directly access the Lua state ''lua_State*'' using the Lua API.
 This class ensures that the current thread has exclusive
 access to the Lua state.
 
@@ -1061,16 +1021,16 @@ current thread has exclusive access to the Lua state
 for the Lua interpreter ''engine''.
 This constructor hangs at most for ''timeOut'' milliseconds.
 To know whether the lock was acquired, 
-cast the ''QtLuaLocker'' as a =lua_State*= pointer.
+cast the ''QtLuaLocker'' as a ''lua_State*'' pointer.
 
 
 ''lua_State* QtLuaLocker::operator lua_State*()''
 
-Returns a [[..:LuaManual#luaState|=lua_State*=]] 
+Returns a [[..:LuaManual#luaState|''lua_State*'']] 
 pointer to access the state
 of the Lua interpreter using the Lua API.
 Since this is a cast operator, one can simply pass 
-the ''QtLuaLocker'' object whenever a =lua_State*= is expected.
+the ''QtLuaLocker'' object whenever a ''lua_State*'' is expected.
 This cast returns ''0'' when the constructor was unable
 to acquire the exclusive lock during the specified timeout.
 
@@ -1109,16 +1069,16 @@ facilities related to the QtLua interface.
 Some ''luaQ'' functions are only meaningful for C++ program.
 The following snipped ensure that all available
 functions are accessible in both C and C++.
-<file>
+
+<file c++>
  #include "qtluautils.h"
  #ifdef __cplusplus
  # include "qtluaengine.h"
  #endif
 </file>
 
-
-
 ====  luaopen_qt ====
+{{anchor:luaqluaopen_qt}}
 
 ''int luaopen_qt(lua_State *L)''
 
@@ -1127,12 +1087,13 @@ This is the function preloaded into ''package.preload['qt']''.
 
 
 ====  luaQ_call ====
+{{anchor:luaqcall}}
 
 ''void luaQ_call(lua_State *L, int na, int nr, QObject *obj = 0)''
 
 Perform a Lua function call like [[..:LuaManual#luacall|lua_call]] 
 but ensure that the function is executed in the thread owning object ''obj''
-using [[#qtqcall|thread hopping]].
+using [[#qt.qcall|thread hopping]].
 Unlike function [[#luaqpcall|luaQ_pcall]],
 this function relays Lua errors into the current thread.
 This is similar to calling
@@ -1157,7 +1118,7 @@ Otherwise it returns a pointer to the object.
 
 This function causes an error if the Lua value at position ''index''
 in the stack cannot be converted to 
-[[#QVariants|Qt variant]] of actual type ''TYPE''.
+[[#Qt.Qvariants|Qt variant]] of actual type ''TYPE''.
 Otherwise it returns a value of the requested type.
 
 The C++ type ''TYPE'' must be known to the Qt meta type system.
@@ -1165,6 +1126,7 @@ This can always be achieved using the macro
 [[http://doc.trolltech.com/4.4/qmetatype.html|Q_DECLARE_METATYPE]].
 
 ====  luaQ_complete ====
+{{anchor:luaqcomplete}}
 
 ''int luaQ_complete(lua_State *L)''
 
@@ -1174,7 +1136,7 @@ Function ''luaQ_complete'' then pushes a table containing potential
 completions for the last symbol in the string.
 
 ====  luaQ_connect ====
-
+{{anchor:luaqconnnect}}
 ''bool luaQ_connect(lua_State*L, QObject*o, const char *s, int fi)''
 
 Connects the signal with signature ''s'' from the Qt object ''o''
@@ -1182,10 +1144,11 @@ to the function at position ''fi'' in the stack.
 Returns ''true'' in case of success. 
 Returns ''false'' if the specified signal was not found.
 
-See also [[#qtconnectf|qt.connect(...)]]
+See also [[#qt.connect|qt.connect(...)]]
 
 
 ====  luaQ_disconnect ====
+{{anchor:luaqdisconnect}}
 
 ''bool luaQ_disconnect(lua_State*L, QObject*o, const char *s, int fi)''
 
@@ -1196,9 +1159,10 @@ all connections from the specified signal to a Lua function.
 When argument ''s'' is null, this function removes
 all connections from the specified object to the specified function.
 
-See also [[#qtdisconnectf|qt.disconnect(...)]].
+See also [[#qt.disconnect|qt.disconnect(...)]].
 
 ====  luaQ_doevents ====
+{{anchor:luaqdoevents}}
 
 ''void luaQ_doevents(lua_State *L, bool wait = false)''
 
@@ -1207,27 +1171,28 @@ and execute the functions associated with all queued signals.
 Calling this function periodically can be useful to
 ensure that queued signals are processed timely.
 
-See also [[#qtdoevents|qt.doevents()]].
+See also [[#qt.doevents|qt.doevents()]].
 
 ====  luaQ_engine ====
+{{anchor:luaqengine}}
 
 ''QtLuaEngine *luaQ_engine(lua_State *L)''
 
-Returns a pointer to the current 
-[[#QtLuaEngine|Lua engine]].
+Returns a pointer to the current [[#qt.QtLuaEngine|Lua engine]].
 
 ====  luaQ_getfield ====
+{{anchor:luaqgetfield}}
 
 ''void luaQ_getfield(lua_State *L, int index, const char *name)''
 
-This function is similar to 
-[[..:LuaManual#luagetfield|lua_getfield]]
-but never propagates errors causes by executing the
-metatable =__index= functions.  When such an error
-occurs, this function simply returns ''nil''.
+This function is similar to [[..:LuaManual#luagetfield|lua_getfield]]
+but never propagates errors causes by executing the metatable
+''__index'' functions.  When such an error occurs, this function
+simply returns ''nil''.
 
 
 ====  luaQ_optqobject&lt;TYPE&gt; ====
+{{anchor:luaqoptqobject}}
 
 ''TYPE* luaQ_optqobject&lt;TYPE&gt;(lua_State *L, int index, TYPE *d)''
 
@@ -1240,12 +1205,12 @@ causes an error.
 
 See also [[#luaqcheckqobject|luaQ_checkqobject]]
 
-
 ====  luaQ_optqvariant&lt;TYPE&gt; ====
+{{anchor:luaqoptqvariant}}
 
 ''TYPE luaQ_optqvariant&lt;TYPE&gt;(lua_State *L, int index, TYPE d = TYPE())''
 
-Returns the optional [[#QVariants|Qt variant]] of actual type ''TYPE''
+Returns the optional [[#Qt.Qvariants|Qt variant]] of actual type ''TYPE''
 found at position ''index'' in the stack.  If the position
 corresponds to an unspecified function argument, 
 this function returns ''d''.  If the Lua value at this position
@@ -1255,6 +1220,7 @@ causes an error.
 See also [[#luaqcheckqvariant|luaQ_checkqvariant]]
 
 ====  luaQ_pause ====
+{{anchor:luaqpause}}
 
 ''void luaQ_pause(lua_State *L)''
 
@@ -1280,11 +1246,12 @@ Argument ''eh'' is an event handler that will be executed
 in the target thread if an error occurs during the
 execution of the function.
 
-This function is the basis for all [[#qtqcall|thread hopping]]
+This function is the basis for all [[#qt.qcall|thread hopping]]
 operations in the QtLua interface.
 
 
 ====  luaQ_print ====
+{{anchor:luaqprint}}
 
 ''int luaQ_print(lua_State *L, int nr)''
 
@@ -1293,6 +1260,7 @@ changing the stack in any respect.
 
 
 ====  luaQ_pushmeta ====
+{{anchor:luaqpushmeta}}
 
 ''void luaQ_pushmeta(lua_State *L, int type)''
 
@@ -1304,7 +1272,7 @@ or any type declared using the C++ macro
 [[http://doc.trolltech.com/4.4/qmetatype.html|Q_DECLARE_METATYPE]] 
 The following expression can be used to push
 a metatable for type ''TYPE'':
-<file>
+<file c++>
  luaQ_pushmeta(L, qMetaTypeId&lt;TYPE&gt;());
 </file>
 
@@ -1317,7 +1285,8 @@ with Qt objects whose class is represented by the
 [[http://doc.trolltech.com/4.4/qmetaobject.html|metaobject]]
 ''mo''. The following expression can be used to push
 a metatable for a Qt object class ''TYPE'':
-<file>
+
+<file c++>
   luaQ_pushmeta(L, &TYPE::staticMetaObject);
 </file>
 
@@ -1333,14 +1302,14 @@ Pushes the table corresponding to the package ''qt''.
 ''void luaQ_pushqt(lua_State *L, const QVariant &var)''
 
 Pushes a representation of the 
-[[#QVariants|Qt variant]] ''var'' onto the Lua stack.
+[[#qt.QVariants|Qt variant]] ''var'' onto the Lua stack.
 Numeric types are automatically converted to Lua numbers. 
 String types are automatically converted to Lua strings.
 
 ''void luaQ_pushqt(lua_State *L, QObject *obj, bool owned=false)''
 
 Pushes a representation of the 
-[[#QObjects|Qt object]] ''obj'' onto the Lua stack.
+[[#qt.QObjects|Qt object]] ''obj'' onto the Lua stack.
 By default, objects are not owned by Lua
 and therefore are not automatically deleted
 by the Lua garbage collector.
@@ -1350,6 +1319,7 @@ immediately after creating the C++ object.
 
 
 ====  luaQ_register ====
+{{anchor:luaqregister}}
 
 ''void luaQ_register(lua_State *L, const luaL_Reg *l, QObject *obj)''
 
@@ -1359,7 +1329,7 @@ It creates entries in the table located on top of the stack
 for the C or C++ functions specified by the array pointed by argument ''l''.
 When a Lua program calls these functions, execution always
 happens in the thread associated with object ''obj'' 
-using [[#qtqcall|thread hopping]].
+using [[#qt.qcall|thread hopping]].
 
 As a special case, when ''obj'' is null,
 the declared functions are always invoked in
@@ -1368,6 +1338,7 @@ which is assumed to be a Qt object.
 
 
 ====  luaQ_toqobject ====
+{{anchor:luaqtoqobject}}
 
 ''QObject* luaQ_toqobject(lua_State *L, int i, const QMetaObject *m = 0)''
 
@@ -1380,17 +1351,19 @@ When ''m'' is null, all Qt objects are accepted.
 
 
 ====  luaQ_toqvariant ====
+{{anchor:luaqtoqvariant}}
 
 ''QVariant luaQ_toqvariant(lua_State *L, int i, int type = 0)''
 
 Converts the Lua value at position ''i'' of
-the stack into a [[#QVariants|Qt variant]] of type ''type''.
+the stack into a [[#Qt.Qvariants|Qt variant]] of type ''type''.
 When ''type'' is zero, the most appropriate Qt variant type is returned.
 When the conversion is not possible, the function
 returns a Qt variant of type ''QVariant::Invalid''.
 
 
 ====  luaQ_traceback ====
+{{anchor:luaqtraceback}}
 
 ''int luaQ_traceback(lua_State *L)''
 
