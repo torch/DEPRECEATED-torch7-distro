@@ -1,4 +1,5 @@
 ====== QtSvg Bindings ====== 
+{{anchor:qtsvg.dok}}
 
 The package ''qtsvg'' 
 contains bindings for classes defined by the Qt module
@@ -19,6 +20,7 @@ to easily generate SVG files.
 
 ====  qtsvg.loadsvg(filename) ====
 {{anchor:qtsvg_loadsvg}}
+{{anchor:qtsvg.loadsvg}}
 
 Returns a Qt object of 
 class [[#qsvgrenderer|qt.QSvgRenderer]]
@@ -27,6 +29,7 @@ representing the SVG file ''filename''.
 
 ====  qtsvg.paintsvg(port,svg,...) ====
 {{anchor:qtsvg_paintsvg}}
+{{anchor:qtsvg.paintsvg}}
 
 Draws a SVG image.
 
@@ -49,6 +52,7 @@ provides a widget that is used to display the contents
 of Scalable Vector Graphics (SVG) files.
 
 ===  qt.QSvgWidget([filename],[parent]) ===
+{{anchor:qsvgwidget}}
 
 Expression ''qt.QSvgWidget(parent)'' returns a 
 new widget for rendering SVG data.
@@ -66,6 +70,7 @@ and is automatically destroyed when the garbage collector
 determines that it is no longer referenced.
 
 ===  qsvgwidget:renderer() ===
+{{anchor:qsvgwidget.renderer}}
 
 Returns the [[#qsvgrenderer|qt.QSvgRenderer]] object 
 associated with this widget.
@@ -82,6 +87,7 @@ You should use instead function
 to easily display SVG data.
 
 ===  qt.QSvgRenderer([filename],[parent]) ===
+{{anchor:qsvgrenderer}}
 
 Creates a new instance of class ''QSvgRenderer''.
 
@@ -107,6 +113,7 @@ You should use instead function
 to easily generate SVG files.
 
 ===  qt.QtLuaSvgGenerator([filename],[parent]) ===
+{{anchor:qtluasvggenerator}}
 
 Creates a new instance of class ''QtLuaSvgGenerator''.
 
@@ -123,6 +130,7 @@ determines that it is no longer referenced.
 
 ===  qtluasvggenerator:data() ===
 {{anchor:qtluasvggeneratordata}}
+{{anchor:qtluasvggenerator.data}}
 
 Assuming the ''qtluasvggenerator'' was created without the ''filename'' argument,
 this function returns a [[..:qtcore:index#qbytearray|qt.QByteArray]]
@@ -131,22 +139,26 @@ until [[..:qtwidget:index#painterclose|painter:close()]] has
 been closed on all painters operating on ''qtluasvggenerator''.
 
 ===  qtluasvggenerator.description ===
+{{anchor:qtluasvggenerator.description}}
 
 Starting with Qt-4.5, this string property defines 
 the contents of the ''<desc>'' tag of the SVG file.
 
 ===  qtluasvggenerator.title ===
+{{anchor:qtluasvggenerator.title}}
 
 Starting with Qt-4.5, this string property defines 
 the contents of the ''<title>'' tag of the SVG file.
 
 ===  qtluasvggenerator.size ===
+{{anchor:qtluasvggenerator.size}}
 
 This property contains a [[..:qtcore:index#qsize|qt.QSize]] 
 variant containing the size of the drawable area.
 This information is shown in the ''viewBox'' attribute of the ''<svg>'' tag.
 
 ===  qtluasvggenerator.resolution ===
+{{anchor:qtluasvggenerator.resolution}}
 
 This integer property defines the resolution, in dots per inch, 
 of the coordinate system.
