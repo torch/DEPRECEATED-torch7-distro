@@ -495,12 +495,12 @@ function dok.dok2html(txt)
 
    -- put back code
    txt = txt:gsub('\018(%d+)\018', function(id)
-                                      id = tonumber(id)
-                                      return '<pre class="code">' .. code[id] .. '</pre>'
+                                      id = tonumber(id) -- code
+                                      return '<pre class="brush: lua;">' .. code[id] .. '</pre>'
                                    end)
    txt = txt:gsub('\019(%d+)\019', function(id)
-                                      id = tonumber(id)
-                                      return '<pre class="file">' .. file[id] .. '</pre>'
+                                      id = tonumber(id) -- file
+                                      return '<pre class="brush: lua;">' .. file[id] .. '</pre>'
                                    end)
 
    return txt
