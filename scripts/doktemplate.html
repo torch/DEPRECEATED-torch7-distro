@@ -11,6 +11,7 @@
 <script type="text/javascript" src="shBrushLua.js"></script>
 <link type="text/css" rel="stylesheet" href="shCore.css"/>
 <script type="text/javascript">SyntaxHighlighter.all();</script>
+<script language="JavaScript1.3" type="text/javascript" src="jse_form.js"></script>
 </head>
 
 <body class="torchdoc">
@@ -22,6 +23,16 @@
 
 <div id="navline">
 %NAVLINE%
+</div>
+
+<div id="search">
+<form name="jse_Form" onsubmit="search_form(jse_Form);return false">
+<input type="text" name="d">
+<input type="button" value="Go" onclick="search_form(jse_Form)">
+</form>
+</div>
+
+<div id="results">
 </div>
 
 <div id="toc">

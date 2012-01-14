@@ -12,7 +12,7 @@ INSTALL(DIRECTORY "${Torch_BINARY_DIR}/html/" DESTINATION "${Torch_INSTALL_HTML_
 SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_DIR}/scripts/doktemplate.html"
   CACHE FILEPATH "List of files needed for HTML doc creation")
 
-SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_DIR}/scripts/doctorch.css;${Torch_SOURCE_DIR}/scripts/torchlogo.png;${Torch_SOURCE_DIR}/scripts/jquery.js;${Torch_SOURCE_DIR}/scripts/shCore.js;${Torch_SOURCE_DIR}/scripts/shBrushLua.js;${Torch_SOURCE_DIR}/scripts/shCore.css"
+SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_DIR}/scripts/doctorch.css;${Torch_SOURCE_DIR}/scripts/torchlogo.png;${Torch_SOURCE_DIR}/scripts/jquery.js;${Torch_SOURCE_DIR}/scripts/shCore.js;${Torch_SOURCE_DIR}/scripts/shBrushLua.js;${Torch_SOURCE_DIR}/scripts/shCore.css;${Torch_SOURCE_DIR}/scripts/jse_form.js"
   CACHE STRING "HTML template needed for HTML doc creation")
 
 MARK_AS_ADVANCED(TORCH_DOK_HTML_FILES TORCH_DOK_HTML_TEMPLATE)

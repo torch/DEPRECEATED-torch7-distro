@@ -235,6 +235,10 @@ a:visited {
     border: 0px;
 }
 
+#search {
+    text-align: right;
+}
+
 code {
     font-size:110%; 
 }
