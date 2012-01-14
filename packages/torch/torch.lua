@@ -37,7 +37,7 @@ local function printvar(key,val,m)
       if #tostr>40 then
 	 tostr = tostr:sub(1,40)
       end
-      tp = tp .. ' = "' .. tostr .. '"'
+      tp = tp .. ' : "' .. tostr .. '"'
    else
       tp = tostring(val)
    end
