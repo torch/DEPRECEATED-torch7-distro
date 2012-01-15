@@ -78,8 +78,8 @@ a:visited {
     color: gray;
     margin-top: 1em;
     text-align: center;
-    border-top: #ccc solid 1px;
-    border-bottom: #ccc solid 1px;
+    border-top: #aaa solid 1px;
+    border-bottom: #aaa solid 1px;
     background: #DDDDDD;
     padding: 27px 0 0 0;  /* this padding matches the left alignment of the elements in the divs that appear beneath it. If an image is used in the #header instead of text, you may want to remove the padding. */
     height: 48px;
@@ -102,8 +102,8 @@ a:visited {
     width: 100%;
     background:#DDDDDD;
     font-size: 70%;
-    border-top: #ccc 1px solid;
-    border-bottom: #ccc 1px solid;
+    border-top: #aaa 1px solid;
+    border-bottom: #aaa 1px solid;
     margin-top: 10px;
     margin-bottom: 10px;
 }
@@ -115,8 +115,8 @@ a:visited {
     width: 50%;
     background:#DDDDDD;
     font-size: 70%;
-    border-top: #ccc 1px solid;
-    border-bottom: #ccc 1px solid;
+    border-top: #aaa 1px solid;
+    border-bottom: #aaa 1px solid;
 }
 
 .torchdoc #toc {
@@ -189,10 +189,15 @@ a:visited {
 
 .torchdoc #navline {
     font-size: 70%;
-    padding: 2px 0px 2px 0px;
+    height: 21px;
+    padding: 1px 2px 2px 2px;
     margin: 0 0 1em 0px;
     background-color:#FFFDD9;
-    border-bottom: 1px solid #FFECD9;
+    border-bottom: 1px solid #CFBCA9;
+}
+
+.torchdoc #navline #title {
+    vertical-align: middle;
 }
 
 .torchdoc #last-modified {
@@ -236,7 +241,8 @@ a:visited {
 }
 
 #search {
-    text-align: right;
+    float: right;
+    /* text-align: right; */
 }
 
 code {

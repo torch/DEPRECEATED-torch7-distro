@@ -32,7 +32,7 @@ table.insert(js, [[
                          for (var i=6; i>=0; i=i-1) { 
                             $(".level"+i).show(); 
                          };
-			 window,scrollTo(0,0);
+			 $(window).scrollTop(0);
                    };
 
                    // on window resize
@@ -53,26 +53,29 @@ table.insert(js, [[
                    // catch all anchor links
                    $('.anchor').click(
                       function() {
+                            // show sections
                             showall();
-                            $(document).scrollTo(window.location.hash);
                       }
                    );
 
                    // when doc is ready:
                    $(function() {
-                           // hide all sections
-                           hideall(); 
-
-                           // show top section
-                           $(".topdiv").show(); 
-
-                           // autosize at startup
-                           autosize();
-
                            // hash?
                            if (window.location.hash) {
+                              // autosize at startup
+                              autosize();
+
+                              // show sections
                               showall();
-                              $(document).scrollTo(window.location.hash);
+                           } else {
+                              // hide all sections
+                              hideall(); 
+
+                              // show top section
+                              $(".topdiv").show(); 
+
+                              // autosize at startup
+                              autosize();
                            }
                    });
                ]])
@@ -113,7 +116,7 @@ local txttitle = gettitlefromsections(sections)
 
 
 -- create navigation line
-local navhome = '<a href="' .. rootdir .. '/index.html">Torch7 Documentation</a>'
+local navhome = '<a href="../index.html">Torch7 Documentation</a>'
 navhome = navhome .. ' > <a href="index.html">' .. title .. '</a>'
 
 if not htmldst:match('index.html') then

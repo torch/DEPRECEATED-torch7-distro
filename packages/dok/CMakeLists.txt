@@ -1,4 +1,4 @@
-SET(luasrc init.lua inline.lua)
+SET(luasrc init.lua inline.lua search.lua)
 
 ADD_TORCH_DOK(doktutorial tutorial "Introduction" "Tutorial" 0.2)
 ADD_TORCH_DOK(dokinstall install "Introduction" "Installation Instructions" 0.1)
