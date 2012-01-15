@@ -1318,7 +1318,7 @@ gi=m:backward(ii,go)
 gnuplot.plot({'f(x)',ii,oo,'+-'},{'df/dx',ii,gi,'+-'})
 gnuplot.grid(true)
 </file>
-{{sigmoid.png?400}}
+{{tanh.png?400}}
 
 =====  Convolutional layers =====
 {{anchor:nn.convlayers.dok}}
