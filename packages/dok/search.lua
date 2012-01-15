@@ -12,6 +12,7 @@ local function html2entries(html, package, file)
    local next = html:gfind('<div.->\n<h%d><a.->%s+(.-)%s+</a></h%d><a.-></a>\n<a name="(.-)"></a>\n(.-)</div>')
    for title,link,body in next do
       link = package .. '/' .. file:gsub('.txt','.html') .. '#' .. link
+      body = body:gsub('<img.->','')
       table.insert(dok.entries, {title, link, body})
    end
 end
