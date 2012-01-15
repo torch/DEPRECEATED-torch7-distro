@@ -8,8 +8,7 @@ var bold = 0;
 
 var s = new Array();
 
-s[0] = "Neural Networks^nn/index.html^Package about neural networks";
-s[1] = "Torch Package^torch/index.html^Main Torch documentation";
+// SEARCH_ARRAY //
 
 
 // ---------- end of script properties and sites ----------
@@ -86,7 +85,7 @@ function dosearch(d) {
 function out_jse() {
     var res = '';
     if (co == 0) {
-        res = 'Your search did not match any documents.<p>Make sure all keywords are spelt correctly.<br>Try different or more general keywords.';
+        res = 'Your search did not match any documents.<p>Make sure all keywords are spelt correctly.<br>Try different or more general keywords.<br>(for now search only works from the top index page)';
         return res;
     }
     for (var a = 0; a < r.length; a++) {
@@ -96,7 +95,7 @@ function out_jse() {
             os[2] = os[2].replace(pat, br);
         }
         var num = String(a + 1);
-        res = res + num + '. <a href="' + os[1] + '">' + os[0] + '</a><br>' + os[2] + '<p>';
+        res = res + '<h3>' + num + '. <a href="' + os[1] + '">' + os[0] + '</a></h3>' + os[2] + '<p>';
     }
     return res;
 }
