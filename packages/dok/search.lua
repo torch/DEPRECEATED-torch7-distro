@@ -18,7 +18,7 @@ end
 
 function dok.gensearch()
    for package in paths.files(paths.install_dok) do
-      if package ~= '.' and package ~= '..' and _G[package] then
+      if package ~= '.' and package ~= '..' then
          local dir = paths.concat(paths.install_dok, package)
          for file in paths.files(dir) do
             if file ~= '.' and file ~= '..' then
