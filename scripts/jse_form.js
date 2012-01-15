@@ -85,7 +85,7 @@ function dosearch(d) {
 function out_jse() {
     var res = '';
     if (co == 0) {
-        res = 'Your search did not match any documents.<p>Make sure all keywords are spelt correctly.<br>Try different or more general keywords.<br>(for now search only works from the top index page)';
+        res = 'Your search did not match any documents.<p>Make sure all keywords are spelt correctly.<br>Try different or more general keywords.<p>(Also, run this once to make sure help is searchable: torch -e "dok.installsearch()")';
         return res;
     }
     for (var a = 0; a < r.length; a++) {
