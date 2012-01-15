@@ -106,5 +106,7 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
     ADD_DEPENDENCIES(documentation-dok ${dstdir}-dok-index)
 
   ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok")
-  
+
 ENDMACRO(ADD_TORCH_DOK)
+
+INSTALL(CODE "EXECUTE_PROCESS(COMMAND lua -ltorch -ldok -e \"dok.installsearch()\")")
