@@ -113,7 +113,7 @@ local txttitle = gettitlefromsections(sections)
 
 
 -- create navigation line
-local navhome = '<a href="' .. rootdir .. '/index.html">Torch7 Documentation</a>'
+local navhome = '<a href="../index.html">Torch7 Documentation</a>'
 navhome = navhome .. ' > <a href="index.html">' .. title .. '</a>'
 
 if not htmldst:match('index.html') then
