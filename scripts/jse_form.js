@@ -95,7 +95,7 @@ function out_jse() {
             os[2] = os[2].replace(pat, br);
         }
         var num = String(a + 1);
-        res = res + '<h3>' + num + '. <a href="' + os[1] + '">' + os[0] + '</a></h3>' + os[2] + '<p>';
+        res = res + '<h3>' + num + '. <a href="' + os[1] + '" class="anchor">' + os[0] + '</a></h3>' + os[2] + '<p>';
     }
     return res;
 }
