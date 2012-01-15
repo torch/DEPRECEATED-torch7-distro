@@ -78,9 +78,9 @@ static int lab_NAME(lua_State *L)
   int narg = lua_gettop(L);
   const void *id = NULL;
 
-  if(narg < 2 || !(id = luaT_id(L, 2))) /* first argument is tensor? */
+  if(narg < 1 || !(id = luaT_id(L, 1))) /* first argument is tensor? */
   {
-    if(narg < 3 || !(id = luaT_id(L, 3))) /* second? */
+    if(narg < 2 || !(id = luaT_id(L, 2))) /* second? */
     {
       if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
         lua_pop(L, 1);
@@ -294,7 +294,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
                   {{name=Tensor, default=true, returned=true},
                    {name=Tensor},
                    {name=Tensor},
-                   {name="index", default=lastdim(2)}})
+                   {name="index", default=0}})
 
    interface:wrap("diag",
                   cname("diag"),

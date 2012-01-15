@@ -7,19 +7,19 @@ local msize = 100
 local function maxdiff(x,y)
    local d = x-y
    if x:type() == 'torch.DoubleTensor' or x:type() == 'torch.FloatTensor' then
-      return d:abs():max()
+      return d:abs():maxall()
    else
       local dd = torch.Tensor():resize(d:size()):copy(d)
-      return dd:abs():max()
+      return dd:abs():maxall()
    end
 end
 
 function labtest.max()
    local x = lab.rand(msize,msize)
-   local mx,ix = lab.max(x)
+   local mx,ix = lab.max(x,1)
    local mxx = torch.Tensor()
    local ixx = torch.LongTensor()
-   lab.max(mxx,ixx,x)
+   lab.max(mxx,ixx,x,1)
    mytester:asserteq(maxdiff(mx,mxx),0,'lab.max value')
    mytester:asserteq(maxdiff(ix,ixx),0,'lab.max index')
 end
@@ -141,9 +141,9 @@ end
 function labtest.cat()
    local x = lab.rand(13,msize,msize)
    local y = lab.rand(17,msize,msize)
-   local mx = lab.cat(x,y)
+   local mx = lab.cat(x,y,1)
    local mxx = torch.Tensor()
-   lab.cat(mxx,x,y)
+   lab.cat(mxx,x,y,1)
    mytester:asserteq(maxdiff(mx,mxx),0,'lab.cat value')
 end
 function labtest.sin()
