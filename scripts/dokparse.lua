@@ -128,8 +128,9 @@ local txthtml = dok.dok2html(txt)
 txthtml = txthtml:gsub('<div(.-)<a name(.-)<p>', function(c1,c2)
                                                     return '<a name' .. c2 .. '\n<div' .. c1 .. '<p>'
                                                  end)
-
-templatehtml = templatehtml:gsub('%%CONTENTS%%', txthtml)
+--print(txthtml)
+--print(templatehtml)
+templatehtml = templatehtml:gsub('%%CONTENTS%%', function () return txthtml end)
 templatehtml = templatehtml:gsub('%%TITLE%%', txttitle)
 templatehtml = templatehtml:gsub('%%NAVLINE%%', navhome)
 templatehtml = templatehtml:gsub('%%TOC%%', toc)
