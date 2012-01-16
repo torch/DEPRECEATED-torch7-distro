@@ -12,7 +12,7 @@ static int lab_(gesv)(lua_State *L)
     // we want new stuff
     THTensor *ta = THTensor_(newClone)(a_);
     THTensor *tb = THTensor_(newClone)(b_);
-    THLab_(gesv)(ta,tb);
+    THTensor_(gesv)(ta,tb);
     // clean ta
     THTensor_(free)(ta);
     // return tb
@@ -23,7 +23,7 @@ static int lab_(gesv)(lua_State *L)
   else if (n == 3)
   {
     // just run like this
-    THLab_(gesv)(a_,b_);
+    THTensor_(gesv)(a_,b_);
     lua_settop(L,2);
   }
   else if (n == 4)
@@ -34,7 +34,7 @@ static int lab_(gesv)(lua_State *L)
     THTensor_(resizeAs)(a_,ta);
     THTensor_(copy)(b_,tb);
     THTensor_(copy)(a_,ta);
-    THLab_(gesv)(a_,b_);
+    THTensor_(gesv)(a_,b_);
     // do not free anything, because user passed everything
     lua_settop(L,2);
   }
@@ -55,7 +55,7 @@ static int lab_(gels)(lua_State *L)
     // we want new stuff
     THTensor *ta = THTensor_(newClone)(a_);
     THTensor *tb = THTensor_(newClone)(b_);
-    THLab_(gels)(ta,tb);
+    THTensor_(gels)(ta,tb);
     // clean ta
     THTensor_(free)(ta);
     // return tb
@@ -66,7 +66,7 @@ static int lab_(gels)(lua_State *L)
   else if (n == 3)
   {
     // just run like this
-    THLab_(gels)(a_,b_);
+    THTensor_(gels)(a_,b_);
     lua_settop(L,2);
   }
   else if (n == 4)
@@ -77,7 +77,7 @@ static int lab_(gels)(lua_State *L)
     THTensor_(resizeAs)(a_,ta);
     THTensor_(copy)(b_,tb);
     THTensor_(copy)(a_,ta);
-    THLab_(gels)(a_,b_);
+    THTensor_(gels)(a_,b_);
     // do not free anything, because user passed everything
     lua_settop(L,2);
   }
@@ -102,7 +102,7 @@ static int lab_(eig)(lua_State *L)
     luaT_pushudata(L, e_, torch_(Tensor_id));
     lua_insert(L,1);
     lua_settop(L,1);
-    THLab_(syev)(a_,e_,"N","U");
+    THTensor_(syev)(a_,e_,"N","U");
     THTensor_(free)(a_);
     return 1;
   }
@@ -112,7 +112,7 @@ static int lab_(eig)(lua_State *L)
     THTensor *ta = luaT_checkudata(L,2,torch_(Tensor_id));
     a_ = THTensor_(newClone)(ta);
     lua_settop(L,1);
-    THLab_(syev)(a_,e_,"N","U");
+    THTensor_(syev)(a_,e_,"N","U");
     THTensor_(free)(a_);
     return 1;
   }
@@ -131,7 +131,7 @@ static int lab_(eig)(lua_State *L)
       luaT_pushudata(L, a_, torch_(Tensor_id));
       lua_insert(L,2);
       lua_settop(L,2);
-      THLab_(syev)(a_,e_,"V","U");
+      THTensor_(syev)(a_,e_,"V","U");
       return 2;
     }
     else
@@ -142,7 +142,7 @@ static int lab_(eig)(lua_State *L)
       luaT_pushudata(L, e_, torch_(Tensor_id));
       lua_insert(L,1);
       lua_settop(L,1);
-      THLab_(syev)(a_,e_,"N","U");
+      THTensor_(syev)(a_,e_,"N","U");
       THTensor_(free)(a_);
       return 1;
     }
@@ -155,7 +155,7 @@ static int lab_(eig)(lua_State *L)
     THTensor_(resizeAs)(a_,ta);
     THTensor_(copy)(a_,ta);
     lua_settop(L,2);
-    THLab_(syev)(a_,e_,"V","U");
+    THTensor_(syev)(a_,e_,"V","U");
     return 2;
   }
   else
@@ -199,7 +199,7 @@ static int lab_(svd)(lua_State *L)
     lua_insert(L,3);
     lua_settop(L,3);
 
-    THLab_(gesvd)(a_,s_,u_,vt_,type);
+    THTensor_(gesvd)(a_,s_,u_,vt_,type);
     THTensor_(free)(a_);
     return 3;
   }
@@ -212,7 +212,7 @@ static int lab_(svd)(lua_State *L)
     a_ = THTensor_(newClone)(ta);
     lua_settop(L,3);
 
-    THLab_(gesvd)(a_,s_,u_,vt_,type);
+    THTensor_(gesvd)(a_,s_,u_,vt_,type);
     THTensor_(free)(a_);
     return 3;
   }

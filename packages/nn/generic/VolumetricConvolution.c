@@ -34,12 +34,12 @@ static int nn_(VolumetricConvolution_updateOutput)(lua_State *L)
   THTensor *outn = THTensor_(new)();
   for (i=0; i<bias->size[0]; i++) {
     THTensor_(select)(outn,output,0,i);
-    THLab_(fill)(outn, THTensor_(get1d)(bias, i));
+    THTensor_(fill)(outn, THTensor_(get1d)(bias, i));
   }
   THTensor_(free)(outn);
 
   /* do convolutions */
-  THLab_(conv3Dmv)(output, 1.0, 1.0, input, weight, dT, dH, dW, "vx");
+  THTensor_(conv3Dmv)(output, 1.0, 1.0, input, weight, dT, dH, dW, "vx");
 
   return 1;
 }
@@ -61,7 +61,7 @@ static int nn_(VolumetricConvolution_updateGradInput)(lua_State *L)
 
   /* gradient to input */
   THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
-  THLab_(conv3Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dT, dH, dW, "fc");
+  THTensor_(conv3Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dT, dH, dW, "fc");
   THTensor_(free)(tweight);
 
   return 1;
@@ -91,12 +91,12 @@ static int nn_(VolumetricConvolution_accGradParameters)(lua_State *L)
   for(k = 0; k < nOutputPlane; k++)
   {
     THTensor_(select)(gradOutSlice, gradOutput, 0, k);
-    gradBias_data[k] += scale*THLab_(sumall)(gradOutSlice);
+    gradBias_data[k] += scale*THTensor_(sumall)(gradOutSlice);
   }
   THTensor_(free)(gradOutSlice);
 
   /* gradient to kernels */
-  THLab_(conv3DRevger)(gradWeight, 1.0, scale, input, gradOutput, dT, dH, dW);
+  THTensor_(conv3DRevger)(gradWeight, 1.0, scale, input, gradOutput, dT, dH, dW);
 
   return 0;
 }

@@ -62,42 +62,51 @@ INSTALL(TARGETS TH
           ARCHIVE DESTINATION "${Torch_INSTALL_LIB_SUBDIR}")
 
 INSTALL(FILES
-          TH.h
-          THBlas.h
-          THVector.h
-          THGeneral.h
-          THLogAdd.h
-          THRandom.h
-          THStorage.h
-          THLapack.h
-          THTensorMacros.h
-          THTensor.h
-          THTensorApply.h
-          THTensorDimApply.h
-          THGenerateAllTypes.h
-          THGenerateFloatTypes.h
-          THGenerateIntTypes.h
-          THFile.h
-          THDiskFile.h
-          THFilePrivate.h
-          THMemoryFile.h
-          THTensorRandom.h
-        DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}/TH")
+  TH.h
+  THBlas.h
+  THDiskFile.h
+  THFile.h
+  THFilePrivate.h
+  THGeneral.h
+  THGenerateAllTypes.h
+  THGenerateFloatTypes.h
+  THGenerateIntTypes.h
+  THLapack.h
+  THLogAdd.h
+  THMemoryFile.h
+  THRandom.h
+  THStorage.h
+  THTensor.h
+  THTensorApply.h
+  THTensorDimApply.h
+  THTensorMacros.h
+  THVector.h
+  DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}/TH")
 
 INSTALL(FILES
-          generic/THBlas.h
-          generic/THStorage.h
-          generic/THLapack.h
-          generic/THTensor.h
-          generic/THTensorRandom.h
-          generic/THBlas.c
-          generic/THStorageCopy.h
-          generic/THTensorCopy.h
-          generic/THVector.c
-          generic/THStorage.c
-          generic/THTensor.c
-          generic/THTensorRandom.c
-        DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}/TH/generic")
+  generic/THBlas.c
+  generic/THBlas.h
+  generic/THLapack.c
+  generic/THLapack.h
+  generic/THStorage.c
+  generic/THStorage.h
+  generic/THStorageCopy.c
+  generic/THStorageCopy.h
+  generic/THTensor.c
+  generic/THTensor.h
+  generic/THTensorConv.c
+  generic/THTensorConv.h
+  generic/THTensorCopy.c
+  generic/THTensorCopy.h
+  generic/THTensorLapack.c
+  generic/THTensorLapack.h
+  generic/THTensorMath.c
+  generic/THTensorMath.c_SAV
+  generic/THTensorMath.h
+  generic/THTensorRandom.c
+  generic/THTensorRandom.h
+  generic/THVector.c
+  DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}/TH/generic")
 
 # Create THConfig.cmake
 GET_TARGET_PROPERTY(TH_OUTPUT_NAME TH LOCATION)

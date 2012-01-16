@@ -78,7 +78,7 @@ wrap.argtypes.IndexTensor = {
    read = function(arg, idx)
              local txt = {}
              table.insert(txt, string.format("arg%d = luaT_toudata(L, %d, torch_LongTensor_id);", arg.i, idx))
-             table.insert(txt, string.format("THLongLab_add(arg%d, arg%d, -1);", arg.i, arg.i));
+             table.insert(txt, string.format("THLongTensor_add(arg%d, arg%d, -1);", arg.i, arg.i));
              return table.concat(txt, '\n')
           end,
    
@@ -110,7 +110,7 @@ wrap.argtypes.IndexTensor = {
    postcall = function(arg)
                  local txt = {}
                  if arg.creturned or arg.returned then
-                    table.insert(txt, string.format("THLongLab_add(arg%d, arg%d, 1);", arg.i, arg.i));
+                    table.insert(txt, string.format("THLongTensor_add(arg%d, arg%d, 1);", arg.i, arg.i));
                  end
                  if arg.creturned then
                     -- this next line is actually debatable

@@ -253,7 +253,7 @@ local function modtester(module,input,params)
 
    openmp.disable()
    local outseq = module:forward(input):clone()
-   local goutseq = lab.rand(outseq:size())
+   local goutseq = torch.rand(outseq:size())
    module:zeroGradParameters()
    local ginseq = module:backward(input,goutseq):clone()
    module:accGradParameters(input,goutseq)
@@ -299,7 +299,7 @@ function omptest.SpatialConvolutionCompare()
    local ini = (outi-1)*si+ki
    local inj = (outj-1)*sj+kj
    local module = nn.SpatialConvolution(from, to, ki, kj, si, sj)
-   local input = lab.rand(from, inj, ini)
+   local input = torch.rand(from, inj, ini)
    
    modtester(module,input,{'gradWeight','gradBias'})
 end
@@ -317,7 +317,7 @@ function omptest.SpatialConvolutionMapCompare()
    local ini = (outi-1)*si+ki
    local inj = (outj-1)*sj+kj
    local module = nn.SpatialConvolutionMap(nn.tables.random(from,to,fanin), ki, kj, si, sj)
-   local input = lab.rand(from, inj, ini)
+   local input = torch.rand(from, inj, ini)
    
    modtester(module,input,{'gradWeight','gradBias'})
 end
@@ -350,7 +350,7 @@ function omptest.SpatialConvolutionBatchCompare()
    local ini = (outi-1)*si+ki
    local inj = (outj-1)*sj+kj
    local module = nn.SpatialConvolution(from, to, ki, kj, si, sj)
-   local input = lab.randn(from,inj,ini)
+   local input = torch.randn(from,inj,ini)
 
    batchcompare(module,input, {'weight','bias','gradWeight','gradBias'})
 end
@@ -366,7 +366,7 @@ function omptest.SpatialSubSamplingBatchCompare()
    local ini = (outi-1)*si+ki
    local inj = (outj-1)*sj+kj
    local module = nn.SpatialSubSampling(from, ki, kj, si, sj)
-   local input = lab.randn(from,inj,ini)--torch.Tensor(from, inj, ini):zero()
+   local input = torch.randn(from,inj,ini)--torch.Tensor(from, inj, ini):zero()
    batchcompare(module,input, {'weight','bias','gradWeight','gradBias'})
 end
 
@@ -375,7 +375,7 @@ function omptest.TanhCompare()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
    local ink = math.random(5,10)
-   local input = lab.randn(ink, inj, ini)
+   local input = torch.randn(ink, inj, ini)
    
    local module = nn.Tanh()
    
@@ -387,7 +387,7 @@ function omptest.HardTanhCompare()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
    local ink = math.random(5,10)
-   local input = lab.randn(ink, inj, ini)
+   local input = torch.randn(ink, inj, ini)
    
    local module = nn.HardTanh()
    modtester(module,input)
@@ -397,7 +397,7 @@ function omptest.SqrtCompare()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
    local ink = math.random(5,10)
-   local input = lab.randn(ink, inj, ini):abs()
+   local input = torch.randn(ink, inj, ini):abs()
    
    local module = nn.Sqrt()
    modtester(module,input)
@@ -407,7 +407,7 @@ function omptest.SquareCompare()
    local ini = math.random(5,10)
    local inj = math.random(5,10)
    local ink = math.random(5,10)
-   local input = lab.randn(ink, inj, ini)
+   local input = torch.randn(ink, inj, ini)
    
    local module = nn.Square()
    modtester(module,input)

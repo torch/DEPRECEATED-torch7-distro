@@ -9,12 +9,12 @@ static void nn_(convolution_updateOutput_)(THTensor *input, THTensor *output, TH
   THTensor *outn = THTensor_(new)();
   for (i=0; i<bias->size[0]; i++) {
     THTensor_(select)(outn,output,0,i);
-    THLab_(fill)(outn, THTensor_(get1d)(bias, i));
+    THTensor_(fill)(outn, THTensor_(get1d)(bias, i));
   }
   THTensor_(free)(outn);
 
   /* do convolutions */
-  THLab_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
+  THTensor_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
 }
 
 static int nn_(SpatialConvolution_updateOutput)(lua_State *L)
@@ -76,12 +76,12 @@ static int nn_(SpatialConvolution_updateOutput)(lua_State *L)
 /*   THTensor *outn = THTensor_(new)(); */
 /*   for (i=0; i<bias->size[0]; i++) { */
 /*     THTensor_(select)(outn,output,0,i); */
-/*     THLab_(fill)(outn, THTensor_(get1d)(bias, i)); */
+/*     THTensor_(fill)(outn, THTensor_(get1d)(bias, i)); */
 /*   } */
 /*   THTensor_(free)(outn); */
 
 /*   /\* do convolutions *\/ */
-/*   THLab_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx"); */
+/*   THTensor_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx"); */
 
   return 1;
 }
@@ -107,7 +107,7 @@ static int nn_(SpatialConvolution_updateGradInput)(lua_State *L)
 
   if(input->nDimension == 3)
   {
-    THLab_(conv2Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
+    THTensor_(conv2Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
   }
   else
   {
@@ -120,7 +120,7 @@ static int nn_(SpatialConvolution_updateGradInput)(lua_State *L)
     {
       THTensor_(select)(outn,gradOutput,0,i);
       THTensor_(select)(inpn,gradInput,0,i);
-      THLab_(conv2Dmv)(inpn, 0.0, 1.0, outn, tweight, dH, dW, "fc");
+      THTensor_(conv2Dmv)(inpn, 0.0, 1.0, outn, tweight, dH, dW, "fc");
     }
     THTensor_(free)(outn);
     THTensor_(free)(inpn);
@@ -140,12 +140,12 @@ static void nn_(convolution_accGradParameters_)(THTensor *input, THTensor *gradO
   for(k = 0; k < gradOutput->size[0]; k++)
   {
     THTensor_(select)(gradOutSlice, gradOutput, 0, k);
-    gradBias_data[k] += scale*THLab_(sumall)(gradOutSlice);
+    gradBias_data[k] += scale*THTensor_(sumall)(gradOutSlice);
   }
   THTensor_(free)(gradOutSlice);
 
   /* gradient to kernels */
-  THLab_(conv2DRevger)(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
+  THTensor_(conv2DRevger)(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
 }
 
 static int nn_(SpatialConvolution_accGradParameters)(lua_State *L)

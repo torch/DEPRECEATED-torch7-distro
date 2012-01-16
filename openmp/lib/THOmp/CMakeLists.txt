@@ -2,7 +2,7 @@ INCLUDE_DIRECTORIES("${Torch_SOURCE_DIR}/libraries/TH")
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_SOURCE_DIR}")
 
 SET(src 
-  THOmpLabConv.c)
+  THOmpTensorConv.c)
 
 SET(src ${src})
 

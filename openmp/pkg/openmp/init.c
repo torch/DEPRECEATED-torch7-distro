@@ -25,7 +25,7 @@ void setompnthread(lua_State *L, int ud, const char *field)
 }
 
 extern void openmp_init(lua_State *L);
-extern void labOmp_init(lua_State *L);
+extern void torchOmp_init(lua_State *L);
 extern void nnOmp_init(lua_State *L);
 
 DLL_EXPORT int luaopen_libopenmp(lua_State *L)
@@ -33,7 +33,7 @@ DLL_EXPORT int luaopen_libopenmp(lua_State *L)
 
   setdefaultnthread(omp_get_max_threads());
   openmp_init(L);
-  labOmp_init(L);
+  torchOmp_init(L);
   nnOmp_init(L);
 
   return 1;

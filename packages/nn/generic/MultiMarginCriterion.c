@@ -21,7 +21,7 @@ static int nn_(MultiMarginCriterion_updateOutput)(lua_State *L)
     dim = input->size[0]; 
     target_ = luaL_checknumber(L, 3);
     target = THTensor_(newWithSize1d)(1);
-    THLab_(fill)(target, target_);
+    THTensor_(fill)(target, target_);
   }
   else
   {
@@ -94,7 +94,7 @@ static int nn_(MultiMarginCriterion_updateGradInput)(lua_State *L)
     dim = input->size[0]; 
     target_ = luaL_checknumber(L, 3);
     target = THTensor_(newWithSize1d)(1);
-    THLab_(fill)(target, target_);
+    THTensor_(fill)(target, target_);
   }
   else
   {

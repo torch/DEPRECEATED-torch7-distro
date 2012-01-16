@@ -148,7 +148,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    end
 
    local function cname(name)
-      return string.format('TH%sLab_%s', Tensor:gsub('Tensor', ''), name)
+      return string.format('TH%s_%s', Tensor, name)
    end
 
    local function lastdim(argn)
@@ -318,7 +318,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    interface:wrap("randperm",
                   cname("randperm"),
                   {{name=Tensor, default=true, returned=true, userpostcall=function(arg)
-                                                                              return string.format("TH%s_add(%s, %s, 1);", Tensor:gsub('Tensor', 'Lab'), arg:carg(), arg:carg())
+                                                                              return string.format("TH%s_add(%s, %s, 1);", Tensor, arg:carg(), arg:carg())
                                                                            end},
                    {name="long"}})
 

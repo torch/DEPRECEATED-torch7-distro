@@ -50,7 +50,7 @@ static int nn_(SpatialConvolutionMap_updateOutput)(lua_State *L)
   int k;
   for (k = 0; k < nOutputPlane; k++) {
     THTensor_(select)(outputPlane,output,0,k);
-    THLab_(fill)(outputPlane, THTensor_(get1d)(bias, k));
+    THTensor_(fill)(outputPlane, THTensor_(get1d)(bias, k));
   }
   THTensor_(free)(outputPlane);
 
@@ -63,7 +63,7 @@ static int nn_(SpatialConvolutionMap_updateOutput)(lua_State *L)
     i = (int)THTensor_(get2d)(connTable,k,0)-1;
 
     // convolve each map
-    THLab_(validXCorr2Dptr)(output_data + o*output_w*output_h,
+    THTensor_(validXCorr2Dptr)(output_data + o*output_w*output_h,
                             1.0,
                             input_data + i*input_w*input_h, input_h, input_w,
                             weight_data + k*weight_w*weight_h, weight_h, weight_w,
@@ -100,7 +100,7 @@ static int nn_(SpatialConvolutionMap_updateGradInput)(lua_State *L)
 
   // Resize/Zero
   THTensor_(resizeAs)(gradInput, input);
-  THLab_(zero)(gradInput);
+  THTensor_(zero)(gradInput);
 
   // get raw pointers
   real *gradInput_data = THTensor_(data)(gradInput);
@@ -128,7 +128,7 @@ static int nn_(SpatialConvolutionMap_updateGradInput)(lua_State *L)
     int i = (int)THTensor_(get2d)(connTable,k,0)-1;
 
     // gradient to input
-    THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
+    THTensor_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
                           1.0,
                           gradOutput_data + o*output_w*output_h,  output_h,  output_w,
                           weight_data + k*weight_w*weight_h, weight_h, weight_w,
@@ -187,7 +187,7 @@ static int nn_(SpatialConvolutionMap_accGradParameters)(lua_State *L)
   real *gradBias_data = THTensor_(data)(gradBias);
   for(k = 0; k < nOutputPlane; k++) {
     THTensor_(select)(gradOutputPlane, gradOutput, 0, k);
-    gradBias_data[k] += scale * THLab_(sumall)(gradOutputPlane);
+    gradBias_data[k] += scale * THTensor_(sumall)(gradOutputPlane);
   }
   THTensor_(free)(gradOutputPlane);
 
@@ -199,7 +199,7 @@ static int nn_(SpatialConvolutionMap_accGradParameters)(lua_State *L)
     int i = (int)THTensor_(get2d)(connTable,k,0)-1;
 
     // gradient to kernel
-    THLab_(validXCorr2DRevptr)(gradWeight_data + k*weight_w*weight_h,
+    THTensor_(validXCorr2DRevptr)(gradWeight_data + k*weight_w*weight_h,
                                scale,
                                input_data + i*input_w*input_h, input_h, input_w,
                                gradOutput_data + o*output_w*output_h, output_h, output_w,

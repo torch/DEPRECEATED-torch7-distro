@@ -140,7 +140,7 @@ static int nn_(SpatialSubSampling_updateGradInput)(lua_State *L)
   real *gradInput_data;
 
   THTensor_(resizeAs)(gradInput, input);
-  THLab_(zero)(gradInput);  
+  THTensor_(zero)(gradInput);  
   gradInput_data = THTensor_(data)(gradInput);
   gradOutput_data = THTensor_(data)(gradOutput);
 

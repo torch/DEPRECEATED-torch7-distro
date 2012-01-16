@@ -70,7 +70,7 @@ static int nnOmp_(SpatialConvolutionMap_updateOutputOmp)(lua_State *L)
 
       if (o == p)
         {
-          THLab_(validXCorr2Dptr)(output_data + o*output_w*output_h,
+          THTensor_(validXCorr2Dptr)(output_data + o*output_w*output_h,
                                   1.0,
                                   input_data + i*input_w*input_h, input_h, input_w,
                                   weight_data + k*weight_w*weight_h, weight_h, weight_w,
@@ -109,7 +109,7 @@ static int nnOmp_(SpatialConvolutionMap_updateGradInputOmp)(lua_State *L)
 
   // Resize/Zero
   THTensor_(resizeAs)(gradInput, input);
-  THLab_(zero)(gradInput);
+  THTensor_(zero)(gradInput);
 
   // get raw pointers
   real *gradInput_data = THTensor_(data)(gradInput);
@@ -143,7 +143,7 @@ static int nnOmp_(SpatialConvolutionMap_updateGradInputOmp)(lua_State *L)
           if (i == p)
             {
               // gradient to input
-              THLab_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
+              THTensor_(fullConv2Dptr)(gradInput_data + i*input_w*input_h,
                                     1.0,
                                     gradOutput_data + o*output_w*output_h,  output_h,  output_w,
                                     weight_data + k*weight_w*weight_h, weight_h, weight_w,
@@ -218,7 +218,7 @@ static int nnOmp_(SpatialConvolutionMap_accGradParametersOmp)(lua_State *L)
       int i = (int)THTensor_(get2d)(connTable,k,0)-1;
 
       // gradient to kernel
-      THLab_(validXCorr2DRevptr)(gradWeight_data + k*weight_w*weight_h,
+      THTensor_(validXCorr2DRevptr)(gradWeight_data + k*weight_w*weight_h,
                                  scale,
                                  input_data + i*input_w*input_h, input_h, input_w,
                                  gradOutput_data + o*output_w*output_h, output_h, output_w,

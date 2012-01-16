@@ -54,7 +54,7 @@ static int nnOmp_(SpatialConvolution_updateOutputOmp)(lua_State *L)
     /*THTensor_(free)(outn);*/
     
     /* do convolutions */
-    THOmpLab_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
+    THOmpTensor_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
   }
   else
   {
@@ -79,7 +79,7 @@ static int nnOmp_(SpatialConvolution_updateOutputOmp)(lua_State *L)
     }
 
     /* do convolutions */
-    THOmpLab_(conv2Dmm)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
+    THOmpTensor_(conv2Dmm)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
   }
   return 1;
 }
@@ -106,11 +106,11 @@ static int nnOmp_(SpatialConvolution_updateGradInputOmp)(lua_State *L)
 
   if (input->nDimension == 3)
   {
-    THOmpLab_(conv2Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
+    THOmpTensor_(conv2Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
   }
   else
   {
-    THOmpLab_(conv2Dmm)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
+    THOmpTensor_(conv2Dmm)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
   }
   THTensor_(free)(tweight);
   return 1;
@@ -161,7 +161,7 @@ static int nnOmp_(SpatialConvolution_accGradParametersOmp)(lua_State *L)
     }
     
     /* gradient to kernels */
-    THOmpLab_(conv2DRevger)(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
+    THOmpTensor_(conv2DRevger)(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
   }
   else
   {
@@ -180,7 +180,7 @@ static int nnOmp_(SpatialConvolution_accGradParametersOmp)(lua_State *L)
       }
     }
     /* gradient to kernels */
-    THOmpLab_(conv2DRevgerm)(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
+    THOmpTensor_(conv2DRevgerm)(gradWeight, 1.0, scale, input, gradOutput, dH, dW);
   }
   return 0;
 }

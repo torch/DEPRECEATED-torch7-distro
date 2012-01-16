@@ -21,19 +21,19 @@ static int torch_TensorMath_(__add__)(lua_State *L)
     {
       THTensor_(resizeAs)(r, tensor2);
       THTensor_(copy)(r, tensor2);
-      THLab_(add)(r, r, luaL_checknumber(L, 1));
+      THTensor_(add)(r, r, luaL_checknumber(L, 1));
     }
     else if(tensor1 && !tensor2)
     {
       THTensor_(resizeAs)(r, tensor1);
       THTensor_(copy)(r, tensor1);
-      THLab_(add)(r, r, luaL_checknumber(L, 2));
+      THTensor_(add)(r, r, luaL_checknumber(L, 2));
     }
     else
     {
       THTensor_(resizeAs)(r, tensor1);
       THTensor_(copy)(r, tensor1);
-      THLab_(cadd)(r, r, 1, tensor2);
+      THTensor_(cadd)(r, r, 1, tensor2);
     }
   }
   return 1;
@@ -55,20 +55,20 @@ static int torch_TensorMath_(__sub__)(lua_State *L)
     if(!tensor1 && tensor2)
     {
       THTensor_(resizeAs)(r, tensor2);
-      THLab_(fill)(r, luaL_checknumber(L, 1));
-      THLab_(cadd)(r, r, -1, tensor2);
+      THTensor_(fill)(r, luaL_checknumber(L, 1));
+      THTensor_(cadd)(r, r, -1, tensor2);
     }
     else if(tensor1 && !tensor2)
     {
       THTensor_(resizeAs)(r, tensor1);
       THTensor_(copy)(r, tensor1);
-      THLab_(add)(r, r, -luaL_checknumber(L, 2));
+      THTensor_(add)(r, r, -luaL_checknumber(L, 2));
     }
     else
     {
       THTensor_(resizeAs)(r, tensor1);
       THTensor_(copy)(r, tensor1);
-      THLab_(cadd)(r, r, -1, tensor2);
+      THTensor_(cadd)(r, r, -1, tensor2);
     }
   }
   return 1;
@@ -83,7 +83,7 @@ static int torch_TensorMath_(__unm__)(lua_State *L)
   luaT_pushudata(L, r, torch_Tensor_id);
   THTensor_(resizeAs)(r, tensor);
   THTensor_(copy)(r, tensor);
-  THLab_(mul)(r, r, -1);
+  THTensor_(mul)(r, r, -1);
 
   return 1;
 }
@@ -105,13 +105,13 @@ static int torch_TensorMath_(__mul__)(lua_State *L)
     {
       THTensor_(resizeAs)(r, tensor2);
       THTensor_(copy)(r, tensor2);
-      THLab_(mul)(r, r, luaL_checknumber(L, 1));
+      THTensor_(mul)(r, r, luaL_checknumber(L, 1));
     }
     else if(tensor1 && !tensor2)
     {
       THTensor_(resizeAs)(r, tensor1);
       THTensor_(copy)(r, tensor1);
-      THLab_(mul)(r, r, luaL_checknumber(L, 2));
+      THTensor_(mul)(r, r, luaL_checknumber(L, 2));
     }
     else
     {
@@ -119,18 +119,18 @@ static int torch_TensorMath_(__mul__)(lua_State *L)
       int dims = tensor2->nDimension;
       
       if(dimt == 1 && dims == 1)
-        lua_pushnumber(L, THLab_(dot)(tensor1, tensor2)); /* ok, we wasted r, but who cares */
+        lua_pushnumber(L, THTensor_(dot)(tensor1, tensor2)); /* ok, we wasted r, but who cares */
       else if(dimt == 2 && dims == 1)
       {
         THTensor_(resize1d)(r, tensor1->size[0]);
-        THLab_(zero)(r);
-        THLab_(addmv)(r, 1, r, 1, tensor1, tensor2);
+        THTensor_(zero)(r);
+        THTensor_(addmv)(r, 1, r, 1, tensor1, tensor2);
       }
       else if(dimt == 2 && dims == 2)
       {
         THTensor_(resize2d)(r, tensor1->size[0], tensor2->size[1]);
-        THLab_(zero)(r);
-        THLab_(addmm)(r, 1, r, 1, tensor1, tensor2);
+        THTensor_(zero)(r);
+        THTensor_(addmm)(r, 1, r, 1, tensor1, tensor2);
       }
       else
         luaL_error(L, "multiplication between %dD and %dD tensors not yet supported", tensor1->nDimension, tensor2->nDimension); 
@@ -151,7 +151,7 @@ static int torch_TensorMath_(__div__)(lua_State *L)
 
   THTensor_(resizeAs)(r, tensor);
   THTensor_(copy)(r, tensor);
-  THLab_(mul)(r, r, 1/lua_tonumber(L, 2));
+  THTensor_(mul)(r, r, 1/lua_tonumber(L, 2));
 
   return 1;
 }

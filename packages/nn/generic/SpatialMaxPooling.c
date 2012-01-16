@@ -103,7 +103,7 @@ static int nn_(SpatialMaxPooling_updateGradInput)(lua_State *L)
 
   // resize
   THTensor_(resizeAs)(gradInput, input);
-  THLab_(zero)(gradInput);
+  THTensor_(zero)(gradInput);
 
   // sizes
   int ichannels = input->size[0];

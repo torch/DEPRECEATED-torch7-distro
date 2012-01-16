@@ -1,11 +1,11 @@
 #include "TH.h"
 #include "luaT.h"
-#include "THOmpLabConv.h"
+#include "THOmpTensorConv.h"
 
 #define torch_(NAME) TH_CONCAT_3(torch_, Real, NAME)
 #define torch_string_(NAME) TH_CONCAT_STRING_3(torch., Real, NAME)
 
-#define labOmp_(NAME) TH_CONCAT_3(labOmp_, Real, NAME)
+#define torchOmp_(NAME) TH_CONCAT_3(torchOmp_, Real, NAME)
 
 static const void* torch_ByteTensor_id;
 static const void* torch_CharTensor_id;
@@ -17,9 +17,9 @@ static const void* torch_DoubleTensor_id;
 
 static const void* torch_LongStorage_id;
 
-static const void* lab_default_tensor_id;
+static const void* torch_default_tensor_id;
 
-#include "generic/labOmp.c"
+#include "generic/torchOmp.c"
 #include "THGenerateAllTypes.h"
 
 #define LUAT_DYNT_FUNCTION_WRAPPER(PKG, FUNC)                           \
@@ -52,36 +52,36 @@ static const void* lab_default_tensor_id;
   }
 
 
-LUAT_DYNT_FUNCTION_WRAPPER(lab, conv2omp);
-LUAT_DYNT_FUNCTION_WRAPPER(lab, xcorr2omp);
+LUAT_DYNT_FUNCTION_WRAPPER(torch, conv2omp);
+LUAT_DYNT_FUNCTION_WRAPPER(torch, xcorr2omp);
 
-static const struct luaL_Reg labomp_stuff__ [] = {
-  {"conv2omp", lab_conv2omp},
-  {"xcorr2omp", lab_conv2omp},
+static const struct luaL_Reg torchomp_stuff__ [] = {
+  {"conv2omp", torch_conv2omp},
+  {"xcorr2omp", torch_conv2omp},
   {NULL,NULL}
 };
 
-extern void labOmp_Byteinit(lua_State *L);
-extern void labOmp_Charinit(lua_State *L);
-extern void labOmp_Shortinit(lua_State *L);
-extern void labOmp_Intinit(lua_State *L);
-extern void labOmp_Longinit(lua_State *L);
-extern void labOmp_Floatinit(lua_State *L);
-extern void labOmp_Doubleinit(lua_State *L);
+extern void torchOmp_Byteinit(lua_State *L);
+extern void torchOmp_Charinit(lua_State *L);
+extern void torchOmp_Shortinit(lua_State *L);
+extern void torchOmp_Intinit(lua_State *L);
+extern void torchOmp_Longinit(lua_State *L);
+extern void torchOmp_Floatinit(lua_State *L);
+extern void torchOmp_Doubleinit(lua_State *L);
 
-void labOmp_init(lua_State* L)
+void torchOmp_init(lua_State* L)
 {
-  labOmp_Byteinit(L);
-  labOmp_Charinit(L);
-  labOmp_Shortinit(L);
-  labOmp_Intinit(L);
-  labOmp_Longinit(L);
-  labOmp_Floatinit(L);
-  labOmp_Doubleinit(L);
+  torchOmp_Byteinit(L);
+  torchOmp_Charinit(L);
+  torchOmp_Shortinit(L);
+  torchOmp_Intinit(L);
+  torchOmp_Longinit(L);
+  torchOmp_Floatinit(L);
+  torchOmp_Doubleinit(L);
 
   lua_newtable(L);
   lua_pushvalue(L, -1);
-  lua_getfield(L, LUA_GLOBALSINDEX, "lab");
-  luaL_register(L, NULL, labomp_stuff__);
+  lua_getfield(L, LUA_GLOBALSINDEX, "torch");
+  luaL_register(L, NULL, torchomp_stuff__);
   lua_pop(L,1);
 }

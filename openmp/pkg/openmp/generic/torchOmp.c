@@ -1,8 +1,8 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/labOmp.c"
+#define TH_GENERIC_FILE "generic/torchOmp.c"
 #else
 
-static int labOmp_(convxcorr2omp)(lua_State *L, char* ktype)
+static int torchOmp_(convxcorr2omp)(lua_State *L, char* ktype)
 {
   THTensor *r_ = NULL;
   THTensor *image = luaT_checkudata(L,1,torch_(Tensor_id));
@@ -57,15 +57,15 @@ static int labOmp_(convxcorr2omp)(lua_State *L, char* ktype)
 
   if (image->nDimension == 2 && kernel->nDimension == 2)
   {
-    THLab_(conv2Dmul)(r_,0.0,1.0,image,kernel,1,1,type);
+    THTensor_(conv2Dmul)(r_,0.0,1.0,image,kernel,1,1,type);
   }
   else if (image->nDimension == 3 && kernel->nDimension == 3)
   {
-    THOmpLab_(conv2Dger)(r_,0.0,1.0,image,kernel,1,1,type);
+    THOmpTensor_(conv2Dger)(r_,0.0,1.0,image,kernel,1,1,type);
   }
   else if (image->nDimension == 3 && kernel->nDimension == 4)
   {
-    THOmpLab_(conv2Dmv)(r_,0.0,1.0,image,kernel,1,1,type);
+    THOmpTensor_(conv2Dmv)(r_,0.0,1.0,image,kernel,1,1,type);
   }
   else if (image->nDimension == 2 && kernel->nDimension == 3)
   {
@@ -96,14 +96,14 @@ static int labOmp_(convxcorr2omp)(lua_State *L, char* ktype)
       {
         THTensor_(select)(ker,kernel,0,k);
         THTensor_(select)(ri,r_,0,k);
-        THLab_(conv2Dmul)(ri,0.0,1.0,image,ker,1,1,type);
+        THTensor_(conv2Dmul)(ri,0.0,1.0,image,ker,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(ker);
     } else {
       THTensor *ker = THTensor_(new)();
       THTensor_(select)(ker,kernel,0,0);
-      THLab_(conv2Dmul)(r_,0.0,1.0,image,ker,1,1,type);
+      THTensor_(conv2Dmul)(r_,0.0,1.0,image,ker,1,1,type);
       THTensor_(free)(ker);
     }
   }
@@ -135,46 +135,46 @@ static int labOmp_(convxcorr2omp)(lua_State *L, char* ktype)
       {
         THTensor_(select)(im, image, 0, k);
         THTensor_(select)(ri,r_,0,k);
-        THLab_(conv2Dmul)(ri,0.0,1.0,im,kernel,1,1,type);
+        THTensor_(conv2Dmul)(ri,0.0,1.0,im,kernel,1,1,type);
       }
       THTensor_(free)(ri);
       THTensor_(free)(im);
     } else {
       THTensor *im = THTensor_(new)();
       THTensor_(select)(im,image,0,0);
-      THLab_(conv2Dmul)(r_,0.0,1.0,im,kernel,1,1,type);
+      THTensor_(conv2Dmul)(r_,0.0,1.0,im,kernel,1,1,type);
       THTensor_(free)(im);
     }
   }
   return 1;
 }
 
-static int labOmp_(conv2omp)(lua_State *L)
+static int torchOmp_(conv2omp)(lua_State *L)
 {
-  return labOmp_(convxcorr2omp)(L,"convolution");
+  return torchOmp_(convxcorr2omp)(L,"convolution");
 }
-static int labOmp_(xcorr2omp)(lua_State *L)
+static int torchOmp_(xcorr2omp)(lua_State *L)
 {
-  return labOmp_(convxcorr2omp)(L,"xcorrelation");
+  return torchOmp_(convxcorr2omp)(L,"xcorrelation");
 }
 
 
 
-static const struct luaL_Reg labOmp_(stuff__) [] = {
-  {"conv2omp", labOmp_(conv2omp)},
-  {"xcorr2omp", labOmp_(xcorr2omp)},
+static const struct luaL_Reg torchOmp_(stuff__) [] = {
+  {"conv2omp", torchOmp_(conv2omp)},
+  {"xcorr2omp", torchOmp_(xcorr2omp)},
   {NULL,NULL}
 };
 
-void labOmp_(init)(lua_State *L)
+void torchOmp_(init)(lua_State *L)
 {
   torch_(Tensor_id) = luaT_checktypename2id(L, torch_string_(Tensor));
   torch_LongStorage_id = luaT_checktypename2id(L, "torch.LongStorage");
 
   /* register everything into the field of the tensor metaclass */
   luaT_pushmetaclass(L, torch_(Tensor_id));
-  lua_getfield(L,-1,"lab");
-  luaL_register(L, NULL, labOmp_(stuff__));
+  lua_getfield(L,-1,"torch");
+  luaL_register(L, NULL, torchOmp_(stuff__));
   lua_pop(L, 1);
 }
 
