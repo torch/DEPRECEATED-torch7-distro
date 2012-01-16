@@ -12,15 +12,15 @@ html help and read about how to do it.
 
 ======  What is Torch? ======
 
-Torch5 provides a Matlab-like environment for state-of-the-art machine
+Torch7 provides a Matlab-like environment for state-of-the-art machine
 learning algorithms. It is easy to use and provides a very efficient
 implementation, thanks to a easy and fast scripting language (Lua) and
-a underlying C++ implementation.  You can read more about Lua
-[[..:luamanual:index|here]].
+an underlying C/C++ implementation.  You can read more about Lua
+[[http://www.lua.org|here]].
 
 ======  Installation ======
 
-First before you can do anything, you need to install Torch on your
+First before you can do anything, you need to install Torch7 on your
 machine.  That is not described in detail here, but is instead
 described in the [[..:install:index|installation help]].
 
@@ -31,61 +31,60 @@ If you have got this far, hopefully your Torch installation works. A simple
 way to make sure it does is to start Lua from the shell command line, 
 and then try to start Torch:
 <file>
-$ lua 
-Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
-> require "torch"
-> x = torch.Tensor()
-> print(x)
+Try the IDE: torch -ide
+Type help() for more info
+Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU
+Lua 5.1  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+torch> 
+torch> x = torch.Tensor()
+torch> print(x)
+[torch.DoubleTensor with no dimension]
 
-[torch.Tensor with no dimension]
-
-> 
 </file>
-You might have to specify the exact path of the ''lua'' executable, if you have several Lua installed
-on your system, or if you installed Torch in a non-standard path.
 
-The first command ''require "torch"'' imports the basic classes of Torch into 
-Lua, and after that they can be used.
-Instead of writing this on the command line in Lua you can also ask Lua on bootup to require this package from the shell:
+You might have to specify the exact path of the ''torch'' executable
+if you installed Torch in a non-standard path. The ''torch''
+executable is just a shell wrapper around ''lua'' with some libraries
+being preloaded. It is equivalent to running
+
 <file>
-$ lua -ltorch
-Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
-> x = torch.Tensor(); print(x)
-
-[torch.Tensor with no dimension]
-
+$lua -ltorch -llab -lgnuplot -ldok
 </file>
-If you use Lua and Torch together all the time you might want to alias Lua
-to do that directly. 
-Whichever way you chose, in future examples I will assume that you have started Lua and required Torch.
 
-In this example, we checked Torch was working by creating an empty [[torch:start#Tensor|Tensor]] and printing it on the screen.
-The Tensor is the main tool in Torch, and is used to represent vector, 
-matrices or higher-dimensional objects (tensors).
+The same effect can also be achieved by explicitely loading these libraries.
 
-''require "torch"'' only installs the basic parts of torch (including Tensors). 
-The list of all the basic Torch objects installed are described 
-[[torch:start|here]].
-However, there are several
-other //external// Torch packages that you might want to use,
-for example the [[lab:start|lab]] 
-package. 
-This package 
-provides Matlab-like functions for linear algebra.
-We will use some of these functions in this tutorial.
-To require this package you simply have to type:
 <file>
-require "lab"
+$ lua
+Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+> require 'torch'
+> require 'lab'
+> require 'gnuplot'
+> require 'dok'
 </file>
 
-To see the list of Torch packages   
-click [[start|here]].
+In this example, we checked Torch was working by creating an empty
+[[..:torch:tensor|Tensor]] and printing it on the screen.  The Tensor
+is the main tool in Torch, and is used to represent vector, matrices
+or higher-dimensional objects (tensors).
+
+''require "torch"'' only installs the basic parts of torch (including
+Tensors).  The list of all the basic Torch objects installed are
+described [[..:torch:index|here]].  However, there are several other
+//external// Torch packages that you might want to use, for example
+the [[..:lab:index|lab]] package.  This package provides Matlab-like
+functions for linear algebra.  We will use some of these functions in
+this tutorial.  To require this package you simply have to type:
+<file> require "lab" </file>
+
+To see the list of all packages distributed with Torch7, click
+[[..:index|here]].
 
 ======  Torch basics: playing with Tensors ======
 
-Ok, now we are ready to actually do something in Torch.
-Lets start by constructing a vector, say a vector with 5 elements,
-and filling the i-th element with value i. Here's how:
+Ok, now we are ready to actually do something in Torch.  Lets start by
+constructing a vector, say a vector with 5 elements, and filling the
+i-th element with value i. Here's how:
+
 <file>
 > x=torch.Tensor(5)
 > for i=1,5 do x[i]=i; end
@@ -96,7 +95,7 @@ and filling the i-th element with value i. Here's how:
  3
  4
  5
-[torch.Tensor of dimension 5] 
+[torch.DoubleTensor of dimension 5] 
 
 >
 </file>
@@ -111,39 +110,62 @@ for i=1,5 do
  end
 end
 </file>
+
 Another way to do the same thing as the code above is provided by the 
-[[lab:start|lab]] package:
+[[..:lab:index|lab]] package:
+
 <file>
 require "lab"
 x=lab.rand(5,5)
 </file>
-The [[lab:start|lab]] package contains a wide variety of commands 
+
+The [[..:lab:index|lab]] package contains a wide variety of commands 
 for manipulating Tensors that follow rather closely the equivalent
 Matlab commands. For example one can construct Tensors using the commands
-[[lab:start#ones|ones]], 
-[[lab:start#zeros|zeros]], 
-[[lab:start#rand|rand]],
-[[lab:start#randn|randn]] and
-[[lab:start#eye|eye]], amongst others.
+[[..:lab:index#lab.ones|ones]], 
+[[..:lab:index#lab.zeros|zeros]], 
+[[..:lab:index#lab.rand|rand]],
+[[..:lab:index#lab.randn|randn]] and
+[[..:lab:index#lab.eye|eye]], amongst others.
 
 Similarly, row or column-wise operations such as 
-[[lab:start#sum|sum]] and 
-[[lab:start#max|max]] are called in the same way:
+[[..:lab:index#lab.sum|sum]] and 
+[[..:lab:index#lab.max|max]] are called in the same way:
+
 <file>
 > require "lab"
 > x1=lab.rand(5,5)
 > x2=lab.sum(x1); 
 > print(x2) 
-
- 2.6443  1.8716  3.6316  1.5378  2.4324
-[torch.Tensor of dimension 1x5]
+ 2.3450
+ 2.7099
+ 2.5044
+ 3.6897
+ 2.4089
+[torch.DoubleTensor of dimension 5x1]
 
 >
 </file>
 
+
+====== Types in Torch7 ======
+
+In Torch7, different types of tensors can be used. By default, all
+tensors are created using ''double'' type. ''torch.Tensor'' is a
+convenience call to ''torch.DoubleTensor''. One can easily switch the
+default tensor type to other types, like ''float''.
+
+<file>
+> =torch.Tensor()
+[torch.DoubleTensor with no dimension]
+> torch.setdefaulttensortype('torch.FloatTensor')
+> =torch.Tensor()
+[torch.FloatTensor with no dimension]
+</file>
+
 ======  Example: training a neural network ======
 
-We will show now how to train a neural network using the [[nn:start|nn]] package
+We will show now how to train a neural network using the [[..:nn:index|nn]] package
 available in Torch.
 
 =====  Torch basics: building a dataset using Lua tables =====
@@ -152,29 +174,33 @@ In general the user has the freedom to create any kind of structure he
 wants for dealing with data.
 
 For example, training a neural network in Torch is achieved easily by
-performing a loop over the data, and forwarding/backwarding tensors through
-the network. Then, the way the dataset is built is left to the user's creativity.
+performing a loop over the data, and forwarding/backwarding tensors
+through the network. Then, the way the dataset is built is left to the
+user's creativity.
 
 
 However, if you want to use some convenience classes, like
-[[nn:start#StochasticGradient|StochasticGradient]], which basically
+[[..:nn:index#nn.StochasticGradient|StochasticGradient]], which basically
 does the training loop for you, one has to follow the dataset
-convention of these classes.
-(We will discuss manual training of a network, where one does not use
-these convenience classes, in a later section.)
+convention of these classes.  (We will discuss manual training of a
+network, where one does not use these convenience classes, in a later
+section.)
 
-StochasticGradient expects 
-as a ''dataset'' an object which implements the operator
-''dataset[index]'' and implements the method ''dataset:size()''. The ''size()'' methods
-returns the number of examples and ''dataset[i]'' has to return the i-th example.
+StochasticGradient expects as a ''dataset'' an object which implements
+the operator ''dataset[index]'' and implements the method
+''dataset:size()''. The ''size()'' methods returns the number of
+examples and ''dataset[i]'' has to return the i-th example.
 
-An ''example'' has to be an object which implements the operator ''example[field]'',
-where ''field'' often takes the value ''1'' (for input features) or ''2'' (for corresponding labels),
-i.e an example is a pair of input and output objects.
-The input is usually a Tensor (exception: if you use special kind of gradient modules,
-like [[nn:start#TableLayers|table layers]]). The label type depends on the criterion.
-For example, the [[nn:start#MSECriterion|MSECriterion]] expects a Tensor, but the
-[[nn:start#ClassNLLCriterion|ClassNLLCriterion]] expects an integer (the class).
+An ''example'' has to be an object which implements the operator
+''example[field]'', where ''field'' often takes the value ''1'' (for
+input features) or ''2'' (for corresponding labels), i.e an example is
+a pair of input and output objects.  The input is usually a Tensor
+(exception: if you use special kind of gradient modules, like
+[[..:nn:index#nn.TableLayers|table layers]]). The label type depends
+on the criterion. For example, the
+[[..:nn:index#nn.MSECriterion|MSECriterion]] expects a Tensor, but the
+[[..:nn:index#nn.ClassNLLCriterion|ClassNLLCriterion]] expects an
+integer (the class).
 
 Such a dataset is easily constructed by using Lua tables, but it could any object
 as long as the required operators/methods are implemented.
@@ -203,7 +229,7 @@ we just generated in the section before.  Now all that remains is to define
 our network architecture, and train it.
 
 To use Neural Networks in Torch you have to require the 
-[[nn:start|nn]] package. 
+[[..:nn:index|nn]] package. 
 A classical feed-forward network is created with the ''Sequential'' object:
 <file>
 require "nn"
@@ -214,8 +240,8 @@ To build the layers of the network, you simply add the Torch objects
 corresponding to those layers to the //mlp// variable created above.
 
 The two basic objects you might be interested in first are the 
-[[nn:start#Linear|Linear]] and 
-[[nn:start#Tanh|Tanh]] layers.
+[[..:nn:index#nn.Linear|Linear]] and 
+[[..:nn:index#nn.Tanh|Tanh]] layers.
 The Linear layer is created with two parameters: the number of input
 dimensions, and the number of output dimensions. 
 So making a classical feed-forward neural network with one hidden layer with 
@@ -263,7 +289,7 @@ trainer.maxIteration = 10
 trainer.shuffleIndices = false
 </file>
 See the nn package description of the
-[[nn:start#StochasticGradient|StochasticGradient]] object
+[[..:nn:index#nn.StochasticGradient|StochasticGradient]] object
 for more details.
 
 
@@ -281,24 +307,24 @@ You should see that your network has learned XOR:
 <file>
 > x=torch.Tensor(2); x[1]=0.5; x[2]=0.5; print(mlp:forward(x))
 -0.5886
-[torch.Tensor of dimension 1]
+[torch.DoubleTensor of dimension 1]
 
 > x=torch.Tensor(2); x[1]=-0.5; x[2]=0.5; print(mlp:forward(x))
  0.9261
-[torch.Tensor of dimension 1]
+[torch.DoubleTensor of dimension 1]
 
 > x=torch.Tensor(2); x[1]=0.5; x[2]=-0.5; print(mlp:forward(x))
  0.7913
-[torch.Tensor of dimension 1]
+[torch.DoubleTensor of dimension 1]
 
 > x=torch.Tensor(2); x[1]=-0.5; x[2]=-0.5; print(mlp:forward(x))
 -0.5576
-[torch.Tensor of dimension 1]
+[torch.DoubleTensor of dimension 1]
 </file>
 
 =====  Manual Training of a Neural Network =====
 
-Instead of using the [[nn:start#StochasticGradient|StochasticGradient]] class
+Instead of using the [[..:nn:index#nn.StochasticGradient|StochasticGradient]] class
 you can directly make the forward and backward calls on the network yourself.
 This gives you greater flexibility.
 In the following code example we create the same XOR data on the fly
@@ -343,15 +369,14 @@ end
 
 Super!
 
-**Concluding remarks**
+====== Concluding remarks ======
 
-That's the end of this tutorial, but not the end of what you have left 
+That's the end of this tutorial, but not the end of what you have left
 to discover of Torch! To explore more of Torch, you should take a look
-at the [[start|Torch package help]]
-which has been linked to throughout this tutorial 
-every time we have mentioned one of the basic Torch object types.
-The Torch library reference manual is available [[torch:start|here]]
-and the external torch packages installed on your system 
-can be viewed [[start|here]].
+at the [[..:index|Torch package help]] which has been linked to
+throughout this tutorial every time we have mentioned one of the basic
+Torch object types.  The Torch library reference manual is available
+[[..:index|here]] and the external torch packages installed on your
+system can be viewed [[..:torch:index|here]].
 
 Good luck and have fun!
