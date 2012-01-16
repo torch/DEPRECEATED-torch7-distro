@@ -7,6 +7,7 @@
 #define THTensor          TH_CONCAT_3(TH,Real,Tensor)
 #define THTensor_(NAME)   TH_CONCAT_4(TH,Real,Tensor_,NAME)
 
+/* basics */
 #include "generic/THTensor.h"
 #include "THGenerateAllTypes.h"
 
@@ -14,5 +15,21 @@
 #include "THGenerateAllTypes.h"
 
 #include "THTensorMacros.h"
+
+/* random numbers */
+#include "generic/THTensorRandom.h"
+#include "THGenerateAllTypes.h"
+
+/* maths */
+#include "generic/THTensorMath.h"
+#include "THGenerateAllTypes.h"
+
+/* convolutions */
+#include "generic/THTensorConv.h"
+#include "THGenerateAllTypes.h"
+
+/* lapack support */
+#include "generic/THTensorLapack.h"
+#include "THGenerateFloatTypes.h"
 
 #endif

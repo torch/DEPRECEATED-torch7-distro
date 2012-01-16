@@ -1,8 +1,8 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/THLabLapack.c"
+#define TH_GENERIC_FILE "generic/THTensorLapack.c"
 #else
 
-TH_API void THLab_(gesv)(THTensor *a_, THTensor *b_)
+TH_API void THTensor_(gesv)(THTensor *a_, THTensor *b_)
 {
   int n, nrhs, lda, ldb, info;
   THIntTensor *ipiv;
@@ -51,7 +51,7 @@ TH_API void THLab_(gesv)(THTensor *a_, THTensor *b_)
   THTensor_(free)(B);
 }
 
-TH_API void THLab_(gels)(THTensor *a_, THTensor *b_)
+TH_API void THTensor_(gels)(THTensor *a_, THTensor *b_)
 {
   int m, n, nrhs, lda, ldb, info, lwork;
   char transpose;
@@ -98,7 +98,7 @@ TH_API void THLab_(gels)(THTensor *a_, THTensor *b_)
   THTensor_(free)(work);
 }
 
-TH_API void THLab_(syev)(THTensor *a_, THTensor *w_, const char *jobz, const char *uplo)
+TH_API void THTensor_(syev)(THTensor *a_, THTensor *w_, const char *jobz, const char *uplo)
 {
   int n, lda, lwork, info;
   THTensor *A;
@@ -130,7 +130,7 @@ TH_API void THLab_(syev)(THTensor *a_, THTensor *w_, const char *jobz, const cha
   THTensor_(free)(work);
 }
 
-TH_API void THLab_(gesvd)(THTensor *a_, THTensor *s_, THTensor *u_, THTensor *vt_, char jobu)
+TH_API void THTensor_(gesvd)(THTensor *a_, THTensor *s_, THTensor *u_, THTensor *vt_, char jobu)
 {
   int k,m, n, lda, ldu, ldvt, lwork, info;
   THTensor *A, *work;

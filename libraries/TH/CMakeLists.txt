@@ -3,13 +3,11 @@
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 SET(hdr 
-  THGeneral.h THStorage.h THTensor.h THTensorApply.h 
+  THGeneral.h THStorage.h THTensor.h THTensorApply.h
   THBlas.h THLapack.h THLogAdd.h THRandom.h THVector.h)
 SET(src 
   THGeneral.c THStorage.c THTensor.c THBlas.c THLapack.c
   THLogAdd.c THRandom.c
-  THTensorRandom.c
-  THLab.c
   THFile.c THDiskFile.c THMemoryFile.c)
 
 SET(src ${src} ${hdr})
@@ -67,7 +65,6 @@ INSTALL(FILES
           TH.h
           THBlas.h
           THVector.h
-          THLab.h
           THGeneral.h
           THLogAdd.h
           THRandom.h
@@ -89,17 +86,13 @@ INSTALL(FILES
 
 INSTALL(FILES
           generic/THBlas.h
-          generic/THLab.h
-          generic/THLabConv.h
           generic/THStorage.h
           generic/THLapack.h
-          generic/THLabLapack.h
           generic/THTensor.h
           generic/THTensorRandom.h
           generic/THBlas.c
           generic/THStorageCopy.h
           generic/THTensorCopy.h
-          generic/THLab.c
           generic/THVector.c
           generic/THStorage.c
           generic/THTensor.c
