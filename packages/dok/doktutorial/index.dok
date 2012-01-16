@@ -79,6 +79,51 @@ this tutorial.  To require this package you simply have to type:
 To see the list of all packages distributed with Torch7, click
 [[..:index|here]].
 
+====== Getting Help ======
+
+There are two main ways of getting help in Torch7. One way is ofcourse
+the html formatted help. However, another and easier method is to use
+inline help in torch interpreter. The ''torch'' executable also
+integrates this capability. Help about any function can be accessed by
+calling the ''help()'' function.
+
+<file>
+
+torch> help(lab.rand)
+
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+lab.rand( [res,] m [, n, k, ...])        
+ y=lab.rand(n) returns a one-dimensional tensor of size n filled with 
+random numbers from a uniform distribution on the interval (0,1).
+ y=lab.rand(m,n) returns a mxn tensor of random numbers from a uniform 
+distribution on the interval (0,1).
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+</file>
+
+Even a more intuitive method is to use tab completion. Whenever any
+input is entered at the ''torch'' prompt, one can eneter two
+consecutive ''TAB'' characters (''double TAB'') to get the syntax
+completion. Moreover entering ''double TAB'' at an open paranthesis
+also causes the help for that particular function to be printed.
+
+<file>
+
+torch> lab.randn( -- enter double TAB after (
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+lab.randn( [res,] m [, n, k, ...])       
+ y=lab.randn(n) returns a one-dimensional tensor of size n filled with 
+random numbers from a normal distribution with mean zero and variance 
+one.
+ y=lab.randn(m,n) returns a mxn tensor of random numbers from a normal 
+distribution with mean zero and variance one.
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+/  \  
+torch> lab.randn(
+
+</file>
+
 ======  Torch basics: playing with Tensors ======
 
 Ok, now we are ready to actually do something in Torch.  Lets start by
