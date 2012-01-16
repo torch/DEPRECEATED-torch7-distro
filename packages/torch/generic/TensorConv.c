@@ -1,8 +1,8 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/labconv.c"
+#define TH_GENERIC_FILE "generic/TensorConv.c"
 #else
 
-static int lab_(convxcorr2)(lua_State *L,char* ktype)
+static int torch_(convxcorr2)(lua_State *L,char* ktype)
 {
   THTensor *r_ = NULL;
   THTensor *image = luaT_checkudata(L,1,torch_(Tensor_id));
@@ -153,16 +153,16 @@ static int lab_(convxcorr2)(lua_State *L,char* ktype)
   return 1;
 }
 
-static int lab_(conv2)(lua_State *L)
+static int torch_(conv2)(lua_State *L)
 {
-  return lab_(convxcorr2)(L,"convolution");
+  return torch_(convxcorr2)(L,"convolution");
 }
-static int lab_(xcorr2)(lua_State *L)
+static int torch_(xcorr2)(lua_State *L)
 {
-  return lab_(convxcorr2)(L,"xcorrelation");
+  return torch_(convxcorr2)(L,"xcorrelation");
 }
 
-static int lab_(convxcorr3)(lua_State *L,char* ktype)
+static int torch_(convxcorr3)(lua_State *L,char* ktype)
 {
   THTensor *r_ = NULL;
   THTensor *image = luaT_checkudata(L,1,torch_(Tensor_id));
@@ -321,33 +321,34 @@ static int lab_(convxcorr3)(lua_State *L,char* ktype)
   return 1;
 }
 
-static int lab_(conv3)(lua_State *L)
+static int torch_(conv3)(lua_State *L)
 {
-  return lab_(convxcorr3)(L,"convolution");
+  return torch_(convxcorr3)(L,"convolution");
 }
-static int lab_(xcorr3)(lua_State *L)
+static int torch_(xcorr3)(lua_State *L)
 {
-  return lab_(convxcorr3)(L,"xcorrelation");
+  return torch_(convxcorr3)(L,"xcorrelation");
 }
 
-static const struct luaL_Reg lab_(conv_stuff__) [] = {
-  {"conv2", lab_(conv2)},
-  {"xcorr2", lab_(xcorr2)},
-  {"conv3", lab_(conv3)},
-  {"xcorr3", lab_(xcorr3)},
+static const struct luaL_Reg torch_(conv__) [] = {
+  {"conv2", torch_(conv2)},
+  {"xcorr2", torch_(xcorr2)},
+  {"conv3", torch_(conv3)},
+  {"xcorr3", torch_(xcorr3)},
   {NULL, NULL}
 };
 
-void lab_(conv_init)(lua_State *L)
+void torch_(conv_init)(lua_State *L)
 {
   torch_(Tensor_id) = luaT_checktypename2id(L, torch_string_(Tensor));
 
-  /* register everything into the "lab" field of the tensor metaclass */
+  /* register everything into the "torch" field of the tensor metaclass */
   luaT_pushmetaclass(L, torch_(Tensor_id));
-  lua_pushstring(L, "lab");
+  lua_pushstring(L, "torch");
   lua_rawget(L, -2);
-  luaL_register(L, NULL, lab_(conv_stuff__));
+  luaL_register(L, NULL, torch_(conv__));
   lua_pop(L, 2);
 }
 
 #endif
+

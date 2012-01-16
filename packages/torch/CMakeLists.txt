@@ -1,10 +1,23 @@
-SET(src DiskFile.c File.c MemoryFile.c PipeFile.c Storage.c Tensor.c Timer.c utils.c init.c TensorMath.c)
-SET(luasrc init.lua File.lua Tensor.lua CmdLine.lua Tester.lua)
-
-SET(src ${src})
+SET(src DiskFile.c File.c MemoryFile.c PipeFile.c Storage.c Tensor.c Timer.c utils.c init.c TensorOperator.c TensorMath.c)
+SET(luasrc init.lua File.lua Tensor.lua TensorMath.lua CmdLine.lua Tester.lua)
   
+# Necessary do generate wrapper
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")
+MACRO(ADD_TORCH_WRAP target luafile)
+  GET_FILENAME_COMPONENT(_file_ "${luafile}" NAME_WE)
+  SET(cfile "${_file_}.c")
+  ADD_CUSTOM_COMMAND(
+    OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${cfile}"
+    COMMAND "${LUA_EXECUTABLE}" ARGS "-e \"dofile('${CMAKE_SOURCE_DIR}/packages/wrap/init.lua')\" " "${CMAKE_CURRENT_SOURCE_DIR}/${luafile}" "${CMAKE_CURRENT_BINARY_DIR}/${cfile}"
+    DEPENDS "${luafile}")
+  ADD_CUSTOM_TARGET(${target} DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${cfile}")
+ENDMACRO(ADD_TORCH_WRAP)
+
+ADD_TORCH_WRAP(tensormathwrap TensorMathWrap.lua)
+
 ADD_TORCH_PACKAGE(torch "${src}" "${luasrc}" "Basics")
 ADD_TORCH_DOK(dok torch "Fundamentals" "Torch package" 1.1)
+ADD_DEPENDENCIES(torch tensormathwrap)
 
 TARGET_LINK_LIBRARIES(torch luaT TH)
 

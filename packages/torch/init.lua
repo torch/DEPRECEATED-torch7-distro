@@ -56,25 +56,23 @@ function torch.class(tname, parenttname)
    return mt, mpt
 end
 
-torch.include('torch', 'Tensor.lua')
-torch.include('torch', 'File.lua')
-torch.include('torch', 'CmdLine.lua')
-torch.include('torch', 'Tester.lua')
-
 function torch.setdefaulttensortype(typename)
    assert(type(typename) == 'string', 'string expected')
    if torch.getconstructortable(typename) then
       torch.Tensor = torch.getconstructortable(typename)
       torch.Storage = torch.getconstructortable(torch.typename(torch.Tensor(1):storage()))
+      torch.__setdefaulttensortype(typename)
    else
       error(string.format("<%s> is not a string describing a torch object", typename))
    end
 end
 
-function torch.getdefaulttensortype(typename)
-   return torch.Tensor.__typename
-end
-
 torch.setdefaulttensortype('torch.DoubleTensor')
+
+torch.include('torch', 'Tensor.lua')
+torch.include('torch', 'File.lua')
+torch.include('torch', 'CmdLine.lua')
+torch.include('torch', 'Tester.lua')
+torch.include('torch', 'TensorMath.lua')
 
 return torch

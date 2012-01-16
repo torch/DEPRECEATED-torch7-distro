@@ -265,7 +265,7 @@ local function getvars(t)
    end
    if not y then
       y = x
-      x = lab.range(1,y:size(1))
+      x = torch.range(1,y:size(1))
    end
    if x:nDimension() ~= 1 or y:nDimension() ~= 1 then
       error('x and y are expected to be vectors x = ' .. x:nDimension() .. 'D y = ' .. y:nDimension() .. 'D')
@@ -729,7 +729,7 @@ end
 
 -- complete function: compute hist and display it
 function gnuplot.hist(tensor,bins,min,max)
-   local h = lab.histc(tensor,bins,min,max)
+   local h = torch.histc(tensor,bins,min,max)
    local x_axis = torch.Tensor(#h)
    for i = 1,#h do
       x_axis[i] = h[i].val

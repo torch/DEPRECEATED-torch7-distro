@@ -4,7 +4,7 @@
 
 local interface = wrap.CInterface.new()
 
--- special argument specific to lab package
+-- special argument specific to torch package
 interface.argtypes.LongArg = {
 
    vararg = true,
@@ -24,11 +24,11 @@ interface.argtypes.LongArg = {
           end,
    
    check = function(arg, idx)
-            return string.format("lab_islongargs(L, %d)", idx)
+            return string.format("torch_islongargs(L, %d)", idx)
          end,
 
    read = function(arg, idx)
-             return string.format("arg%d = lab_checklongargs(L, %d);", arg.i, idx)
+             return string.format("arg%d = torch_checklongargs(L, %d);", arg.i, idx)
           end,
    
    carg = function(arg, idx)
@@ -61,7 +61,7 @@ interface.argtypes.LongArg = {
               end   
 }
 
--- also specific to lab: we generate a 'dispatch' function
+-- also specific to torch: we generate a 'dispatch' function
 interface.dispatchregistry = {}
 function interface:wrap(name, ...)
    -- usual stuff
@@ -70,10 +70,10 @@ function interface:wrap(name, ...)
    -- dispatch function
    if not interface.dispatchregistry[name] then
       interface.dispatchregistry[name] = true
-      table.insert(interface.dispatchregistry, {name=name, wrapname=string.format("lab_%s", name)})
+      table.insert(interface.dispatchregistry, {name=name, wrapname=string.format("torch_%s", name)})
 
       interface:print(string.gsub([[
-static int lab_NAME(lua_State *L)
+static int torch_NAME(lua_State *L)
 {
   int narg = lua_gettop(L);
   const void *id = NULL;
@@ -85,12 +85,12 @@ static int lab_NAME(lua_State *L)
       if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
         lua_pop(L, 1);
       else
-        id = lab_default_tensor_id;
+        id = torch_getdefaulttensorid();
     }
   }
   luaT_pushmetaclass(L, id);
 
-  lua_pushstring(L, "lab");
+  lua_pushstring(L, "torch");
   lua_rawget(L, -2);
   if(lua_istable(L, -1))
   {
@@ -103,10 +103,10 @@ static int lab_NAME(lua_State *L)
       lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
     }
     else
-      return luaL_error(L, "%s does not implement the lab.NAME() function", luaT_id2typename(L, id));
+      return luaL_error(L, "%s does not implement the torch.NAME() function", luaT_id2typename(L, id));
   }
   else
-    return luaL_error(L, "%s does not implement lab functions", luaT_id2typename(L, id));
+    return luaL_error(L, "%s does not implement torch functions", luaT_id2typename(L, id));
 
   return lua_gettop(L);
 }
@@ -144,7 +144,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    local real = reals[Tensor]
 
    function interface.luaname2wrapname(self, name)
-      return string.format('lab_%s_%s', Tensor, name)
+      return string.format('torch_%s_%s', Tensor, name)
    end
 
    local function cname(name)
@@ -446,26 +446,26 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
 
    end
 
-   interface:register(string.format("lab_%s_stuff", Tensor))
+   interface:register(string.format("torch_%sMath__", Tensor))
 
    interface:print(string.gsub([[
-static void lab_Tensor_init(lua_State *L)
+static void torch_TensorMath_init(lua_State *L)
 {
   torch_Tensor_id = luaT_checktypename2id(L, "torch.Tensor");
   torch_LongStorage_id = luaT_checktypename2id(L, "torch.LongStorage");
 
-  /* register everything into the "lab" field of the tensor metaclass */
+  /* register everything into the "torch" field of the tensor metaclass */
   luaT_pushmetaclass(L, torch_Tensor_id);
-  lua_pushstring(L, "lab");
+  lua_pushstring(L, "torch");
   lua_newtable(L);
-  luaL_register(L, NULL, lab_Tensor_stuff);
+  luaL_register(L, NULL, torch_TensorMath__);
   lua_rawset(L, -3);
   lua_pop(L, 1);
 }
 ]], 'Tensor', Tensor))
 end
 
-interface:dispatchregister("lab_stuff")
+interface:dispatchregister("torch_TensorMath__")
 
 if arg[1] then
    interface:tofile(arg[1])

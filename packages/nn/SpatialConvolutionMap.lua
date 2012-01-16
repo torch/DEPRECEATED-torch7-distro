@@ -27,7 +27,7 @@ end
 function nn.tables.random(nin, nout, nto)
    local nker = nto * nout
    local tbl = torch.Tensor(nker, 2)
-   local fi = lab.randperm(nin)
+   local fi = torch.randperm(nin)
    local frcntr = 1
    local tocntr = 1
    local nfi = math.floor(nin/nto) -- number of distinct nto chunks 
@@ -44,7 +44,7 @@ function nn.tables.random(nin, nout, nto)
       ufrtbl:select(1,i):copy(ufitbl:select(1,frcntr))
       frcntr = frcntr + 1
       if frcntr-1 ==  nfi then -- reset fi
-	 fi:copy(lab.randperm(nin))
+	 fi:copy(torch.randperm(nin))
 	 frcntr = 1
       end
    end

@@ -1,4 +1,5 @@
 #include "general.h"
+#include "utils.h"
 
 extern void torch_utils_init(lua_State *L);
 extern void torch_File_init(lua_State *L);
@@ -24,13 +25,15 @@ extern void torch_LongTensor_init(lua_State *L);
 extern void torch_FloatTensor_init(lua_State *L);
 extern void torch_DoubleTensor_init(lua_State *L);
 
-extern void torch_ByteTensorMath_init(lua_State *L);
-extern void torch_CharTensorMath_init(lua_State *L);
-extern void torch_ShortTensorMath_init(lua_State *L);
-extern void torch_IntTensorMath_init(lua_State *L);
-extern void torch_LongTensorMath_init(lua_State *L);
-extern void torch_FloatTensorMath_init(lua_State *L);
-extern void torch_DoubleTensorMath_init(lua_State *L);
+extern void torch_ByteTensorOperator_init(lua_State *L);
+extern void torch_CharTensorOperator_init(lua_State *L);
+extern void torch_ShortTensorOperator_init(lua_State *L);
+extern void torch_IntTensorOperator_init(lua_State *L);
+extern void torch_LongTensorOperator_init(lua_State *L);
+extern void torch_FloatTensorOperator_init(lua_State *L);
+extern void torch_DoubleTensorOperator_init(lua_State *L);
+
+extern void torch_TensorMath_init(lua_State *L);
 
 static lua_State *globalL;
 static void luaTorchErrorHandlerFunction(const char *msg)
@@ -53,7 +56,6 @@ DLL_EXPORT int luaopen_libtorch(lua_State *L)
   lua_pushvalue(L, -1);
   lua_setfield(L, LUA_GLOBALSINDEX, "torch");
 
-  torch_utils_init(L);
   torch_File_init(L);
 
   torch_ByteStorage_init(L);
@@ -74,18 +76,22 @@ DLL_EXPORT int luaopen_libtorch(lua_State *L)
 
   torch_File_init_storage_id(L);
 
-  torch_ByteTensorMath_init(L);
-  torch_CharTensorMath_init(L);
-  torch_ShortTensorMath_init(L);
-  torch_IntTensorMath_init(L);
-  torch_LongTensorMath_init(L);
-  torch_FloatTensorMath_init(L);
-  torch_DoubleTensorMath_init(L);
+  torch_ByteTensorOperator_init(L);
+  torch_CharTensorOperator_init(L);
+  torch_ShortTensorOperator_init(L);
+  torch_IntTensorOperator_init(L);
+  torch_LongTensorOperator_init(L);
+  torch_FloatTensorOperator_init(L);
+  torch_DoubleTensorOperator_init(L);
 
   torch_Timer_init(L);
   torch_DiskFile_init(L);
   torch_PipeFile_init(L);
   torch_MemoryFile_init(L);
+
+  torch_TensorMath_init(L);
+
+  torch_utils_init(L);
 
   return 1;
 }

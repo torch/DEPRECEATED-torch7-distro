@@ -155,7 +155,7 @@ function nntest.SoftShrink()
 end
 
 function nntest.Power()
-   local in1 = lab.rand(10,20)
+   local in1 = torch.rand(10,20)
    local module = nn.Power(2)
    local out = module:forward(in1)
    local err = out:dist(in1:cmul(in1))
@@ -178,7 +178,7 @@ function nntest.Power()
 end
 
 function nntest.Square()
-   local in1 = lab.rand(10,20)
+   local in1 = torch.rand(10,20)
    local module = nn.Square()
    local out = module:forward(in1)
    local err = out:dist(in1:cmul(in1))
@@ -200,7 +200,7 @@ function nntest.Square()
 end
 
 function nntest.Sqrt()
-   local in1 = lab.rand(10,20)
+   local in1 = torch.rand(10,20)
    local module = nn.Sqrt()
    local out = module:forward(in1)
    local err = out:dist(in1:sqrt())
@@ -515,7 +515,7 @@ function nntest.SpatialSubtractiveNormalization_2dkernel()
    local nbfeatures = math.random(5,10)
    local kernel = torch.Tensor(kersize,kersize):fill(1)
    local module = nn.SpatialSubtractiveNormalization(nbfeatures,kernel)
-   local input = lab.rand(nbfeatures,inputSize,inputSize)
+   local input = torch.rand(nbfeatures,inputSize,inputSize)
 
    local err = jac.testJacobian(module,input)
    mytester:assertlt(err,precision, 'error on state ')
@@ -531,7 +531,7 @@ function nntest.SpatialSubtractiveNormalization_1dkernel()
    local nbfeatures = math.random(5,10)
    local kernel = torch.Tensor(kersize):fill(1)
    local module = nn.SpatialSubtractiveNormalization(nbfeatures,kernel)
-   local input = lab.rand(nbfeatures,inputSize,inputSize)
+   local input = torch.rand(nbfeatures,inputSize,inputSize)
 
    local err = jac.testJacobian(module,input)
    mytester:assertlt(err,precision, 'error on state ')
@@ -677,7 +677,7 @@ function batchcompare(smod, sin, plist)
    local sout = smod:forward(sin):clone()
    local bout = bmod:forward(bin):clone()
 
-   local sgout = lab.randn(sout:size())
+   local sgout = torch.randn(sout:size())
    local bgout = torch.Tensor(bout:size())
    bgout:copy(sgout)
 
@@ -708,7 +708,7 @@ function nntest.SpatialConvolutionBatchCompare()
    local inj = (outj-1)*sj+kj
 
    local module = nn.SpatialConvolution(from, to, ki, kj, si, sj)
-   local input = lab.randn(from,inj,ini)
+   local input = torch.randn(from,inj,ini)
 
    batchcompare(module,input, {'weight','bias','gradWeight','gradBias'})
 end
@@ -724,7 +724,7 @@ function nntest.SpatialSubSamplingBatchCompare()
    local ini = (outi-1)*si+ki
    local inj = (outj-1)*sj+kj
    local module = nn.SpatialSubSampling(from, ki, kj, si, sj)
-   local input = lab.randn(from,inj,ini)--torch.Tensor(from, inj, ini):zero()
+   local input = torch.randn(from,inj,ini)--torch.Tensor(from, inj, ini):zero()
 
    batchcompare(module,input, {'weight','bias','gradWeight','gradBias'})
 end
@@ -819,7 +819,7 @@ function nntest.SpatialMaxPooling()
    local sizex = osizex*mx
    local sizey = osizey*my
    local module = nn.SpatialMaxPooling(mx,my,mx,my)
-   local input = lab.rand(fanin,sizey,sizex)
+   local input = torch.rand(fanin,sizey,sizex)
 
    local err = jac.testJacobian(module, input)
    mytester:assertlt(err, precision, 'error on state ')
@@ -841,7 +841,7 @@ function nntest.SpatialLPPooling()
    local sizex = osizex*mx
    local sizey = osizey*my
    local module = nn.SpatialLPPooling(fanin,p,mx,my,dx,dy)
-   local input = lab.rand(fanin,sizey,sizex)
+   local input = torch.rand(fanin,sizey,sizex)
 
    local err = jac.testJacobian(module, input)
    mytester:assertlt(err, precision, 'error on state ')

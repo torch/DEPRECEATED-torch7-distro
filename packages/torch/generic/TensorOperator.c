@@ -1,10 +1,10 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/TensorMath.c"
+#define TH_GENERIC_FILE "generic/TensorOperator.c"
 #else
 
 static const void* torch_Tensor_id;
 
-static int torch_TensorMath_(__add__)(lua_State *L)
+static int torch_TensorOperator_(__add__)(lua_State *L)
 {
   THTensor *tensor1 = luaT_toudata(L, 1, torch_Tensor_id);
   THTensor *tensor2 = luaT_toudata(L, 2, torch_Tensor_id);
@@ -39,7 +39,7 @@ static int torch_TensorMath_(__add__)(lua_State *L)
   return 1;
 }
 
-static int torch_TensorMath_(__sub__)(lua_State *L)
+static int torch_TensorOperator_(__sub__)(lua_State *L)
 {
   THTensor *tensor1 = luaT_toudata(L, 1, torch_Tensor_id);
   THTensor *tensor2 = luaT_toudata(L, 2, torch_Tensor_id);
@@ -74,7 +74,7 @@ static int torch_TensorMath_(__sub__)(lua_State *L)
   return 1;
 }
 
-static int torch_TensorMath_(__unm__)(lua_State *L)
+static int torch_TensorOperator_(__unm__)(lua_State *L)
 {
   THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor_id);
   THTensor *r;
@@ -88,7 +88,7 @@ static int torch_TensorMath_(__unm__)(lua_State *L)
   return 1;
 }
 
-static int torch_TensorMath_(__mul__)(lua_State *L)
+static int torch_TensorOperator_(__mul__)(lua_State *L)
 {
   THTensor *tensor1 = luaT_toudata(L, 1, torch_Tensor_id);
   THTensor *tensor2 = luaT_toudata(L, 2, torch_Tensor_id);
@@ -139,7 +139,7 @@ static int torch_TensorMath_(__mul__)(lua_State *L)
   return 1;
 }
 
-static int torch_TensorMath_(__div__)(lua_State *L)
+static int torch_TensorOperator_(__div__)(lua_State *L)
 {
   THTensor *tensor = luaT_checkudata(L, 1, torch_Tensor_id);
   THTensor *r;
@@ -156,21 +156,21 @@ static int torch_TensorMath_(__div__)(lua_State *L)
   return 1;
 }
 
-static const struct luaL_Reg torch_TensorMath_(_) [] = {
-  {"__add__", torch_TensorMath_(__add__)},
-  {"__sub__", torch_TensorMath_(__sub__)},
-  {"__unm__", torch_TensorMath_(__unm__)},
-  {"__mul__", torch_TensorMath_(__mul__)},
-  {"__div__", torch_TensorMath_(__div__)},
+static const struct luaL_Reg torch_TensorOperator_(_) [] = {
+  {"__add__", torch_TensorOperator_(__add__)},
+  {"__sub__", torch_TensorOperator_(__sub__)},
+  {"__unm__", torch_TensorOperator_(__unm__)},
+  {"__mul__", torch_TensorOperator_(__mul__)},
+  {"__div__", torch_TensorOperator_(__div__)},
   {NULL, NULL}
 };
 
-void torch_TensorMath_(init)(lua_State *L)
+void torch_TensorOperator_(init)(lua_State *L)
 {
   torch_Tensor_id = luaT_checktypename2id(L, STRING_torchTensor);
 
   luaT_pushmetaclass(L, torch_Tensor_id);
-  luaL_register(L, NULL, torch_TensorMath_(_));
+  luaL_register(L, NULL, torch_TensorOperator_(_));
   lua_pop(L, 1);
 }
 

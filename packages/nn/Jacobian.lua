@@ -114,7 +114,7 @@ function nn.Jacobian.testJacobian (module, input, minval, maxval)
    minval = minval or -2
    maxval = maxval or 2
    local inrange = maxval - minval
-   input:copy(lab.rand(input:nElement()):mul(inrange):add(minval))
+   input:copy(torch.rand(input:nElement()):mul(inrange):add(minval))
    local jac_fprop = nn.Jacobian.forward(module,input)
    local jac_bprop = nn.Jacobian.backward(module,input)
    local error = jac_fprop-jac_bprop
@@ -125,8 +125,8 @@ function nn.Jacobian.testJacobianParameters (module, input, param, dparam, minva
    minval = minval or -2
    maxval = maxval or 2
    local inrange = maxval - minval
-   input:copy(lab.rand(input:nElement()):mul(inrange):add(minval))
-   param:copy(lab.rand(param:nElement()):mul(inrange):add(minval))
+   input:copy(torch.rand(input:nElement()):mul(inrange):add(minval))
+   param:copy(torch.rand(param:nElement()):mul(inrange):add(minval))
    local jac_bprop = nn.Jacobian.backward(module, input, param, dparam)
    local jac_fprop = nn.Jacobian.forward(module, input, param)
    local error = jac_fprop - jac_bprop
@@ -137,8 +137,8 @@ function nn.Jacobian.testJacobianUpdateParameters (module, input, param, minval,
    minval = minval or -2
    maxval = maxval or 2
    local inrange = maxval - minval
-   input:copy(lab.rand(input:nElement()):mul(inrange):add(minval))
-   param:copy(lab.rand(param:nElement()):mul(inrange):add(minval))
+   input:copy(torch.rand(input:nElement()):mul(inrange):add(minval))
+   param:copy(torch.rand(param:nElement()):mul(inrange):add(minval))
    local params_bprop = nn.Jacobian.backwardUpdate(module, input, param)
    local params_fprop = nn.Jacobian.forwardUpdate(module, input, param)
 
@@ -153,7 +153,7 @@ function nn.Jacobian.testIO(module,input, minval, maxval)
 
    -- run module
    module:forward(input)
-   local go = module.output:clone():copy(lab.rand(module.output:nElement()):mul(inrange):add(minval))
+   local go = module.output:clone():copy(torch.rand(module.output:nElement()):mul(inrange):add(minval))
    module:updateGradInput(input,go)
    module:accGradParameters(input,go)
 
@@ -189,7 +189,7 @@ function nn.Jacobian.testAllUpdate(module, input, weight, gradWeight)
    local maccgp = module:clone()
    local weightc = maccgp[weight]:clone()
    maccgp:forward(input)
-   gradOutput = lab.rand(maccgp.output:size())
+   gradOutput = torch.rand(maccgp.output:size())
    maccgp:zeroGradParameters()
    maccgp:updateGradInput(input, gradOutput)
    maccgp:accGradParameters(input, gradOutput)

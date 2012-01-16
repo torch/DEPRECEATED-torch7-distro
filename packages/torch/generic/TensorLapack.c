@@ -1,8 +1,8 @@
 #ifndef TH_GENERIC_FILE
-#define TH_GENERIC_FILE "generic/lablapack.c"
+#define TH_GENERIC_FILE "generic/TensorLapack.c"
 #else
 
-static int lab_(gesv)(lua_State *L)
+static int torch_(gesv)(lua_State *L)
 {
   THTensor *a_ = luaT_checkudata(L,1,torch_(Tensor_id));
   THTensor *b_ = luaT_checkudata(L,2,torch_(Tensor_id));
@@ -45,7 +45,7 @@ static int lab_(gesv)(lua_State *L)
   return 1;
 }
 
-static int lab_(gels)(lua_State *L)
+static int torch_(gels)(lua_State *L)
 {
   THTensor *a_ = luaT_checkudata(L,1,torch_(Tensor_id));
   THTensor *b_ = luaT_checkudata(L,2,torch_(Tensor_id));
@@ -88,7 +88,7 @@ static int lab_(gels)(lua_State *L)
   return 1;
 }
 
-static int lab_(eig)(lua_State *L)
+static int torch_(eig)(lua_State *L)
 {
   THTensor *a_, *e_;
 
@@ -165,7 +165,7 @@ static int lab_(eig)(lua_State *L)
   return 0;
 }
 
-static int lab_(svd)(lua_State *L)
+static int torch_(svd)(lua_State *L)
 {
   THTensor *a_, *u_, *s_, *vt_;
 
@@ -223,23 +223,23 @@ static int lab_(svd)(lua_State *L)
   return 0;
 }
 
-static const struct luaL_Reg lab_(lapack_stuff__) [] = {
-  {"gesv", lab_(gesv)},
-  {"gels", lab_(gels)},
-  {"eig", lab_(eig)},
-  {"svd", lab_(svd)},
+static const struct luaL_Reg torch_(lapack__) [] = {
+  {"gesv", torch_(gesv)},
+  {"gels", torch_(gels)},
+  {"eig", torch_(eig)},
+  {"svd", torch_(svd)},
   {NULL, NULL}
 };
 
-void lab_(lapack_init)(lua_State *L)
+void torch_(lapack_init)(lua_State *L)
 {
   torch_(Tensor_id) = luaT_checktypename2id(L, torch_string_(Tensor));
 
-  /* register everything into the "lab" field of the tensor metaclass */
+  /* register everything into the "torch" field of the tensor metaclass */
   luaT_pushmetaclass(L, torch_(Tensor_id));
-  lua_pushstring(L, "lab");
+  lua_pushstring(L, "torch");
   lua_rawget(L, -2);
-  luaL_register(L, NULL, lab_(lapack_stuff__));
+  luaL_register(L, NULL, torch_(lapack__));
   lua_pop(L, 2);
 }
 

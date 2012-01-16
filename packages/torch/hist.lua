@@ -7,7 +7,7 @@
 --  + made 80 columns default
 --  + save index of max bin in h.max not pointer to bin
 --
-function lab.histc__tostring(h, barHeight)
+function torch.histc__tostring(h, barHeight)
    barHeight = barHeight or 10
    local lastm = h[h.max].nb
    local incr  = lastm/(barHeight+1)
@@ -83,20 +83,20 @@ function lab.histc__tostring(h, barHeight)
 end
 
 -- a simple function that computes the histogram of a tensor
-function lab.histc(...)
+function torch.histc(...)
    -- get args
    local args = {...}
-   local tensor = args[1] or error('usage: lab.histc (tensor [, nBins] [, min] [, max]')
+   local tensor = args[1] or error('usage: torch.histc (tensor [, nBins] [, min] [, max]')
    local bins = args[2] or 80 - 8
    local min = args[3] or tensor:min()
    local max = args[4] or tensor:max()
    local raw = args[5] or false
 
    -- compute histogram
-   local hist = lab.zeros(bins)
+   local hist = torch.zeros(bins)
    local ten = torch.Tensor(tensor:nElement()):copy(tensor)
    ten:add(-min):div(max-min):mul(bins - 1e-6):floor():add(1)
-   ten.lab._histc(ten, hist, bins)
+   ten.torch._histc(ten, hist, bins)
 
    -- return raw histogram (no extra info)
    if raw then return hist end
@@ -104,8 +104,8 @@ function lab.histc(...)
    -- cleanup hist
    local cleanhist = {}
    cleanhist.raw = hist
-   local _,mx = lab.max(cleanhist.raw)
-   local _,mn = lab.min(cleanhist.raw)
+   local _,mx = torch.max(cleanhist.raw)
+   local _,mn = torch.min(cleanhist.raw)
    cleanhist.bins = bins
    cleanhist.binwidth = (max-min)/bins
    for i = 1,bins do
@@ -117,7 +117,7 @@ function lab.histc(...)
    cleanhist.min = mn[1]
 
    -- print function
-   setmetatable(cleanhist, {__tostring=lab.histc__tostring})
+   setmetatable(cleanhist, {__tostring=torch.histc__tostring})
    return cleanhist
 end
 

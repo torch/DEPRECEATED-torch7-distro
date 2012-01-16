@@ -21,9 +21,8 @@ function import(package, forced) \
 end \
 "
 
-# by default, import torch+lab globally
+# by default, import torch globally
 IMPORT_TORCH="import 'torch'"
-IMPORT_LAB="import 'lab'"
 IMPORT_PLOT="import 'gnuplot'"
 IMPORT_DOK="require 'dok'"
 
