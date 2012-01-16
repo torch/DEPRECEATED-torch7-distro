@@ -62,6 +62,28 @@ interface.argtypes.LongArg = {
 }
 
 -- also specific to torch: we generate a 'dispatch' function
+-- first we create a helper function
+interface:print([[
+static const void* torch_istensorid(lua_State *L, const void *id)
+{
+  if(!id)
+    return NULL;
+
+  luaT_pushmetaclass(L, id);
+  lua_pushstring(L, "torch");
+  lua_rawget(L, -2);
+  if(lua_istable(L, -1))
+    return id;
+  else
+  {
+    lua_pop(L, 2);
+    return NULL;
+  }
+
+  return NULL;
+}
+]])
+
 interface.dispatchregistry = {}
 function interface:wrap(name, ...)
    -- usual stuff
@@ -76,37 +98,29 @@ function interface:wrap(name, ...)
 static int torch_NAME(lua_State *L)
 {
   int narg = lua_gettop(L);
-  const void *id = NULL;
+  const void *id;
 
-  if(narg < 1 || !(id = luaT_id(L, 1))) /* first argument is tensor? */
+  if(narg < 1 || !(id = torch_istensorid(L, luaT_id(L, 1)))) /* first argument is tensor? */
   {
-    if(narg < 2 || !(id = luaT_id(L, 2))) /* second? */
+    if(narg < 2 || !(id = torch_istensorid(L, luaT_id(L, 2)))) /* second? */
     {
-      if(lua_isstring(L, -1) && (id = luaT_typename2id(L, lua_tostring(L, -1)))) /* do we have a valid string then? */
+      if(lua_isstring(L, -1) && (id = torch_istensorid(L, luaT_typename2id(L, lua_tostring(L, -1))))) /* do we have a valid string then? */
         lua_pop(L, 1);
-      else
-        id = torch_getdefaulttensorid();
+      else if(!(id = torch_istensorid(L, torch_getdefaulttensorid())))
+        luaL_error(L, "internal error: the default tensor type does not seem to be an actual tensor");
     }
   }
-  luaT_pushmetaclass(L, id);
-
-  lua_pushstring(L, "torch");
+  
+  lua_pushstring(L, "NAME");
   lua_rawget(L, -2);
-  if(lua_istable(L, -1))
+  if(lua_isfunction(L, -1))
   {
-    lua_pushstring(L, "NAME");
-    lua_rawget(L, -2);
-    if(lua_isfunction(L, -1))
-    {
-      lua_insert(L, 1);
-      lua_pop(L, 2); /* the two tables we put on the stack above */
-      lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
-    }
-    else
-      return luaL_error(L, "%s does not implement the torch.NAME() function", luaT_id2typename(L, id));
+    lua_insert(L, 1);
+    lua_pop(L, 2); /* the two tables we put on the stack above */
+    lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
   }
   else
-    return luaL_error(L, "%s does not implement torch functions", luaT_id2typename(L, id));
+    return luaL_error(L, "%s does not implement the torch.NAME() function", luaT_id2typename(L, id));
 
   return lua_gettop(L);
 }
