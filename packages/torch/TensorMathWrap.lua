@@ -454,7 +454,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
                       {name="LongArg"}})
 
       interface:wrap("randn",
-                     cname("rand"),
+                     cname("randn"),
                      {{name=Tensor, default=true, returned=true},
                       {name="LongArg"}})
 
