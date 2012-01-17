@@ -14,11 +14,11 @@ wrap.argtypes.Tensor = {
           end,
    
    check = function(arg, idx)
-            return string.format("luaT_isudata(L, %d, torch_(Tensor_id))", idx)
+            return string.format("(arg%d = luaT_toudata(L, %d, torch_(Tensor_id)))", arg.i, idx)
          end,
 
    read = function(arg, idx)
-             return string.format("arg%d = luaT_toudata(L, %d, torch_(Tensor_id));", arg.i, idx)
+            -- already done above
           end,
    
    carg = function(arg, idx)
@@ -139,11 +139,11 @@ for _,typename in ipairs({"ByteTensor", "CharTensor", "ShortTensor", "IntTensor"
              end,
 
       check = function(arg, idx)
-                 return string.format("luaT_isudata(L, %d, torch_%s_id)", idx, typename)
+                 return string.format("(arg%d = luaT_toudata(L, %d, torch_%s_id))", arg.i, idx, typename)
               end,
 
       read = function(arg, idx)
-                return string.format("arg%d = luaT_toudata(L, %d, torch_%s_id);", arg.i, idx, typename)
+                -- already done above
              end,
       
       carg = function(arg, idx)
