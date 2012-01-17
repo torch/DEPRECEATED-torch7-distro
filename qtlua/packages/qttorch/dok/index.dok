@@ -1,4 +1,5 @@
 ======  QTTorch Package Reference Manual ====== 
+{{anchor:qttorch.dok}}
 
 Package ''qttorch'' declares two functions
 that convert ''torch.Tensor'' to ''QImage'' and vice-versa.

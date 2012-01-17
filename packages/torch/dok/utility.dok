@@ -189,7 +189,7 @@ If the two objects given as arguments are ''Lua'' tables (or Torch objects), the
 tables (or Torch objects) have the same address in memory. Returns ''false'' in any other cases.
 
 A Torch class is a class created with [[#TorchClass|torch.class()]] or
-[[#TorchNewmetatable|torch.newmetatable()]].
+[[#torch.newmetatable|torch.newmetatable()]].
 
 =====  torch.setenv(function or userdata, table) =====
 {{anchor:torch.setenv}}

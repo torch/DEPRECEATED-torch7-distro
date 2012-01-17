@@ -6,7 +6,12 @@
 %TITLE%
 </title>
 <link href="doctorch.css" rel="stylesheet" type="text/css">
-<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript" src="jquery.js"></script>
+<script type="text/javascript" src="shCore.js"></script>
+<script type="text/javascript" src="shBrushLua.js"></script>
+<link type="text/css" rel="stylesheet" href="shCore.css"/>
+<script type="text/javascript">SyntaxHighlighter.all();</script>
+<script language="JavaScript1.3" type="text/javascript" src="jse_form.js"></script>
 </head>
 
 <body class="torchdoc">
@@ -17,7 +22,21 @@
 </div>
 
 <div id="navline">
+
+<span id="title">
 %NAVLINE%
+</span>
+
+<span id="search">
+<form name="jse_Form" onsubmit="search_form(jse_Form);return false">
+<input type="text" name="d">
+<input type="button" value="Go" onclick="search_form(jse_Form)">
+</form>
+</span>
+
+</div>
+
+<div id="results">
 </div>
 
 <div id="toc">
@@ -32,11 +51,10 @@
 %JS%
 </script>
 
-<div id="footer-left">&nbsp;</div>
-<div id="footer-right">&nbsp;</div>
-
+<div id="footer-left">
 <div id="last-modified">
 %LASTMODIFIED%
+</div>
 </div>
 
 </div>

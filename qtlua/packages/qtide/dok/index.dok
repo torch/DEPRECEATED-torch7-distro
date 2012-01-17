@@ -1,4 +1,5 @@
 ======  QtIde Package Reference Manual ====== 
+{{anchor:qtide.dok}}
 
 A package implementing 
 the QLua Integrated Development Environment (IDE),
@@ -10,9 +11,11 @@ it is under heavy development.
 
 
 ====  Functions ====
+{{anchor:qtide.functions.}}
 {{anchor:qtidefunctions}}
 
 ===  qtide.editor([filename]) ===
+{{anchor:qtide.editor}}
 
 Called without argument, this function returns a 
 text editor object of class [[#qluaeditor|QLuaEditor]].
@@ -26,6 +29,7 @@ and are accessible by name in the ''qt'' package.
 
 
 ===  qtide.doeditor(qluaeditor) ===
+{{anchor:qtide.doeditor}}
 
 This function executes the chunk of Lua code
 corresponding to the text present in the editor ''qluaeditor''.
@@ -37,6 +41,7 @@ Lua function ''dofile''.)
 
 
 ===  qtide.browser([url]) ===
+{{anchor:qtide.browser}}
 
 This function opens a web browser for URL ''url''.
 The web browser is a widget of class [[#qluabrowser|QLuaBrowser]].
@@ -45,16 +50,19 @@ requests the help index.
 
 
 ===  qtide.inspector(...) ===
+{{anchor:qtide.inspector}}
 
 Not yet implemented
 
 
 ===  qtide.preferences() ===
+{{anchor:qtide.preferences}}
 
 Not yet implemented
 
 
 ===  qtide.start([style]) ===
+{{anchor:qtide.start}}
 {{anchor:qtidestart}}
 
 Starts the QLua Integrated Development Environment (IDE)
@@ -75,6 +83,7 @@ The recognized IDE styles are:
 
 
 ===  qtide.setup([style]) ===
+{{anchor:qtide.setup}}
 {{anchor:qtidesetup}}
 
 This function is called by [[#qtidestart|qtide.start()]]
@@ -84,7 +93,7 @@ a graphic console.
 
 
 ====  Qt Classes ====
-
+{{anchor:qtclasses}}
 
 ===  qt.QLuaIde ===
 {{anchor:qluaide}}
@@ -97,6 +106,7 @@ accessible using the functions defined
 by the [[#qtidefunctions|package ''qtide]].
 
 ==  qt.qLuaIde.editOnError ==
+{{anchor:qluaide.editOnError}}
 
 When a Lua error occurs, this boolean property 
 specifies whether editors are automatically opened
@@ -105,47 +115,63 @@ This property is ''false'' by default
 Function [[#qtidestart|qtide.start]] sets it to ''true''.
 
 ==  qt.qLuaIde:windows() ==
+{{anchor:qluaide.windows}}
 
 Returns a variant of type ''qt.QObjectList'' containing
 all the main windows managed by the IDE.
 
 ==  qt.qLuaIde:windowNames() ==
+{{anchor:qluaide.windowNames}}
 
 Returns a variant of type ''qt.QStringList'' containing
 the names of all the main windows managed by the IDE.
 
 ==  qt.qLuaIde:activeWindow() ==
+{{anchor:qluaide.activeWindow}}
 
 ==  qt.qLuaIde:editor([fname]) ==
+{{anchor:qluaide.editor}}
 
 ==  qt.qLuaIde:browser([url]) ==
+{{anchor:qluaide.browser}}
 
 ==  qt.qLuaIde:inspector() ==
+{{anchor:qluaide.inspector}}
 
 ==  qt.qLuaIde:recentFiles() ==
+{{anchor:qluaide.recentFiles}}
 
 Returns a variant of type ''qt.QStringList'' containing
 the file names appearing in the "Open Recent Files" menu.
 
 ==  qt.qLuaIde:addRecentFile(fname) ==
+{{anchor:qluaide.addRecentFile}}
 
 ==  qt.qLuaIde:clearRecentFiles() ==
+{{anchor:qluaide.clearRecentFiles}}
 
 ==  qt.qLuaIde:activateWidget(qwidget) ==
+{{anchor:qluaide.activateWidget}}
 
 ==  qt.qLuaIde:activateConsole() ==
+{{anchor:qluaide.activateConsole}}
 
 ==  qt.qLuaIde:messageBox(title,message,buttons,[defbutton,[icon]]) ==
+{{anchor:qluaide.messageBox}}
 
 ==  qt.qLuaIde:hasAction(name) ==
+{{anchor:qluaide.hasAction}}
 
 ==  qt.qLuaIde:stdAction(name) ==
+{{anchor:qluaide.stdAction}}
 
 ==  [qt.QLuaIde signal] prefsRequested(qwidget) ==
+{{anchor:qluaide.prefsRequested}}
 
 This signal is emitted when the "Preferences" menu is selected.
 
 ==  [qt.QLuaIde signal] helpRequested(qwidget) ==
+{{anchor:qluaide.helpRequested}}
 
 This signal is emitted when the "Help Index" menu is selected.
 
@@ -159,14 +185,19 @@ functionalities shared by all main windows defined
 by the ''qtide'' package.
 
 ==  qluamainwindow:clearStatusMessage() ==
+{{anchor:qluamainwindow.clearStatusMessage}}
 
 ==  qluamainwindow:showStatusMessage(string,[timeout]) ==
+{{anchor:qluamainwindow.showStatusMessage}}
 
 ==  qluamainwindow:hasAction(name) ==
+{{anchor:qluamainwindow.hasAction}}
 
 ==  qluamainwindow:stdAction(name) ==
+{{anchor:qluamainwindow.stdAction}}
 
 ==  qluamainwindow:doXXXX() ==
+{{anchor:qluamainwindow.doXXXX}}
 
 Methods whose name start with ''do'' implement
 the functions accessible from the menus and toolbar icons
@@ -182,19 +213,22 @@ an instance of [[#qluatextedit|qt.QLuaTextEdit]]
 as its main widget.
 
 ==  qluaeditor:widget() ==
+{{anchor:qluaeditor.widget}}
 
 Expression ''qluaeditor:widget()'' returns the
 [[#qluatextedit|qt.QLuaTextEdit]]
 object that underlies the editor window.
 
 ==  qluaeditor.fileName ==
+{{anchor:qluaeditor.fileName}}
 
 This property contains the name of the file being edited.
 
 ==  qluaeditor:readFile(string) ==
+{{anchor:qluaeditor.readFile}}
 
 ==  qluaeditor:writeFile(string) ==
-
+{{anchor:qluaeditor.writeFile}}
 
 
 ===  qt.QLuaBrowser ===
@@ -205,12 +239,14 @@ implements the QLua web browser windows using the Qt WebKit interface.
 
 
 ==  qluabrowser.url ==
+{{anchor:qluabrowser.url}}
 
 This property contains a qt variant 
 of type [[..:qt:index#qurl|qt.QUrl]] 
 representing the URL displayed by the browser.
 
 ==  qluabrowser.html ==
+{{anchor:qluabrowser.html}}
 
 This property contains a qt variant of type ''QString''
 representing the HTML text displayed by the browser.
@@ -227,6 +263,7 @@ Expression ''qt.qLuaSdiMain'' returns the single console
 window when such a window exists.
 
 ==  qt.qLuaSdiMain:consoleWidget() ==
+{{anchor:qluasdimain.consoleWidget}}
 
 Returns the object of class 
 [[#qluaconsolewidget|qt.QLuaTextEdit]]
@@ -234,6 +271,7 @@ implementing the part of the main console
 where the user can edit and submit lua strings.
 
 ==  qt.qLuaSdiMain:editorWidget() ==
+{{anchor:qluasdimain.editorWidget}}
 
 Returns the object of class 
 [[#qluatextedit|qt.QLuaTextEdit]]
@@ -250,12 +288,14 @@ to implement the IDE styles. Expression ''qt.qLuaMdiMain''
 returns the single main window when such a window exists.
 
 ==  qt.qLuaMdiMain.tabMode ==
+{{anchor:qluamdimain.tabMode}}
 
 The boolean property ''qt.qLuaMdiMain.tabMode''
 indicates whether the aggregated
 windows are displayed using tabs or using a multiple document interface.
 
 ==  qt.qLuaMdiMain.clientClass ==
+{{anchor:qluamdimain.clientClass}}
 
 The string property ''qt.qLuaMdiMain.clientClass'' 
 contains the name of a class.
@@ -263,15 +303,17 @@ All new main windows inheriting this class are then
 managed by the single main window.
 
 ==  qt.qLuaMdiMain:adoptAll() ==
+{{anchor:qluamdimain.adoptAll}}
 
 Collects all main windows that are 
 subclasses of ''qt.qLuaMdiMain.clientClass'' 
 and aggregates them into the mdi main window.
 
 ==  qt.qLuaMdiMain:adopt(qwidget) ==
+{{anchor:qluamdimain.adopt}}
 
 ==  qt.qLuaMdiMain:activate(qwidget) ==
-
+{{anchor:qluamdimain.activate}}
 
 ===  qt.QLuaTextEdit ===
 {{anchor:qluatextedit}}
@@ -281,28 +323,37 @@ from ''QPlainTextEdit'' with support for line numbers,
 find dialog, replace dialog, and printing.
 
 ==  qluatextedit.showLineNumbers ==
+{{anchor:qluatextedit.showLineNumbers}}
 
 ==  qluatextedit.autoComplete ==
+{{anchor:qluatextedit.autoComplete}}
 
 ==  qluatextedit.autoIndent ==
+{{anchor:qluatextedit.autoIndent}}
 
 ==  qluatextedit.autoHighlight ==
+{{anchor:qluatextedit.autoHighlight}}
 
 ==  qluatextedit.autoMatch ==
+{{anchor:qluatextedit.autoMatch}}
 
 ==  qluatextedit.tabExpand ==
+{{anchor:qluatextedit.tabExpand}}
 
 ==  qluatextedit.tabSize ==
+{{anchor:qluatextedit.tabSize}}
 
 ==  qluatextedit:setEditorMode(suffix) ==
+{{anchor:qluatextedit.setEditorMode}}
 
 ==  qluatextedit:readFile(fname) ==
+{{anchor:qluatextedit.readFile}}
 
 ==  qluatextedit:writeFile(fname) ==
+{{anchor:qluatextedit.writeFile}}
 
 ==  qluatextedit:showLine(lineno) ==
-
-
+{{anchor:qluatextedit.showLine}}
 
 ===  qt.QLuaConsoleWidget ===
 {{anchor:qluaconsolewidget}}
@@ -312,24 +363,27 @@ Class ''QLuaConsoleWidget'' is a subclass of
 that captures and display the lua output.
 
 ==  qluaconsolewidget.printTimings ==
+{{anchor:qluaconsolewidget.printTimings}}
 
 Boolean property that indicates whether the console
 displays the running time of each command.
 
 ==  qluaconsolewidget:addOutput(text,[format]) ==
+{{anchor:qluaconsolewidget.addOutput}}
 
 Adds ''text'' to the console window.
 Argument ''format'' is a string specifying the text format.
 Possible values are ''"default"'', ''"quote"'', and ''"comment"''.
 
 ==  qluaconsolewidget:moveToEnd() ==
+{{anchor:qluaconsolewidget.moveToEnd}}
 
 Shows the bottom of the text displayed in the console window.
 
 
 
 ====  Qt Objects  ====
-
+{{anchor:qtobjects}}
 
 ===  qt.qLuaIde ===
 {{anchor:qtqluaide}}
@@ -340,6 +394,7 @@ This instance is created when package ''qtide'' is loaded.
 
 
 ===  qt.qLuaSdiMain ===
+{{anchor:qtqluasdimain}}
 
 Expression ''qt.qLuaSdiMain'' refers to the unique instance of 
 class [[#qluasdimain|qt.QLuaSdiMain]],
@@ -347,6 +402,7 @@ created by function [[#qtidestart|qtide.start()]].
 
 
 ===  qt.qLuaMdiMain ===
+{{anchor:qtqluamdimain}}
 
 Expression ''qt.qLuaMdiMain'' refers to the unique instance of 
 class [[#qluamdimain|qt.QLuaMdiMain]] created 

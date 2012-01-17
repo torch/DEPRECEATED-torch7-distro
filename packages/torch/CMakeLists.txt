@@ -1,5 +1,5 @@
 SET(src DiskFile.c File.c MemoryFile.c PipeFile.c Storage.c Tensor.c Timer.c utils.c init.c TensorOperator.c TensorMath.c)
-SET(luasrc init.lua File.lua Tensor.lua TensorMath.lua CmdLine.lua Tester.lua)
+SET(luasrc init.lua File.lua Tensor.lua TensorMath.lua CmdLine.lua Tester.lua torch.lua)
   
 # Necessary do generate wrapper
 INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")

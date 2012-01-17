@@ -1,0 +1,367 @@
+====== Torch Installation Manual ======
+{{anchor:install.dok}}
+
+There are two main ways for installing Torch. If you would like to try
+out Torch quickly, we suggest using [[#install.rocks|luarocks]] based
+installation instructions. If you would like to install using
+libraries at custom locations and develop your packages, we suggest
+[[#install.sources|installing from sources]].
+
+======  Installing from sources ======
+{{anchor:install.sources}}
+
+''Torch7'' is mainly made out of ''ANSI C'' and ''Lua'', which makes
+it easy to compile everywhere. The graphical interface is based on QT
+and requires a ''C++'' compiler.
+
+The installation process became easily portable on most platforms,
+thanks to [[http://www.cmake.org|CMake]], a tool which replace the
+aging ''configure/automake'' tools. CMake allows us to detect and
+configure Torch properly.
+
+You will find here step-by-step instructions for each system we are supporting.
+
+You are also strongly encouraged to read the [[#CMakeHints|CMake hints]]
+section for more details on CMake (and before reporting a problem).
+
+If you are a programmer, you might want to produce your own
+[[#DevPackages|development package]].
+
+=====  Linux =====
+{{anchor:install.linux}}
+
+==== A. Requirements ====
+
+Torch compilation requires a number of standard packages described below:
+  * **Mandatory:**
+    * A ''C/C++'' compiler ([[http://gcc.gnu.org|GNU compiler]] or Intel compiler work fine)
+    * [[http://www.cmake.org|CMake]] version 2.8 or later is required.
+    * [[http://gnuplot.info|Gnuplot]], version ''4.4'' or later is recommended for best experience.
+
+  * **Recommended:**
+    * [[http://tiswww.case.edu/php/chet/readline/rltop.html|GNU Readline]]
+    * [[http://git-scm.com/|Git]] to keep up-to-date sources
+    * [[http://trolltech.com/products|QT 4.4]] or newer development libraries
+    * CBLAS. Intel MKL library is recommended for that purpose on Intel computers.
+    * LAPACK. Intel MKL library is recommended for that purpose on Intel computers.
+
+The installation of most of these packages should be rather
+straightforward. For ''Ubuntu 10.04 LTS'' system we use the
+''apt-get'' magic:
+
+<file>
+sudo apt-get install gcc g++
+sudo apt-get install cmake
+sudo apt-get install libreadline5-dev
+sudo apt-get install git-core
+sudo apt-get install gnuplot
+</file>
+
+Please adapt according to your distribution.
+
+Note: readline library is helpful for better command line interaction,
+but it is not required. It is only used when QT is installed.
+
+We require ''QT 4.4'' for handling graphics (//beware// not installing QT 4.3
+or older). If it is not found at compile time, Torch will still compile but
+no graphics will be available. On ''Ubuntu 10.04 LTS'' distribution you can
+install it with
+<file>
+sudo apt-get install libqt4-core libqt4-gui libqt4-dev
+</file>
+
+CBLAS installation is also recommended for speed. If not found, Torch
+will rely on hand-made linear algebra routines. Ubuntu distribution
+provide CBLAS through the ''libblas'' package:
+
+<file>
+sudo apt-get install libblas-dev
+</file>
+
+LAPACK installation is required for anyone who wants to use linear
+algebra operations like [[..lab:index#lab.linbalg.dok|eigenvalue
+computation, singular value decomposition]]. Ubuntu distribution
+provides LAPACK through ''liblapack'' package.
+
+<file>
+sudo apt-get install liblapack-dev
+</file>
+
+Ultimate speed is achieved using the Intel MKL libraries. Follow Intel
+instructiona to unpack MKL. Then make sure the libraries relevant for
+your system (e.g. ''em64t'' if you are on a 64 bits distribution) are
+available in your ''LD_LIBRARY_PATH''. Both BLAS and LAPACK interfaces are
+readily included in MKL.
+
+==== B. Getting Torch sources ====
+{{anchor:install.sources}}
+
+Torch7 is being developed on [[http://github.com|github]].
+
+<file>
+git clone git://github.com/andresy/torch.git
+</file>
+
+
+==== C. Configuring Torch ====
+{{anchor:install.config}}
+
+We use ''CMake'' for configuring ''Torch''. We //highly// recommend to create
+first a dedicated build directory. This eases cleaning up built objects,
+but also allow you to build Torch with //various configurations//
+(e.g. Release and Debug in two different build directories).
+
+<file>
+cd torch
+mkdir build
+cd build
+cmake ..
+</file>
+
+The ''..'' given to ''cmake'' indicates the directory where the
+sources are. We chose here to have a ''build'' directory inside
+''torch'', but it could be anywhere else. In that latter case, go
+instead in your build directory and then do: 
+
+<file>
+cmake /path/to/torch/sources
+</file>
+
+CMake detects external libraries or tools necessary for Torch, and
+produces Makefiles such that Torch is then easily compilable on your
+platform. If you prefer the GUI version of CMake, you can replace
+''cmake'' by ''ccmake'' in the above command lines. In particular, it
+is //strongly encouraged// to use ''ccmake'' for finer configuration
+of Torch.
+
+The most common Torch configuration step you might want to perform is
+changing the installation path. By default, Torch will be installed in
+''/usr/local''. You will need super-user rights to perform that. If
+you are not root on your computer, you can instead specifying a
+install directory to ''CMake'' on the above ''cmake'' command:
+
+<file>
+cmake .. -DCMAKE_INSTALL_PREFIX=/my/install/path
+</file>
+
+Equivalently you can set the variable ''CMAKE_INSTALL_PREFIX'' if you
+use ''ccmake'' GUI.  Please, see [[http://www.cmake.org|CMake
+documentation]] or //at least// [[#CMakeHints|some of our CMake
+hints]] for more details on configuration.
+
+==== D. Compiling and installing ====
+{{anchor:install.compile}}
+
+If the configuration was successful, Makefiles should have appeared in
+your build directory.  Compile Torch with:
+
+then compile and install with:
+<file>
+make install
+</file>
+
+This last command might possibly be prefixed by ''sudo'' if you are
+installing Torch in ''/usr/local''.
+
+==== E. Running Torch ====
+{{anchor:install.run}}
+
+Now Torch should be installed in ''/usr/local'' or in
+''/my/install/path'' if you chose to use the ''CMAKE_INSTALL_PREFIX''
+when configuring with CMake.  Lua executables (''lua'', ''qlua'' and
+''torch'') are found in the ''bin'' sub-directory of these
+installation directories.
+
+<file>
+/usr/local/bin/lua
+Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+> require 'torch'
+> = torch.Tensor(5):zero()
+
+0
+0
+0
+0
+0
+[torch.Tensor of dimension 5]
+
+> 
+</file>
+
+For convenience, you might want to add to your ''PATH'' the path to
+lua binaries. The executable ''lua'' is a simple Lua interpreter (as
+provided on [[http://www.lua.org|Lua website]]), while ''qlua'' has
+enhanced interactivity (like completion) and is able to handle
+graphics and QT widgets.
+
+For best experience we suggest using the ''torch'' executable which is
+in the same place as ''lua'' and ''qlua'' since it preloads several
+most commonly used libraries into global namespace.
+
+<file>
+/usr/local/bin/torch
+Try the IDE: torch -ide
+Type help() for more info
+Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU
+Lua 5.1  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+torch> =lab.randn(10,10)
+ 1.3862  1.5983 -2.0216 -0.1502  1.9467 -1.2322  0.1628 -2.6253  1.3255 -0.5784
+ 0.1363 -1.2638 -1.0661  0.0233  1.3064 -0.8817  1.1424  1.0952 -0.2147  0.7712
+ 1.1348 -0.8596 -0.6102  0.9137 -1.1582 -0.3301  0.5250  1.3631 -0.4051 -0.9549
+-0.2734 -0.0914  0.9728  1.3272 -0.4126 -0.1264 -1.2936 -0.2120  1.3040 -1.9991
+-0.9642  0.2367 -0.5246 -0.0476 -0.6586  1.8705  0.8482 -1.2768 -0.0782  0.5403
+ 0.4551 -1.4549 -0.7079 -1.6308 -0.2086 -1.7208 -1.4915  0.9703  0.3661  0.5051
+ 0.3082  0.3188 -1.1247  0.1343 -0.2671 -0.4596 -0.2618  1.7482  0.4714  0.5217
+-0.8406 -0.2372 -0.1504  0.6982 -0.5437  0.7447  0.0229 -2.4998  0.7367 -1.2721
+-0.3993  1.5155 -0.3685 -0.0534 -0.0495 -0.1002 -0.3652  0.1248 -0.2693  0.9159
+-1.5035  0.7326 -0.6262  0.2715  0.0543 -0.7419 -0.6758 -0.0221  0.5342 -0.4262
+[torch.DoubleTensor of dimension 10x10]
+
+torch> 
+
+</file>
+
+=====  MacOS X =====
+
+==== A. Requirements ====
+
+Torch compilation requires a number of standard packages described below:
+  * **Mandatory:**
+    * A ''C/C++'' compiler ([[http://gcc.gnu.org|GNU compiler]] or Intel compiler work fine)
+    * [[http://www.cmake.org|CMake]] version 2.8 or later is required.
+    * [[http://gnuplot.info|Gnuplot]], version ''4.4'' or later is recommended for best experience.
+
+  * **Recommended:**
+    * [[http://tiswww.case.edu/php/chet/readline/rltop.html|GNU Readline]]
+    * [[http://git-scm.com/|Git]] to keep up-to-date sources
+    * [[http://trolltech.com/products|QT 4.4]] or newer development libraries
+    * CBLAS. Intel MKL library is recommended for that purpose on Intel computers.
+    * LAPACK. Intel MKL library is recommended for that purpose on Intel computers.
+
+Installation of gcc should be done by installing the
+[[http://developer.apple.com/tools/xcode|the Apple developer
+tools]]. These tools should also be available on you MacOS X
+installation DVD.
+
+CMake can be retrieved from
+[[http://www.cmake.org/HTML/Download.html|CMake website]] (you can
+take the **DMG** installer). However, we found it was as simple to use
+[[http://mxcl.github.com/homebrew/|Homebrew]], which are necessary
+anyway for git and the Readline library. We recommend to avoid
+[[http://finkproject.org/|Fink]] and
+[[http://www.macports.org/|MacPorts]], which tend to be always
+outdated. Assuming you installed Homebrew, just do:
+
+<file>
+brew install readline
+brew install cmake
+brew install git
+brew install gnuplot
+</file>
+
+For installing QT, one can use Homebrew, but it might take too long to
+compile.  Instead, you can
+[[http://trolltech.com/downloads/opensource/appdev/mac-os-cpp|download]]
+the binary **DMG** file available on [[http://trolltech.com|Trolltech
+website]] and install it.
+
+==== B. Getting Torch sources ====
+
+Same as [[#install.sources|getting sources]] for linux.
+
+==== C. Configuring Torch ====
+
+Same as [[#install.config|configuring]] for linux.
+
+==== D. Compiling and Installing ====
+
+Same as [[#install.compile|compiling]] for linux.
+
+==== E. Running Torch ====
+
+Same as [[#install.run|runnning]] for linux.
+
+
+=====  Cygwin =====
+
+//We do not recommend// Cygwin installation. Cygwin is pretty slow, and we
+could not manage to make QT 4.4 work under Cygwin. Instead prefer
+[[#Windows|native windows]] installation.
+
+=====  Windows =====
+{{anchor:Windows}}
+
+//** Torch7 is not yet Windows compatible, coming soon **//
+
+
+=====  CMake hints =====
+{{anchor:CMakeHints}}
+
+CMake is well documented on [[http://www.cmake.org|http://www.cmake.org]].
+
+====CMake GUI====
+
+Under Windows, CMake comes by default with a GUI. Under Unix system it is
+quite handy to use the //text GUI// available through ''ccmake''.
+''ccmake'' works in the same way than ''cmake'': go in your build directory and
+<file>
+ccmake /path/to/torch/source
+</file>
+
+Windows and Unix GUI works in the same way: you ''configure'', //possibly several times//,
+until CMake has detected everything and proposes to ''generate'' the configuration.
+
+After each configuration step, you can modify CMake variables to suit your needs.
+
+====CMake variables====
+
+CMake is highly configurable thanks to //variables// you can set when
+executing it. It is really easy to change these variables with CMake GUI. If you want
+to stick with the command line you can also change a variable by doing:
+<file>
+cmake /path/to/torch/source -DMY_VARIABLE=MY_VALUE
+</file>
+where ''MY_VARIABLE'' is the name of the variable you want to set and
+''MY_VALUE'' is its corresponding value.
+
+====CMake caches everything====
+
+As soon as CMake performed a test to detect an external library, it saves
+the result of this test in a cache and will not test it again.
+
+If you forgot to install a library (like QT or Readline), and install it
+after having performed a CMake configuration, it will not be used by Torch
+when compiling.
+
+//In doubt//, if you changed, updated, added some libraries that should be used by Torch, you should
+//erase your build directory and perform CMake configuration again//.
+
+====Interesting standard CMake variables====
+
+  * ''CMAKE_INSTALL_PREFIX'': directory where Torch is going to be installed
+  * ''CMAKE_BUILD_TYPE'': ''Release'' for optimized compilation, ''Debug'' for debug compilation.
+  * ''CMAKE_C_FLAGS'': add here the flags you want to pass to the C compiler (like ''-Wall'' for e.g.)
+
+
+====== Installing using Luarocks ======
+{{anchor:install.rocks}}
+
+We need doc here.
+
+
+=====  Development Torch packages =====
+{{anchor:DevPackages}}
+
+If you want to develop your own package, you can put it in the ''dev''
+sub-directory. Packages in ''dev'' are all compiled in the same way that the
+ones in ''packages'' sub-directory. We prefer to have this directory to make a
+clear difference between official packages and development packages.
+
+======  Installing from binaries ======
+{{anchor:install.binary}}
+
+** This section is not applicable now as we have not produced binaries yet. **
+
+** Please [[#install.sources|install from sources]]. **
+
+

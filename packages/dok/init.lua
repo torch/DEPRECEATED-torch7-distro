@@ -2,6 +2,7 @@ dok = {}
 
 if torch then
    torch.include('dok', 'inline.lua')
+   torch.include('dok', 'search.lua')
 end
 
 dok.options = {}
@@ -262,7 +263,7 @@ function dok.dok2html(txt)
                                 end
                                 first = false
                                 stack[rank] = 'par_' .. dok.link2wikilink(title):gsub('%.','-')
-                                return closesection .. '\002div class="level' .. rank .. classes .. '" id="div_' .. dok.link2wikilink(title):gsub('%.','-') .. '"\003\n' .. '\002h' .. rank .. '\003\002a id="' .. dok.link2wikilink(title) .. '"\003' .. dok.cleanText(title) .. '\002/a\003\002/h' .. rank .. '\003\n'
+                                return closesection .. '\002div class="level' .. rank .. classes .. '" id="div_' .. dok.link2wikilink(title):gsub('%.','-') .. '"\003\n' .. '\002h' .. rank .. '\003\002a id="' .. dok.link2wikilink(title) .. '"\003' .. dok.cleanText(title) .. '\002/a\003\002/h' .. rank .. '\003\002a name="mybogusanchor"\003\002/a\003\n'
                              else
                                 return line
                              end
@@ -470,7 +471,7 @@ function dok.dok2html(txt)
    -- put back links
    txt = txt:gsub('\017(%d+)\017', function(id)
                                       id = tonumber(id)
-                                      return '<a href="' .. dok.linkURL(link[id]) ..  '">' .. dok.linkText(link[id]) .. '</a>'
+                                      return '<a href="' .. dok.linkURL(link[id]) ..  '" class="anchor">' .. dok.linkText(link[id]) .. '</a>'
                                    end)
 
    -- put back anchors
@@ -495,12 +496,12 @@ function dok.dok2html(txt)
 
    -- put back code
    txt = txt:gsub('\018(%d+)\018', function(id)
-                                      id = tonumber(id)
-                                      return '<pre class="code">' .. code[id] .. '</pre>'
+                                      id = tonumber(id) -- code
+                                      return '<pre class="brush: lua;">' .. code[id] .. '</pre>'
                                    end)
    txt = txt:gsub('\019(%d+)\019', function(id)
-                                      id = tonumber(id)
-                                      return '<pre class="file">' .. file[id] .. '</pre>'
+                                      id = tonumber(id) -- file
+                                      return '<pre class="brush: lua;">' .. file[id] .. '</pre>'
                                    end)
 
    return txt

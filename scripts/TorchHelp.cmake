@@ -12,7 +12,7 @@ INSTALL(DIRECTORY "${Torch_BINARY_DIR}/html/" DESTINATION "${Torch_INSTALL_HTML_
 SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_DIR}/scripts/doktemplate.html"
   CACHE FILEPATH "List of files needed for HTML doc creation")
 
-SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_DIR}/scripts/doctorch.css;${Torch_SOURCE_DIR}/scripts/torchlogo.png"
+SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_DIR}/scripts/doctorch.css;${Torch_SOURCE_DIR}/scripts/torchlogo.png;${Torch_SOURCE_DIR}/scripts/jquery.js;${Torch_SOURCE_DIR}/scripts/shCore.js;${Torch_SOURCE_DIR}/scripts/shBrushLua.js;${Torch_SOURCE_DIR}/scripts/shCore.css;${Torch_SOURCE_DIR}/scripts/jse_form.js"
   CACHE STRING "HTML template needed for HTML doc creation")
 
 MARK_AS_ADVANCED(TORCH_DOK_HTML_FILES TORCH_DOK_HTML_TEMPLATE)
@@ -106,5 +106,7 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
     ADD_DEPENDENCIES(documentation-dok ${dstdir}-dok-index)
 
   ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok")
-  
+
 ENDMACRO(ADD_TORCH_DOK)
+
+INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_INSTALL_PREFIX}/bin/lua -ltorch -ldok -e \"dok.installsearch()\")")

@@ -85,6 +85,11 @@ local f = io.open(dokindex, 'w')
 f:write(txtdok)
 f:close()
 
+-- javascript
+local js = [[
+      $('#toc').hide();
+]]
+
 -- write the html
 local templatehtml = io.open(doktemplate):read('*all')
 txthtml = dok.dok2html(txtdok)
@@ -92,7 +97,7 @@ templatehtml = templatehtml:gsub('%%CONTENTS%%', txthtml)
 templatehtml = templatehtml:gsub('%%TITLE%%', 'Torch7 Documentation')
 templatehtml = templatehtml:gsub('%%TOC%%', '')
 templatehtml = templatehtml:gsub('%%NAVLINE%%','Torch7 Documentation')
-templatehtml = templatehtml:gsub('%%JS%%', '')
+templatehtml = templatehtml:gsub('%%JS%%', js)
 templatehtml = templatehtml:gsub('%%LASTMODIFIED%%','Generated on ' .. os.date())
 local f = io.open(htmlindex, 'w')
 f:write(templatehtml)
