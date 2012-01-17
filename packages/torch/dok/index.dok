@@ -7,8 +7,8 @@ The **''torch''** package contains basic classes used everywhere in ''Torch7''.
 [[MemoryFile|MemoryFile]] (file in ''RAM'') and [[PipeFile|PipeFile]] (file from a piped command). These
 classes also handle //serialization//.
 
-[[Storage|Storage]] and [[Tensor|Tensor]] are the basic bricks for
-//powerful numeric operations//.
+[[Storage|Storage]] and [[Tensor|Tensor]] are the basic bricks for //powerful numeric operations//. Tensors support
+a wide variety of fundamental [[maths|math operations]].
 
 [[Timer|Timer]] is provided for //measuring time//.
 
