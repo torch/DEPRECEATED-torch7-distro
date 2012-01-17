@@ -101,7 +101,6 @@ INSTALL(FILES
   generic/THTensorLapack.c
   generic/THTensorLapack.h
   generic/THTensorMath.c
-  generic/THTensorMath.c_SAV
   generic/THTensorMath.h
   generic/THTensorRandom.c
   generic/THTensorRandom.h
