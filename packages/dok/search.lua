@@ -8,14 +8,17 @@ paths.install_dok = paths.concat(paths.install_html, '..', 'dok')
 paths.install_dokmedia = paths.concat(paths.install_html, '..', 'dokmedia')
 
 local function html2entries(html, package, file)
-   local next = html:gfind('<div.->\n<h%d><a.->%s+(.-)%s+</a></h%d><a.-></a>\n<a name="(.-)"></a>\n(.-)</div>')
-   for title,link,body in next do
-      link = package .. '/' .. file:gsub('.txt','.html') .. '#' .. link
-      body = body:gsub('<img.->','')
-      entries.global = entries.global or {}
-      table.insert(entries.global, {title, link, body})
-      entries[package] = entries[package] or {}
-      table.insert(entries[package], {title, '../' .. link, body})
+   local dnext = html:gfind('<div.->(.-)</div>')
+   for div in dnext do
+      local next = div:gfind('<h%d><a.->%s+(.-)%s+</a></h%d><a.-></a>\n<a name="(.-)"></a>\n(.-)$')
+      for title,link,body in next do
+         link = package .. '/' .. file:gsub('.txt','.html') .. '#' .. link
+         body = body:gsub('<img.->','')
+         entries.global = entries.global or {}
+         table.insert(entries.global, {title, link, body})
+         entries[package] = entries[package] or {}
+         table.insert(entries[package], {title, '../' .. link, body})
+      end
    end
    return entries
 end
@@ -38,11 +41,13 @@ local function install(entries, dir)
 end
 
 function dok.installsearch()
+   print('-- parsing dok files to build search index')
    for package in paths.files(paths.install_dok) do
       if package ~= '.' and package ~= '..' then
          local dir = paths.concat(paths.install_dok, package)
          for file in paths.files(dir) do
             if file ~= '.' and file ~= '..' then
+               print('-+ parsing file: ' .. paths.concat(dir,file))
                local path = paths.concat(dir, file)
                local f = io.open(path)
                if f then
@@ -55,7 +60,7 @@ function dok.installsearch()
       end
    end
    for package,entries in pairs(entries) do
-      print('installing search for package: ' .. package)
+      print('-+ installing search for package: ' .. package)
       if package == 'global' then package = '.' end
       install(entries, package)
    end
