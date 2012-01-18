@@ -7,18 +7,26 @@ wrap.argtypes.Tensor = {
             end,
 
    declare = function(arg)
-              return string.format("THTensor *arg%d = NULL;", arg.i)
+                local txt = {}
+                table.insert(txt, string.format("THTensor *arg%d = NULL;", arg.i))
+                if arg.returned then
+                   table.insert(txt, string.format("int arg%d_idx = 0;", arg.i));
+                end
+                return table.concat(txt, '\n')
            end,
-
-   init = function(arg)
-          end,
    
    check = function(arg, idx)
             return string.format("(arg%d = luaT_toudata(L, %d, torch_(Tensor_id)))", arg.i, idx)
          end,
 
    read = function(arg, idx)
-            -- already done above
+             if arg.returned then
+                return string.format("arg%d_idx = %d;", arg.i, idx)
+             end
+          end,
+
+   init = function(arg)
+             return string.format('arg%d = TH%s_new();', arg.i, typename)
           end,
    
    carg = function(arg, idx)
@@ -32,16 +40,14 @@ wrap.argtypes.Tensor = {
    precall = function(arg)
                 local txt = {}
                 if arg.default and arg.returned then
-                   table.insert(txt, string.format('if(arg%d)', arg.i))
-                   table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
-                   table.insert(txt, 'else')
-                   table.insert(txt, string.format('arg%d = THTensor_(new)();', arg.i))
+                   table.insert(txt, string.format('if(arg%d_idx)', arg.i)) -- means it was passed as arg
+                   table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
+                   table.insert(txt, string.format('else')) -- means we did a new()
                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
                 elseif arg.default then
                    error('a tensor cannot be optional if not returned')
                 elseif arg.returned then
-                   table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i))
-                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                   table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
                 end
                 return table.concat(txt, '\n')
              end,
@@ -64,22 +70,29 @@ wrap.argtypes.IndexTensor = {
             end,
 
    declare = function(arg)
-              return string.format("THLongTensor *arg%d = NULL;", arg.i)
+                local txt = {}
+                table.insert(txt, string.format("THLongTensor *arg%d = NULL;", arg.i))
+                if arg.returned then
+                   table.insert(txt, string.format("int arg%d_idx = 0;", arg.i));
+                end
+                return table.concat(txt, '\n')
            end,
    
-   init = function(arg)
-             return ''
-          end,
-
    check = function(arg, idx)
-            return string.format("luaT_isudata(L, %d, torch_LongTensor_id)", idx)
-         end,
+              return string.format("(arg%d = luaT_toudata(L, %d, torch_LongTensor_id))", arg.i, idx)
+           end,
 
    read = function(arg, idx)
              local txt = {}
-             table.insert(txt, string.format("arg%d = luaT_toudata(L, %d, torch_LongTensor_id);", arg.i, idx))
              table.insert(txt, string.format("THLongTensor_add(arg%d, arg%d, -1);", arg.i, arg.i));
+             if arg.returned then
+                return table.insert(txt, string.format("arg%d_idx = %d;", arg.i, idx))
+             end
              return table.concat(txt, '\n')
+          end,
+
+   init = function(arg)
+             return string.format('arg%d = THLongTensor_new();', arg.i)
           end,
    
    carg = function(arg, idx)
@@ -93,16 +106,14 @@ wrap.argtypes.IndexTensor = {
    precall = function(arg)
                 local txt = {}
                 if arg.default and arg.returned then
-                   table.insert(txt, string.format('if(arg%d)', arg.i))
-                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
-                   table.insert(txt, 'else')
-                   table.insert(txt, string.format('arg%d = THLongTensor_new();', arg.i))
+                   table.insert(txt, string.format('if(arg%d_idx)', arg.i)) -- means it was passed as arg
+                   table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
+                   table.insert(txt, string.format('else')) -- means we did a new()
                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
                 elseif arg.default then
                    error('a tensor cannot be optional if not returned')
                 elseif arg.returned then
-                   table.insert(txt, string.format('THLongTensor_retain(arg%d);', arg.i))
-                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongTensor_id);', arg.i))
+                   table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
                 end
                 return table.concat(txt, '\n')
              end,
@@ -131,21 +142,28 @@ for _,typename in ipairs({"ByteTensor", "CharTensor", "ShortTensor", "IntTensor"
                  end,
       
       declare = function(arg)
-                   return string.format("TH%s *arg%d = NULL;", typename, arg.i)
+                   local txt = {}
+                   table.insert(txt, string.format("TH%s *arg%d = NULL;", typename, arg.i))
+                   if arg.returned then
+                      table.insert(txt, string.format("int arg%d_idx = 0;", arg.i));
+                   end
+                   return table.concat(txt, '\n')
                 end,
       
-      init = function(arg)
-                return ''
-             end,
-
       check = function(arg, idx)
                  return string.format("(arg%d = luaT_toudata(L, %d, torch_%s_id))", arg.i, idx, typename)
               end,
 
       read = function(arg, idx)
-                -- already done above
+                if arg.returned then
+                   return string.format("arg%d_idx = %d;", arg.i, idx)
+                end
              end,
       
+      init = function(arg)
+                return string.format('arg%d = TH%s_new();', arg.i, typename)
+             end,
+
       carg = function(arg, idx)
                 return string.format('arg%d', arg.i)
              end,
@@ -157,16 +175,14 @@ for _,typename in ipairs({"ByteTensor", "CharTensor", "ShortTensor", "IntTensor"
       precall = function(arg)
                    local txt = {}
                    if arg.default and arg.returned then
-                      table.insert(txt, string.format('if(arg%d)', arg.i))
-                      table.insert(txt, string.format('TH%s_retain(arg%d);', typename, arg.i))
-                      table.insert(txt, 'else')
-                      table.insert(txt, string.format('arg%d = TH%s_new();', arg.i, typename))
+                      table.insert(txt, string.format('if(arg%d_idx)', arg.i)) -- means it was passed as arg
+                      table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
+                      table.insert(txt, string.format('else')) -- means we did a new()
                       table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_%s_id);', arg.i, typename))
                    elseif arg.default then
                       error('a tensor cannot be optional if not returned')
                    elseif arg.returned then
-                      table.insert(txt, string.format('TH%s_retain(arg%d);', typename, arg.i))
-                      table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_%s_id);', arg.i, typename))
+                      table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
                    end
                    return table.concat(txt, '\n')
                 end,
@@ -218,6 +234,14 @@ wrap.argtypes.index = {
                 return string.format("long arg%d = %d;", arg.i, tonumber(default)-1)
            end,
 
+   check = function(arg, idx)
+              return string.format("lua_isnumber(L, %d)", idx)
+           end,
+
+   read = function(arg, idx)
+             return string.format("arg%d = (long)lua_tonumber(L, %d)-1;", arg.i, idx)
+          end,
+
    init = function(arg)
              -- otherwise do it here
              if arg.default then
@@ -226,14 +250,6 @@ wrap.argtypes.index = {
                    return string.format("arg%d = %s-1;", arg.i, default)
                 end
              end
-          end,
-
-   check = function(arg, idx)
-              return string.format("lua_isnumber(L, %d)", idx)
-           end,
-
-   read = function(arg, idx)
-             return string.format("arg%d = (long)lua_tonumber(L, %d)-1;", arg.i, idx)
           end,
 
    carg = function(arg, idx)
@@ -269,6 +285,14 @@ wrap.argtypes.byte = {
                 return string.format("unsigned char arg%d = %d;", arg.i, tonumber(default))
            end,
 
+   check = function(arg, idx)
+              return string.format("lua_isnumber(L, %d)", idx)
+           end,
+
+   read = function(arg, idx)
+             return string.format("arg%d = (unsigned char)lua_tonumber(L, %d);", arg.i, idx)
+          end,
+
    init = function(arg)
              -- otherwise do it here
              if arg.default then
@@ -277,14 +301,6 @@ wrap.argtypes.byte = {
                    return string.format("arg%d = %s;", arg.i, default)
                 end
              end
-          end,
-
-   check = function(arg, idx)
-              return string.format("lua_isnumber(L, %d)", idx)
-           end,
-
-   read = function(arg, idx)
-             return string.format("arg%d = (unsigned char)lua_tonumber(L, %d);", arg.i, idx)
           end,
 
    carg = function(arg, idx)
@@ -321,6 +337,14 @@ for _,typename in ipairs({"real", "char", "short", "int", "long", "float", "doub
                    return string.format("%s arg%d = %d;", typename, arg.i, tonumber(default))
                 end,
 
+      check = function(arg, idx)
+                 return string.format("lua_isnumber(L, %d)", idx)
+              end,
+
+      read = function(arg, idx)
+                return string.format("arg%d = (%s)lua_tonumber(L, %d);", arg.i, typename, idx)
+             end,
+
       init = function(arg)
                 -- otherwise do it here
                 if arg.default then
@@ -329,14 +353,6 @@ for _,typename in ipairs({"real", "char", "short", "int", "long", "float", "doub
                       return string.format("arg%d = %s;", arg.i, default)
                    end
                 end
-             end,
-      
-      check = function(arg, idx)
-                 return string.format("lua_isnumber(L, %d)", idx)
-              end,
-      
-      read = function(arg, idx)
-                return string.format("arg%d = (%s)lua_tonumber(L, %d);", arg.i, typename, idx)
              end,
       
       carg = function(arg, idx)
@@ -373,6 +389,14 @@ wrap.argtypes.boolean = {
                 return string.format("int arg%d = %d;", arg.i, tonumber(default))
              end,
 
+   check = function(arg, idx)
+              return string.format("lua_isboolean(L, %d)", idx)
+           end,
+
+   read = function(arg, idx)
+             return string.format("arg%d = lua_toboolean(L, %d);", arg.i, idx)
+          end,
+
    init = function(arg)
              -- otherwise do it here
              if arg.default then
@@ -381,14 +405,6 @@ wrap.argtypes.boolean = {
                    return string.format("arg%d = %s;", arg.i, default)
                 end
              end
-          end,
-             
-   check = function(arg, idx)
-              return string.format("lua_isboolean(L, %d)", idx)
-           end,
-
-   read = function(arg, idx)
-             return string.format("arg%d = lua_toboolean(L, %d);", arg.i, idx)
           end,
 
    carg = function(arg, idx)
