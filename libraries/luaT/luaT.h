@@ -90,37 +90,4 @@ LUAT_API int luaT_lua_version(lua_State *L);
 LUAT_API int luaT_lua_setmetatable(lua_State *L);
 LUAT_API int luaT_lua_typename2id(lua_State *L);
 
-LUAT_API int luaT_checkargs1(lua_State *L,
-                             void *r1, int type1, const void *id1);
-
-LUAT_API int luaT_checkargs2(lua_State *L,
-                             void *r1, int type1, const void *id1,
-                             void *r2, int type2, const void *id2);
-
-LUAT_API int luaT_checkargs3(lua_State *L,
-                             void *r1, int type1, const void *id1,
-                             void *r2, int type2, const void *id2,
-                             void *r3, int type3, const void *id3);
-
-LUAT_API int luaT_checkargs4(lua_State *L,
-                             void *r1, int type1, const void *id1,
-                             void *r2, int type2, const void *id2,
-                             void *r3, int type3, const void *id3,
-                             void *r4, int type4, const void *id4);
-
-LUAT_API int luaT_checkargs5(lua_State *L,
-                             void *r1, int type1, const void *id1,
-                             void *r2, int type2, const void *id2,
-                             void *r3, int type3, const void *id3,
-                             void *r4, int type4, const void *id4,
-                             void *r5, int type5, const void *id5);
-
-LUAT_API int luaT_checkargs6(lua_State *L,
-                             void *r1, int type1, const void *id1,
-                             void *r2, int type2, const void *id2,
-                             void *r3, int type3, const void *id3,
-                             void *r4, int type4, const void *id4,
-                             void *r5, int type5, const void *id5,
-                             void *r6, int type6, const void *id6);
-
 #endif
