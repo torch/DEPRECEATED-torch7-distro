@@ -120,7 +120,7 @@ static int cunn_MultiMarginCriterion_updateOutput(lua_State *L)
                                                                  THCudaTensor_data(target),
                                                                  input->size[0], input->size[1],
                                                                  sizeaverage);
-    lua_pushnumber(L, THCudaTensor_sum(output));
+    lua_pushnumber(L, THCudaTensor_sumall(output));
     THCudaTensor_free(output);
   }
   else

@@ -220,7 +220,7 @@ float THCudaTensor_dot(THCudaTensor *self, THCudaTensor *src)
   }
 }
 
-float THCudaTensor_min(THCudaTensor *self)
+float THCudaTensor_minall(THCudaTensor *self)
 {
   self = THCudaTensor_newContiguous(self);
   thrust::device_ptr<float> self_data(THCudaTensor_data(self));
@@ -231,7 +231,7 @@ float THCudaTensor_min(THCudaTensor *self)
   return result;
 }
 
-float THCudaTensor_max(THCudaTensor *self)
+float THCudaTensor_maxall(THCudaTensor *self)
 {
   self = THCudaTensor_newContiguous(self);
   thrust::device_ptr<float> self_data(THCudaTensor_data(self));
@@ -242,7 +242,7 @@ float THCudaTensor_max(THCudaTensor *self)
   return result;
 }
 
-float THCudaTensor_sum(THCudaTensor *self)
+float THCudaTensor_sumall(THCudaTensor *self)
 {
   self = THCudaTensor_newContiguous(self);
   thrust::device_ptr<float> self_data(THCudaTensor_data(self));
@@ -505,10 +505,10 @@ void THCudaTensor_pow(THCudaTensor *self_, float value)
   THCudaTensor_freeCopyTo(self, self_);
 }
 
-float THCudaTensor_mean(THCudaTensor *self)
+float THCudaTensor_meanall(THCudaTensor *self)
 {
   THArgCheck(self->nDimension > 0, 1, "empty Tensor");
-  return THCudaTensor_sum(self)/THCudaTensor_nElement(self);
+  return THCudaTensor_sumall(self)/THCudaTensor_nElement(self);
 }
 
 struct square_functor
@@ -523,13 +523,13 @@ struct square_functor
   }
 };
 
-float THCudaTensor_var(THCudaTensor *self)
+float THCudaTensor_varall(THCudaTensor *self)
 {
   self = THCudaTensor_newContiguous(self);
   long size = THCudaTensor_nElement(self);
   thrust::device_ptr<float> self_data(THCudaTensor_data(self));
 
-  float mean = THCudaTensor_mean(self);
+  float mean = THCudaTensor_meanall(self);
   float result = thrust::transform_reduce(self_data, self_data+size, square_functor(mean), (float)0, thrust::plus<float>());
 
   result = result/(THCudaTensor_nElement(self)-1);
@@ -538,9 +538,9 @@ float THCudaTensor_var(THCudaTensor *self)
   return result;
 }
 
-float THCudaTensor_std(THCudaTensor *self)
+float THCudaTensor_stdall(THCudaTensor *self)
 {
-  return sqrt(THCudaTensor_var(self));
+  return sqrt(THCudaTensor_varall(self));
 }
 
 struct norm_functor

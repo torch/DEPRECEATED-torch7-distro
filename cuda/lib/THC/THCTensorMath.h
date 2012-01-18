@@ -19,9 +19,9 @@ TH_API void THCudaTensor_addcdiv(THCudaTensor *self, float value, THCudaTensor *
 
 TH_API float THCudaTensor_dot(THCudaTensor *self, THCudaTensor *src);
   
-TH_API float THCudaTensor_min(THCudaTensor *self);
-TH_API float THCudaTensor_max(THCudaTensor *self);
-TH_API float THCudaTensor_sum(THCudaTensor *self);
+TH_API float THCudaTensor_minall(THCudaTensor *self);
+TH_API float THCudaTensor_maxall(THCudaTensor *self);
+TH_API float THCudaTensor_sumall(THCudaTensor *self);
 
 TH_API void THCudaTensor_addmv(THCudaTensor *self, float beta, float alpha, THCudaTensor *mat, THCudaTensor *vec);
 TH_API void THCudaTensor_addmm(THCudaTensor *self, float beta, float alpha, THCudaTensor *mat1, THCudaTensor *mat2);
@@ -45,9 +45,9 @@ TH_API void THCudaTensor_ceil(THCudaTensor *self);
 TH_API void THCudaTensor_floor(THCudaTensor *self);
 TH_API void THCudaTensor_abs(THCudaTensor *self);
 
-TH_API float THCudaTensor_mean(THCudaTensor *self);
-TH_API float THCudaTensor_var(THCudaTensor *self);
-TH_API float THCudaTensor_std(THCudaTensor *self);
+TH_API float THCudaTensor_meanall(THCudaTensor *self);
+TH_API float THCudaTensor_varall(THCudaTensor *self);
+TH_API float THCudaTensor_stdall(THCudaTensor *self);
 TH_API float THCudaTensor_norm(THCudaTensor *self, float value);
 TH_API float THCudaTensor_dist(THCudaTensor *self, THCudaTensor *src, float value);
 

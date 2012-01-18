@@ -2,8 +2,8 @@ SET(src DiskFile.c File.c MemoryFile.c PipeFile.c Storage.c Tensor.c Timer.c uti
 SET(luasrc init.lua File.lua Tensor.lua TensorMath.lua CmdLine.lua Tester.lua torch.lua)
   
 # Necessary do generate wrapper
-INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")
 MACRO(ADD_TORCH_WRAP target luafile)
+  INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")
   GET_FILENAME_COMPONENT(_file_ "${luafile}" NAME_WE)
   SET(cfile "${_file_}.c")
   ADD_CUSTOM_COMMAND(
