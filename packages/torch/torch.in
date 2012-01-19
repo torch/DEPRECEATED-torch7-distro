@@ -3,46 +3,30 @@
 # install prefix
 PREFIX=@Torch_INSTALL_BIN@
 
-# import:
-# this function is a python-like loader, it requires a module,
-# and then imports all its symbols globally
-IMPORTF="\
-function import(package, forced) \
-   require(package) \
-   if _G[package] then \
-      _G._torchimport = _G._torchimport or {} \
-      _G._torchimport[package] = _G[package] \
-   end \
-   for k,v in pairs(_G[package]) do \
-      if not _G[k] or forced then \
-         _G[k] = v \
-      end \
-   end \
-end \
-"
+# load torch.lua
+INIT="require 'torch'; torch.include('torch','torch.lua')"
 
-TOOLS="\
-torch.include('torch','torch.lua') \
-"
-# by default, import torch+lab globally
-IMPORT_TORCH="import 'torch'"
-IMPORT_LAB="import 'lab'"
-IMPORT_PLOT="import 'gnuplot'"
-IMPORT_DOK="require 'dok'"
-
-# nicer prompt (self-promotion) + copyright
-PROMPT="_PROMPT='torch> ' _PROMPT2=' ... > '"
-COPYRIGHT="print 'Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU'"
-
-# concat all symbols defined above
-INIT="$COPYRIGHT $PROMPT $IMPORTF $IMPORT_TORCH $IMPORT_LAB $IMPORT_PLOT $IMPORT_DOK $TOOLS" # $PRINT $WHO"
+# check special arguments
+if [ $# -gt 0 ]
+then
+    if [ $1 == 'install' ]
+    then
+        if [ $# -eq 2 ]
+        then
+            $PREFIX/lua -e "$INIT; install('$2')";
+        else
+            $PREFIX/lua -e "$INIT; install('.')";
+        fi
+        exit
+    fi
+fi
 
 # try to run qlua, and default to lua if not available
 # all the functions defined above are executed before
 # returning to a user prompt
-if [ -f $PREFIX/qlua ]; 
+if [ -f $PREFIX/qlua ]
 then 
-    if [ $DISPLAY ];
+    if [ $DISPLAY ]
     then
         echo "Try the IDE: torch -ide"
         echo "Type help() for more info"
