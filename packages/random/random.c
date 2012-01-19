@@ -23,6 +23,7 @@ static int random_initialSeed(lua_State *L)
 static int random_random(lua_State *L)
 {
   int narg = lua_gettop(L);
+  luaT_stackdump(L);
 
   if(narg == 0)
     lua_pushnumber(L, THRandom_random());

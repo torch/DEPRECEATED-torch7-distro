@@ -187,6 +187,8 @@ double THRandom_uniform(double a, double b)
 
 double THRandom_normal(double mean, double stdv)
 {
+  THArgCheck(stdv > 0, 2, "standard deviation must be strictly positive");
+
   if(!normal_is_valid)
   {
     normal_x = __uniform__();
@@ -219,15 +221,18 @@ double THRandom_logNormal(double mean, double stdv)
 {
   double zm = mean*mean;
   double zs = stdv*stdv;
+  THArgCheck(stdv > 0, 2, "standard deviation must be strictly positive");
   return(exp(THRandom_normal(log(zm/sqrt(zs + zm)), sqrt(log(zs/zm+1)) )));
 }
 
 int THRandom_geometric(double p)
 {
+  THArgCheck(p > 0 && p < 1, 1, "must be > 0 and < 1");
   return((int)(log(1-__uniform__()) / log(p)) + 1);
 }
 
 int THRandom_bernoulli(double p)
 {
+  THArgCheck(p > 0 && p < 1, 1, "must be > 0 and < 1");
   return(__uniform__() <= p);
 }

@@ -92,7 +92,16 @@ for _,tensortype in ipairs({'ByteTensor',
                          'linspace',
                          'logspace',
                          'rand',
-                         'randn'}) do
+                         'randn',
+                         'random',
+                         'uniform',
+                         'normal',
+                         'cauchy',
+                         'logNormal',
+                         'exponential',
+                         'geometric',
+                         'bernoulli'                         
+                      }) do
 
       torch[tensortype][func] = torch[tensortype].torch[func]
    end

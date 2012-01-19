@@ -2,6 +2,7 @@
 #include "utils.h"
 
 extern void torch_utils_init(lua_State *L);
+extern void torch_random_init(lua_State *L);
 extern void torch_File_init(lua_State *L);
 extern void torch_File_init_storage_id(lua_State *L);
 extern void torch_DiskFile_init(lua_State *L);
@@ -92,6 +93,7 @@ DLL_EXPORT int luaopen_libtorch(lua_State *L)
   torch_TensorMath_init(L);
 
   torch_utils_init(L);
+  torch_random_init(L);
 
   return 1;
 }

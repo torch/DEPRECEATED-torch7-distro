@@ -1,4 +1,4 @@
-SET(src DiskFile.c File.c MemoryFile.c PipeFile.c Storage.c Tensor.c Timer.c utils.c init.c TensorOperator.c TensorMath.c)
+SET(src DiskFile.c File.c MemoryFile.c PipeFile.c Storage.c Tensor.c Timer.c utils.c init.c TensorOperator.c TensorMath.c random.c)
 SET(luasrc init.lua File.lua Tensor.lua TensorMath.lua CmdLine.lua Tester.lua torch.lua)
   
 # Necessary do generate wrapper
@@ -14,6 +14,7 @@ MACRO(ADD_TORCH_WRAP target luafile)
 ENDMACRO(ADD_TORCH_WRAP)
 
 ADD_TORCH_WRAP(tensormathwrap TensorMathWrap.lua)
+ADD_TORCH_WRAP(randomwrap random.lua)
 
 ADD_TORCH_PACKAGE(torch "${src}" "${luasrc}" "Basics")
 ADD_TORCH_DOK(dok torch "Fundamentals" "Torch package" 1.1)
