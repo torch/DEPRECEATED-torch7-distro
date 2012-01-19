@@ -1,5 +1,7 @@
 require 'torch'
 
-print('**** WARNING: lab package is deprecated. Please use torch instead ****')
+print("***** WARNING: the 'lab' package is deprecated. Please use 'torch' package instead *****")
 
 lab = torch
+
+return lab

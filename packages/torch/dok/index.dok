@@ -16,5 +16,7 @@ a wide variety of fundamental [[maths|math operations]].
 
 [[CmdLine|CmdLine]] is provided as a command line argument parsing utility.
 
-Finally, ''Torch'' provides some [[Utility|utility functions]] for creating and handling ''Torch'' //classes//.
+Finally, ''Torch'' provides some [[Utility|utility functions]] for creating and handling ''Torch'' //classes//,
+as well as support for [[random|random number generation]].
+
 
