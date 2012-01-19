@@ -1,4 +1,12 @@
 
+-- welcome message
+print 'Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU'
+
+-- custom prompt
+_PROMPT  = 'torch> '
+_PROMPT2 = ' ... > '
+
+-- helper
 local function sizestr(x)
    local strt = {}
    if x:nDimension() == 0 then
@@ -44,6 +52,7 @@ local function printvar(key,val,m)
    return name .. ' = ' .. tp
 end
 
+-- helper
 local function getmaxlen(vars)
    local m = 0
    if type(vars) ~= 'table' then return tostring(vars):len() end
@@ -132,3 +141,37 @@ function print(obj,...)
       _G.io.write('\n')
    end
 end
+
+-- import:
+-- this function is a python-like loader, it requires a module,
+-- and then imports all its symbols globally
+function import(package, forced)
+   require(package)
+   if _G[package] then
+      _G._torchimport = _G._torchimport or {}
+      _G._torchimport[package] = _G[package]
+   end
+   for k,v in pairs(_G[package]) do
+      if not _G[k] or forced then
+         _G[k] = v
+      end
+   end
+end
+
+-- install module:
+-- this function builds and install a specified module
+function install(path)
+   path = paths.concat(paths.cwd(), path)
+   print('--> installing module ' .. path)
+   os.execute('mkdir ' .. paths.concat(path,'build') .. '; '
+           .. 'cd ' .. paths.concat(path,'build') .. '; '
+        .. 'cmake .. -DCMAKE_INSTALL_PREFIX=' .. paths.install_prefix .. '; '
+        .. 'make install; cd .. ; rm -r build')
+   print('--> module installed')
+end
+
+-- preload basic libraries
+import 'torch'
+import 'lab'
+import 'gnuplot'
+import 'dok'
