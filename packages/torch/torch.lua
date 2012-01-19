@@ -172,6 +172,5 @@ end
 
 -- preload basic libraries
 import 'torch'
-import 'lab'
 import 'gnuplot'
 import 'dok'
