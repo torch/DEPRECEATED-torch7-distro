@@ -15,7 +15,7 @@ function PairwiseDistance:updateOutput(input)
 end
 
 local function mathsign(x) 
-   if x==0 then return  2*math.random(2)-3; end
+   if x==0 then return  2*torch.random(2)-3; end
    if x>0 then return 1; else return -1; end
 end
 

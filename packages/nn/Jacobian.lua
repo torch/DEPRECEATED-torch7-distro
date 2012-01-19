@@ -182,7 +182,7 @@ end
 
 function nn.Jacobian.testAllUpdate(module, input, weight, gradWeight)
    local gradOutput
-   local lr = random.uniform(0.1, 1)
+   local lr = torch.uniform(0.1, 1)
    local errors = {}
 
    -- accGradParameters

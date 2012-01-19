@@ -1,5 +1,4 @@
 require('torch')
-require('random')
 require('libnn')
 
 torch.include('nn', 'Module.lua')

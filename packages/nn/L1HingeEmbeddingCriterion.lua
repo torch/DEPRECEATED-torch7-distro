@@ -19,7 +19,7 @@ end
 local function mathsign(t)
    if t>0 then return 1; end
    if t<0 then return -1; end
-   return 2*math.random(2)-3;
+   return 2*torch.random(2)-3;
 end
 
 function L1HingeEmbeddingCriterion:updateGradInput(input, y)

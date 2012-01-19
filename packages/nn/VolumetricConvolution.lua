@@ -31,10 +31,10 @@ function VolumetricConvolution:reset(stdv)
       stdv = 1/math.sqrt(self.kT*self.kW*self.kH*self.nInputPlane)
    end
    self.weight:apply(function()
-                        return random.uniform(-stdv, stdv)
+                        return torch.uniform(-stdv, stdv)
                      end)
    self.bias:apply(function()
-                      return random.uniform(-stdv, stdv)
+                      return torch.uniform(-stdv, stdv)
                    end)   
 end
 

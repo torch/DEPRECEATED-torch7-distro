@@ -27,10 +27,10 @@ function SpatialSubSampling:reset(stdv)
       stdv = 1/math.sqrt(self.kW*self.kH)
    end
    self.weight:apply(function()
-                        return random.uniform(-stdv, stdv)
+                        return torch.uniform(-stdv, stdv)
                      end)
    self.bias:apply(function()
-                      return random.uniform(-stdv, stdv)
+                      return torch.uniform(-stdv, stdv)
                    end)   
 end
 

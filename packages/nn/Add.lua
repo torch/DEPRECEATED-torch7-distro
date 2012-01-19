@@ -23,7 +23,7 @@ function Add:reset(stdv)
    end
 
    for i=1,self.bias:size(1) do
-      self.bias[i] = random.uniform(-stdv, stdv)
+      self.bias[i] = torch.uniform(-stdv, stdv)
    end
 end
 

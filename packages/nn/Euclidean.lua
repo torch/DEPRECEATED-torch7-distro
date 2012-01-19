@@ -23,7 +23,7 @@ function Euclidean:reset(stdv)
 
    for i=1,self.weight:size(2) do
       self.weight:select(2, i):apply(function()
-                                        return random.uniform(-stdv, stdv)
+                                        return torch.uniform(-stdv, stdv)
                                      end)
    end
 end

@@ -21,7 +21,7 @@ function Mul:reset(stdv)
       stdv = 1./math.sqrt(self.weight:size(1))
    end
 
-   self.weight[1] = random.uniform(-stdv, stdv);
+   self.weight[1] = torch.uniform(-stdv, stdv);
 end
 
 function Mul:updateOutput(input)

@@ -29,7 +29,7 @@ end
 function LookupTable:reset(stdv)
    stdv = stdv or 1
    self.weight:apply(function()
-                        return random.normal(0, stdv)
+                        return torch.normal(0, stdv)
                      end)
 end
 

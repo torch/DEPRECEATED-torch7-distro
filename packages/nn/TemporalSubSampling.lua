@@ -25,11 +25,11 @@ function TemporalSubSampling:reset(stdv)
    end
 
    self.weight:apply(function()
-                        return random.uniform(-stdv, stdv)
+                        return torch.uniform(-stdv, stdv)
                      end)
 
    self.bias:apply(function()
-                      return random.uniform(-stdv, stdv)
+                      return torch.uniform(-stdv, stdv)
                    end)   
 end
 
