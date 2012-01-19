@@ -2,6 +2,7 @@
 #include <thrust/fill.h>
 #include <thrust/functional.h>
 #include <thrust/reduce.h>
+#include <thrust/inner_product.h>
 
 struct mse_functor
 {

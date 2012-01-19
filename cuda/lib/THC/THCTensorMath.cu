@@ -4,6 +4,7 @@
 #include <thrust/fill.h>
 #include <thrust/functional.h>
 #include <thrust/reduce.h>
+#include <thrust/inner_product.h>
 
 #define NB_THREADS_PER_BLOCK 256
 
