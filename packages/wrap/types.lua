@@ -273,58 +273,7 @@ wrap.argtypes.index = {
               end
 }
 
-wrap.argtypes.byte = {
-
-   helpname = function(arg)
-               return "byte"
-            end,
-
-   declare = function(arg)
-                -- if it is a number we initialize here
-                local default = tonumber(interpretdefaultvalue(arg)) or 0
-                return string.format("unsigned char arg%d = %d;", arg.i, tonumber(default))
-           end,
-
-   check = function(arg, idx)
-              return string.format("lua_isnumber(L, %d)", idx)
-           end,
-
-   read = function(arg, idx)
-             return string.format("arg%d = (unsigned char)lua_tonumber(L, %d);", arg.i, idx)
-          end,
-
-   init = function(arg)
-             -- otherwise do it here
-             if arg.default then
-                local default = interpretdefaultvalue(arg)
-                if not tonumber(default) then
-                   return string.format("arg%d = %s;", arg.i, default)
-                end
-             end
-          end,
-
-   carg = function(arg, idx)
-             return string.format('arg%d', arg.i)
-          end,
-
-   creturn = function(arg, idx)
-                return string.format('arg%d', arg.i)
-             end,
-
-   precall = function(arg)
-                if arg.returned then
-                   return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
-                end
-             end,
-
-   postcall = function(arg)
-                 if arg.creturned then
-                    return string.format('lua_pushnumber(L, (lua_Number)arg%d);', arg.i)
-                 end
-              end
-}
-
-for _,typename in ipairs({"real", "char", "short", "int", "long", "float", "double"}) do
+for _,typename in ipairs({"real", "unsigned char", "char", "short", "int", "long", "float", "double"}) do
    wrap.argtypes[typename] = {
 
       helpname = function(arg)
@@ -376,6 +325,8 @@ for _,typename in ipairs({"real", "char", "short", "int", "long", "float", "doub
                  end
    }
 end
+
+wrap.argtypes.byte = wrap.argtypes['unsigned char']
 
 wrap.argtypes.boolean = {
 
