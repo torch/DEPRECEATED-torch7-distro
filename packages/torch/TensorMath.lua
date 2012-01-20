@@ -29,7 +29,7 @@ for _,tensortype in ipairs({'ByteTensor',
                          'sqrt',
                          'ceil',
                          'floor',
-                         'abs'
+                         'abs',
                       }) do
 
       local torchfunc = torch[tensortype].torch[func]
@@ -100,7 +100,8 @@ for _,tensortype in ipairs({'ByteTensor',
                          'logNormal',
                          'exponential',
                          'geometric',
-                         'bernoulli'                         
+                         'bernoulli',
+                         'squeeze'
                       }) do
 
       torch[tensortype][func] = torch[tensortype].torch[func]
