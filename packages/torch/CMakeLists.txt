@@ -14,11 +14,13 @@ MACRO(ADD_TORCH_WRAP target luafile)
 ENDMACRO(ADD_TORCH_WRAP)
 
 ADD_TORCH_WRAP(tensormathwrap TensorMathWrap.lua)
+ADD_TORCH_WRAP(tensorlapackwrap TensorLapackWrap.lua)
 ADD_TORCH_WRAP(randomwrap random.lua)
 
 ADD_TORCH_PACKAGE(torch "${src}" "${luasrc}" "Basics")
 ADD_TORCH_DOK(dok torch "Fundamentals" "Torch package" 1.1)
 ADD_DEPENDENCIES(torch tensormathwrap)
+ADD_DEPENDENCIES(torch tensorlapackwrap)
 
 TARGET_LINK_LIBRARIES(torch luaT TH)
 

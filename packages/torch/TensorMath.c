@@ -19,12 +19,16 @@ static const void* torch_LongStorage_id;
 
 
 #include "TensorMathWrap.c"
+#include "TensorLapackWrap.c"
+
+#include "generic/TensorLapack.c"
+#include "THGenerateFloatTypes.h"
 
 #include "generic/TensorConv.c"
 #include "THGenerateAllTypes.h"
 
-#include "generic/TensorLapack.c"
-#include "THGenerateFloatTypes.h"
+extern void torch_FloatLapack_init(lua_State *L);
+extern void torch_DoubleLapack_init(lua_State *L);
 
 void torch_TensorMath_init(lua_State *L)
 {
@@ -35,6 +39,9 @@ void torch_TensorMath_init(lua_State *L)
   torch_LongTensorMath_init(L);
   torch_FloatTensorMath_init(L);
   torch_DoubleTensorMath_init(L);
-
   luaL_register(L, NULL, torch_TensorMath__);
+
+  torch_FloatLapack_init(L);
+  torch_DoubleLapack_init(L);
+  luaL_register(L, NULL, torch_TensorLapack__);
 }

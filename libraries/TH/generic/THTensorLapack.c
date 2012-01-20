@@ -2,39 +2,83 @@
 #define TH_GENERIC_FILE "generic/THTensorLapack.c"
 #else
 
-TH_API void THTensor_(gesv)(THTensor *a_, THTensor *b_)
+static int THTensor_(lapackClone)(THTensor *r_, THTensor *m, int forced)
 {
-  int n, nrhs, lda, ldb, info;
-  THIntTensor *ipiv;
-  THTensor *A, *B;
-  
-  THArgCheck(a_->nDimension == 2, 2, "A should be 2 dimensional");
-  THArgCheck(a_->size[0] == a_->size[1], 2, "A should be symmetric");
+  int clone;
 
-  n = (int)a_->size[1];
-  lda = n;
-  ldb = n;
-  if (b_->nDimension == 1)
+  if (!forced && m->stride[0] == 1 && m->stride[1] == m->size[0])
   {
-    nrhs = 1;
-    THArgCheck(n == b_->size[0], 1, "size incompatible A,b");
+    clone = 0;
+    THTensor_(set)(r_,m);
   }
   else
   {
-    nrhs = b_->size[0];
-    THArgCheck(n == b_->size[1], 1, "size incompatible A,b");
+    clone = 1;
+    /* we need to copy */
+    THTensor_(resize2d)(r_,m->size[1],m->size[0]);
+    THTensor_(transpose)(r_,NULL,0,1);
+    THTensor_(copy)(r_,m);
+  }
+  return clone;
+}
+
+TH_API void THTensor_(gesv)(THTensor *rb_, THTensor *ra_, THTensor *b, THTensor *a)
+{
+  int n, nrhs, lda, ldb, info;
+  THIntTensor *ipiv;
+  THTensor *ra__;
+  THTensor *rb__;
+
+  int clonea;
+  int cloneb;
+  int destroy;
+
+  
+  if (a == NULL && b == NULL) /* possibly destroy the inputs  */
+  {
+    ra__ = THTensor_(new)();
+    rb__ = THTensor_(new)();
+    clonea = THTensor_(lapackClone)(ra__,ra_,0);
+    cloneb = THTensor_(lapackClone)(rb__,rb_,0);
+    destroy = 1;
+  }
+  else /*we want to definitely clone and use ra_ and rb_ as computational space*/
+  {
+    clonea = THTensor_(lapackClone)(ra_,a,1);
+    cloneb = THTensor_(lapackClone)(rb_,b,1);
+    ra__ = ra_;
+    rb__ = rb_;
+    destroy = 0;
   }
 
-  A = THTensor_(newContiguous)(a_);
-  B = THTensor_(newContiguous)(b_);
+  THArgCheck(ra__->nDimension == 2, 1, "A should be 2 dimensional");
+  THArgCheck(rb__->nDimension == 2, 2, "b should be 2 dimensional");
+  THArgCheck(ra__->size[0] == ra__->size[1], 1, "A should be square");
+  THArgCheck(rb__->size[0] == ra__->size[0], 2, "A,b size incomptable");
+
+  n    = (int)ra__->size[0];
+  nrhs = (int)rb__->size[1];
+  lda  = n;
+  ldb  = n;
+
   ipiv = THIntTensor_newWithSize1d((long)n);
   THLapack_(gesv)(n, nrhs, 
-		  THTensor_(data)(A), lda, THIntTensor_data(ipiv),
-		  THTensor_(data)(B), ldb, &info);
+		  THTensor_(data)(ra__), lda, THIntTensor_data(ipiv),
+		  THTensor_(data)(rb__), ldb, &info);
 
-  if(!THTensor_(isContiguous)(b_))
+  /* clean up */
+  if (destroy)
   {
-    THTensor_(copy)(b_,B);
+    if (clonea)
+    {
+      THTensor_(copy)(ra_,ra__);
+    }
+    if (cloneb)
+    {
+      THTensor_(copy)(rb_,rb__);
+    }
+    THTensor_(free)(ra__);
+    THTensor_(free)(rb__);
   }
 
   if (info < 0)
@@ -47,45 +91,58 @@ TH_API void THTensor_(gesv)(THTensor *a_, THTensor *b_)
   }
 
   THIntTensor_free(ipiv);
-  THTensor_(free)(A);
-  THTensor_(free)(B);
 }
 
-TH_API void THTensor_(gels)(THTensor *a_, THTensor *b_)
+TH_API void THTensor_(gels)(THTensor *rb_, THTensor *ra_, THTensor *b, THTensor *a)
 {
   int m, n, nrhs, lda, ldb, info, lwork;
   char transpose;
-  THTensor *A, *B;
-  THTensor *work;
-  real wkopt;
-  
-  THArgCheck(a_->nDimension == 2, 2, "A should be 2 dimensional");
+  THTensor *work = NULL;
+  real wkopt = 0;
 
-  A = THTensor_(newContiguous)(a_);
-  B = THTensor_(newContiguous)(b_);
-  m = A->size[1];
-  n = A->size[0];
+  THTensor *ra__;
+  THTensor *rb__;
+
+  int clonea;
+  int cloneb;
+  int destroy;
+
+  
+  if (a == NULL && b == NULL) /* possibly destroy the inputs  */
+  {
+    ra__ = THTensor_(new)();
+    rb__ = THTensor_(new)();
+    clonea = THTensor_(lapackClone)(ra__,ra_,0);
+    cloneb = THTensor_(lapackClone)(rb__,rb_,0);
+    destroy = 1;
+  }
+  else /*we want to definitely clone and use ra_ and rb_ as computational space*/
+  {
+    clonea = THTensor_(lapackClone)(ra_,a,1);
+    cloneb = THTensor_(lapackClone)(rb_,b,1);
+    ra__ = ra_;
+    rb__ = rb_;
+    destroy = 0;
+  }
+  
+  THArgCheck(ra__->nDimension == 2, 1, "A should be 2 dimensional");
+  THArgCheck(ra_->size[0] == rb__->size[0], 2, "size incompatible A,b");
+
+  m = ra__->size[0];
+  n = ra__->size[1];
+  nrhs = rb__->size[1];
   lda = m;
   ldb = m;
-  if (b_->nDimension == 1)
-  {
-    nrhs = 1;
-    THArgCheck(m == b_->size[0], 1, "size incompatible A,b");
-  }
-  else
-  {
-    nrhs = b_->size[0];
-    THArgCheck(m == b_->size[1], 1, "size incompatible A,b");
-  }
+  info = 0;
 
   // get optimal workspace size
-  THLapack_(gels)('N', m, n, nrhs, THTensor_(data)(A), lda, 
-		  THTensor_(data)(B), ldb, 
+  THLapack_(gels)('N', m, n, nrhs, THTensor_(data)(ra__), lda, 
+		  THTensor_(data)(rb__), ldb, 
 		  &wkopt, -1, &info);
   lwork = (int)wkopt;
   work = THTensor_(newWithSize1d)(lwork);
-  THLapack_(gels)('N', m, n, nrhs, THTensor_(data)(A), lda, 
-		  THTensor_(data)(B), ldb, 
+  THLapack_(gels)('N', m, n, nrhs, THTensor_(data)(ra__), lda, 
+		  THTensor_(data)(rb__), ldb, 
 		  THTensor_(data)(work), lwork, &info);
 
   //printf("lwork = %d,%g\n",lwork,THTensor_(data)(work)[0]);
@@ -93,30 +150,61 @@ TH_API void THTensor_(gels)(THTensor *a_, THTensor *b_)
   {
     THError("Lapack gels : Argument %d : illegal value", -info);
   }
-  THTensor_(free)(A);
-  THTensor_(free)(B);
+  /* clean up */
+  if (destroy)
+  {
+    if (clonea)
+    {
+      THTensor_(copy)(ra_,ra__);
+    }
+    if (cloneb)
+    {
+      THTensor_(copy)(rb_,rb__);
+    }
+    THTensor_(free)(ra__);
+    THTensor_(free)(rb__);
+  }
   THTensor_(free)(work);
 }
 
-TH_API void THTensor_(syev)(THTensor *a_, THTensor *w_, const char *jobz, const char *uplo)
+TH_API void THTensor_(syev)(THTensor *re_, THTensor *rv_, THTensor *a, const char *jobz, const char *uplo)
 {
   int n, lda, lwork, info;
-  THTensor *A;
   THTensor *work;
   real wkopt;
 
-  THArgCheck(a_->nDimension == 2, 2, "A should be 2 dimensional");
-  A = THTensor_(newContiguous)(a_);
-  n = A->size[1];
+  THTensor *rv__;
+
+  int clonea;
+  int destroy;
+  
+  if (a == NULL) /* possibly destroy the inputs  */
+  {
+    rv__ = THTensor_(new)();
+    clonea = THTensor_(lapackClone)(rv__,rv_,0);
+    destroy = 1;
+  }
+  else /*we want to definitely clone and use ra_ and rb_ as computational space*/
+  {
+    clonea = THTensor_(lapackClone)(rv_,a,1);
+    rv__ = rv_;
+    destroy = 0;
+  }
+
+  THArgCheck(rv__->nDimension == 2, 2, "A should be 2 dimensional");
+
+  n = rv__->size[0];
   lda = n;
-  THTensor_(resize1d)(w_,n);
+
+  THTensor_(resize1d)(re_,n);
+
   // get optimal workspace size
-  THLapack_(syev)(jobz[0], uplo[0], n, THTensor_(data)(A), lda,
-		  THTensor_(data)(w_), &wkopt, -1, &info);
+  THLapack_(syev)(jobz[0], uplo[0], n, THTensor_(data)(rv__), lda,
+		  THTensor_(data)(re_), &wkopt, -1, &info);
   lwork = (int)wkopt;
   work = THTensor_(newWithSize1d)(lwork);
-  THLapack_(syev)(jobz[0], uplo[0], n, THTensor_(data)(A), lda,
-		  THTensor_(data)(w_), THTensor_(data)(work), lwork, &info);
+  THLapack_(syev)(jobz[0], uplo[0], n, THTensor_(data)(rv__), lda,
+		  THTensor_(data)(re_), THTensor_(data)(work), lwork, &info);
 
   if (info > 0)
   {
@@ -126,52 +214,83 @@ TH_API void THTensor_(syev)(THTensor *a_, THTensor *w_, const char *jobz, const 
   {
     THError("Lapack syev : Argument %d : illegal value", -info);
   }
-  THTensor_(free)(A);
+  /* clean up */
+  if (destroy)
+  {
+    if (clonea)
+    {
+      THTensor_(copy)(rv_,rv__);
+    }
+    THTensor_(free)(rv__);
+  }
   THTensor_(free)(work);
 }
 
-TH_API void THTensor_(gesvd)(THTensor *a_, THTensor *s_, THTensor *u_, THTensor *vt_, char jobu)
+TH_API void THTensor_(gesvd)(THTensor *ru_, THTensor *rs_, THTensor *rv_, THTensor *a, const char* jobu)
+{
+  THTensor *ra_ = THTensor_(new)();
+  THTensor_(gesvd2)(ru_, rs_, rv_,  ra_, a, jobu);
+  THTensor_(free)(ra_);
+}
+
+TH_API void THTensor_(gesvd2)(THTensor *ru_, THTensor *rs_, THTensor *rv_, THTensor *ra_, THTensor *a, const char* jobu)
 {
   int k,m, n, lda, ldu, ldvt, lwork, info;
-  THTensor *A, *work;
+  THTensor *work;
   real wkopt;
-  char jobvt = jobu;
 
-  THArgCheck(a_->nDimension == 2, 2, "A should be 2 dimensional");
-  THArgCheck(jobu == 'A' || jobu == 'S',4, "jobu can be 'A' or 'S'");
-  A = THTensor_(newContiguous)(a_);
-  m = A->size[1];
-  n = A->size[0];
+  THTensor *ra__;
+
+  int clonea;
+  int destroy;
+
+  if (a == NULL) /* possibly destroy the inputs  */
+  {
+    ra__ = THTensor_(new)();
+    clonea = THTensor_(lapackClone)(ra__,ra_,0);
+    destroy = 1;
+  }
+  else /*we want to definitely clone */
+  {
+    clonea = THTensor_(lapackClone)(ra_,a,1);
+    ra__ = ra_;
+    destroy = 0;
+  }
+  
+  THArgCheck(ra__->nDimension == 2, 2, "A should be 2 dimensional");
+
+  m = ra__->size[0];
+  n = ra__->size[1];
   k = (m < n ? m : n);
 
   lda = m;
   ldu = m;
   ldvt = n;
-  THTensor_(resize1d)(s_,k);
-  THTensor_(resize2d)(vt_,n,ldvt);
-  if (jobu == 'A')
+  THTensor_(resize1d)(rs_,k);
+  THTensor_(resize2d)(rv_,n,ldvt);
+  if (*jobu == 'A')
   {
-    THTensor_(resize2d)(u_,m,ldu);
+    THTensor_(resize2d)(ru_,m,ldu);
   }
   else
   {
-    THTensor_(resize2d)(u_,k,ldu);
+    THTensor_(resize2d)(ru_,k,ldu);
   }
-  THLapack_(gesvd)(jobu,jobvt,
-		   m,n,THTensor_(data)(A),lda,
-		   THTensor_(data)(s_),
-		   THTensor_(data)(u_),
+  THLapack_(gesvd)(jobu[0],jobu[0],
+		   m,n,THTensor_(data)(ra__),lda,
+		   THTensor_(data)(rs_),
+		   THTensor_(data)(ru_),
 		   ldu,
-		   THTensor_(data)(vt_), ldvt,
+		   THTensor_(data)(rv_), ldvt,
 		   &wkopt, -1, &info);
   lwork = (int)wkopt;
   work = THTensor_(newWithSize1d)(lwork);
-  THLapack_(gesvd)(jobu,jobvt,
-		   m,n,THTensor_(data)(A),lda,
-		   THTensor_(data)(s_),
-		   THTensor_(data)(u_),
+  THLapack_(gesvd)(jobu[0],jobu[0],
+		   m,n,THTensor_(data)(ra__),lda,
+		   THTensor_(data)(rs_),
+		   THTensor_(data)(ru_),
 		   ldu,
-		   THTensor_(data)(vt_), ldvt,
+		   THTensor_(data)(rv_), ldvt,
 		   THTensor_(data)(work),lwork, &info);
   if (info > 0)
   {
@@ -181,7 +300,16 @@ TH_API void THTensor_(gesvd)(THTensor *a_, THTensor *s_, THTensor *u_, THTensor 
   {
     THError("Lapack gesvd : Argument %d : illegal value", -info);
   }
-  THTensor_(free)(A);
+
+  /* clean up */
+  if (destroy)
+  {
+    if (clonea)
+    {
+      THTensor_(copy)(ra_,ra__);
+    }
+    THTensor_(free)(ra__);
+  }
   THTensor_(free)(work);
 }
 

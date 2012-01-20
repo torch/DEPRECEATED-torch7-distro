@@ -100,7 +100,7 @@ for _,tensortype in ipairs({'ByteTensor',
                          'logNormal',
                          'exponential',
                          'geometric',
-                         'bernoulli'                         
+                         'bernoulli',
                       }) do
 
       torch[tensortype][func] = torch[tensortype].torch[func]
