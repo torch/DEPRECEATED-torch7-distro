@@ -38,6 +38,9 @@ ADD_CUSTOM_TARGET(main-index-dok-files
   DEPENDS ${generatedfiles})
 ADD_DEPENDENCIES(documentation-dok main-index-dok-files)
 
+# used to make sure dokindex is built in a serial way
+SET(all-dok-index "" CACHE INTERNAL "dokindex previous dependencies" FORCE)
+
 MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
 
   SET(dokdstdir "${Torch_BINARY_DIR}/dok/${dstdir}")
@@ -103,7 +106,15 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
       "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok"
       "${Torch_SOURCE_DIR}/packages/dok/init.lua")
     
+    # the main dok depends on this
     ADD_DEPENDENCIES(documentation-dok ${dstdir}-dok-index)
+
+    # this one depends on all previous ones (serial build)
+    FOREACH(target ${all-dok-index})
+      ADD_DEPENDENCIES(${dstdir}-dok-index ${target})
+    ENDFOREACH(target ${all-dok-index})
+
+    SET(all-dok-index "${dstdir}-dok-index" "${all-dok-index}" CACHE INTERNAL "dokindex previous dependencies" FORCE)
 
   ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok")
 

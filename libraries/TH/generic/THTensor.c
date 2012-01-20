@@ -458,6 +458,62 @@ void THTensor_(unfold)(THTensor *self, THTensor *src, int dimension, long size, 
   self->nDimension++;
 }
 
+/* we have to handle the case where the result is a number */
+void THTensor_(squeeze)(THTensor *self, THTensor *src)
+{
+  int ndim = 0;
+  int d;
+
+  if(!src)
+    src = self;
+
+  THTensor_(set)(self, src);
+
+  for(d = 0; d < src->nDimension; d++)
+  {
+    if(src->size[d] != 1)
+    {
+      if(d != ndim)
+      {
+        self->size[ndim] = src->size[d];
+        self->stride[ndim] = src->stride[d];
+      }
+      ndim++;
+    }
+  }
+
+  /* right now, we do not handle 0-dimension tensors */
+  if(ndim == 0 && src->nDimension > 0)
+  {
+    self->size[0] = 1;
+    self->stride[0] = 1;
+    ndim = 1;
+  }
+  self->nDimension = ndim;
+}
+
+void THTensor_(squeeze1d)(THTensor *self, THTensor *src, int dimension)
+{
+  int d;
+
+  if(!src)
+    src = self;
+
+  THArgCheck(dimension < src->nDimension, 3, "dimension out of range");
+
+  THTensor_(set)(self, src);
+
+  if(src->size[dimension] == 1 && src->nDimension > 1)
+  {
+    for(d = dimension; d < self->nDimension-1; d++)
+    {
+      self->size[d] = self->size[d+1];
+      self->stride[d] = self->stride[d+1];
+    }
+    self->nDimension--;
+  }
+}
+
 int THTensor_(isContiguous)(THTensor *self)
 {
   long z = 1;

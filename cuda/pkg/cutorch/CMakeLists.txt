@@ -8,7 +8,7 @@ MACRO(ADD_TORCH_WRAP target luafile)
   ADD_CUSTOM_COMMAND(
     OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/${cfile}"
     COMMAND "${LUA_EXECUTABLE}" ARGS "-e \"dofile('${CMAKE_SOURCE_DIR}/packages/wrap/init.lua')\" " "${CMAKE_CURRENT_SOURCE_DIR}/${luafile}" "${CMAKE_CURRENT_BINARY_DIR}/${cfile}"
-    DEPENDS "${luafile}")
+    DEPENDS "${luafile}" "${LUA_EXECUTABLE}" "${CMAKE_SOURCE_DIR}/packages/wrap/init.lua" "${CMAKE_SOURCE_DIR}/packages/wrap/types.lua")
   ADD_CUSTOM_TARGET(${target} DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/${cfile}")
 ENDMACRO(ADD_TORCH_WRAP)
 
