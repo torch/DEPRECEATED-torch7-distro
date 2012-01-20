@@ -1,4 +1,3 @@
-
 #include <thrust/fill.h>
 #include <thrust/functional.h>
 #include <thrust/reduce.h>
