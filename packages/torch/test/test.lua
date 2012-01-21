@@ -261,6 +261,89 @@ function labtest.svd()
    mytester:asserteq(maxdiff(v,vv),0,'torch.svd')
    mytester:asserteq(maxdiff(v,vvv),0,'torch.svd')
 end
+
+function labtest.conv2()
+   local x = torch.rand(math.floor(torch.uniform(50,100)),math.floor(torch.uniform(50,100)))
+   local k = torch.rand(math.floor(torch.uniform(10,20)),math.floor(torch.uniform(10,20)))
+   local imvc = torch.conv2(x,k)
+   local imvc2 = torch.conv2(x,k,'v')
+   local imfc = torch.conv2(x,k,'f')
+
+   local ki = k:clone();
+   local ks = k:storage()
+   local kis = ki:storage()
+   for i=ks:size(),1,-1 do kis[ks:size()-i+1]=ks[i] end
+   local imvx = torch.xcorr2(x,ki)
+   local imvx2 = torch.xcorr2(x,ki,'v')
+   local imfx = torch.xcorr2(x,ki,'f')
+
+   mytester:asserteq(maxdiff(imvc,imvc2),0,'torch.conv2')
+   mytester:asserteq(maxdiff(imvc,imvx),0,'torch.conv2')
+   mytester:asserteq(maxdiff(imvc,imvx2),0,'torch.conv2')
+   mytester:asserteq(maxdiff(imfc,imfx),0,'torch.conv2')
+   mytester:asserteq(x:dot(x),torch.xcorr2(x,x)[1][1],'torch.conv2')
+
+   local xx = torch.Tensor(2,x:size(1),x:size(2))
+   xx[1]:copy(x)
+   xx[2]:copy(x)
+   local kk = torch.Tensor(2,k:size(1),k:size(2))
+   kk[1]:copy(k)
+   kk[2]:copy(k)
+
+   local immvc = torch.conv2(xx,kk)
+   local immvc2 = torch.conv2(xx,kk,'v')
+   local immfc = torch.conv2(xx,kk,'f')
+
+   mytester:asserteq(maxdiff(immvc[1],immvc[2]),0,'torch.conv2')
+   mytester:asserteq(maxdiff(immvc[1],imvc),0,'torch.conv2')
+   mytester:asserteq(maxdiff(immvc2[1],imvc2),0,'torch.conv2')
+   mytester:asserteq(maxdiff(immfc[1],immfc[2]),0,'torch.conv2')
+   mytester:asserteq(maxdiff(immfc[1],imfc),0,'torch.conv2')
+end
+
+function labtest.conv3()
+   local x = torch.rand(math.floor(torch.uniform(20,40)),
+			math.floor(torch.uniform(20,40)),
+			math.floor(torch.uniform(20,40)))
+   local k = torch.rand(math.floor(torch.uniform(5,10)),
+			math.floor(torch.uniform(5,10)),
+			math.floor(torch.uniform(5,10)))
+   local imvc = torch.conv3(x,k)
+   local imvc2 = torch.conv3(x,k,'v')
+   local imfc = torch.conv3(x,k,'f')
+
+   local ki = k:clone();
+   local ks = k:storage()
+   local kis = ki:storage()
+   for i=ks:size(),1,-1 do kis[ks:size()-i+1]=ks[i] end
+   local imvx = torch.xcorr3(x,ki)
+   local imvx2 = torch.xcorr3(x,ki,'v')
+   local imfx = torch.xcorr3(x,ki,'f')
+
+   mytester:asserteq(maxdiff(imvc,imvc2),0,'torch.conv3')
+   mytester:asserteq(maxdiff(imvc,imvx),0,'torch.conv3')
+   mytester:asserteq(maxdiff(imvc,imvx2),0,'torch.conv3')
+   mytester:asserteq(maxdiff(imfc,imfx),0,'torch.conv3')
+   mytester:asserteq(x:dot(x),torch.xcorr3(x,x)[1][1][1],'torch.conv3')
+
+   local xx = torch.Tensor(2,x:size(1),x:size(2),x:size(3))
+   xx[1]:copy(x)
+   xx[2]:copy(x)
+   local kk = torch.Tensor(2,k:size(1),k:size(2),k:size(3))
+   kk[1]:copy(k)
+   kk[2]:copy(k)
+
+   local immvc = torch.conv3(xx,kk)
+   local immvc2 = torch.conv3(xx,kk,'v')
+   local immfc = torch.conv3(xx,kk,'f')
+
+   mytester:asserteq(maxdiff(immvc[1],immvc[2]),0,'torch.conv3')
+   mytester:asserteq(maxdiff(immvc[1],imvc),0,'torch.conv3')
+   mytester:asserteq(maxdiff(immvc2[1],imvc2),0,'torch.conv3')
+   mytester:asserteq(maxdiff(immfc[1],immfc[2]),0,'torch.conv3')
+   mytester:asserteq(maxdiff(immfc[1],imfc),0,'torch.conv3')
+end
+
 function torch.test()
    math.randomseed(os.time())
    mytester = torch.Tester()
