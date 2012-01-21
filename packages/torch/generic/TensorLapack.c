@@ -50,6 +50,10 @@ static int torch_(gesv)(lua_State *L)
     ragiven = 2;
     rbgiven = 1;
   }
+  else
+  {
+    luaL_error(L,"[Tensor, Tensor], Tensor, Tensor, [,true]");      
+  }
 
   if (!ra_) ra_ = THTensor_(new)();
   if (!rb_) rb_ = THTensor_(new)();
