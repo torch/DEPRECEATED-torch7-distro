@@ -90,22 +90,23 @@ function Sequential:share(mlp,...)
 end
 
 function Sequential:parameters()
-   local function tinsert(from, to)
+   local function tinsert(to, from)
       if type(from) == 'table' then
          for i=1,#from do
-            tinsert(from[i],to)
+            tinsert(to,from[i])
          end
       else
-         table.insert(from,to)
+         table.insert(to,from)
       end
    end
    local w = {}
    local gw = {}
    for i=1,#self.modules do
       local mw,mgw = self.modules[i]:parameters()
-      tinsert(mw,w)
-      tinsert(mgw,gw)
+      if mw then
+         tinsert(w,mw)
+         tinsert(gw,mgw)
+      end
    end
    return w,gw
 end
-
