@@ -242,7 +242,7 @@ static int torch_(svd)(lua_State *L)
   if (!rs_) rs_ = THTensor_(new)();
   if (!rv_) rv_ = THTensor_(new)();
 
-  THTensor_(gesvd)(rs_,ru_,rv_,a_,&type);
+  THTensor_(gesvd)(ru_,rs_,rv_,a_,&type);
 
   pushreturn(rugiven,ru_,torch_(Tensor_id));
   pushreturn(rsgiven,rs_,torch_(Tensor_id));

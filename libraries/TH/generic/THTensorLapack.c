@@ -267,7 +267,7 @@ TH_API void THTensor_(gesvd2)(THTensor *ru_, THTensor *rs_, THTensor *rv_, THTen
   ldu = m;
   ldvt = n;
   THTensor_(resize1d)(rs_,k);
-  THTensor_(resize2d)(rv_,n,ldvt);
+  THTensor_(resize2d)(rv_,ldvt,n);
   if (*jobu == 'A')
   {
     THTensor_(resize2d)(ru_,m,ldu);
@@ -276,6 +276,9 @@ TH_API void THTensor_(gesvd2)(THTensor *ru_, THTensor *rs_, THTensor *rv_, THTen
   {
     THTensor_(resize2d)(ru_,k,ldu);
   }
+  THTensor_(transpose)(ru_,NULL,0,1);
+  THTensor_(transpose)(rv_,NULL,0,1);
+
   THLapack_(gesvd)(jobu[0],jobu[0],
 		   m,n,THTensor_(data)(ra__),lda,
 		   THTensor_(data)(rs_),
