@@ -456,6 +456,18 @@ static void THTensor_random1__(THTensor *self, long b)
 		  {{name=Tensor, default=true, returned=true},
 		   {name=Tensor}})
 
+   for _,name in pairs({'lt','gt','le','ge','eq','ne'}) do
+      interface:wrap(name,
+		     cname(name .. 'Val'),
+		     {{name='ByteTensor',default=true, returned=true},
+		      {name=Tensor},
+		      {name=real}},
+		     cname(name .. 'Tensor'),
+		     {{name='ByteTensor',default=true, returned=true},
+		      {name=Tensor},
+		      {name=Tensor}})
+   end
+
    if Tensor == 'FloatTensor' or Tensor == 'DoubleTensor' then
 
       interface:wrap("mean",

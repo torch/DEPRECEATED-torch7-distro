@@ -109,6 +109,9 @@ TH_API void THTensor_(retain)(THTensor *self);
 TH_API void THTensor_(free)(THTensor *self);
 TH_API void THTensor_(freeCopyTo)(THTensor *self, THTensor *dst);
 
+TH_API void THTensor_(setValByIndex)(THTensor *tensor, THByteTensor *index, real value);
+TH_API void THTensor_(setTensorByIndex)(THTensor *tensor, THByteTensor *index, THTensor* src);
+
 /* Slow access methods [check everything] */
 TH_API void THTensor_(set1d)(THTensor *tensor, long x0, real value);
 TH_API void THTensor_(set2d)(THTensor *tensor, long x0, long x1, real value);

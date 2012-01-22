@@ -50,6 +50,20 @@ TH_API void THTensor_(tril)(THTensor *r_, THTensor *t, long k);
 TH_API void THTensor_(triu)(THTensor *r_, THTensor *t, long k);
 TH_API void THTensor_(cat)(THTensor *r_, THTensor *ta, THTensor *tb, int dimension);
 
+TH_API void THTensor_(ltVal)(THByteTensor *r_, THTensor* t, real value);
+TH_API void THTensor_(leVal)(THByteTensor *r_, THTensor* t, real value);
+TH_API void THTensor_(gtVal)(THByteTensor *r_, THTensor* t, real value);
+TH_API void THTensor_(geVal)(THByteTensor *r_, THTensor* t, real value);
+TH_API void THTensor_(neVal)(THByteTensor *r_, THTensor* t, real value);
+TH_API void THTensor_(eqVal)(THByteTensor *r_, THTensor* t, real value);
+
+TH_API void THTensor_(ltTensor)(THByteTensor *r_, THTensor *ta, THTensor *tb);
+TH_API void THTensor_(leTensor)(THByteTensor *r_, THTensor *ta, THTensor *tb);
+TH_API void THTensor_(gtTensor)(THByteTensor *r_, THTensor *ta, THTensor *tb);
+TH_API void THTensor_(geTensor)(THByteTensor *r_, THTensor *ta, THTensor *tb);
+TH_API void THTensor_(neTensor)(THByteTensor *r_, THTensor *ta, THTensor *tb);
+TH_API void THTensor_(eqTensor)(THByteTensor *r_, THTensor *ta, THTensor *tb);
+
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
 
 TH_API void THTensor_(log)(THTensor *r_, THTensor *t);

@@ -847,6 +847,29 @@ void THTensor_(cat)(THTensor *r_, THTensor *ta, THTensor *tb, int dimension)
   }
 }
 
+#define TENSOR_IMPLEMENT_LOGICAL(NAME,OP)				\
+  void THTensor_(NAME##Val)(THByteTensor *r_, THTensor* t, real value)	\
+  {									\
+    THByteTensor_rawResize(r_, t->nDimension, t->size, NULL);		\
+    THByteTensor_zero(r_);						\
+    TH_TENSOR_APPLY2(unsigned char, r_, real, t,			\
+		     if (*t_data OP value) *r__data = 1;);		\
+  }									\
+  void THTensor_(NAME##Tensor)(THByteTensor *r_, THTensor *ta, THTensor *tb) \
+  {									\
+    THByteTensor_rawResize(r_, ta->nDimension, ta->size, NULL);		\
+    THByteTensor_zero(r_);						\
+    TH_TENSOR_APPLY3(unsigned char, r_, real, ta, real, tb,		\
+		     if(*ta_data OP *tb_data) *r__data = 1;);		\
+  }									\
+
+TENSOR_IMPLEMENT_LOGICAL(lt,<)
+TENSOR_IMPLEMENT_LOGICAL(gt,>)
+TENSOR_IMPLEMENT_LOGICAL(le,<=)
+TENSOR_IMPLEMENT_LOGICAL(ge,>=)
+TENSOR_IMPLEMENT_LOGICAL(eq,==)
+TENSOR_IMPLEMENT_LOGICAL(ne,!=)
+
 /* floating point only now */
 
 #if defined(TH_REAL_IS_FLOAT) || defined(TH_REAL_IS_DOUBLE)
