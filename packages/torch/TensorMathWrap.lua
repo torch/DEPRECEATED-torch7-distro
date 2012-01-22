@@ -451,6 +451,11 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=Tensor},
                    {name="index"}})
 
+   interface:wrap("sign",
+		  cname("sign"),
+		  {{name=Tensor, default=true, returned=true},
+		   {name=Tensor}})
+
    if Tensor == 'FloatTensor' or Tensor == 'DoubleTensor' then
 
       interface:wrap("mean",

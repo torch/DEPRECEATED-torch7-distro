@@ -1,8 +1,7 @@
 require 'torch'
-require 'random'
 
 local mytester 
-local labtest = {}
+local torchtest = {}
 local msize = 100
 
 local function maxdiff(x,y)
@@ -15,7 +14,7 @@ local function maxdiff(x,y)
    end
 end
 
-function labtest.max()
+function torchtest.max()
    local x = torch.rand(msize,msize)
    local mx,ix = torch.max(x,1)
    local mxx = torch.Tensor()
@@ -24,7 +23,7 @@ function labtest.max()
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.max value')
    mytester:asserteq(maxdiff(ix,ixx),0,'torch.max index')
 end
-function labtest.min()
+function torchtest.min()
    local x = torch.rand(msize,msize)
    local mx,ix = torch.min(x)
    local mxx = torch.Tensor()
@@ -33,35 +32,35 @@ function labtest.min()
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.min value')
    mytester:asserteq(maxdiff(ix,ixx),0,'torch.min index')
 end
-function labtest.sum()
+function torchtest.sum()
    local x = torch.rand(msize,msize)
    local mx = torch.sum(x)
    local mxx = torch.Tensor()
    torch.sum(mxx,x)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.sum value')
 end
-function labtest.prod()
+function torchtest.prod()
    local x = torch.rand(msize,msize)
    local mx = torch.prod(x)
    local mxx = torch.Tensor()
    torch.prod(mxx,x)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.prod value')
 end
-function labtest.cumsum()
+function torchtest.cumsum()
    local x = torch.rand(msize,msize)
    local mx = torch.cumsum(x)
    local mxx = torch.Tensor()
    torch.cumsum(mxx,x)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.cumsum value')
 end
-function labtest.cumprod()
+function torchtest.cumprod()
    local x = torch.rand(msize,msize)
    local mx = torch.cumprod(x)
    local mxx = torch.Tensor()
    torch.cumprod(mxx,x)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.cumprod value')
 end
-function labtest.cross()
+function torchtest.cross()
    local x = torch.rand(msize,3,msize)
    local y = torch.rand(msize,3,msize)
    local mx = torch.cross(x,y)
@@ -69,54 +68,54 @@ function labtest.cross()
    torch.cross(mxx,x,y)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.cross value')
 end
-function labtest.zeros()
+function torchtest.zeros()
    local mx = torch.zeros(msize,msize)
    local mxx = torch.Tensor()
    torch.zeros(mxx,msize,msize)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.zeros value')
 end
-function labtest.ones()
+function torchtest.ones()
    local mx = torch.ones(msize,msize)
    local mxx = torch.Tensor()
    torch.ones(mxx,msize,msize)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.ones value')
 end
-function labtest.diag()
+function torchtest.diag()
    local x = torch.rand(msize,msize)
    local mx = torch.diag(x)
    local mxx = torch.Tensor()
    torch.diag(mxx,x)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.diag value')
 end
-function labtest.eye()
+function torchtest.eye()
    local mx = torch.eye(msize,msize)
    local mxx = torch.Tensor()
    torch.eye(mxx,msize,msize)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.eye value')
 end
-function labtest.range()
+function torchtest.range()
    local mx = torch.range(0,1)
    local mxx = torch.Tensor()
    torch.range(mxx,0,1)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.range value')
 end
-function labtest.randperm()
+function torchtest.randperm()
    local t=os.time()
-   random.manualSeed(t)
+   torch.manualSeed(t)
    local mx = torch.randperm(msize)
    local mxx = torch.Tensor()
-   random.manualSeed(t)
+   torch.manualSeed(t)
    torch.randperm(mxx,msize)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.randperm value')
 end
-function labtest.reshape()
+function torchtest.reshape()
    local x = torch.rand(10,13,23)
    local mx = torch.reshape(x,130,23)
    local mxx = torch.Tensor()
    torch.reshape(mxx,x,130,23)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.reshape value')
 end
-function labtest.sort()
+function torchtest.sort()
    local x = torch.rand(msize,msize)
    local mx,ix = torch.sort(x)
    local mxx = torch.Tensor()
@@ -125,21 +124,21 @@ function labtest.sort()
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.sort value')
    mytester:asserteq(maxdiff(ix,ixx),0,'torch.sort index')
 end
-function labtest.tril()
+function torchtest.tril()
    local x = torch.rand(msize,msize)
    local mx = torch.tril(x)
    local mxx = torch.Tensor()
    torch.tril(mxx,x)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.tril value')
 end
-function labtest.triu()
+function torchtest.triu()
    local x = torch.rand(msize,msize)
    local mx = torch.triu(x)
    local mxx = torch.Tensor()
    torch.triu(mxx,x)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.tril value')
 end
-function labtest.cat()
+function torchtest.cat()
    local x = torch.rand(13,msize,msize)
    local y = torch.rand(17,msize,msize)
    local mx = torch.cat(x,y,1)
@@ -147,14 +146,14 @@ function labtest.cat()
    torch.cat(mxx,x,y,1)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.cat value')
 end
-function labtest.sin()
+function torchtest.sin()
    local x = torch.rand(msize,msize,msize)
    local mx = torch.sin(x)
    local mxx  = torch.Tensor()
    torch.sin(mxx,x)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.sin value')
 end
-function labtest.linspace()
+function torchtest.linspace()
    local from = math.random()
    local to = from+math.random()
    local mx = torch.linspace(from,to,137)
@@ -162,7 +161,7 @@ function labtest.linspace()
    torch.linspace(mxx,from,to,137)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.linspace value')
 end
-function labtest.logspace()
+function torchtest.logspace()
    local from = math.random()
    local to = from+math.random()
    local mx = torch.logspace(from,to,137)
@@ -170,23 +169,23 @@ function labtest.logspace()
    torch.logspace(mxx,from,to,137)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.logspace value')
 end
-function labtest.rand()
-   random.manualSeed(123456)
+function torchtest.rand()
+   torch.manualSeed(123456)
    local mx = torch.rand(msize,msize)
    local mxx = torch.Tensor()
-   random.manualSeed(123456)
+   torch.manualSeed(123456)
    torch.rand(mxx,msize,msize)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.rand value')
 end
-function labtest.randn()
-   random.manualSeed(123456)
+function torchtest.randn()
+   torch.manualSeed(123456)
    local mx = torch.randn(msize,msize)
    local mxx = torch.Tensor()
-   random.manualSeed(123456)
+   torch.manualSeed(123456)
    torch.randn(mxx,msize,msize)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.randn value')
 end
-function labtest.gesv()
+function torchtest.gesv()
    if not torch.gesv then return end
    local a=torch.Tensor({{6.80, -2.11,  5.66,  5.97,  8.23},
 			 {-6.05, -3.30,  5.36, -4.44,  1.08},
@@ -207,7 +206,7 @@ function labtest.gesv()
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.gesv value out1')
    mytester:asserteq(maxdiff(mx,mxxx),0,'torch.gesv value out2')
 end
-function labtest.gels()
+function torchtest.gels()
    if not torch.gels then return end
    local a=torch.Tensor({{ 1.44, -9.96, -7.55,  8.34,  7.08, -5.45},
 			 {-7.84, -0.28,  3.24,  8.09,  2.52, -5.70},
@@ -225,7 +224,7 @@ function labtest.gels()
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.gels value out1')
    mytester:asserteq(maxdiff(mx,mxxx),0,'torch.gels value out2')
 end
-function labtest.eig()
+function torchtest.eig()
    if not torch.eig then return end
    local a=torch.Tensor({{ 1.96,  0.00,  0.00,  0.00,  0.00},
 			 {-6.49,  3.80,  0.00,  0.00,  0.00},
@@ -243,7 +242,7 @@ function labtest.eig()
    mytester:assertlt(maxdiff(vv,vvv),1e-12,'torch.eig value')
    mytester:assertlt(maxdiff(vv,tv),1e-12,'torch.eig value')
 end
-function labtest.svd()
+function torchtest.svd()
    if not torch.svd then return end
    local a=torch.Tensor({{8.79,  6.11, -9.15,  9.57, -3.49,  9.84},
 			 {9.93,  6.91, -7.93,  1.64,  4.02,  0.15},
@@ -263,7 +262,7 @@ function labtest.svd()
    mytester:asserteq(maxdiff(v,vvv),0,'torch.svd')
 end
 
-function labtest.conv2()
+function torchtest.conv2()
    local x = torch.rand(math.floor(torch.uniform(50,100)),math.floor(torch.uniform(50,100)))
    local k = torch.rand(math.floor(torch.uniform(10,20)),math.floor(torch.uniform(10,20)))
    local imvc = torch.conv2(x,k)
@@ -302,7 +301,7 @@ function labtest.conv2()
    mytester:asserteq(maxdiff(immfc[1],imfc),0,'torch.conv2')
 end
 
-function labtest.conv3()
+function torchtest.conv3()
    local x = torch.rand(math.floor(torch.uniform(20,40)),
 			math.floor(torch.uniform(20,40)),
 			math.floor(torch.uniform(20,40)))
@@ -348,6 +347,6 @@ end
 function torch.test()
    math.randomseed(os.time())
    mytester = torch.Tester()
-   mytester:add(labtest)
+   mytester:add(torchtest)
    mytester:run()
 end

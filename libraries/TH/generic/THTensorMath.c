@@ -456,6 +456,24 @@ void THTensor_(cumprod)(THTensor *r_, THTensor *t, int dimension)
                        });
 }
 
+
+void THTensor_(sign)(THTensor *r_, THTensor *t)
+{
+  THTensor_(resizeAs)(r_, t);
+
+#if defined (TH_REAL_IS_BYTE)
+  TH_TENSOR_APPLY2(real, r_, real, t, 
+		   if (*t_data > 0) *r__data = 1;
+		   else *r__data = 0;);
+#else
+  TH_TENSOR_APPLY2(real, r_, real, t, 
+		   if (*t_data > 0) *r__data = 1;
+		   else if (*t_data < 0) *r__data = -1;
+		   else *r__data = 0;);
+#endif
+}
+
+
 accreal THTensor_(trace)(THTensor *t)
 {
   real *t_data = THTensor_(data)(t);
