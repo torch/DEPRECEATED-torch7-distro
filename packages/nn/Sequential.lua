@@ -110,3 +110,23 @@ function Sequential:parameters()
    end
    return w,gw
 end
+
+function Sequential:__tostring__(dontexpand)
+   local tab = '  '
+   local line = '\n'
+   local next = ' -> '
+   local str = 'nn.Sequential'
+   if dontexpand then
+      return str
+   end
+   str = str .. ' {' .. line .. tab .. '[input'
+   for i=1,#self.modules do
+      str = str .. next .. '(' .. i .. ')'
+   end
+   str = str .. next .. 'output]'
+   for i=1,#self.modules do
+      str = str .. line .. tab .. '(' .. i .. '): ' .. tostring(self.modules[i], true)
+   end
+   str = str .. line .. '}'
+   return str
+end
