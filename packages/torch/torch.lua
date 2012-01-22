@@ -3,8 +3,8 @@
 print 'Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU'
 
 -- custom prompt
-_PROMPT  = 'torch> '
-_PROMPT2 = ' ... > '
+_PROMPT  = 't7> '
+_PROMPT2 = '. > '
 
 -- helper
 local function sizestr(x)
@@ -43,7 +43,7 @@ local function printvar(key,val,m)
    elseif tp == 'string' then
       local tostr = val:gsub('\n','\\n')
       if #tostr>40 then
-	 tostr = tostr:sub(1,40)
+	 tostr = tostr:sub(1,40) .. '...'
       end
       tp = tp .. ' : "' .. tostr .. '"'
    else
