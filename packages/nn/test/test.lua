@@ -1,4 +1,5 @@
 require 'torch'
+require 'random'
 
 local mytester = torch.Tester()
 local jac

@@ -54,7 +54,7 @@ static int nnOmp_(SpatialConvolution_updateOutputOmp)(lua_State *L)
     /*THTensor_(free)(outn);*/
     
     /* do convolutions */
-    THOmpTensor_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
+    THOmpTensor_(conv2Dmv)(output, 1.0, 1.0, input, weight, dH, dW, "V","X");
   }
   else
   {
@@ -79,7 +79,7 @@ static int nnOmp_(SpatialConvolution_updateOutputOmp)(lua_State *L)
     }
 
     /* do convolutions */
-    THOmpTensor_(conv2Dmm)(output, 1.0, 1.0, input, weight, dH, dW, "vx");
+    THOmpTensor_(conv2Dmm)(output, 1.0, 1.0, input, weight, dH, dW, "V","X");
   }
   return 1;
 }
@@ -106,11 +106,11 @@ static int nnOmp_(SpatialConvolution_updateGradInputOmp)(lua_State *L)
 
   if (input->nDimension == 3)
   {
-    THOmpTensor_(conv2Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
+    THOmpTensor_(conv2Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "F","C");
   }
   else
   {
-    THOmpTensor_(conv2Dmm)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "fc");
+    THOmpTensor_(conv2Dmm)(gradInput, 0.0, 1.0, gradOutput, tweight, dH, dW, "F","C");
   }
   THTensor_(free)(tweight);
   return 1;

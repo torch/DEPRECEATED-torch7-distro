@@ -8,7 +8,7 @@ static int torchOmp_(convxcorr2omp)(lua_State *L, char* ktype)
   THTensor *image = luaT_checkudata(L,1,torch_(Tensor_id));
   THTensor *kernel = luaT_checkudata(L,2,torch_(Tensor_id));
   int n = lua_gettop(L);
-  const char* ctype = "v";
+  const char* ctype = "V";
   if (n == 2)
   {
     r_ = THTensor_(new)();
@@ -57,15 +57,15 @@ static int torchOmp_(convxcorr2omp)(lua_State *L, char* ktype)
 
   if (image->nDimension == 2 && kernel->nDimension == 2)
   {
-    THTensor_(conv2Dmul)(r_,0.0,1.0,image,kernel,1,1,type);
+    THTensor_(conv2Dmul)(r_,0.0,1.0,image,kernel,1,1,ctype,ktype);
   }
   else if (image->nDimension == 3 && kernel->nDimension == 3)
   {
-    THOmpTensor_(conv2Dger)(r_,0.0,1.0,image,kernel,1,1,type);
+    THOmpTensor_(conv2Dger)(r_,0.0,1.0,image,kernel,1,1,ctype,ktype);
   }
   else if (image->nDimension == 3 && kernel->nDimension == 4)
   {
-    THOmpTensor_(conv2Dmv)(r_,0.0,1.0,image,kernel,1,1,type);
+    THOmpTensor_(conv2Dmv)(r_,0.0,1.0,image,kernel,1,1,ctype,ktype);
   }
   else if (image->nDimension == 2 && kernel->nDimension == 3)
   {
@@ -81,9 +81,9 @@ static int torchOmp_(convxcorr2omp)(lua_State *L, char* ktype)
       long nKernelCols = kernel->size[2];
       long nOutputRows, nOutputCols;
 
-      THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "Input image is smaller than kernel");
+      THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'F', 2, "Input image is smaller than kernel");
   
-      if (type[0] == 'f') {
+      if (type[0] == 'F') {
 	nOutputRows = (nInputRows - 1) * 1 + nKernelRows;
 	nOutputCols = (nInputCols - 1) * 1 + nKernelCols;
       } else { // valid
@@ -96,14 +96,14 @@ static int torchOmp_(convxcorr2omp)(lua_State *L, char* ktype)
       {
         THTensor_(select)(ker,kernel,0,k);
         THTensor_(select)(ri,r_,0,k);
-        THTensor_(conv2Dmul)(ri,0.0,1.0,image,ker,1,1,type);
+        THTensor_(conv2Dmul)(ri,0.0,1.0,image,ker,1,1,ctype,ktype);
       }
       THTensor_(free)(ri);
       THTensor_(free)(ker);
     } else {
       THTensor *ker = THTensor_(new)();
       THTensor_(select)(ker,kernel,0,0);
-      THTensor_(conv2Dmul)(r_,0.0,1.0,image,ker,1,1,type);
+      THTensor_(conv2Dmul)(r_,0.0,1.0,image,ker,1,1,ctype,ktype);
       THTensor_(free)(ker);
     }
   }
@@ -121,9 +121,9 @@ static int torchOmp_(convxcorr2omp)(lua_State *L, char* ktype)
       long nKernelCols = kernel->size[1];
       long nOutputRows, nOutputCols;
 
-      THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "Input image is smaller than kernel");
+      THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'F', 2, "Input image is smaller than kernel");
   
-      if (type[0] == 'f') {
+      if (type[0] == 'F') {
 	nOutputRows = (nInputRows - 1) * 1 + nKernelRows;
 	nOutputCols = (nInputCols - 1) * 1 + nKernelCols;
       } else { // valid
@@ -135,14 +135,14 @@ static int torchOmp_(convxcorr2omp)(lua_State *L, char* ktype)
       {
         THTensor_(select)(im, image, 0, k);
         THTensor_(select)(ri,r_,0,k);
-        THTensor_(conv2Dmul)(ri,0.0,1.0,im,kernel,1,1,type);
+        THTensor_(conv2Dmul)(ri,0.0,1.0,im,kernel,1,1,ctype,ktype);
       }
       THTensor_(free)(ri);
       THTensor_(free)(im);
     } else {
       THTensor *im = THTensor_(new)();
       THTensor_(select)(im,image,0,0);
-      THTensor_(conv2Dmul)(r_,0.0,1.0,im,kernel,1,1,type);
+      THTensor_(conv2Dmul)(r_,0.0,1.0,im,kernel,1,1,ctype,ktype);
       THTensor_(free)(im);
     }
   }
@@ -151,11 +151,11 @@ static int torchOmp_(convxcorr2omp)(lua_State *L, char* ktype)
 
 static int torchOmp_(conv2omp)(lua_State *L)
 {
-  return torchOmp_(convxcorr2omp)(L,"convolution");
+  return torchOmp_(convxcorr2omp)(L,"Convolution");
 }
 static int torchOmp_(xcorr2omp)(lua_State *L)
 {
-  return torchOmp_(convxcorr2omp)(L,"xcorrelation");
+  return torchOmp_(convxcorr2omp)(L,"Xcorrelation");
 }
 
 

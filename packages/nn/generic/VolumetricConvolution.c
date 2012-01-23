@@ -39,7 +39,7 @@ static int nn_(VolumetricConvolution_updateOutput)(lua_State *L)
   THTensor_(free)(outn);
 
   /* do convolutions */
-  THTensor_(conv3Dmv)(output, 1.0, 1.0, input, weight, dT, dH, dW, "vx");
+  THTensor_(conv3Dmv)(output, 1.0, 1.0, input, weight, dT, dH, dW, "V", "X");
 
   return 1;
 }
@@ -61,7 +61,7 @@ static int nn_(VolumetricConvolution_updateGradInput)(lua_State *L)
 
   /* gradient to input */
   THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
-  THTensor_(conv3Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dT, dH, dW, "fc");
+  THTensor_(conv3Dmv)(gradInput, 0.0, 1.0, gradOutput, tweight, dT, dH, dW, "F", "C");
   THTensor_(free)(tweight);
 
   return 1;

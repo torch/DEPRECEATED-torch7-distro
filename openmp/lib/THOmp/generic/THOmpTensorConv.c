@@ -218,7 +218,7 @@ void THOmpTensor_(conv2DRevgerm)(THTensor *r_, real beta, real alpha, THTensor *
   like rank1 update
   A <- xx' + beta*A
 */
-void THOmpTensor_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, THTensor *k_, long srow, long scol, const char *type)
+void THOmpTensor_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, THTensor *k_, long srow, long scol, const char *vf, const char *xc)
 {
   long nInputPlane, nInputRows, nInputCols;
   long nKernelPlane, nKernelRows, nKernelCols;
@@ -229,8 +229,8 @@ void THOmpTensor_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, 
   THArgCheck(k_->nDimension == 3 , 4, "kernel: 3D Tensor expected");
   THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
-  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
-  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
+  THArgCheck(*vf == 'V' || *vf == 'F', 7, "type of convolution can 'V' or 'F'");
+  THArgCheck(*xc == 'C' || *xc == 'X', 7, "type of convolution can 'X' or 'C'");
 
   THTensor *input = THTensor_(newContiguous)(t_);
   THTensor *kernel = THTensor_(newContiguous)(k_);
@@ -246,9 +246,9 @@ void THOmpTensor_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, 
   nKernelCols = kernel->size[2];
   nOutputPlane = nInputPlane * kernel->size[0];
 
-  THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv2Dger : Input image is smaller than kernel");
+  THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *vf == 'F', 2, "conv2Dger : Input image is smaller than kernel");
 
-  if (*type == 'f') {
+  if (*vf == 'F') {
     nOutputRows = (nInputRows - 1) * srow + nKernelRows;
     nOutputCols = (nInputCols - 1) * scol + nKernelCols;
   } else { // valid
@@ -306,8 +306,8 @@ void THOmpTensor_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, 
       real *ptr_input = input_data+i*istride0;
 
       /* do image, kernel convolution */
-      if (type[0] == 'f')
-        if (type[1] == 'x')
+      if (*vf == 'F')
+        if (*xc == 'X')
           THTensor_(fullXCorr2Dptr)(ptr_output,
                                  alpha,
                                  ptr_input,  nInputRows,  nInputCols,
@@ -320,7 +320,7 @@ void THOmpTensor_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, 
                                 ptr_weight, nKernelRows, nKernelCols,
                                 srow, scol);
       else
-        if (type[1] == 'x')
+        if (*xc == 'X')
           THTensor_(validXCorr2Dptr)(ptr_output,
                                   alpha,
                                   ptr_input,  nInputRows,  nInputCols,
@@ -345,7 +345,7 @@ void THOmpTensor_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, 
   matrix vector product like
   y <- Ax + beta*y
 */
-void THOmpTensor_(conv2Dmv)(THTensor *r_, real beta, real alpha, THTensor *t_, THTensor *k_, long srow, long scol, const char *type)
+void THOmpTensor_(conv2Dmv)(THTensor *r_, real beta, real alpha, THTensor *t_, THTensor *k_, long srow, long scol, const char *vf, const char *xc)
 {
   long nInputPlane, nInputRows, nInputCols;
   long nKernelRows, nKernelCols;
@@ -356,8 +356,8 @@ void THOmpTensor_(conv2Dmv)(THTensor *r_, real beta, real alpha, THTensor *t_, T
   THArgCheck(k_->nDimension == 4 , 4, "kernel: 4D Tensor expected");
   THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
-  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
-  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
+  THArgCheck(*vf == 'V' || *vf == 'F', 7, "type of convolution can 'V' or 'F'");
+  THArgCheck(*xc == 'C' || *xc == 'X', 7, "type of convolution can 'X' or 'C'");
 
   THTensor *input = THTensor_(newContiguous)(t_);
   THTensor* kernel;
@@ -380,9 +380,9 @@ void THOmpTensor_(conv2Dmv)(THTensor *r_, real beta, real alpha, THTensor *t_, T
   nOutputPlane = kernel->size[0];
   THArgCheck(kernel->size[1] == nInputPlane, 2, "invalid number of input planes");
 
-  THArgCheck( (nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv2Dmv : Input image is smaller than kernel");
+  THArgCheck( (nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *vf == 'F', 2, "conv2Dmv : Input image is smaller than kernel");
 
-  if (*type == 'f') {
+  if (*vf == 'F') {
     nOutputRows = (nInputRows - 1) * srow + nKernelRows;
     nOutputCols = (nInputCols - 1) * scol + nKernelCols;
   } else { // valid
@@ -440,8 +440,8 @@ void THOmpTensor_(conv2Dmv)(THTensor *r_, real beta, real alpha, THTensor *t_, T
       real *ptr_input = input_data + i*istride0;
 
       /* do image, kernel convolution */
-      if (type[0] == 'f')
-        if (type[1] == 'x')
+      if (*vf == 'F')
+        if (*xc == 'X')
           THTensor_(fullXCorr2Dptr)(ptr_output,
                                  alpha,
                                  ptr_input,  nInputRows,  nInputCols,
@@ -454,7 +454,7 @@ void THOmpTensor_(conv2Dmv)(THTensor *r_, real beta, real alpha, THTensor *t_, T
                                 ptr_weight, nKernelRows, nKernelCols,
                                 srow, scol);
       else
-        if (type[1] == 'x')
+        if (*xc == 'X')
           THTensor_(validXCorr2Dptr)(ptr_output,
                                   alpha,
                                   ptr_input,  nInputRows,  nInputCols,
@@ -479,7 +479,7 @@ void THOmpTensor_(conv2Dmv)(THTensor *r_, real beta, real alpha, THTensor *t_, T
   matrix vector product like
   y <- Ax + beta*y
 */
-void THOmpTensor_(conv2Dmm)(THTensor *r_, real beta, real alpha, THTensor *t_, THTensor *k_, long srow, long scol, const char *type)
+void THOmpTensor_(conv2Dmm)(THTensor *r_, real beta, real alpha, THTensor *t_, THTensor *k_, long srow, long scol, const char *vf, const char *xc)
 {
   long nInputPlane, nInputRows, nInputCols;
   long nKernelRows, nKernelCols;
@@ -490,8 +490,8 @@ void THOmpTensor_(conv2Dmm)(THTensor *r_, real beta, real alpha, THTensor *t_, T
   THArgCheck(k_->nDimension == 4 , 4, "kernel: 4D Tensor expected");
   THArgCheck(srow >= 1, 5, "Stride should be a positive integer");
   THArgCheck(scol >= 1, 6, "Stride should be a positive integer");
-  THArgCheck(type[0] == 'v' || type[0] == 'f', 7, "type of convolution can 'v' or 'f'");
-  THArgCheck(type[1] == 'c' || type[1] == 'x', 7, "type of convolution can 'x' or 'c'");
+  THArgCheck(*vf == 'V' || *vf == 'F', 7, "type of convolution can 'V' or 'F'");
+  THArgCheck(*xc == 'C' || *xc == 'X', 7, "type of convolution can 'X' or 'C'");
 
   THTensor *input = THTensor_(newContiguous)(t_);
   THTensor* kernel;
@@ -514,9 +514,9 @@ void THOmpTensor_(conv2Dmm)(THTensor *r_, real beta, real alpha, THTensor *t_, T
   nOutputPlane = kernel->size[0];
   THArgCheck(kernel->size[1] == nInputPlane, 2, "invalid number of input planes");
 
-  THArgCheck( (nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *type == 'f', 2, "conv2Dmv : Input image is smaller than kernel");
+  THArgCheck( (nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *vf == 'F', 2, "conv2Dmv : Input image is smaller than kernel");
 
-  if (*type == 'f') {
+  if (*vf == 'F') {
     nOutputRows = (nInputRows - 1) * srow + nKernelRows;
     nOutputCols = (nInputCols - 1) * scol + nKernelCols;
   } else { // valid
@@ -584,8 +584,8 @@ void THOmpTensor_(conv2Dmm)(THTensor *r_, real beta, real alpha, THTensor *t_, T
 	real *ptr_input = input_data + p*nInputPlane*nInputRows*nInputCols + i*nInputRows*nInputCols;
 	
 	/* do image, kernel convolution */
-	if (type[0] == 'f')
-	  if (type[1] == 'x')
+	if (*vf == 'F')
+	  if (*xc == 'X')
 	    THTensor_(fullXCorr2Dptr)(ptr_output,
 				   alpha,
 				   ptr_input,  nInputRows,  nInputCols,
@@ -598,7 +598,7 @@ void THOmpTensor_(conv2Dmm)(THTensor *r_, real beta, real alpha, THTensor *t_, T
 				  ptr_weight, nKernelRows, nKernelCols,
 				  srow, scol);
 	else
-	  if (type[1] == 'x')
+	  if (*xc == 'X')
 	    THTensor_(validXCorr2Dptr)(ptr_output,
 				    alpha,
 				    ptr_input,  nInputRows,  nInputCols,

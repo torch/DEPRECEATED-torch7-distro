@@ -247,7 +247,7 @@ local function modtester(module,input,params)
    params = params or {}
    local tensordmax= function(t1,t2)
 			local d = t1-t2
-			return d:abs():max()
+			return d:abs():maxall()
 		     end
    local precision = 1e-8
 

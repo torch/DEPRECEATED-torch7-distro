@@ -531,7 +531,8 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=Tensor, dim=2},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="c", invisible=true}},
+		   {name='charoption', values={'V', 'F'}, default='V'},
+                   {name='charoption', default="C", invisible=true}},
 		  cname("conv2Dcmul"),
 		  {{name=Tensor, default=true, returned=true},
                    {name=real, default=0, invisible=true},
@@ -540,7 +541,8 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=Tensor, dim=3},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="c", invisible=true}},
+		   {name='charoption', values={'V', 'F'}, default='V'},
+                   {name='charoption', default="C", invisible=true}},
 		  cname("conv2Dmv"),
 		  {{name=Tensor, default=true, returned=true},
                    {name=real, default=0, invisible=true},
@@ -549,7 +551,8 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=Tensor, dim=4},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="c", invisible=true}}
+		   {name='charoption', values={'V', 'F'}, default='V'},
+                   {name='charoption', default="C", invisible=true}}
                )
 
    interface:wrap("xcorr2",
@@ -561,7 +564,8 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=Tensor, dim=2},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="x", invisible=true}},
+                   {name='charoption', values={'V', 'F'}, default='V'},
+		   {name='charoption', default="X", invisible=true}},
 		  cname("conv2Dcmul"),
 		  {{name=Tensor, default=true, returned=true},
                    {name=real, default=0, invisible=true},
@@ -570,7 +574,8 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=Tensor, dim=3},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="x", invisible=true}},
+		   {name='charoption', values={'V', 'F'}, default='V'},
+                   {name='charoption', default="X", invisible=true}},
 		  cname("conv2Dmv"),
 		  {{name=Tensor, default=true, returned=true},
                    {name=real, default=0, invisible=true},
@@ -579,8 +584,9 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=Tensor, dim=4},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="x", invisible=true}}
-               )
+		   {name='charoption', values={'V', 'F'}, default='V'},
+                   {name='charoption', default="X", invisible=true}}
+		 )
 
    interface:wrap("conv3",
 		  cname("conv3Dmul"),
@@ -592,7 +598,8 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="c", invisible=true}},
+		   {name='charoption', values={'V', 'F'}, default='V'},
+		   {name='charoption', default="C", invisible=true}},
 		  cname("conv3Dcmul"),
 		  {{name=Tensor, default=true, returned=true},
                    {name=real, default=0, invisible=true},
@@ -602,7 +609,8 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="c", invisible=true}},
+		   {name='charoption', values={'V', 'F'}, default='V'},
+		   {name='charoption', default="C", invisible=true}},
 		  cname("conv3Dmv"),
 		  {{name=Tensor, default=true, returned=true},
                    {name=real, default=0, invisible=true},
@@ -612,8 +620,9 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="c", invisible=true}}
-               )
+		   {name='charoption', values={'V', 'F'}, default='V'},
+                   {name='charoption', default="C", invisible=true}}
+		 )
 
    interface:wrap("xcorr3",
 		  cname("conv3Dmul"),
@@ -625,7 +634,8 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="x", invisible=true}},
+		   {name='charoption', values={'V', 'F'}, default='V'},
+                   {name='charoption', default="X", invisible=true}},
 		  cname("conv3Dcmul"),
 		  {{name=Tensor, default=true, returned=true},
                    {name=real, default=0, invisible=true},
@@ -635,7 +645,8 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="x", invisible=true}},
+		   {name='charoption', values={'V', 'F'}, default='V'},
+		   {name='charoption', default="X", invisible=true}},
 		  cname("conv3Dmv"),
 		  {{name=Tensor, default=true, returned=true},
                    {name=real, default=0, invisible=true},
@@ -645,8 +656,9 @@ static void THTensor_random1__(THTensor *self, long b)
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
                    {name=real, default=1, invisible=true},
-                   {name='charoption', default="x", invisible=true}}
-               )
+		   {name='charoption', values={'V', 'F'}, default='V'},
+		   {name='charoption', default="X", invisible=true}}
+		 )
 
    if Tensor == 'FloatTensor' or Tensor == 'DoubleTensor' then
 

@@ -135,8 +135,8 @@ local function nn_disable(tensorType)
 end
 
 function openmp.enable ()
-   torch.conv2_ = torch.conv2
-   torch.conv2 = torch.conv2omp
+   --torch.conv2_ = torch.conv2
+   --torch.conv2 = torch.conv2omp
 
    nn_enable(torch.DoubleTensor)
    nn_enable(torch.FloatTensor)
@@ -145,8 +145,8 @@ function openmp.enable ()
 end
 
 function openmp.disable ()
-   torch.conv2 = torch.conv2_
-   torch.conv2_ = torch.conv2omp
+   --torch.conv2 = torch.conv2_
+   --torch.conv2_ = torch.conv2omp
 
    nn_disable(torch.DoubleTensor)
    nn_disable(torch.FloatTensor)
