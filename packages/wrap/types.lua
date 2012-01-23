@@ -3,7 +3,11 @@ wrap.argtypes = {}
 wrap.argtypes.Tensor = {
 
    helpname = function(arg)
-               return "Tensor"
+                 if arg.dim then
+                    return string.format("Tensor~%dD", arg.dim)
+                 else
+                    return "Tensor"
+                 end
             end,
 
    declare = function(arg)
@@ -16,7 +20,11 @@ wrap.argtypes.Tensor = {
            end,
    
    check = function(arg, idx)
-            return string.format("(arg%d = luaT_toudata(L, %d, torch_(Tensor_id)))", arg.i, idx)
+              if arg.dim then
+                 return string.format("(arg%d = luaT_toudata(L, %d, torch_(Tensor_id))) && (arg%d->nDimension == %d)", arg.i, idx, arg.i, arg.dim)
+              else
+                 return string.format("(arg%d = luaT_toudata(L, %d, torch_(Tensor_id)))", arg.i, idx)
+              end
          end,
 
    read = function(arg, idx)
@@ -138,7 +146,11 @@ for _,typename in ipairs({"ByteTensor", "CharTensor", "ShortTensor", "IntTensor"
    wrap.argtypes[typename] = {
 
       helpname = function(arg)
-                    return typename
+                    if arg.dim then
+                       return string.format('%s~%dD', typename, arg.dim)
+                    else
+                       return typename
+                    end
                  end,
       
       declare = function(arg)
@@ -151,7 +163,11 @@ for _,typename in ipairs({"ByteTensor", "CharTensor", "ShortTensor", "IntTensor"
                 end,
       
       check = function(arg, idx)
-                 return string.format("(arg%d = luaT_toudata(L, %d, torch_%s_id))", arg.i, idx, typename)
+                 if arg.dim then
+                    return string.format("(arg%d = luaT_toudata(L, %d, torch_%s_id)) && (arg%d->nDimension == %d)", arg.i, idx, typename, arg.i, arg.dim)
+                 else
+                    return string.format("(arg%d = luaT_toudata(L, %d, torch_%s_id))", arg.i, idx, typename)
+                 end
               end,
 
       read = function(arg, idx)
