@@ -83,8 +83,18 @@
 
 typedef void (*signal_handler_t)(int);
 
+#if APPLE
 
-#if HAVE_SIGACTION
+static void hold_signals(sigset_t*) { }
+static void release_signals(sigset_t*) { }
+
+static signal_handler_t
+set_sigint_handler(signal_handler_t handler)
+{
+  return signal(SIGINT, handler);
+}
+
+#elif HAVE_SIGACTION
 
 static void 
 hold_signals(sigset_t *oset)
@@ -165,7 +175,6 @@ set_sigint_handler(signal_handler_t handler)
 {
   return signal(SIGINT, handler);
 }
-
 
 #else // !HAVE_SIGACTION && !HAVE_SIGNAL
 
