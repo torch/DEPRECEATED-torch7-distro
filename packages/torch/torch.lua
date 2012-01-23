@@ -31,19 +31,20 @@ local function printvar(key,val,m)
    name = name .. string.rep(' ',m-name:len()+2)
    local tp = type(val)
    if tp == 'userdata' then
-      tp = torch.typename(val)
+      tp = torch.typename(val) or ''
       if tp:find('torch.*Tensor') then
-	 tp = sizestr(val)
-      end
-      if tp:find('torch.*Storage') then
-	 tp = sizestr(val)
+         tp = sizestr(val)
+      elseif tp:find('torch.*Storage') then
+         tp = sizestr(val)
+      else
+         tp = tostring(val)
       end
    elseif tp == 'table' then
       tp = tp .. ' - size: ' .. #val
    elseif tp == 'string' then
       local tostr = val:gsub('\n','\\n')
       if #tostr>40 then
-	 tostr = tostr:sub(1,40) .. '...'
+         tostr = tostr:sub(1,40) .. '...'
       end
       tp = tp .. ' : "' .. tostr .. '"'
    else
@@ -74,7 +75,7 @@ function who()
    local function printsymb(sys)
       for k,v in pairs(_G) do
          if (sys and p[k]) or (not sys and not p[k]) then
-	    print(printvar(k,_G[k],m))
+       print(printvar(k,_G[k],m))
          end
       end
    end
@@ -115,16 +116,16 @@ function print(obj,...)
          end
          _G.io.write('{')
          local idx = 1
-	 local tab = ''
-	 local newline = ''
+    local tab = ''
+    local newline = ''
          for k,v in pairs(obj) do
-	    local line = printvar(k,v,m)
-	    _G.io.write(newline .. tab .. line)
-	    if idx == 1 then
-	       tab = ' '
-	       newline = '\n'
-	    end
-	    idx = idx + 1
+       local line = printvar(k,v,m)
+       _G.io.write(newline .. tab .. line)
+       if idx == 1 then
+          tab = ' '
+          newline = '\n'
+       end
+       idx = idx + 1
          end
          _G.io.write('}')
          if obj_w_usage then
