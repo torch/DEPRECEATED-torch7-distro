@@ -163,7 +163,7 @@ function CInterface:__writeheaders(txt, args, argoffset)
       if arg.returned then
          helpname = string.format('*%s*', helpname)
       end
-      if arg.default then
+      if arg.default ~= nil then
          table.insert(helpargs, string.format('[%s]', helpname))
       elseif not arg.creturned then
          table.insert(helpargs, helpname)
@@ -172,7 +172,7 @@ function CInterface:__writeheaders(txt, args, argoffset)
          if argcreturned then
             error('A C function can only return one argument!')
          end
-         if arg.default then
+         if arg.default ~= nil then
             error('Obviously, an "argument" returned by a C function cannot have a default value')
          end
          if arg.returned then
@@ -207,7 +207,7 @@ function CInterface:__writechecks(txt, args, argset)
 
    local nopt = 0
    for i,arg in ipairs(args) do
-      if arg.default then
+      if arg.default ~= nil then
          nopt = nopt + 1
       end
    end
@@ -218,7 +218,7 @@ function CInterface:__writechecks(txt, args, argset)
       local optargs = {}
       local hasvararg = false
       for i,arg in ipairs(args) do
-         if arg.default then
+         if arg.default ~= nil then
             opt = opt + 1
             if hasbit(variant, bit(opt)) then
                table.insert(currentargs, arg)
