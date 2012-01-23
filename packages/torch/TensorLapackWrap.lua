@@ -8,7 +8,7 @@ interface = wrap.CInterface.new()
 interface.dispatchregistry = {}
 function interface:wrap(name, ...)
    -- usual stuff
-   --wrap.CInterface.wrap(self, name, ...)
+   wrap.CInterface.wrap(self, name, ...)
 
    -- dispatch function
    if not interface.dispatchregistry[name] then
@@ -91,15 +91,20 @@ for _,Tensor in ipairs({"FloatTensor", "DoubleTensor"}) do
    end
    
 
-   for _,name in ipairs({"gesv","gels","eig","svd"}) do
-      interface:wrap(name,
-		     cname(name),
-		     {{name=Tensor, default=true, returned=true},
-		      {name=Tensor, default=true, returned=true},
-		      {name=Tensor},
-		      {name=Tensor}}
-		  )
-   end
+--    for _,name in ipairs({"gesv","gels","eig","svd"}) do
+--       interface:wrap(name,
+-- 		     cname(name),
+-- 		     {{name=Tensor, returned=true},
+-- 		      {name=Tensor, returned=true},
+-- 		      {name=Tensor},
+-- 		      {name=Tensor}},
+-- 		     cname(name),
+-- 		     {{name=Tensor, default=true, returned=true, invisible=true},
+-- 		      {name=Tensor, default=true, returned=true, invisible=true},
+-- 		      {name=Tensor},
+-- 		      {name=Tensor}}
+-- 		  )
+--    end
    
 
    --interface:register(string.format("torch_%sLapack__", Tensor))

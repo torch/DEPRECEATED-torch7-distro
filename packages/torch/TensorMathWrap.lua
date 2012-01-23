@@ -4,6 +4,22 @@
 
 local interface = wrap.CInterface.new()
 
+interface:print([[
+#include "TH.h"
+#include "luaT.h"
+#include "utils.h"
+
+static const void* torch_ByteTensor_id;
+static const void* torch_CharTensor_id;
+static const void* torch_ShortTensor_id;
+static const void* torch_IntTensor_id;
+static const void* torch_LongTensor_id;
+static const void* torch_FloatTensor_id;
+static const void* torch_DoubleTensor_id;
+
+static const void* torch_LongStorage_id;
+                ]])
+
 -- special argument specific to torch package
 interface.argtypes.LongArg = {
 
@@ -58,6 +74,56 @@ interface.argtypes.LongArg = {
                     table.insert(txt, string.format('THLongStorage_free(arg%d);', arg.i))
                  end
                  return table.concat(txt, '\n')
+              end   
+}
+
+interface.argtypes.charoption = {
+
+   helpname = function(arg)
+                 if arg.values then
+                    return "(" .. table.concat(arg.values, '|') .. ")"
+                 end
+              end,
+
+   declare = function(arg)
+                local txt = {}
+                table.insert(txt, string.format("const char *arg%d = NULL;", arg.i))
+                if arg.default then
+                   table.insert(txt, string.format("char arg%d_default = '%s';", arg.i, arg.default))
+                end
+                return table.concat(txt, '\n')
+           end,
+
+   init = function(arg)
+             return string.format("arg%d = &arg%d_default;", arg.i, arg.i)
+          end,
+   
+   check = function(arg, idx)
+              local txt = {}
+              local txtv = {}
+              table.insert(txt, string.format('(arg%d = lua_tostring(L, %d)) && (', arg.i, idx))
+              for _,value in ipairs(arg.values) do
+                 table.insert(txtv, string.format("*arg%d == '%s'", arg.i, value))
+              end
+              table.insert(txt, table.concat(txtv, ' || '))
+              table.insert(txt, ')')              
+              return table.concat(txt, '')
+         end,
+
+   read = function(arg, idx)
+          end,
+   
+   carg = function(arg, idx)
+             return string.format('arg%d', arg.i)
+          end,
+
+   creturn = function(arg, idx)
+             end,
+   
+   precall = function(arg)
+             end,
+
+   postcall = function(arg)
               end   
 }
 
@@ -456,6 +522,132 @@ static void THTensor_random1__(THTensor *self, long b)
 		  {{name=Tensor, default=true, returned=true},
 		   {name=Tensor}})
 
+   interface:wrap("conv2",
+		  cname("conv2Dmul"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=2},
+                   {name=Tensor, dim=2},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="c", invisible=true}},
+		  cname("conv2Dcmul"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=3},
+                   {name=Tensor, dim=3},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="c", invisible=true}},
+		  cname("conv2Dmv"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=3},
+                   {name=Tensor, dim=4},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="c", invisible=true}}
+               )
+
+   interface:wrap("xcorr2",
+		  cname("conv2Dmul"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=2},
+                   {name=Tensor, dim=2},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="x", invisible=true}},
+		  cname("conv2Dcmul"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=3},
+                   {name=Tensor, dim=3},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="x", invisible=true}},
+		  cname("conv2Dmv"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=3},
+                   {name=Tensor, dim=4},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="x", invisible=true}}
+               )
+
+   interface:wrap("conv3",
+		  cname("conv3Dmul"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=3},
+                   {name=Tensor, dim=3},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="c", invisible=true}},
+		  cname("conv3Dcmul"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=4},
+                   {name=Tensor, dim=4},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="c", invisible=true}},
+		  cname("conv3Dmv"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=4},
+                   {name=Tensor, dim=5},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="c", invisible=true}}
+               )
+
+   interface:wrap("xcorr3",
+		  cname("conv3Dmul"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=3},
+                   {name=Tensor, dim=3},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="x", invisible=true}},
+		  cname("conv3Dcmul"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=4},
+                   {name=Tensor, dim=4},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="x", invisible=true}},
+		  cname("conv3Dmv"),
+		  {{name=Tensor, default=true, returned=true},
+                   {name=real, default=0, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=Tensor, dim=4},
+                   {name=Tensor, dim=5},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name=real, default=1, invisible=true},
+                   {name='charoption', default="x", invisible=true}}
+               )
+
    if Tensor == 'FloatTensor' or Tensor == 'DoubleTensor' then
 
       interface:wrap("mean",
@@ -577,6 +769,51 @@ static void THTensor_random1__(THTensor *self, long b)
                          {name=real, default=f.a}})
       end
       
+      for _,name in ipairs({"gesv","gels"}) do
+         interface:wrap(name,
+                        cname(name),
+                        {{name=Tensor, returned=true},
+                         {name=Tensor, returned=true},
+                         {name=Tensor},
+                         {name=Tensor}},
+                        cname(name),
+                        {{name=Tensor, default=true, returned=true, invisible=true},
+                         {name=Tensor, default=true, returned=true, invisible=true},
+                         {name=Tensor},
+                         {name=Tensor}}
+                     )
+      end
+
+      interface:wrap("eig",
+                     cname("syev"),
+                     {{name=Tensor, returned=true},
+                      {name=Tensor, returned=true},
+                      {name=Tensor},
+                      {name='charoption', values={'N', 'V'}, default='N'},
+                      {name='charoption', values={'U', 'L'}, default='U'}},
+                     cname("syev"),
+                     {{name=Tensor, default=true, returned=true, invisible=true},
+                      {name=Tensor, default=true, returned=true, invisible=true},
+                      {name=Tensor},
+                      {name='charoption', values={'N', 'V'}, default='N'},
+                      {name='charoption', values={'U', 'L'}, default='U'}}
+                  )
+
+      interface:wrap("svd",
+                     cname("gesvd"),
+                     {{name=Tensor, returned=true},
+                      {name=Tensor, returned=true},
+                      {name=Tensor, returned=true},
+                      {name=Tensor},
+                      {name='charoption', values={'A', 'S'}, default='S'}},
+                     cname("gesvd"),
+                     {{name=Tensor, default=true, returned=true, invisible=true},
+                      {name=Tensor, default=true, returned=true, invisible=true},
+                      {name=Tensor, default=true, returned=true, invisible=true},
+                      {name=Tensor},
+                      {name='charoption', values={'A', 'S'}, default='S'}}
+                  )
+      
    end
 
    interface:register(string.format("torch_%sMath__", Tensor))
@@ -599,6 +836,20 @@ static void torch_TensorMath_init(lua_State *L)
 end
 
 interface:dispatchregister("torch_TensorMath__")
+
+interface:print([[
+void torch_TensorMath_init(lua_State *L)
+{
+  torch_ByteTensorMath_init(L);
+  torch_CharTensorMath_init(L);
+  torch_ShortTensorMath_init(L);
+  torch_IntTensorMath_init(L);
+  torch_LongTensorMath_init(L);
+  torch_FloatTensorMath_init(L);
+  torch_DoubleTensorMath_init(L);
+  luaL_register(L, NULL, torch_TensorMath__);
+}
+]])
 
 if arg[1] then
    interface:tofile(arg[1])

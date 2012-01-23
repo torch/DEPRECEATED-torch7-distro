@@ -19,14 +19,14 @@ static const void* torch_LongStorage_id;
 
 
 #include "TensorMathWrap.c"
-#include "TensorLapackWrap.c"
-#include "TensorConvWrap.c"
+//#include "TensorLapackWrap.c"
+//#include "TensorConvWrap.c"
 
-#include "generic/TensorLapack.c"
-#include "THGenerateFloatTypes.h"
+//#include "generic/TensorLapack.c"
+//#include "THGenerateFloatTypes.h"
 
-#include "generic/TensorConv.c"
-#include "THGenerateAllTypes.h"
+//#include "generic/TensorConv.c"
+//#include "THGenerateAllTypes.h"
 
 void torch_TensorMath_init(lua_State *L)
 {
@@ -39,16 +39,16 @@ void torch_TensorMath_init(lua_State *L)
   torch_DoubleTensorMath_init(L);
   luaL_register(L, NULL, torch_TensorMath__);
 
-  torch_FloatLapack_init(L);
-  torch_DoubleLapack_init(L);
-  luaL_register(L, NULL, torch_TensorLapack__);
+/*   torch_FloatLapack_init(L); */
+/*   torch_DoubleLapack_init(L); */
+/*   luaL_register(L, NULL, torch_TensorLapack__); */
 
-  torch_ByteConv_init(L);
-  torch_CharConv_init(L);
-  torch_ShortConv_init(L);
-  torch_IntConv_init(L);
-  torch_LongConv_init(L);
-  torch_FloatConv_init(L);
-  torch_DoubleConv_init(L);
-  luaL_register(L, NULL, torch_TensorConv__);
+/*   torch_ByteConv_init(L); */
+/*   torch_CharConv_init(L); */
+/*   torch_ShortConv_init(L); */
+/*   torch_IntConv_init(L); */
+/*   torch_LongConv_init(L); */
+/*   torch_FloatConv_init(L); */
+/*   torch_DoubleConv_init(L); */
+/*   luaL_register(L, NULL, torch_TensorConv__); */
 }
