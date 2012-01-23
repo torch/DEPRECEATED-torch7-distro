@@ -163,8 +163,13 @@ function CInterface:__writeheaders(txt, args, argoffset)
       if arg.returned then
          helpname = string.format('*%s*', helpname)
       end
+      if arg.invisible and arg.default == nil then
+         error('Invisible arguments must have a default! How could I guess how to initialize it?')
+      end
       if arg.default ~= nil then
-         table.insert(helpargs, string.format('[%s]', helpname))
+         if not arg.invisible then
+            table.insert(helpargs, string.format('[%s]', helpname))
+         end
       elseif not arg.creturned then
          table.insert(helpargs, helpname)
       end
@@ -207,7 +212,7 @@ function CInterface:__writechecks(txt, args, argset)
 
    local nopt = 0
    for i,arg in ipairs(args) do
-      if arg.default ~= nil then
+      if arg.default ~= nil and not arg.invisible then
          nopt = nopt + 1
       end
    end
@@ -218,7 +223,9 @@ function CInterface:__writechecks(txt, args, argset)
       local optargs = {}
       local hasvararg = false
       for i,arg in ipairs(args) do
-         if arg.default ~= nil then
+         if arg.invisible then
+            table.insert(optargs, arg)
+         elseif arg.default ~= nil then
             opt = opt + 1
             if hasbit(variant, bit(opt)) then
                table.insert(currentargs, arg)
