@@ -35,7 +35,7 @@ TH_API long THStorage_(size)(THStorage*);
 
 /* slow access -- checks everything */
 TH_API void THStorage_(set)(THStorage*, long, real);
-TH_API real THStorage_(get)(THStorage*, long);
+TH_API real THStorage_(get)(const THStorage*, long);
 
 TH_API THStorage* THStorage_(new)(void);
 TH_API THStorage* THStorage_(newWithSize)(long size);

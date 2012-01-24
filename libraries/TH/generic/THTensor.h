@@ -112,9 +112,9 @@ TH_API void THTensor_(set2d)(THTensor *tensor, long x0, long x1, real value);
 TH_API void THTensor_(set3d)(THTensor *tensor, long x0, long x1, long x2, real value);
 TH_API void THTensor_(set4d)(THTensor *tensor, long x0, long x1, long x2, long x3, real value);
 
-TH_API real THTensor_(get1d)(THTensor *tensor, long x0);
-TH_API real THTensor_(get2d)(THTensor *tensor, long x0, long x1);
-TH_API real THTensor_(get3d)(THTensor *tensor, long x0, long x1, long x2);
-TH_API real THTensor_(get4d)(THTensor *tensor, long x0, long x1, long x2, long x3);
+TH_API real THTensor_(get1d)(const THTensor *tensor, long x0);
+TH_API real THTensor_(get2d)(const THTensor *tensor, long x0, long x1);
+TH_API real THTensor_(get3d)(const THTensor *tensor, long x0, long x1, long x2);
+TH_API real THTensor_(get4d)(const THTensor *tensor, long x0, long x1, long x2, long x3);
 
 #endif
