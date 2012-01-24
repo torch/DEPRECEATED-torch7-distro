@@ -5,5 +5,5 @@ SET(src ${src})
 
 INCLUDE_DIRECTORIES("${Torch_SOURCE_DIR}/packages/torch")
   
-ADD_TORCH_PACKAGE(cutorch "${src}" "${luasrc}" "xxx")
+ADD_TORCH_PACKAGE(cutorch "${src}" "${luasrc}")
 TARGET_LINK_LIBRARIES(cutorch luaT THC)

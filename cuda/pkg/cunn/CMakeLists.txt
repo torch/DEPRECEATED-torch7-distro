@@ -5,8 +5,6 @@ INCLUDE_DIRECTORIES(BEFORE ${LUA_INCLUDE_DIR})
 SET(src-cuda init.cu)
 SET(luasrc init.lua)
 
-CUDA_COMPILE(gen-cuda ${src-cuda})
-
 CUDA_ADD_LIBRARY(cunn SHARED ${src-cuda})
 TARGET_LINK_LIBRARIES(cunn luaT THC)
 
