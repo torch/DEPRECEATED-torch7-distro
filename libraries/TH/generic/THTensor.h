@@ -22,14 +22,14 @@ typedef struct THTensor
 
 
 /**** access methods ****/
-TH_API THStorage* THTensor_(storage)(THTensor *self);
-TH_API long THTensor_(storageOffset)(THTensor *self);
-TH_API int THTensor_(nDimension)(THTensor *self);
-TH_API long THTensor_(size)(THTensor *self, int dim);
-TH_API long THTensor_(stride)(THTensor *self, int dim);
+TH_API THStorage* THTensor_(storage)(const THTensor *self);
+TH_API long THTensor_(storageOffset)(const THTensor *self);
+TH_API int THTensor_(nDimension)(const THTensor *self);
+TH_API long THTensor_(size)(const THTensor *self, int dim);
+TH_API long THTensor_(stride)(const THTensor *self, int dim);
 TH_API THLongStorage *THTensor_(newSizeOf)(THTensor *self);
 TH_API THLongStorage *THTensor_(newStrideOf)(THTensor *self);
-TH_API real *THTensor_(data)(THTensor *self);
+TH_API real *THTensor_(data)(const THTensor *self);
 
 TH_API void THTensor_(setFlag)(THTensor *self, const char flag);
 TH_API void THTensor_(clearFlag)(THTensor *self, const char flag);
@@ -99,8 +99,8 @@ TH_API void THTensor_(select)(THTensor *self, THTensor *src, int dimension_, lon
 TH_API void THTensor_(transpose)(THTensor *self, THTensor *src, int dimension1_, int dimension2_);
 TH_API void THTensor_(unfold)(THTensor *self, THTensor *src, int dimension_, long size_, long step_);
     
-TH_API int THTensor_(isContiguous)(THTensor *self);
-TH_API long THTensor_(nElement)(THTensor *self);
+TH_API int THTensor_(isContiguous)(const THTensor *self);
+TH_API long THTensor_(nElement)(const THTensor *self);
 
 TH_API void THTensor_(retain)(THTensor *self);
 TH_API void THTensor_(free)(THTensor *self);

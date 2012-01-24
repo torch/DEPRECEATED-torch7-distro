@@ -3,28 +3,28 @@
 #else
 
 /**** access methods ****/
-THStorage *THTensor_(storage)(THTensor *self)
+THStorage *THTensor_(storage)(const THTensor *self)
 {
   return self->storage;
 }
 
-long THTensor_(storageOffset)(THTensor *self)
+long THTensor_(storageOffset)(const THTensor *self)
 {
   return self->storageOffset;
 }
 
-int THTensor_(nDimension)(THTensor *self)
+int THTensor_(nDimension)(const THTensor *self)
 {
   return self->nDimension;
 }
 
-long THTensor_(size)(THTensor *self, int dim)
+long THTensor_(size)(const THTensor *self, int dim)
 {
   THArgCheck((dim >= 0) && (dim < self->nDimension), 2, "out of range");
   return self->size[dim];
 }
 
-long THTensor_(stride)(THTensor *self, int dim)
+long THTensor_(stride)(const THTensor *self, int dim)
 {
   THArgCheck((dim >= 0) && (dim < self->nDimension), 2, "out of range");
   return self->stride[dim];
@@ -44,7 +44,7 @@ THLongStorage *THTensor_(newStrideOf)(THTensor *self)
   return stride;
 }
 
-real *THTensor_(data)(THTensor *self)
+real *THTensor_(data)(const THTensor *self)
 {
   if(self->storage)
     return (self->storage->data+self->storageOffset);
@@ -458,7 +458,7 @@ void THTensor_(unfold)(THTensor *self, THTensor *src, int dimension, long size, 
   self->nDimension++;
 }
 
-int THTensor_(isContiguous)(THTensor *self)
+int THTensor_(isContiguous)(const THTensor *self)
 {
   long z = 1;
   int d;
@@ -475,7 +475,7 @@ int THTensor_(isContiguous)(THTensor *self)
   return 1;
 }
 
-long THTensor_(nElement)(THTensor *self)
+long THTensor_(nElement)(const THTensor *self)
 {
   if(self->nDimension == 0)
     return 0;
