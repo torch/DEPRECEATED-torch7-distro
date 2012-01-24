@@ -8,15 +8,23 @@ local function pad(str, sz)
    return str .. string.rep(' ', sz-#str)
 end
 
+function CmdLine:error(msg)
+   print('')
+   print(msg)
+   print('')
+   self:help()
+   os.exit(0)
+end
+
 function CmdLine:__readArgument__(params, arg, i, nArgument)
    local argument = self.arguments[nArgument]
    local value = arg[i]
 
    if nArgument > #self.arguments then
-      error('do not see what you want to do with ' .. value)
+      self:error('invalid argument: ' .. value)
    end
    if argument.type and type(value) ~= argument.type then
-      error('invalid argument type for argument ' .. argument.key .. ' (should be ' .. argument.type .. ')')
+      self:error('invalid argument type for argument ' .. argument.key .. ' (should be ' .. argument.type .. ')')
    end
    params[strip(argument.key)] = value
    return 1
@@ -26,7 +34,7 @@ function CmdLine:__readOption__(params, arg, i)
    local key = arg[i]
    local option = self.options[key]
    if not option then
-      error('unknown option ' .. key)
+      self:error('unknown option ' .. key)
    end
 
    if option.type and option.type == 'boolean' then
@@ -35,16 +43,16 @@ function CmdLine:__readOption__(params, arg, i)
    else
       local value = arg[i+1]
       if not value then
-         error('missing argument for option ' .. key)
+         self:error('missing argument for option ' .. key)
       end
       if not option.type or option.type == 'string' then
       elseif option.type == 'number' then
          value = tonumber(value)
       else
-         error('unknown required option type ' .. option.type)
+         self:error('unknown required option type ' .. option.type)
       end
       if not value then
-         error('invalid type for option ' .. key .. ' (should be ' .. option.type .. ')')
+         self:error('invalid type for option ' .. key .. ' (should be ' .. option.type .. ')')
       end
       params[strip(key)] = value
       return 2
@@ -105,7 +113,7 @@ function CmdLine:parse(arg)
    end
 
    if nArgument ~= #self.arguments then
-      error('not enough arguments')
+      self:error('not enough arguments')
    end
 
    return params
