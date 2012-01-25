@@ -17,14 +17,19 @@ ENDIF(COMMAND CMAKE_POLICY)
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake
                       ${CMAKE_CURRENT_BINARY_DIR}/cmake ${CMAKE_MODULE_PATH})
 
-MESSAGE("DUDE: ${CMAKE_MODULE_PATH}")
-
 INCLUDE(TorchPaths)
 INCLUDE(TorchCFlags)
 INCLUDE(TorchDOK)
-INCLUDE(TorchPackage)
-#INCLUDE(TorchWrap)
 
+# Torch executables
 ADD_SUBDIRECTORY(exe)
+
+# Torch libraries
 ADD_SUBDIRECTORY(lib)
-#ADD_SUBDIRECTORY(pkg)
+
+# Torch packages
+FIND_PACKAGE(Lua REQUIRED)
+INCLUDE(TorchPackage)
+INCLUDE(TorchWrap)
+
+ADD_SUBDIRECTORY(pkg)
