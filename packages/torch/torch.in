@@ -58,8 +58,10 @@ for i,a in ipairs(arg) do
       arg[i+1] = '"' .. arg[i+1] .. '"'
    end
    -- autostart interactive sessions if no user script:
-   if a:find('%.lua$') then
+   if a:find('%.lua$') and paths.filep(a) then
       interactive = false
+      -- do not consider further arguments
+      break
    end
 end
 
