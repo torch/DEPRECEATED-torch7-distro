@@ -1,0 +1,173 @@
+# -*- cmake -*-
+
+FIND_PACKAGE(Readline)
+
+INCLUDE(CheckLibraryExists)
+INCLUDE(CheckSymbolExists)
+INCLUDE(CheckFunctionExists)
+
+CHECK_FUNCTION_EXISTS(_longjmp LUA_USE_ULONGJMP)
+CHECK_SYMBOL_EXISTS(sigaction signal.h LUA_USE_POSIX_SIGNAL)
+CHECK_SYMBOL_EXISTS(isatty unistd.h LUA_USE_ISATTY)
+CHECK_SYMBOL_EXISTS(mkstemp stdlib.h LUA_USE_MKSTEMP)
+CHECK_SYMBOL_EXISTS(popen stdio.h LUA_USE_POPEN)
+CHECK_LIBRARY_EXISTS(m sin "" LUA_USE_LIBM)
+
+IF(READLINE_FOUND)
+  SET(CMAKE_REQUIRED_INCLUDES ${READLINE_INCLUDE_DIR})
+  SET(CMAKE_REQUIRED_LIBRARIES ${READLINE_LIBRARIES})
+  CHECK_LIBRARY_EXISTS(${READLINE_readline_LIBRARY} readline "" LUA_USE_READLINE)
+  CHECK_SYMBOL_EXISTS("rl_event_hook" "stdio.h;readline/readline.h" LUA_USE_READLINE_EVENT_HOOK)
+ENDIF(READLINE_FOUND)
+
+CHECK_LIBRARY_EXISTS(dl dlopen "" LUA_USE_DLOPEN)
+IF(NOT WIN32 AND NOT LUA_USE_DLOPEN)
+  MESSAGE(FATAL_ERROR "Cannot compile a useful lua.
+Function dlopen() seems not to be supported on your platform.
+Apparently you are not on a Windows platform as well.
+So lua has no way to deal with shared libraries!")
+ENDIF(NOT WIN32 AND NOT LUA_USE_DLOPEN)
+
+IF(WIN32)
+  SET(LUA_BUILD_AS_DLL 1)
+ENDIF(WIN32)
+
+SET(LUA_PACKAGE_PATH "${Torch_INSTALL_LUA_PATH}")
+SET(LUA_PACKAGE_CPATH "${Torch_INSTALL_LUA_CPATH}")
+IF (CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL CMAKE_SHARED_MODULE_SUFFIX)
+  SET(LUA_USE_MODULE_AND_LIBRARY 0)
+ELSE (CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL CMAKE_SHARED_MODULE_SUFFIX)
+  SET(LUA_USE_MODULE_AND_LIBRARY 1)
+ENDIF (CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL CMAKE_SHARED_MODULE_SUFFIX)
+
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/luaconf.h.in 
+  ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h)
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h 
+  DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}")
+
+SET(_lua_lib_src
+  lapi.c lcode.c ldebug.c ldo.c ldump.c lfunc.c lgc.c llex.c lmem.c
+  lobject.c lopcodes.c lparser.c lstate.c lstring.c ltable.c ltm.c
+  lundump.c lvm.c lzio.c
+  lauxlib.c lbaselib.c ldblib.c liolib.c
+  lmathlib.c loslib.c ltablib.c lstrlib.c loadlib.c linit.c
+  ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h
+  luaconf.c )
+
+SET(_lua_src lua.c)
+SET(_luac_src luac.c print.c)
+
+# Compile library as c++
+
+SET_SOURCE_FILES_PROPERTIES(${_lua_lib_src} ${_lua_src} ${_luac_src} PROPERTIES
+  OBJECT_DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/luaconf.h"
+  LANGUAGE CXX)
+
+
+# Compile static executables for dealing with compile time.
+
+ADD_LIBRARY(liblua-static STATIC ${_lua_lib_src})
+SET_TARGET_PROPERTIES(liblua-static PROPERTIES 
+				    COMPILE_DEFINITIONS "liblua_STATIC"
+				    OUTPUT_NAME "lua-static")
+
+ADD_EXECUTABLE(torch-lua-static ${_lua_src})
+TARGET_LINK_LIBRARIES(torch-lua-static liblua-static)
+SET_TARGET_PROPERTIES(torch-lua-static PROPERTIES 
+                 COMPILE_DEFINITIONS "liblua_STATIC"
+                 LINKER_LANGUAGE CXX)
+
+ADD_EXECUTABLE(torch-luac ${_luac_src})
+TARGET_LINK_LIBRARIES(torch-luac liblua-static)
+SET_TARGET_PROPERTIES(torch-luac PROPERTIES
+                 COMPILE_DEFINITIONS "liblua_STATIC"
+                 LINKER_LANGUAGE CXX)
+
+
+# Compile shared library and regular lua executable
+
+ADD_LIBRARY(liblua-shared SHARED ${_lua_lib_src})
+SET_TARGET_PROPERTIES(liblua-shared PROPERTIES 
+  OUTPUT_NAME "torchlua"
+  PREFIX "lib" IMPORT_PREFIX "lib"
+  LINKER_LANGUAGE CXX)
+
+ADD_EXECUTABLE(torch-lua ${_lua_src})
+TARGET_LINK_LIBRARIES(torch-lua liblua-shared)
+SET_TARGET_PROPERTIES(torch-lua PROPERTIES LINKER_LANGUAGE CXX)
+
+# Specify necessary libraries
+
+IF(LUA_USE_LIBM)
+  TARGET_LINK_LIBRARIES(liblua-shared m)
+  TARGET_LINK_LIBRARIES(liblua-static m)
+ENDIF(LUA_USE_LIBM)
+
+IF(LUA_USE_READLINE)
+  INCLUDE_DIRECTORIES(${READLINE_INCLUDE_DIR})
+  TARGET_LINK_LIBRARIES(torch-lua ${READLINE_LIBRARIES})
+  TARGET_LINK_LIBRARIES(torch-lua-static ${READLINE_LIBRARIES})
+  SET(LUA_READLINE_INCLUDE ${READLINE_INCLUDE_DIR})
+  SET(LUA_READLINE_LIBRARIES ${READLINE_LIBRARIES})
+ELSE(LUA_USE_READLINE)
+  SET(LUA_READLINE_INCLUDE)
+  SET(LUA_READLINE_LIBRARIES)
+ENDIF(LUA_USE_READLINE)
+
+IF(LUA_USE_DLOPEN)
+  TARGET_LINK_LIBRARIES(liblua-shared dl)
+  TARGET_LINK_LIBRARIES(liblua-static dl)
+ENDIF(LUA_USE_DLOPEN)
+
+# Install files
+INSTALL(TARGETS liblua-shared torch-lua torch-luac
+  RUNTIME DESTINATION "${Torch_INSTALL_BIN_SUBDIR}"
+  LIBRARY DESTINATION "${Torch_INSTALL_LIB_SUBDIR}"
+  ARCHIVE DESTINATION "${Torch_INSTALL_LIB_SUBDIR}")
+
+INSTALL(FILES lua.h lualib.h lauxlib.h  
+  DESTINATION "${Torch_INSTALL_INCLUDE_SUBDIR}")
+
+# Create LuaConfig.cmake for internal packages
+
+SET(LUA_LIBRARIES liblua-shared)
+#GET_TARGET_PROPERTY(LUA_LIBRARIES liblua-shared LOCATION)
+
+GET_TARGET_PROPERTY(LUA_EXECUTABLE torch-lua-static LOCATION)
+
+GET_TARGET_PROPERTY(LUAC_EXECUTABLE torch-luac LOCATION)
+
+SET(LUA_INCLUDE_DIR 
+  ${CMAKE_CURRENT_SOURCE_DIR} 
+  ${CMAKE_CURRENT_BINARY_DIR} 
+  ${LUA_READLINE_INCLUDE_DIR})
+
+CONFIGURE_FILE(LuaConfig.cmake.in "${Torch_BINARY_DIR}/cmake/LuaConfig.cmake")
+SET(Lua_DIR "${Torch_BINARY_DIR}/cmake" 
+  CACHE PATH "Directory containing LuaConfig.cmake")
+MARK_AS_ADVANCED(Lua_DIR)
+
+# Create LuaConfig.cmake for external packages
+
+GET_TARGET_PROPERTY(LUASHARED_OUTPUT_NAME liblua-shared LOCATION)
+GET_FILENAME_COMPONENT(LUASHARED_OUTPUT_NAME ${LUASHARED_OUTPUT_NAME} NAME)
+SET(LUA_LIBRARIES "${Torch_INSTALL_LIB}/${LUASHARED_OUTPUT_NAME}")
+
+GET_TARGET_PROPERTY(LUA_OUTPUT_NAME torch-lua LOCATION)
+GET_FILENAME_COMPONENT(LUA_OUTPUT_NAME ${LUA_OUTPUT_NAME} NAME)
+SET(LUA_EXECUTABLE "${Torch_INSTALL_BIN}/${LUA_OUTPUT_NAME}")
+
+GET_TARGET_PROPERTY(LUAC_OUTPUT_NAME torch-luac LOCATION)
+GET_FILENAME_COMPONENT(LUAC_OUTPUT_NAME ${LUAC_OUTPUT_NAME} NAME)
+SET(LUAC_EXECUTABLE "${Torch_INSTALL_BIN}/${LUAC_OUTPUT_NAME}")
+
+SET(LUA_INCLUDE_DIR 
+  "${Torch_INSTALL_INCLUDE}" 
+  ${LUA_READLINE_INCLUDE_DIR})
+
+CONFIGURE_FILE(LuaConfig.cmake.in 
+  "${Torch_BINARY_DIR}/cmake-external/LuaConfig.cmake")
+INSTALL(FILES "${Torch_BINARY_DIR}/cmake-external/LuaConfig.cmake" 
+  DESTINATION "${Torch_INSTALL_CMAKE_SUBDIR}")
+
