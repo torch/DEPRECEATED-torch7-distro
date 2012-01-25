@@ -17,9 +17,10 @@ function Concat:get(index)
 end
 
 function Concat:updateOutput(input)
+   local outs = {}
    for i=1,#self.modules do
       local currentOutput = self.modules[i]:updateOutput(input)
-      
+      outs[i] = currentOutput
       if i == 1 then
          self.size:resize(currentOutput:dim()):copy(currentOutput:size())
       else
@@ -29,8 +30,9 @@ function Concat:updateOutput(input)
    self.output:resize(self.size)
    
    local offset = 1
-   for _,module in ipairs(self.modules) do
-      local currentOutput = module:updateOutput(input)
+   for i,module in ipairs(self.modules) do
+      --local currentOutput = module:updateOutput(input)
+      local currentOutput = outs[i]
       self.output:narrow(self.dimension, offset, currentOutput:size(self.dimension)):copy(currentOutput)
       offset = offset + currentOutput:size(self.dimension)
    end
