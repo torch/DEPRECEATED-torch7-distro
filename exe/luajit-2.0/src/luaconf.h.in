@@ -9,6 +9,7 @@
 #include <limits.h>
 #include <stddef.h>
 
+#cmakedefine LUA_USE_DLOPEN 1
 #cmakedefine LUA_USE_MODULE_AND_LIBRARY 1
 
 #cmakedefine LUAJIT_DISABLE_FFI

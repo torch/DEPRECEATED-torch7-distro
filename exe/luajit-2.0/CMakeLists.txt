@@ -213,45 +213,27 @@ SET(DEPS
                   
 ## COMPILE
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} dynasm src )
-add_library ( liblua SHARED ${SRC_LJCORE} src/lua_dll.rc ${DEPS} ) #old: src/lua.def
-target_link_libraries ( liblua ${LIBS} )
-set_target_properties ( liblua PROPERTIES OUTPUT_NAME lua CLEAN_DIRECT_OUTPUT 1 )
+add_library ( libluajit SHARED ${SRC_LJCORE} src/lua_dll.rc ${DEPS} ) #old: src/lua.def
+target_link_libraries ( libluajit ${LIBS} )
+set_target_properties ( libluajit PROPERTIES OUTPUT_NAME lua CLEAN_DIRECT_OUTPUT 1 )
 
-add_executable ( lua src/luajit.c src/lua.rc )
-target_link_libraries ( lua liblua )
+add_executable ( luajit src/luajit.c src/lua.rc )
+target_link_libraries ( luajit libluajit )
 
-# On windows a variant of the lua interpreter without console output needs to be built
-if(LUA_BUILD_WLUA)
-  add_executable ( wlua WIN32 src/luajit.c src/lua.rc )
-  target_link_libraries ( wlua liblua )  
-  install_executable ( wlua )
-endif()
 
-## INSTALL
-#install_executable( lua )
-#install_library( liblua )
-#install_header( src/lua.h ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h src/lualib.h src/lauxlib.h )
-
-#install_lua_module ( strict etc/strict.lua )
-#install_doc ( doc/ )
-#install_foo ( etc/ )
-#install_data ( COPYRIGHT README )
-#install_data ( lib/ INTO lib )
-
-SET_TARGET_PROPERTIES(liblua PROPERTIES 
-  OUTPUT_NAME "torchlua"
+SET_TARGET_PROPERTIES(libluajit PROPERTIES 
+  OUTPUT_NAME "torchluajit"
   PREFIX "lib" IMPORT_PREFIX "lib")
 
-SET_TARGET_PROPERTIES(lua PROPERTIES
+SET_TARGET_PROPERTIES(luajit PROPERTIES
   OUTPUT_NAME "torch-luajit")
 
 SET(LUA_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src")
-SET(LUA_LIBRARIES liblua)
-SET(LUA_EXECUTABLE lua)
-
+SET(LUA_LIBRARIES libluajit)
+SET(LUA_EXECUTABLE luajit)
 CONFIGURE_FILE(LuaConfig.cmake.in "${Torch_BINARY_DIR}/cmake/FindLua.cmake")
 
-INSTALL(TARGETS liblua lua
+INSTALL(TARGETS libluajit luajit
   RUNTIME DESTINATION "${Torch_INSTALL_BIN_SUBDIR}"
   LIBRARY DESTINATION "${Torch_INSTALL_LIB_SUBDIR}"
   ARCHIVE DESTINATION "${Torch_INSTALL_LIB_SUBDIR}")

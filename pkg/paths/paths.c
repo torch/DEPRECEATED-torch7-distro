@@ -660,7 +660,7 @@ lua_dir(lua_State *L)
 /* ------------------------------------------------------ */
 /* require (with global flag) */
 
-#ifdef LUA_DL_DLOPEN
+#ifdef LUA_USE_DLOPEN
 # define NEED_PATH_REQUIRE 1
 # include <dlfcn.h>
 # ifndef RTLD_LAZY
@@ -673,7 +673,7 @@ lua_dir(lua_State *L)
 # define LL_SYM(h,sym) dlsym(h, sym)
 #endif
 
-#ifdef LUA_DL_DLL
+#ifdef LUA_WIN
 # define NEED_PATH_REQUIRE 1
 # include <windows.h>
 # define LL_LOAD(h,fname) h=(void*)LoadLibraryA(fname)

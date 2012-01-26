@@ -33,3 +33,4 @@ INCLUDE(TorchPackage)
 INCLUDE(TorchWrap)
 
 ADD_SUBDIRECTORY(pkg)
+ADD_SUBDIRECTORY(extra)
