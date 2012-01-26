@@ -297,7 +297,7 @@ function dok.dok2html(txt)
    
    txt = txt:gsub('%(%((.-)%)%)', function(str)
                                      table.insert(foot, str)
-                                     return '\002sup\003\002a href="#footnote-' .. #foot .. '"\003' .. #foot .. ')\002\/a\003\002/sup\003'
+                                     return '\002sup\003\002a href="#footnote-' .. #foot .. '"\003' .. #foot .. ')\002/a\003\002/sup\003'
                                   end)
 
    txt = txt:gsub('%*%*(.-)%*%*', '\002b\003%1\002/b\003')
