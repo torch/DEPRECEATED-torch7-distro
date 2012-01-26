@@ -1,14 +1,14 @@
 # We include all Torch libraries
 INCLUDE_DIRECTORIES(${CUDA_INCLUDE_DIRS})
 
-FILE(GLOB _all_library_files "${Torch_SOURCE_DIR}/libraries/*")
+FILE(GLOB _all_library_files "${Torch_SOURCE_DIR}/lib/*")
 FOREACH(_library_file ${_all_library_files})
   IF(EXISTS "${_library_file}/CMakeLists.txt")
     INCLUDE_DIRECTORIES(${_library_file})
   ENDIF(EXISTS "${_library_file}/CMakeLists.txt")
 ENDFOREACH(_library_file ${_all_library_files})
 
-FILE(GLOB _all_library_files "${Torch_SOURCE_DIR}/cuda/lib/*")
+FILE(GLOB _all_library_files "${Torch_SOURCE_DIR}/extra/cuda/lib/*")
 FOREACH(_library_file ${_all_library_files})
   IF(EXISTS "${_library_file}/CMakeLists.txt")
     INCLUDE_DIRECTORIES(${_library_file})
