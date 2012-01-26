@@ -7,9 +7,9 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 # When using gcc
 IF(CMAKE_COMPILER_IS_GNUCC)
   # we want warnings
-  ADD_DEFINITIONS("-Wall -Wno-unused")
   # we want exceptions support even when compiling c code
-  ADD_DEFINITIONS("-fexceptions")
+  SET(CMAKE_C_FLAGS "-Wall -Wno-unused ${CMAKE_C_FLAGS} -fexceptions")
+  SET(CMAKE_CXX_FLAGS "-Wall -Wno-unused ${CMAKE_CXX_FLAGS}")
 ENDIF(CMAKE_COMPILER_IS_GNUCC)
 
 # When using MSVC
