@@ -1,15 +1,17 @@
-/*
-** Configuration header.
-** Copyright (C) 2005-2011 Mike Pall. See Copyright Notice in luajit.h
-*/
+/* -*- C -*- */
 
-#ifndef luaconf_h
-#define luaconf_h
 
-#include <limits.h>
-#include <stddef.h>
+/* ================================================================ */
+/* ================================================================ */
+/* ================================================================ */
+/*              THE FOLLOWING IS FILLED WITH CMAKE                  */
+/* ================================================================ */
+/* ================================================================ */
+/* ================================================================ */
 
-#cmakedefine LUA_USE_DLOPEN 1
+#ifndef luaconf_cmake_h
+#define luaconf_cmake_h
+
 #cmakedefine LUA_USE_MODULE_AND_LIBRARY 1
 
 #cmakedefine LUAJIT_DISABLE_FFI
@@ -18,22 +20,66 @@
 #cmakedefine LUAJIT_CPU_SSE2
 #cmakedefine LUAJIT_CPU_NOCMOV
 
-/* Default path for loading Lua and C modules with require(). */
-#cmakedefine LUA_MODULE_SUFFIX "@LUA_MODULE_SUFFIX@"
-#cmakedefine LUA_DIR	"@LUA_DIR@"
-#cmakedefine LUA_LDIR	"@LUA_LDIR@"
-#cmakedefine LUA_CDIR	"@LUA_CDIR@"
+#endif
 
-#define LUA_PATH_DEFAULT "@LUA_PATH_DEFAULT@"
-#define LUA_CPATH_DEFAULT "@LUA_CPATH_DEFAULT@"
+/* ================================================================ */
+/* ================================================================ */
+/* ================================================================ */
+/*  THE FOLLOWING IS COPIED VERBATIM FROM LUAJIT-2.0/SRC/LUACONF.H  */
+/* ================================================================ */
+/* ================================================================ */
+/* ================================================================ */
+
+
+#ifndef luaconf_h
+#define luaconf_h
+
+#include <limits.h>
+#include <stddef.h>
+
+/* Default path for loading Lua and C modules with require(). */
+#if defined(_WIN32)
+/*
+** In Windows, any exclamation mark ('!') in the path is replaced by the
+** path of the directory of the executable file of the current process.
+*/
+#define LUA_LDIR	"!\\lua\\"
+#define LUA_CDIR	"!\\"
+#define LUA_PATH_DEFAULT \
+  ".\\?.lua;" LUA_LDIR"?.lua;" LUA_LDIR"?\\init.lua;"
+#define LUA_CPATH_DEFAULT \
+  ".\\?.dll;" LUA_CDIR"?.dll;" LUA_CDIR"loadall.dll"
+#else
+#define LUA_ROOT	"/usr/local/"
+#define LUA_LDIR	LUA_ROOT "share/lua/5.1/"
+#define LUA_CDIR	LUA_ROOT "lib/lua/5.1/"
+#ifdef LUA_XROOT
+#define LUA_JDIR	LUA_XROOT "share/luajit-2.0.0-beta6/"
+#define LUA_XPATH \
+  ";" LUA_XROOT "share/lua/5.1/?.lua;" LUA_XROOT "share/lua/5.1/?/init.lua"
+#define LUA_XCPATH	LUA_XROOT "lib/lua/5.1/?.so;"
+#else
+#define LUA_JDIR	LUA_ROOT "share/luajit-2.0.0-beta6/"
+#define LUA_XPATH
+#define LUA_XCPATH
+#endif
+#define LUA_PATH_DEFAULT \
+  "./?.lua;" LUA_JDIR"?.lua;" LUA_LDIR"?.lua;" LUA_LDIR"?/init.lua" LUA_XPATH
+#define LUA_CPATH_DEFAULT \
+  "./?.so;" LUA_CDIR"?.so;" LUA_XCPATH LUA_CDIR"loadall.so"
+#endif
 
 /* Environment variable names for path overrides and initialization code. */
-#cmakedefine LUA_PATH "@LUA_PATH@"
-#cmakedefine LUA_CPATH "@LUA_CPATH@"
-#cmakedefine LUA_INIT "@LUA_INIT@"
+#define LUA_PATH	"LUA_PATH"
+#define LUA_CPATH	"LUA_CPATH"
+#define LUA_INIT	"LUA_INIT"
 
 /* Special file system characters. */
-#cmakedefine LUA_DIRSEP	"@LUA_DIRSEP@"
+#if defined(_WIN32)
+#define LUA_DIRSEP	"\\"
+#else
+#define LUA_DIRSEP	"/"
+#endif
 #define LUA_PATHSEP	";"
 #define LUA_PATH_MARK	"?"
 #define LUA_EXECDIR	"!"
@@ -60,9 +106,9 @@
 /* Configuration for the frontend (the luajit executable). */
 #if defined(luajit_c)
 #define LUA_PROGNAME	"luajit"  /* Fallback frontend name. */
-#cmakedefine LUA_PROMPT		"@LUA_PROMPT@"  /* Interactive prompt. */
-#cmakedefine LUA_PROMPT2	"@LUA_PROMPT2@"  /* Continuation prompt. */
-#cmakedefine LUA_MAXINPUT	@LUA_MAXINPUT@ /* Max. input line length. */
+#define LUA_PROMPT	"> "	/* Interactive prompt. */
+#define LUA_PROMPT2	">> "	/* Continuation prompt. */
+#define LUA_MAXINPUT	512	/* Max. input line length. */
 #endif
 
 /* Note: changing the following defines breaks the Lua 5.1 ABI. */
@@ -110,6 +156,8 @@
 #define luai_apicheck(L, o)	{ (void)L; }
 #endif
 
+#endif
+
 /* ================================================================ */
 /* ================================================================ */
 /* ================================================================ */
@@ -147,6 +195,9 @@
 # undef LUA_CDIR
 # undef LUA_PATH_DEFAULT
 # undef LUA_CPATH_DEFAULT
+#if !defined(LUA_ANSI) && defined(_WIN32)
+#define LUA_WIN
+#endif
 LUA_API const char *lua_path_default();
 LUA_API const char *lua_cpath_default();
 LUA_API const char *lua_executable_dir(const char *argv0);
@@ -184,6 +235,4 @@ LUA_API const char *lua_executable_dir(const char *argv0);
     LUA_CDIR"?@CMAKE_SHARED_MODULE_SUFFIX@;" \
     LUA_CDIR"loadall@CMAKE_SHARED_MODULE_SUFFIX@"
 # endif
-#endif
-
 #endif

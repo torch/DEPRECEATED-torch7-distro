@@ -1,26 +1,17 @@
+# This CMakeLists.txt has been first taken from LuaDist
 # Copyright (C) 2007-2011 LuaDist.
 # Created by Peter Drahoš
 # Redistribution and use of this file is allowed according to the terms of the MIT license.
-# For details see the COPYRIGHT file distributed with LuaDist.
-# Please note that the package source code is licensed under its own license.
+# Debugged and modified by Ronan Collobert, for Torch
 
-project ( luajit C ASM)
-set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_MODULE_PATH} )
+project(Lua C ASM)
 
-cmake_minimum_required ( VERSION 2.6 )
-#include ( dist.cmake )
+set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
 
-## CONFIGURATION
-# Default configuration (we assume POSIX by default)
-set ( LUA_PATH "${Torch_INSTALL_LUA_PATH}" CACHE STRING "Environment variable to use as package.path." )
-set ( LUA_CPATH "${Torch_INSTALL_LUA_CPATH}" CACHE STRING "Environment variable to use as package.cpath." )
-set ( LUA_INIT "LUA_INIT" CACHE STRING "Environment variable for initial script." )
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
+CMAKE_POLICY(VERSION 2.6)
 
-option ( LUA_ANSI "Use only ansi features." OFF )
-set ( LUA_IDSIZE 60 CACHE NUMBER "gives the maximum size for the description of the source." )
-set ( LUA_PROMPT "> " CACHE STRING "Is the default prompt used by stand-alone Lua." )
-set ( LUA_PROMPT2 ">> " CACHE STRING "Is the default continuation prompt used by stand-alone Lua." )
-set ( LUA_MAXINPUT 512 CACHE NUMBER "Is the maximum length for an input line in the stand-alone interpreter.")
+INCLUDE(CheckLibraryExists)
 
 # LuaJIT specific
 option ( LUAJIT_DISABLE_FFI "Disable FFI." OFF )
@@ -30,62 +21,30 @@ option ( LUAJIT_CPU_SSE2 "Disable SSE2." OFF )
 option ( LUAJIT_CPU_NOCMOV "Disable NOCMOV." OFF )
 option ( LUAJIT_RUN_DYNASM "Re-generate headers with DynASM." OFF )
 
-#2DO: LUAI_* and LUAL_* settings, for now defaults are used.
-set ( LUA_DIRSEP "/" )
-set ( LUA_MODULE_SUFFIX ${CMAKE_SHARED_MODULE_SUFFIX} )
-set ( LUA_LDIR ${INSTALL_LMOD} )
-set ( LUA_CDIR ${INSTALL_CMOD} )
-
-# Direct path to installation
-set ( LUA_DIR ${CMAKE_INSTALL_PREFIX} CACHE STRING "Destination from which modules will be resolved. See INSTALL_LMOD and INSTALL_CMOD.")
-
-set ( LUA_PATH_DEFAULT "./?.lua;${LUA_DIR}${LUA_LDIR}/?.lua;${LUA_DIR}${LUA_LDIR}/?/init.lua;./?/init.lua" )
-set ( LUA_CPATH_DEFAULT "./?${LUA_MODULE_SUFFIX};${LUA_DIR}${LUA_CDIR}/?${LUA_MODULE_SUFFIX};${LUA_DIR}${LUA_CDIR}/loadall${LUA_MODULE_SUFFIX}" )
-
 if ( WIN32 AND NOT CYGWIN )
-  # Windows systems
   add_definitions ( -DLUA_BUILD_AS_DLL -DLUAJIT_OS=LUAJIT_OS_WINDOWS)
   set ( LJVM_MODE coffasm )
-  # Paths (Double escapes needed)
-  set ( LUA_DIRSEP "\\\\" )
-  string ( REPLACE "/" ${LUA_DIRSEP} LUA_DIR "${LUA_DIR}" )
-  string ( REPLACE "/" ${LUA_DIRSEP} LUA_LDIR "${LUA_LDIR}" )
-  string ( REPLACE "/" ${LUA_DIRSEP} LUA_CDIR "${LUA_CDIR}" )
-  string ( REPLACE "/" ${LUA_DIRSEP} LUA_PATH_DEFAULT "${LUA_PATH_DEFAULT}" )
-  string ( REPLACE "/" ${LUA_DIRSEP} LUA_CPATH_DEFAULT "${LUA_CPATH_DEFAULT}" )
-
 elseif ( APPLE )
-  set ( CMAKE_EXE_LINKER_FLAGS "-pagezero_size 10000 -image_base 100000000" )
-  option ( LUA_USE_POSIX "Use POSIX functionality." ON )
-  option ( LUA_USE_DLOPEN "Use dynamic linker to load modules." ON )
+  set ( CMAKE_EXE_LINKER_FLAGS "-pagezero_size 10000 -image_base 100000000 ${CMAKE_EXE_LINKER_FLAGS}" )
   set ( LJVM_MODE machasm )
 else ()
-  option ( LUA_USE_POSIX "Use POSIX functionality." ON )
-  option ( LUA_USE_DLOPEN "Use dynamic linker to load modules." ON )
   set ( LJVM_MODE elfasm )  
 endif ()
 
-## SETUP
-# Optional libraries
-find_package ( Readline )
-if ( READLINE_FOUND )
-  option ( LUA_USE_READLINE "Use readline in the Lua CLI." ON )
-endif ()
-
-find_package ( Curses )
-if ( CURSES_FOUND )
-  option ( LUA_USE_CURSES "Use curses in the Lua CLI." ON )
-endif ()
-
-# Setup needed variables and libraries
-if ( LUA_USE_POSIX )
-  # On POSIX Lua links to standard math library "m"
-  list ( APPEND LIBS m )
-endif ()
-
-if ( LUA_USE_DLOPEN )
-  # Link to dynamic linker library "dl"
+IF(NOT WIN32)
+  CHECK_LIBRARY_EXISTS(dl dlopen "" LUA_USE_DLOPEN)
+  IF(NOT LUA_USE_DLOPEN)
+    MESSAGE(FATAL_ERROR "Cannot compile a useful lua.
+Function dlopen() seems not to be supported on your platform.
+Apparently you are not on a Windows platform as well.
+So lua has no way to deal with shared libraries!")
+  ENDIF(NOT LUA_USE_DLOPEN)
   list ( APPEND LIBS dl )
+ENDIF(NOT WIN32)
+
+CHECK_LIBRARY_EXISTS(m sin "" LUA_USE_LIBM)
+if ( LUA_USE_LIBM )
+  list ( APPEND LIBS m )
 endif ()
 
 if ( LUA_WIN )
@@ -96,18 +55,6 @@ if ( LUA_WIN )
     set ( LUA_RC src/lua.rc )
     set ( LUAC_RC src/luac.rc )
   endif ()
-endif ()
-
-if ( LUA_USE_READLINE )
-  # Add readline
-  include_directories ( ${READLINE_INCLUDE_DIR} )
-  list ( APPEND LIBS ${READLINE_LIBRARY} )
-endif ()
-
-if ( LUA_USE_CURSES )
-  # Add curses
-  include_directories ( ${CURSES_INCLUDE_DIR} )
-  list ( APPEND LIBS ${CURSES_LIBRARY} )
 endif ()
 
 IF (CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL CMAKE_SHARED_MODULE_SUFFIX)
@@ -213,27 +160,30 @@ SET(DEPS
                   
 ## COMPILE
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} dynasm src )
-add_library ( libluajit SHARED ${SRC_LJCORE} src/lua_dll.rc ${DEPS} ) #old: src/lua.def
-target_link_libraries ( libluajit ${LIBS} )
-set_target_properties ( libluajit PROPERTIES OUTPUT_NAME lua CLEAN_DIRECT_OUTPUT 1 )
 
-add_executable ( luajit src/luajit.c src/lua.rc )
-target_link_libraries ( luajit libluajit )
-
-
-SET_TARGET_PROPERTIES(libluajit PROPERTIES 
-  OUTPUT_NAME "torchluajit"
+add_library ( liblua-shared SHARED ${SRC_LJCORE} ${DEPS} )
+target_link_libraries ( liblua-shared ${LIBS} )
+SET_TARGET_PROPERTIES(liblua-shared PROPERTIES 
   PREFIX "lib" IMPORT_PREFIX "lib")
 
-SET_TARGET_PROPERTIES(luajit PROPERTIES
-  OUTPUT_NAME "torch-luajit")
+add_library ( liblua-static STATIC ${SRC_LJCORE} ${DEPS} )
+target_link_libraries ( liblua-static ${LIBS} )
+SET_TARGET_PROPERTIES(liblua-static PROPERTIES
+  COMPILE_DEFINITIONS "liblua_STATIC"
+  OUTPUT_NAME "lua-static")
+
+add_executable ( lua src/luajit.c)
+target_link_libraries ( lua liblua-shared )
+
+add_executable ( lua-static src/luajit.c)
+target_link_libraries ( lua-static liblua-static )
 
 SET(LUA_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src")
-SET(LUA_LIBRARIES libluajit)
-SET(LUA_EXECUTABLE luajit)
+SET(LUA_LIBRARIES liblua-shared)
+SET(LUA_EXECUTABLE lua-static)
 CONFIGURE_FILE(LuaConfig.cmake.in "${Torch_BINARY_DIR}/cmake/FindLua.cmake")
 
-INSTALL(TARGETS libluajit luajit
+INSTALL(TARGETS liblua-shared lua
   RUNTIME DESTINATION "${Torch_INSTALL_BIN_SUBDIR}"
   LIBRARY DESTINATION "${Torch_INSTALL_LIB_SUBDIR}"
   ARCHIVE DESTINATION "${Torch_INSTALL_LIB_SUBDIR}")
