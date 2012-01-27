@@ -228,9 +228,9 @@ LUA_API const char *lua_executable_dir(const char *argv0);
 # define LUA_CPATH_DEFAULT lua_cpath_default()
 # define HAVE_LUA_EXECUTABLE_DIR 1
 # define LUA_LDIR LUA_EXECDIR \
-    "/@Torch_INSTALL_BIN_RIDBUS@/@Torch_INSTALL_LUA_PATH_SUBDIR@/"
+    "/@Lua_INSTALL_BIN_RIDBUS@/@Lua_INSTALL_LUA_PATH_SUBDIR@/"
 # define LUA_CDIR LUA_EXECDIR \
-    "/@Torch_INSTALL_BIN_RIDBUS@/@Torch_INSTALL_LUA_CPATH_SUBDIR@/"
+    "/@Lua_INSTALL_BIN_RIDBUS@/@Lua_INSTALL_LUA_CPATH_SUBDIR@/"
 # define LUA_PATH_DEFAULT_STATIC  \
    "./?.lua;" \
     LUA_LDIR"?.lua;" \

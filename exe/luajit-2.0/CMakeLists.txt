@@ -6,10 +6,24 @@
 
 project(Lua C ASM)
 
-set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
-
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 CMAKE_POLICY(VERSION 2.6)
+
+set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
+
+IF(NOT Lua_INSTALL_BIN_SUBDIR)
+  SET(Lua_INSTALL_BIN_SUBDIR "bin" CACHE PATH "Install dir for binaries")
+  SET(Lua_INSTALL_LIB_SUBDIR "lib" CACHE PATH "Install dir for libraries")
+  SET(Lua_INSTALL_INCLUDE_SUBDIR "include" CACHE PATH "Install dir for includes")
+  SET(Lua_INSTALL_LUA_PATH_SUBDIR "share/lua/5.1" CACHE PATH "Install dir for Lua packages files")
+  SET(Lua_INSTALL_LUA_CPATH_SUBDIR "lib/lua/5.1" CACHE PATH "Install dir for Lua C packages files")
+ENDIF()
+IF(NOT Lua_INSTALL_BIN_RIDBUS)
+  FILE(RELATIVE_PATH Lua_INSTALL_BIN_RIDBUS "${Lua_INSTALL_PREFIX}/${Lua_INSTALL_BIN}" "${Lua_INSTALL_PREFIX}/.")
+ENDIF()
+IF(NOT Lua_INSTALL_FINDLUA_DIR)
+  SET(Lua_INSTALL_FINDLUA_DIR "{Lua_BINARY_DIR}/cmake")
+ENDIF()
 
 INCLUDE(CheckLibraryExists)
 
@@ -82,9 +96,9 @@ SET(SRC_LJCORE src/lj_gc.c src/lj_err.c src/lj_char.c src/lj_bc.c src/lj_obj.c
   src/lj_state.c src/lj_dispatch.c src/lj_vmevent.c src/lj_vmmath.c src/lj_api.c
   src/lj_lex.c src/lj_parse.c src/lj_bcread.c src/lj_bcwrite.c
   src/lj_ir.c src/lj_opt_mem.c src/lj_opt_fold.c src/lj_opt_narrow.c
-  src/lj_opt_dce.c src/lj_opt_loop.c src/lj_opt_split.c
+  src/lj_opt_dce.c src/lj_opt_loop.c #only included src/lj_opt_split.c
   src/lj_mcode.c src/lj_snap.c src/lj_record.c src/lj_crecord.c src/lj_ffrecord.c
-  src/lj_asm.c src/lj_trace.c src/lj_gdbjit.c
+  src/lj_asm.c src/lj_trace.c #only included src/lj_gdbjit.c
   src/lj_ctype.c src/lj_cdata.c src/lj_cconv.c src/lj_ccall.c src/lj_ccallback.c
   src/lj_carith.c src/lj_clib.c src/lj_cparse.c
   src/lj_lib.c src/lj_alloc.c src/lib_aux.c
@@ -185,13 +199,17 @@ target_link_libraries ( lua liblua-shared )
 add_executable ( lua-static src/luajit.c)
 target_link_libraries ( lua-static liblua-static )
 
-SET(LUA_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/src")
+INSTALL(TARGETS liblua-shared lua
+  RUNTIME DESTINATION "${Lua_INSTALL_BIN_SUBDIR}"
+  LIBRARY DESTINATION "${Lua_INSTALL_LIB_SUBDIR}"
+  ARCHIVE DESTINATION "${Lua_INSTALL_LIB_SUBDIR}")
+
+# Create internal FindLua.cmake
 SET(LUA_LIBRARIES liblua-shared)
 SET(LUA_EXECUTABLE lua-static)
-CONFIGURE_FILE(LuaConfig.cmake.in "${Torch_BINARY_DIR}/cmake/FindLua.cmake")
-
-INSTALL(TARGETS liblua-shared lua
-  RUNTIME DESTINATION "${Torch_INSTALL_BIN_SUBDIR}"
-  LIBRARY DESTINATION "${Torch_INSTALL_LIB_SUBDIR}"
-  ARCHIVE DESTINATION "${Torch_INSTALL_LIB_SUBDIR}")
-
+SET(LUAC_EXECUTABLE torch-luac)
+SET(LUA_INCLUDE_DIR 
+  ${CMAKE_CURRENT_SOURCE_DIR}/src
+  ${CMAKE_CURRENT_BINARY_DIR}
+  ${READLINE_INCLUDE_DIR})
+CONFIGURE_FILE(cmake/LuaConfig.cmake.in "${Lua_INSTALL_FINDLUA_DIR}/FindLua.cmake")
