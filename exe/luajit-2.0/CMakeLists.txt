@@ -14,13 +14,7 @@ set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
 # If you want to include Lua in a main project,
 # you might want to define those variables yourself
 IF(NOT Lua_IS_SUBPROJECT)
-  SET(Lua_INSTALL_BIN_SUBDIR "bin" CACHE PATH "Install dir for binaries")
-  SET(Lua_INSTALL_LIB_SUBDIR "lib" CACHE PATH "Install dir for libraries")
-  SET(Lua_INSTALL_INCLUDE_SUBDIR "include" CACHE PATH "Install dir for includes")
-  SET(Lua_INSTALL_LUA_PATH_SUBDIR "share/lua/5.1" CACHE PATH "Install dir for Lua packages files")
-  SET(Lua_INSTALL_LUA_CPATH_SUBDIR "lib/lua/5.1" CACHE PATH "Install dir for Lua C packages files")
-  FILE(RELATIVE_PATH Lua_INSTALL_BIN_RIDBUS "${Lua_INSTALL_PREFIX}/${Lua_INSTALL_BIN}" "${Lua_INSTALL_PREFIX}/.")
-  SET(Lua_INSTALL_FINDLUA_DIR "{Lua_BINARY_DIR}/cmake")
+  INCLUDE(LuaPaths)
 ENDIF()
 
 INCLUDE(CheckLibraryExists)
@@ -184,7 +178,7 @@ include_directories (BEFORE ${CMAKE_CURRENT_BINARY_DIR} dynasm src )
 add_library ( liblua-shared SHARED ${SRC_LJCORE} ${DEPS} )
 target_link_libraries ( liblua-shared ${LIBS} )
 SET_TARGET_PROPERTIES(liblua-shared PROPERTIES 
-  PREFIX "lib" IMPORT_PREFIX "lib")
+  PREFIX "lib" IMPORT_PREFIX "lib" OUTPUT_NAME "lua")
 
 add_library ( liblua-static STATIC ${SRC_LJCORE} ${DEPS} )
 target_link_libraries ( liblua-static ${LIBS} )

@@ -41,9 +41,9 @@ FOREACH(module QT3SUPPORT QTOPENGL QTASSISTANT QTDESIGNER QTMOTIF QTNSPLUGIN
         GET_FILENAME_COMPONENT(_libname "${_lib}" NAME_WE)
         IF (EXISTS "${QT_BINARY_DIR}/${_libname}.dll")
           # --- DEBUG MESSAGE
-          # MESSAGE("Will install ${Torch_INSTALL_BIN_SUBDIR}/${_libname}.dll")
+          # MESSAGE("Will install ${QtLua_INSTALL_BIN_SUBDIR}/${_libname}.dll")
           INSTALL(PROGRAMS "${QT_BINARY_DIR}/${_libname}.dll"
-            DESTINATION "${Torch_INSTALL_BIN_SUBDIR}")
+            DESTINATION "${QtLua_INSTALL_BIN_SUBDIR}")
         ENDIF (EXISTS "${QT_BINARY_DIR}/${_libname}.dll")
       ENDFOREACH(_lib)
       FOREACH(depend_module ${QT_${module}_MODULE_DEPENDS})
@@ -56,7 +56,7 @@ ENDFOREACH(module)
 # Create qt.conf in torch binary directory
 FILE(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf" "[Paths]")
 INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
-  DESTINATION "${Torch_INSTALL_BIN_SUBDIR}")
+  DESTINATION "${QtLua_INSTALL_BIN_SUBDIR}")
 
 # Install qt plugins
 FOREACH(_pdir "codecs" "imageformats")
@@ -80,9 +80,9 @@ FOREACH(_pdir "codecs" "imageformats")
       ENDIF ("${_debug}" STREQUAL "DEBUG" AND "${_dll}" STREQUAL "${_dll_d}")
       IF (_inst)
         # --- DEBUG MESSAGE
-        # MESSAGE("Will install ${Torch_INSTALL_BIN_SUBDIR}/plugins/${_pdir}/${_dll}.dll")
+        # MESSAGE("Will install ${QtLua_INSTALL_BIN_SUBDIR}/plugins/${_pdir}/${_dll}.dll")
         INSTALL(PROGRAMS "${QT_PLUGINS_DIR}/${_pdir}/${_dll}.dll"
-          DESTINATION "${Torch_INSTALL_BIN_SUBDIR}/plugins/${_pdir}" )
+          DESTINATION "${QtLua_INSTALL_BIN_SUBDIR}/plugins/${_pdir}" )
       ENDIF(_inst)
     ENDFOREACH(_dll)
   ENDIF (EXISTS "${QT_PLUGINS_DIR}/${_pdir}")

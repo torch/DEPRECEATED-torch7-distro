@@ -1,5 +1,22 @@
 # -*- cmake -*-
 
+project(QtLua)
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
+CMAKE_POLICY(VERSION 2.6)
+
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+# If you want to include Lua in a main project,
+# you might want to define those variables yourself
+IF(NOT QtLua_IS_SUBPROJECT)
+  INCLUDE(QtLuaPaths)
+
+  # We do not support dok generation for now
+  MACRO(ADD_TORCH_DOK)
+  ENDMACRO(ADD_TORCH_DOK)
+ENDIF()
+
 # --- General
 
 SET(WITH_QTLUA ON 
@@ -11,9 +28,6 @@ SET(WITH_QTLUA_IDE ON
 # --- Macros
 
 IF (WITH_QTLUA)
-  SET(CMAKE_QTLUA_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake
-    CACHE INTERNAL "Path for QtLua cmake modules")
-  SET(CMAKE_MODULE_PATH ${CMAKE_QTLUA_MODULE_PATH} ${CMAKE_MODULE_PATH})
   INCLUDE(MacroQt4AutoGen)
   INCLUDE(MacroAddQtLuaModule)
   INCLUDE(CheckCXXSourceCompiles)
@@ -41,33 +55,35 @@ IF (WITH_QTLUA)
   INCLUDE_DIRECTORIES(${LUA_INCLUDE_DIR})
 ENDIF(WITH_QTLUA)
 
-# was lua compiled with c++?
-IF (WITH_QTLUA AND NOT LUA_COMPILED_WITH_CXX)
-  SET(CMAKE_REQUIRED_DEFINITIONS ${LUA_DEFINITIONS})
-  SET(CMAKE_REQUIRED_INCLUDES ${LUA_INCLUDE_DIR})
-  SET(CMAKE_REQUIRED_LIBRARIES ${LUA_LIBRARIES})
-  CHECK_CXX_SOURCE_RUNS("
-#include <stdlib.h>
-#include \"lua.h\"
-#include \"lauxlib.h\"
-int result = 1;
-int foo(lua_State *L) { 
-  try { luaL_error(L,\"error\"); } catch(...) { result=0; throw; } 
-  return 0; }
-int main() { lua_State *L = luaL_newstate();
-  lua_pushcfunction(L, foo);
-  lua_pcall(L, 0, 0, 0); exit(result); }" 
-  LUA_COMPILED_WITH_CXX)
-  SET(CMAKE_REQUIRED_DEFINITIONS)
-  SET(CMAKE_REQUIRED_INCLUDES)
-  SET(CMAKE_REQUIRED_LIBRARIES)
-  MESSAGE(STATUS "LUA_COMPILED_WITH_CXX=${LUA_COMPILED_WITH_CXX}")
-  IF (NOT "${LUA_COMPILED_WITH_CXX}" EQUAL "0")
-    MESSAGE(STATUS "Disabling QtLua (Lua not compiled with C++)")
-    SET(WITH_QTLUA FALSE)
-  ENDIF (NOT "${LUA_COMPILED_WITH_CXX}" EQUAL "0")
-ENDIF(WITH_QTLUA AND NOT LUA_COMPILED_WITH_CXX)
-
+# It is not easy to check this because we have the relative
+# paths activated in general... so the program fails
+# to execute given it is not at the install place
+# # was lua compiled with c++?
+# IF (WITH_QTLUA AND NOT LUA_COMPILED_WITH_CXX)
+#   SET(CMAKE_REQUIRED_DEFINITIONS ${LUA_DEFINITIONS})
+#   SET(CMAKE_REQUIRED_INCLUDES ${LUA_INCLUDE_DIR})
+#   SET(CMAKE_REQUIRED_LIBRARIES ${LUA_LIBRARIES})
+#   CHECK_CXX_SOURCE_RUNS("
+# #include <stdlib.h>
+# #include \"lua.h\"
+# #include \"lauxlib.h\"
+# int result = 1;
+# int foo(lua_State *L) { 
+#   try { luaL_error(L,\"error\"); } catch(...) { result=0; throw; } 
+#   return 0; }
+# int main() { lua_State *L = luaL_newstate();
+#   lua_pushcfunction(L, foo);
+#   lua_pcall(L, 0, 0, 0); exit(result); }" 
+#   LUA_COMPILED_WITH_CXX)
+#   SET(CMAKE_REQUIRED_DEFINITIONS)
+#   SET(CMAKE_REQUIRED_INCLUDES)
+#   SET(CMAKE_REQUIRED_LIBRARIES)
+#   MESSAGE("HEYYY <${LUA_COMPILED_WITH_CXX}>")
+#   IF (NOT "${LUA_COMPILED_WITH_CXX}" EQUAL "0")
+#     MESSAGE(STATUS "Disabling QtLua (Lua not compiled with C++ exceptions support)")
+#     SET(WITH_QTLUA FALSE)
+#   ENDIF (NOT "${LUA_COMPILED_WITH_CXX}" EQUAL "0")
+# ENDIF(WITH_QTLUA AND NOT LUA_COMPILED_WITH_CXX)
 
 
 # --- compile libqtlua
