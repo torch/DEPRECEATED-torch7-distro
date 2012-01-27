@@ -11,17 +11,15 @@ CMAKE_POLICY(VERSION 2.6)
 
 set ( CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH} )
 
-IF(NOT Lua_INSTALL_BIN_SUBDIR)
+# If you want to include Lua in a main project,
+# you might want to define those variables yourself
+IF(NOT Lua_IS_SUBPROJECT)
   SET(Lua_INSTALL_BIN_SUBDIR "bin" CACHE PATH "Install dir for binaries")
   SET(Lua_INSTALL_LIB_SUBDIR "lib" CACHE PATH "Install dir for libraries")
   SET(Lua_INSTALL_INCLUDE_SUBDIR "include" CACHE PATH "Install dir for includes")
   SET(Lua_INSTALL_LUA_PATH_SUBDIR "share/lua/5.1" CACHE PATH "Install dir for Lua packages files")
   SET(Lua_INSTALL_LUA_CPATH_SUBDIR "lib/lua/5.1" CACHE PATH "Install dir for Lua C packages files")
-ENDIF()
-IF(NOT Lua_INSTALL_BIN_RIDBUS)
   FILE(RELATIVE_PATH Lua_INSTALL_BIN_RIDBUS "${Lua_INSTALL_PREFIX}/${Lua_INSTALL_BIN}" "${Lua_INSTALL_PREFIX}/.")
-ENDIF()
-IF(NOT Lua_INSTALL_FINDLUA_DIR)
   SET(Lua_INSTALL_FINDLUA_DIR "{Lua_BINARY_DIR}/cmake")
 ENDIF()
 
@@ -34,6 +32,7 @@ option ( LUAJIT_DISABLE_JIT "Disable JIT." OFF )
 option ( LUAJIT_CPU_SSE2 "Disable SSE2." OFF )
 option ( LUAJIT_CPU_NOCMOV "Disable NOCMOV." OFF )
 option ( LUAJIT_RUN_DYNASM "Re-generate headers with DynASM." OFF )
+MARK_AS_ADVANCED(LUAJIT_DISABLE_FFI LUAJIT_ENABLE_LUA52COMPAT LUAJIT_DISABLE_JIT LUAJIT_CPU_SSE2 LUAJIT_CPU_NOCMOV LUAJIT_RUN_DYNASM)
 
 if ( WIN32 AND NOT CYGWIN )
   add_definitions ( -DLUA_BUILD_AS_DLL -DLUAJIT_OS=LUAJIT_OS_WINDOWS)
