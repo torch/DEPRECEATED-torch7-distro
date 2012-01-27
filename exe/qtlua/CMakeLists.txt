@@ -1,7 +1,5 @@
 # -*- cmake -*-
 
-
-
 # --- General
 
 SET(WITH_QTLUA ON 
