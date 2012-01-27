@@ -186,15 +186,13 @@ static int dolibrary(lua_State *L, const char *name)
   return report(L, docall(L, 1, 1));
 }
 
-static void write_prompt(lua_State *L, int firstline)
-{
+static const char *get_prompt (lua_State *L, int firstline) {
   const char *p;
   lua_getfield(L, LUA_GLOBALSINDEX, firstline ? "_PROMPT" : "_PROMPT2");
   p = lua_tostring(L, -1);
-  if (p == NULL) p = firstline ? LUA_PROMPT : LUA_PROMPT2;
-  fputs(p, stdout);
-  fflush(stdout);
+  if (p == NULL) p = (firstline ? LUA_PROMPT : LUA_PROMPT2);
   lua_pop(L, 1);  /* remove global */
+  return p;
 }
 
 static int incomplete(lua_State *L, int status)
@@ -211,21 +209,22 @@ static int incomplete(lua_State *L, int status)
   return 0;  /* else... */
 }
 
-static int pushline(lua_State *L, int firstline)
-{
-  char buf[LUA_MAXINPUT];
-  write_prompt(L, firstline);
-  if (fgets(buf, LUA_MAXINPUT, stdin)) {
-    size_t len = strlen(buf);
-    if (len > 0 && buf[len-1] == '\n')
-      buf[len-1] = '\0';
-    if (firstline && buf[0] == '=')
-      lua_pushfstring(L, "return %s", buf+1);
-    else
-      lua_pushstring(L, buf);
-    return 1;
-  }
-  return 0;
+static int pushline (lua_State *L, int firstline) {
+  char buffer[LUA_MAXINPUT];
+  char *b = buffer;
+  size_t l;
+  const char *prmt = get_prompt(L, firstline);
+  if (lua_readline(L, b, prmt) == 0)
+    return 0;  /* no input */
+  l = strlen(b);
+  if (l > 0 && b[l-1] == '\n')  /* line ends with newline? */
+    b[l-1] = '\0';  /* remove it */
+  if (firstline && b[0] == '=')  /* first line starts with `=' ? */
+    lua_pushfstring(L, "return %s", b+1);  /* change it to `return' */
+  else
+    lua_pushstring(L, b);
+  lua_freeline(L, b);
+  return 1;
 }
 
 static int loadline(lua_State *L)
@@ -243,6 +242,7 @@ static int loadline(lua_State *L)
     lua_insert(L, -2);  /* ...between the two lines */
     lua_concat(L, 3);  /* join them */
   }
+  lua_saveline(L, 1);
   lua_remove(L, 1);  /* remove line */
   return status;
 }

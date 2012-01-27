@@ -47,6 +47,13 @@ if ( LUA_USE_LIBM )
   list ( APPEND LIBS m )
 endif ()
 
+FIND_PACKAGE(Readline)
+IF(READLINE_FOUND)
+  INCLUDE_DIRECTORIES(${READLINE_INCLUDE_DIR})
+  list(APPEND LIBS ${READLINE_LIBRARIES})
+  SET(LUAJIT_USE_READLINE 1)
+ENDIF(READLINE_FOUND)
+
 if ( LUA_WIN )
   # Add extra rc files to the windows build
   if ( MSVC OR MINGW )
@@ -159,7 +166,7 @@ SET(DEPS
   )
                   
 ## COMPILE
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} dynasm src )
+include_directories (BEFORE ${CMAKE_CURRENT_BINARY_DIR} dynasm src )
 
 add_library ( liblua-shared SHARED ${SRC_LJCORE} ${DEPS} )
 target_link_libraries ( liblua-shared ${LIBS} )
