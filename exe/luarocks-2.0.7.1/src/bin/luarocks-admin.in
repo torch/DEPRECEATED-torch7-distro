@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!@LuaRocks_LUA_EXECUTABLE@
 
 local command_line = require("luarocks.command_line")
 
