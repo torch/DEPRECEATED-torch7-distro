@@ -79,6 +79,7 @@ local function uncleanText(txt)
 end
 
 local function string2symbol(str)
+   local str  = str:gsub(':','.')
    local ok, res = pcall(loadstring('local t = ' .. str .. '; return t'))
    if not ok then
       ok, res = pcall(loadstring('local t = _torchimport.' .. str .. '; return t'))

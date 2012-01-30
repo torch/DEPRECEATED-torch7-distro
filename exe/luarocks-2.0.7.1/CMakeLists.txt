@@ -20,11 +20,11 @@ INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/config.lua" DESTINATION "${LuaRocks_I
 
 # site config file
 FIND_PROGRAM(LuaRocks_DOWNLOADER_ NAMES wget curl DOC "File downloader (wget or curl)")
-IF(LuaRocks_DOWNLOADER)
+IF(LuaRocks_DOWNLOADER_)
   GET_FILENAME_COMPONENT(LuaRocks_DOWNLOADER "${LuaRocks_DOWNLOADER_}" NAME)  
-ELSE(LuaRocks_DOWNLOADER)
+ELSE(LuaRocks_DOWNLOADER_)
   MESSAGE(FATAL_ERROR "Downloader (wget, curl or fetch) not found")  
-ENDIF(LuaRocks_DOWNLOADER)
+ENDIF(LuaRocks_DOWNLOADER_)
 
 FIND_PROGRAM(LuaRocks_MD5CHECKER NAMES md5 md5sum openssl DOC "MD5 checker")
 IF(NOT LuaRocks_MD5CHECKER)
