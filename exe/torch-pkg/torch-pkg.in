@@ -55,6 +55,8 @@ lua = 'torch-lua'
 
 -- shortcuts
 append = table.insert
+info = function(msg) print('--> ' .. msg) end
+infoarg = function(msg) print('    ' .. msg) end
 
 -- no args?
 if #arg == 0 then
@@ -131,11 +133,32 @@ elseif command == 'search' then
 
 elseif command == 'add' then
 
+   if not arguments[1] then
+      print(help)
+      print()
+      print('ERROR: please provide at least one valid URL')
+      os.exit()
+   end
+
+   info('added url(s) to user config:')
+
    f = io.open(configfile)
    conf = f:read('*all')
    f:close()
 
-   conf = conf .. 'table.insert(config.urls, "' .. arguments[1] .. '")\n'
+   for _,arg in ipairs(arguments) do
+      for _,url in ipairs(config.urls) do
+         if url == arg then
+            bypass = true
+         end
+      end
+      if bypass then
+         infoarg('skipping ' .. arg .. ' (already exists)')
+      else
+         conf = conf .. 'table.insert(config.urls, "' .. arg .. '")\n'
+         infoarg(arg)
+      end
+   end
 
    f = io.open(configfile,'w')
    f:write(conf)
