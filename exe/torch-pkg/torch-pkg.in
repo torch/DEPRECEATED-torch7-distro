@@ -1,0 +1,144 @@
+#!@Torch_INSTALL_BIN@/torch-lua
+
+-- PREFIX
+PREFIX = '@Torch_INSTALL_BIN@'
+
+-- some dependencies
+require 'paths'
+require 'torch'
+torch.include('torch','torch.lua')
+
+-- some binaries
+wget = '@WGET_EXECUTABLE@'
+curl = '@CURL_EXECUTABLE@'
+git = '@GIT_EXECUTABLE@'
+
+-- config
+configfile = paths.concat(os.getenv('HOME'), '.torchpkg', 'config')
+if not paths.filep(configfile) then
+   os.execute('mkdir -p ' .. paths.dirname(configfile))
+   os.execute('echo "config = {urls={}}" > ' .. configfile)
+end
+dofile(configfile)
+
+-- help/args
+help = 
+[=[Torch7 Package Manager
+
+Usage: torch-pkg [options] <command> [argument]
+
+Supported Commands:
+  help            print this help
+  install         install a package (download + build + deploy)
+  download        download a package locally
+  build           build a local package
+  deploy          deploy a package (build it if necessary)
+  show            show information about a package
+  list            list available packages
+  search          search for a package
+  add             add a server address to local config ($HOME/.torchpkg/config)
+
+Arguments for install|download:
+  <pkg-name>      a package name (to be found in one of the configured repos)
+  <pkg-repo>      the full address of a GIT repository
+  <pkg-url>       the URL of a simple package (should be a tar/tgz/tbz)
+
+Arguments for add:
+  <base-url>      a base URL where GIT repos or tars can be found
+
+Options:
+  -v|-verbose     be more verbose
+  -d|-dry         dry run ]=]
+
+-- lua interpreter
+lua = 'torch-lua'
+
+-- shortcuts
+append = table.insert
+
+-- no args?
+if #arg == 0 then
+   print(help)
+   os.exit()
+end
+
+-- commands
+commands = {'help','install','download','build','deploy','show',
+            'list','search','add'}
+
+-- parse arguments
+options = {}
+arguments = {}
+for i,arg in ipairs(arg) do
+   if commandi then
+      append(arguments, arg)
+   end
+   for _,cmd in ipairs(commands) do
+      if arg == cmd then
+         command = arg
+         commandi = i
+         break
+      end 
+   end
+end
+for i = 1,#arg do
+   append(options, arg[i])
+end
+
+-- parse basic options
+for i,opt in ipairs(options) do
+   if opt == '-v' or opt == '-verbose' then
+      verbose = true
+   end
+   if opt == '-d' or opt == '-dry' then
+      dry = true
+   end
+end
+
+-- now execute command
+if command == 'help' then
+
+   print(help)
+   os.exit()
+
+elseif command == 'install' then
+
+   print(config.urls)
+
+elseif command == 'download' then
+
+
+
+elseif command == 'build' then
+
+
+
+elseif command == 'deploy' then
+
+
+
+elseif command == 'show' then
+
+
+
+elseif command == 'list' then
+
+
+
+elseif command == 'search' then
+
+
+
+elseif command == 'add' then
+
+   f = io.open(configfile)
+   conf = f:read('*all')
+   f:close()
+
+   conf = conf .. 'table.insert(config.urls, "' .. arguments[1] .. '")\n'
+
+   f = io.open(configfile,'w')
+   f:write(conf)
+   f:close()   
+
+end
