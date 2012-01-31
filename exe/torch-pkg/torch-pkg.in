@@ -3,21 +3,66 @@
 -- PREFIX
 PREFIX = '@Torch_INSTALL_BIN@'
 
+-- some paths
+tmp = '/tmp/torch-pkg'
+
 -- some dependencies
 require 'paths'
 require 'torch'
-torch.include('torch','torch.lua')
+
+-- torch cmake config
+cmake_conf = {
+   CMAKE_PROJECT_NAME = 'Torch',
+   CMAKE_INSTALL_PREFIX = paths.install_prefix,
+   INSTALL_PREFIX = paths.install_lua_path,
+   CINSTALL_PREFIX = paths.install_lua_cpath,
+   Torch_INSTALL_LUA_PATH_SUBDIR = paths.install_lua_path,
+   Torch_INSTALL_LUA_CPATH_SUBDIR = paths.install_lua_cpath,
+   LUA_INCLUDE_DIR = paths.install_include,
+   LUA_INCLUDE_DIR = paths.concat(paths.install_include,'TH')
+}
+
+-- some commands
+mkdir = 'mkdir -p '
+rm = 'rm -rf '
+cd = 'cd '
+cmake = 'cmake .. '
+for var,val in pairs(cmake_conf) do
+   cmake = cmake .. '-D' .. var .. '=' .. val .. ' '
+end
+cmake = cmake .. '; '
+make = mkdir .. 'build; ' .. cd .. 'build; ' .. cmake .. 'make'
+install = 'make install'
+
+-- shortcuts
+append = table.insert
+error = function(msg) print('ERROR: ' .. msg) end
+info = function(msg) print('--> ' .. msg) end
+infoarg = function(msg) print('    ' .. msg) end
 
 -- some binaries
-wget = '@WGET_EXECUTABLE@'
-curl = '@CURL_EXECUTABLE@'
-git = '@GIT_EXECUTABLE@'
+wget = '@WGET_EXECUTABLE@' if wget == '' then wget = nil end
+curl = '@CURL_EXECUTABLE@' if curl == '' then curl = nil end
+git = '@GIT_EXECUTABLE@'   if git  == '' then git  = nil end
+if not wget and not curl or not git then
+   error('torch-pkg cannot run without git and one of wget | curl')
+   os.exit()
+end
 
 -- config
 configfile = paths.concat(os.getenv('HOME'), '.torchpkg', 'config')
 if not paths.filep(configfile) then
-   os.execute('mkdir -p ' .. paths.dirname(configfile))
+   defurls = {
+      'https://github.com/andresy/',
+      'https://github.com/clementfarabet/',
+      'https://github.com/clementfarabet/lua---',
+      'https://github.com/koraykv/'
+   }
+   os.execute(mkdir .. paths.dirname(configfile))
    os.execute('echo "config = {urls={}}" > ' .. configfile)
+   for _,url in ipairs(defurls) do
+      os.execute('echo "table.insert(config.urls, \'' .. url .. '\')" >> ' .. configfile)
+   end
 end
 dofile(configfile)
 
@@ -50,14 +95,6 @@ Options:
   -v|-verbose     be more verbose
   -d|-dry         dry run ]=]
 
--- lua interpreter
-lua = 'torch-lua'
-
--- shortcuts
-append = table.insert
-info = function(msg) print('--> ' .. msg) end
-infoarg = function(msg) print('    ' .. msg) end
-
 -- no args?
 if #arg == 0 then
    print(help)
@@ -87,6 +124,13 @@ for i = 1,#arg do
    append(options, arg[i])
 end
 
+-- no command?
+if not command then
+   error('invalid command')
+   print(help)
+   os.exit()
+end
+
 -- parse basic options
 for i,opt in ipairs(options) do
    if opt == '-v' or opt == '-verbose' then
@@ -94,6 +138,17 @@ for i,opt in ipairs(options) do
    end
    if opt == '-d' or opt == '-dry' then
       dry = true
+   end
+end
+
+-- exec command
+if dry then
+   exec = print
+else
+   if verbose then
+      exec = function(cmd) info('executing: ' .. cmd) os.execute(cmd) end
+   else
+      exec = os.execute
    end
 end
 
@@ -105,38 +160,119 @@ if command == 'help' then
 
 elseif command == 'install' then
 
-   print(config.urls)
+   if not arguments[1] then
+      print(help)
+      print()
+      error('please provide a package name or a path to a tar/tgz')
+      os.exit()
+   end
+
+   package = arguments[1]
+
+   if package:find('%.tar$') or package:find('%.tgz$') or package:find('%.tar.gz$') then
+      error('only supporting git repos for now')
+      os.exit()
+   end
+
+   exec(mkdir .. tmp)
+   exec(rm .. paths.concat(tmp,package))
+
+   for _,url in ipairs(config.urls) do
+      info('trying to fetch package from server: ' .. url)
+      exec(git .. ' clone ' .. url .. package .. ' ' .. paths.concat(tmp,package))
+      if paths.dirp(paths.concat(tmp,package)) then
+         found = paths.concat(tmp,package)
+         info('just found it!')
+         break
+      end
+   end
+
+   if not found then
+      error('could not find package ' .. package .. ' in any of the registered repos')
+      os.exit()
+   end
+
+   info('building & deploying')
+   exec(cd .. found .. '; ' .. make .. '; ' .. install)
 
 elseif command == 'download' then
 
+   if not arguments[1] then
+      print(help)
+      print()
+      error('please provide a package name or a path to a tar/tgz')
+      os.exit()
+   end
 
+   package = arguments[1]
+
+   if package:find('%.tar$') or package:find('%.tgz$') or package:find('%.tar.gz$') then
+      error('only supporting git repos for now')
+      os.exit()
+   end
+
+   if paths.filep(package) or paths.dirp(package) then
+      error('file ' .. package .. ' already exists locally, aborting')
+      os.exit()
+   end
+
+   for _,url in ipairs(config.urls) do
+      info('trying to fetch package from server: ' .. url)
+      exec(git .. ' clone ' .. url .. package .. ' ' .. package)
+      if paths.dirp(package) then
+         found = package
+         info('just found it, and saved in ' .. package)
+         break
+      end
+   end
+
+   if not found then
+      error('could not find package ' .. package .. ' in any of the registered repos')
+      os.exit()
+   end
 
 elseif command == 'build' then
 
+   found = arguments[1] or '.'
 
+   if not paths.filep(paths.concat(found, 'CMakeLists.txt')) then
+      error('not a valid package, please specify a path to a valid package')
+      os.exit()
+   end
+
+   info('building package in ' .. found)
+   exec(cd .. found .. '; ' .. make)
 
 elseif command == 'deploy' then
 
+   found = arguments[1] or '.'
 
+   if not paths.filep(paths.concat(found, 'CMakeLists.txt')) then
+      error('not a valid package, please specify a path to a valid package')
+      os.exit()
+   end
+
+   info('building package in ' .. found)
+   exec(cd .. found .. '; ' .. make .. '; ' .. install)
 
 elseif command == 'show' then
 
-
+   error(command .. ' is not implemented yet')
 
 elseif command == 'list' then
 
-
+   error(command .. ' is not implemented yet')
 
 elseif command == 'search' then
 
-
+   error(command .. ' is not implemented yet')
 
 elseif command == 'add' then
 
    if not arguments[1] then
       print(help)
       print()
-      print('ERROR: please provide at least one valid URL')
+      error('please provide at least one valid URL')
       os.exit()
    end
 
