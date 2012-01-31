@@ -195,6 +195,7 @@ add_executable ( lua-static src/luajit.c)
 target_link_libraries ( lua-static liblua-static )
 
 INSTALL(TARGETS liblua-shared lua
+  EXPORT torch-exports
   RUNTIME DESTINATION "${Lua_INSTALL_BIN_SUBDIR}"
   LIBRARY DESTINATION "${Lua_INSTALL_LIB_SUBDIR}"
   ARCHIVE DESTINATION "${Lua_INSTALL_LIB_SUBDIR}")

@@ -18,6 +18,7 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake"
                       "${CMAKE_BINARY_DIR}/cmake" "${CMAKE_MODULE_PATH}")
 
 INCLUDE(TorchPaths)
+INCLUDE(TorchPathsInit)
 INCLUDE(TorchCFlags)
 INCLUDE(TorchDOK)
 
@@ -34,3 +35,5 @@ INCLUDE(TorchWrap)
 
 ADD_SUBDIRECTORY(pkg)
 ADD_SUBDIRECTORY(extra)
+
+INCLUDE(TorchExports)

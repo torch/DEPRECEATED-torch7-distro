@@ -1,0 +1,11 @@
+INSTALL(EXPORT torch-exports
+  DESTINATION "${Torch_INSTALL_CMAKE_SUBDIR}"
+  FILE "TorchExports.cmake")
+
+CONFIGURE_FILE("cmake/TorchConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/TorchConfig.cmake" @ONLY)
+INSTALL(
+  FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/TorchConfig.cmake"
+  "cmake/TorchPathsInit.cmake"  
+  "cmake/TorchPackage.cmake"  
+  DESTINATION "${Torch_INSTALL_CMAKE_SUBDIR}")
