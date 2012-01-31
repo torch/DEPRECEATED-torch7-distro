@@ -97,6 +97,11 @@ end
 -- this new print is much more verbose, automatically recursing through
 -- lua tables, and objects.
 function print(obj,...)
+   if obj == nil then
+      _G.io.write('\n')
+      _G.io.flush()
+      return
+   end
    local m = getmaxlen(obj)
    if _G.type(obj) == 'table' then
       local mt = _G.getmetatable(obj)

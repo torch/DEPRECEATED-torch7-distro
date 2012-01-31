@@ -21,7 +21,7 @@ function SpatialLPPooling:__init(nInputPlane, pnorm, kW, kH, dW, dH)
    end
    self:add(nn.SpatialConvolutionMap(nn.tables.oneToOne(nInputPlane), kW, kH, dW, dH))
    if pnorm == 2 then
-      self:add(nn.Sqrt())
+      self:add(nn.Sqrt(0.01))
    else
       self:add(nn.Power(1/pnorm))
    end
@@ -40,4 +40,8 @@ end
 function SpatialLPPooling:accUpdateGradParameters()
 end
 
+function SpatialLPPooling:zeroGradParameters()
+end
 
+function SpatialLPPooling:updateParameters()
+end
