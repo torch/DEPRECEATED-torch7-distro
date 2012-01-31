@@ -1,7 +1,0 @@
-rocks_servers = {
-   [[http://luarocks.org/repositories/rocks]]
-}
-rocks_trees = {
-   home..[[/.@LuaRocks_NAME@]],
-   [[@LuaRocks_INSTALL_PREFIX@]]
-}
