@@ -12,21 +12,14 @@ require 'torch'
 
 -- torch cmake config
 cmake_conf = {
-   CMAKE_PROJECT_NAME = 'Torch',
-   CMAKE_INSTALL_PREFIX = paths.install_prefix,
-   INSTALL_PREFIX = paths.install_lua_path,
-   CINSTALL_PREFIX = paths.install_lua_cpath,
-   Torch_INSTALL_LUA_PATH_SUBDIR = paths.install_lua_path,
-   Torch_INSTALL_LUA_CPATH_SUBDIR = paths.install_lua_cpath,
-   LUA_INCLUDE_DIR = paths.install_include,
-   LUA_INCLUDE_DIR = paths.concat(paths.install_include,'TH')
+   CMAKE_INSTALL_PREFIX = paths.install_prefix
 }
 
 -- some commands
 mkdir = 'mkdir -p '
 rm = 'rm -rf '
 cd = 'cd '
-cmake = 'cmake .. '
+cmake = 'CMAKE_PREFIX_PATH=' .. paths.install_prefix .. ' cmake .. '
 for var,val in pairs(cmake_conf) do
    cmake = cmake .. '-D' .. var .. '=' .. val .. ' '
 end
