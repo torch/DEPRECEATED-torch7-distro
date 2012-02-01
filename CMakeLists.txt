@@ -29,4 +29,8 @@ INCLUDE(TorchWrap)
 ADD_SUBDIRECTORY(pkg)
 ADD_SUBDIRECTORY(extra)
 
+# External packages support
 INCLUDE(TorchExports)
+
+# Packaging support
+INCLUDE(TorchCPack)
