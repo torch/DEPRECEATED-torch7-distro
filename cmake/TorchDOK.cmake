@@ -103,7 +103,7 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
     # this target is always built
     # so the index is always up-to-date (even if the installed index changed)
     ADD_CUSTOM_TARGET(${dstdir}-dok-index
-      ${Torch_SOURCE_LUA} "${Torch_SOURCE_CMAKE}/dok/dokindex.lua" "${Torch_SOURCE_PKG}/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${CMAKE_BINARY_DIR}/dokindex.lua" "${Torch_INSTALL_SHARE}/dokindex.lua" "${CMAKE_BINARY_DIR}/dok/index.txt" "${CMAKE_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
+      ${Torch_SOURCE_LUA} "${Torch_SOURCE_CMAKE}/dok/dokindex.lua" "${Torch_SOURCE_PKG}/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${CMAKE_BINARY_DIR}/dokindex.lua" "${Torch_INSTALL_SHARE}/torch/dokindex.lua" "${CMAKE_BINARY_DIR}/dok/index.txt" "${CMAKE_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
       DEPENDS ${Torch_SOURCE_LUA}
       "${Torch_SOURCE_CMAKE}/dok/dokindex.lua"
       "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok"
@@ -124,4 +124,4 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
 ENDMACRO(ADD_TORCH_DOK)
 
 INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_INSTALL_PREFIX}/bin/lua -ltorch -ldok -e \"dok.installsearch()\")")
-INSTALL(FILES "${CMAKE_BINARY_DIR}/dokindex.lua" DESTINATION "${Torch_INSTALL_SHARE_SUBDIR}")
+INSTALL(FILES "${CMAKE_BINARY_DIR}/dokindex.lua" DESTINATION "${Torch_INSTALL_SHARE_SUBDIR}/torch")

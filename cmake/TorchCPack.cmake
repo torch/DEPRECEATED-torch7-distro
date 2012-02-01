@@ -5,7 +5,7 @@ SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Torch7 machine-learning platform.
  efficient implementation, thanks to an easy and fast scripting language
  (Lua) and a underlying C implementation.")
 
-SET(CPACK_PACKAGE_NAME "Torch7")
+SET(CPACK_PACKAGE_NAME "torch7")
 SET(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYRIGHT.txt")
 SET(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.txt")
 SET(CPACK_PACKAGE_VERSION_MAJOR 0)
@@ -23,6 +23,7 @@ INSTALL(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION "${Torch_INSTA
 
 # Debian related stuff
 SET(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6, libstdc++6, libgcc1, libreadline5, libncurses5, libqtgui4 (>= 4.4.0), atlas3-base")
+SET(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
 
 # MacOS X Bundle
 SET(CPACK_BUNDLE_PLIST "${CMAKE_BINARY_DIR}/exe/qtlua/qlua/Info.plist")
