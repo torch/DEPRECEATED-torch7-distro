@@ -18,6 +18,7 @@ SET(CMAKE_MODULE_PATH "@Torch_INSTALL_CMAKE@" "${CMAKE_MODULE_PATH}")
 # Init all paths with this
 INCLUDE(TorchPathsInit)
 INCLUDE(TorchPackage)
+INCLUDE(TorchWrap)
 
 # Define Torch basic targets
 INCLUDE(TorchExports)
