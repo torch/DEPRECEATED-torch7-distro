@@ -65,8 +65,8 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
     # such that dokuwiki understands it.
     IF(_ext_ STREQUAL ".dok")
       ADD_CUSTOM_COMMAND(OUTPUT "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
-        COMMAND  ${LUA_EXECUTABLE} ARGS "${Torch_SOURCE_DIR}/cmake/dok/dokparse.lua" "${Torch_SOURCE_DIR}/pkg/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${title}" "${Torch_BINARY_DIR}/html" "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
-        DEPENDS ${LUA_EXECUTABLE}
+        COMMAND  ${Torch_SOURCE_LUA} ARGS "${Torch_SOURCE_DIR}/cmake/dok/dokparse.lua" "${Torch_SOURCE_DIR}/pkg/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${title}" "${Torch_BINARY_DIR}/html" "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
+        DEPENDS ${Torch_SOURCE_LUA}
         "${Torch_SOURCE_DIR}/pkg/dok/init.lua"
         "${Torch_SOURCE_DIR}/cmake/dok/dokparse.lua"
         "${dokfile}"
@@ -100,8 +100,8 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
   # Build the dok index if the package contains an index.dok file
   IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok")    
     ADD_CUSTOM_TARGET(${dstdir}-dok-index
-      ${LUA_EXECUTABLE} "${Torch_SOURCE_DIR}/cmake/dok/dokindex.lua" "${Torch_SOURCE_DIR}/pkg/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${Torch_BINARY_DIR}/dokindex.lua" "${Torch_BINARY_DIR}/dok/index.txt" "${Torch_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
-      DEPENDS ${LUA_EXECUTABLE}
+      ${Torch_SOURCE_LUA} "${Torch_SOURCE_DIR}/cmake/dok/dokindex.lua" "${Torch_SOURCE_DIR}/pkg/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${Torch_BINARY_DIR}/dokindex.lua" "${Torch_BINARY_DIR}/dok/index.txt" "${Torch_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
+      DEPENDS ${Torch_SOURCE_LUA}
       "${Torch_SOURCE_DIR}/cmake/dok/dokindex.lua"
       "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok"
       "${Torch_SOURCE_DIR}/pkg/dok/init.lua")
