@@ -1,7 +1,3 @@
-# We include all Torch libraries
-INCLUDE_DIRECTORIES("${Torch_SOURCE_DIR}/lib/TH")
-INCLUDE_DIRECTORIES("${Torch_SOURCE_DIR}/lib/luaT")
-
 # We compile all existing packages
 FILE(GLOB _all_files *)
 FOREACH(_file ${_all_files})

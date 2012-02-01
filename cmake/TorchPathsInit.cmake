@@ -52,3 +52,13 @@ IF (WIN32)
   SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
   SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 ENDIF (WIN32)
+
+# Useful if you need to access sources and you do
+# not know if you are in the torch7 build or external package
+IF(${CMAKE_PROJECT_NAME} STREQUAL "Torch")
+  SET(Torch_SOURCE_PKG "${CMAKE_SOURCE_DIR}/pkg")
+  SET(Torch_SOURCE_INCLUDES "${CMAKE_SOURCE_DIR}/lib/luaT" "${CMAKE_SOURCE_DIR}/lib/TH")
+ELSE()
+  SET(Torch_SOURCE_PKG "${Torch_INSTALL_LUA_PATH}")
+  SET(Torch_SOURCE_INCLUDES "${Torch_INSTALL_INCLUDE}")  
+ENDIF()

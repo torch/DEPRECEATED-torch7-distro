@@ -28,8 +28,10 @@ ADD_SUBDIRECTORY(exe)
 # Torch libraries
 ADD_SUBDIRECTORY(lib)
 
-# Torch packages
+# Find our own Lua
 FIND_PACKAGE(Lua REQUIRED)
+SET(Torch_SOURCE_INCLUDES "${LUA_INCLUDE_DIR}" "${Torch_SOURCE_INCLUDES}")
+
 INCLUDE(TorchPackage)
 INCLUDE(TorchWrap)
 
