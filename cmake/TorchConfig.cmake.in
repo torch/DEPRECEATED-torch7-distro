@@ -15,15 +15,12 @@ SET(Torch_INSTALL_LUA_CPATH_SUBDIR "@Torch_INSTALL_LUA_CPATH_SUBDIR@")
 
 SET(CMAKE_MODULE_PATH "@Torch_INSTALL_CMAKE@" "${CMAKE_MODULE_PATH}")
 
-# Init all paths with this
 INCLUDE(TorchPathsInit)
 INCLUDE(TorchPackage)
 INCLUDE(TorchWrap)
+INCLUDE(TorchDOK)
 
 # Define Torch basic targets
 INCLUDE(TorchExports)
 
-# Includes
-SET(Torch_INCLUDES "${Torch_INSTALL_INCLUDE}" "${Torch_INSTALL_INCLUDE}/TH")
-
-MESSAGE("Found Torch7 in ${Torch_INSTALL_PREFIX}")
+MESSAGE(STATUS "Found Torch7 in ${Torch_INSTALL_PREFIX}")

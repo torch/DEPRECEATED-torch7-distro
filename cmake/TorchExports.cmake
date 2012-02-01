@@ -6,7 +6,13 @@ CONFIGURE_FILE("cmake/TorchConfig.cmake.in" "${CMAKE_CURRENT_BINARY_DIR}/cmake-e
 INSTALL(
   FILES
   "${CMAKE_CURRENT_BINARY_DIR}/cmake-exports/TorchConfig.cmake"
-  "cmake/TorchPathsInit.cmake"  
-  "cmake/TorchPackage.cmake"  
-  "cmake/TorchWrap.cmake"  
+  "cmake/TorchPathsInit.cmake"
+  "cmake/TorchPackage.cmake"
+  "cmake/TorchWrap.cmake"
+  "cmake/TorchDOK.cmake"
+  DESTINATION "${Torch_INSTALL_CMAKE_SUBDIR}")
+
+INSTALL(
+  DIRECTORY
+  "cmake/dok"
   DESTINATION "${Torch_INSTALL_CMAKE_SUBDIR}")

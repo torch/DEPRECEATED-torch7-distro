@@ -6,12 +6,13 @@
 local dokutils = arg[1]
 local doktemplate = arg[2]
 local dokcurrentindex = arg[3]
-local dokindex = arg[4]
-local htmlindex = arg[5]
-local package = arg[6]
-local section = arg[7]
-local title = arg[8]
-local rank = arg[9]
+local dokinstalledindex = arg[4]
+local dokindex = arg[5]
+local htmlindex = arg[6]
+local package = arg[7]
+local section = arg[8]
+local title = arg[9]
+local rank = arg[10]
 
 dofile(dokutils)
 
@@ -29,6 +30,13 @@ if f then
    f:close()
 end
 
+-- merge with installed sections, if any
+local f = io.open(dokinstalledindex)
+if f then
+   dofile(dokinstalledindex)
+   f:close()
+end
+
 -- add new (given) section
 sections[section] = sections[section] or {rank=ranksec, packages={}}
 sections[section].packages[package] = {title=title, rank=rankpkg}
@@ -37,7 +45,7 @@ sections[section].rank = math.min(sections[section].rank, ranksec)
 -- write all the stuff on disk so we can reload it easily
 local f = io.open(dokcurrentindex, 'w')
 for secname, section in pairs(sections) do
-   f:write(string.format('sections["%s"] = {rank=%d, packages={}}\n', secname, section.rank))
+   f:write(string.format('sections["%s"] = sections["%s"] or {rank=%d, packages={}}\n', secname, secname, section.rank))
    for pkgname, package in pairs(section.packages) do
       f:write(string.format('sections["%s"].packages["%s"] = {title="%s", rank=%d}\n', secname, pkgname, package.title, package.rank))
    end

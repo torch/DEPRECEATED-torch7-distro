@@ -1,18 +1,18 @@
 # Workaround: CMake sux if we do not create the directories
 # This is completely incoherent compared to INSTALL(FILES ...)
-FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/dok")
-FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/dokmedia")
-FILE(MAKE_DIRECTORY "${Torch_BINARY_DIR}/html")
+FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/dok")
+FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/dokmedia")
+FILE(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/html")
 
-INSTALL(DIRECTORY "${Torch_BINARY_DIR}/dok/" DESTINATION "${Torch_INSTALL_DOK_SUBDIR}")
-INSTALL(DIRECTORY "${Torch_BINARY_DIR}/dokmedia/" DESTINATION "${Torch_INSTALL_DOKMEDIA_SUBDIR}")
-INSTALL(DIRECTORY "${Torch_BINARY_DIR}/html/" DESTINATION "${Torch_INSTALL_HTML_SUBDIR}")
+INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/dok/" DESTINATION "${Torch_INSTALL_DOK_SUBDIR}")
+INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/dokmedia/" DESTINATION "${Torch_INSTALL_DOKMEDIA_SUBDIR}")
+INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/html/" DESTINATION "${Torch_INSTALL_HTML_SUBDIR}")
 
 # Files for HTML creation
-SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_DIR}/cmake/dok/doktemplate.html"
+SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_CMAKE}/dok/doktemplate.html"
   CACHE FILEPATH "List of files needed for HTML doc creation")
 
-SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_DIR}/cmake/dok/doctorch.css;${Torch_SOURCE_DIR}/cmake/dok/torchlogo.png;${Torch_SOURCE_DIR}/cmake/dok/jquery.js;${Torch_SOURCE_DIR}/cmake/dok/shCore.js;${Torch_SOURCE_DIR}/cmake/dok/shBrushLua.js;${Torch_SOURCE_DIR}/cmake/dok/shCore.css;${Torch_SOURCE_DIR}/cmake/dok/jse_form.js"
+SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_CMAKE}/dok/doctorch.css;${Torch_SOURCE_CMAKE}/dok/torchlogo.png;${Torch_SOURCE_CMAKE}/dok/jquery.js;${Torch_SOURCE_CMAKE}/dok/shCore.js;${Torch_SOURCE_CMAKE}/dok/shBrushLua.js;${Torch_SOURCE_CMAKE}/dok/shCore.css;${Torch_SOURCE_CMAKE}/dok/jse_form.js"
   CACHE STRING "HTML template needed for HTML doc creation")
 
 MARK_AS_ADVANCED(TORCH_DOK_HTML_FILES TORCH_DOK_HTML_TEMPLATE)
@@ -22,7 +22,7 @@ ADD_CUSTOM_TARGET(documentation-dok
   COMMENT "Built documentation")
 
 # copy extra files needed for HTML doc (main index)
-SET(htmldstdir "${Torch_BINARY_DIR}/html")
+SET(htmldstdir "${CMAKE_BINARY_DIR}/html")
 SET(generatedfiles)
 
 FOREACH(extrafile ${TORCH_DOK_HTML_FILES}) 
@@ -43,9 +43,9 @@ SET(all-dok-index "" CACHE INTERNAL "dokindex previous dependencies" FORCE)
 
 MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
 
-  SET(dokdstdir "${Torch_BINARY_DIR}/dok/${dstdir}")
-  SET(dokmediadstdir "${Torch_BINARY_DIR}/dokmedia/${dstdir}")
-  SET(htmldstdir "${Torch_BINARY_DIR}/html/${dstdir}")
+  SET(dokdstdir "${CMAKE_BINARY_DIR}/dok/${dstdir}")
+  SET(dokmediadstdir "${CMAKE_BINARY_DIR}/dokmedia/${dstdir}")
+  SET(htmldstdir "${CMAKE_BINARY_DIR}/html/${dstdir}")
 
   FILE(MAKE_DIRECTORY "${dokdstdir}")
   FILE(MAKE_DIRECTORY "${dokmediadstdir}")
@@ -65,10 +65,10 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
     # such that dokuwiki understands it.
     IF(_ext_ STREQUAL ".dok")
       ADD_CUSTOM_COMMAND(OUTPUT "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
-        COMMAND  ${Torch_SOURCE_LUA} ARGS "${Torch_SOURCE_DIR}/cmake/dok/dokparse.lua" "${Torch_SOURCE_DIR}/pkg/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${title}" "${Torch_BINARY_DIR}/html" "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
+        COMMAND  ${Torch_SOURCE_LUA} ARGS "${Torch_SOURCE_CMAKE}/dok/dokparse.lua" "${Torch_SOURCE_PKG}/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${title}" "${CMAKE_BINARY_DIR}/html" "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
         DEPENDS ${Torch_SOURCE_LUA}
-        "${Torch_SOURCE_DIR}/pkg/dok/init.lua"
-        "${Torch_SOURCE_DIR}/cmake/dok/dokparse.lua"
+        "${Torch_SOURCE_PKG}/dok/init.lua"
+        "${Torch_SOURCE_CMAKE}/dok/dokparse.lua"
         "${dokfile}"
         "${TORCH_DOK_HTML_TEMPLATE}")
       
@@ -99,12 +99,15 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
 
   # Build the dok index if the package contains an index.dok file
   IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok")    
+
+    # this target is always built
+    # so the index is always up-to-date (even if the installed index changed)
     ADD_CUSTOM_TARGET(${dstdir}-dok-index
-      ${Torch_SOURCE_LUA} "${Torch_SOURCE_DIR}/cmake/dok/dokindex.lua" "${Torch_SOURCE_DIR}/pkg/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${Torch_BINARY_DIR}/dokindex.lua" "${Torch_BINARY_DIR}/dok/index.txt" "${Torch_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
+      ${Torch_SOURCE_LUA} "${Torch_SOURCE_CMAKE}/dok/dokindex.lua" "${Torch_SOURCE_PKG}/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${CMAKE_BINARY_DIR}/dokindex.lua" "${Torch_INSTALL_SHARE}/dokindex.lua" "${CMAKE_BINARY_DIR}/dok/index.txt" "${CMAKE_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
       DEPENDS ${Torch_SOURCE_LUA}
-      "${Torch_SOURCE_DIR}/cmake/dok/dokindex.lua"
+      "${Torch_SOURCE_CMAKE}/dok/dokindex.lua"
       "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok"
-      "${Torch_SOURCE_DIR}/pkg/dok/init.lua")
+      "${Torch_SOURCE_PKG}/dok/init.lua")
     
     # the main dok depends on this
     ADD_DEPENDENCIES(documentation-dok ${dstdir}-dok-index)
@@ -121,3 +124,4 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
 ENDMACRO(ADD_TORCH_DOK)
 
 INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_INSTALL_PREFIX}/bin/lua -ltorch -ldok -e \"dok.installsearch()\")")
+INSTALL(FILES "${CMAKE_BINARY_DIR}/dokindex.lua" DESTINATION "${Torch_INSTALL_SHARE_SUBDIR}")
