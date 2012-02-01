@@ -117,11 +117,16 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
       ADD_DEPENDENCIES(${dstdir}-dok-index ${target})
     ENDFOREACH(target ${all-dok-index})
 
-    SET(all-dok-index "${dstdir}-dok-index" "${all-dok-index}" CACHE INTERNAL "dokindex previous dependencies" FORCE)
+    SET(all-dok-index "${dstdir}-dok-index" ${all-dok-index} CACHE INTERNAL "dokindex previous dependencies" FORCE)
+
+    # install (only once) the dokindex.lua for future reference
+    LIST(LENGTH all-dok-index all-dok-index-length)
+    IF(all-dok-index-length EQUAL 1)
+      INSTALL(FILES "${CMAKE_BINARY_DIR}/dokindex.lua" DESTINATION "${Torch_INSTALL_SHARE_SUBDIR}/torch")
+    ENDIF(all-dok-index-length EQUAL 1)
 
   ENDIF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok")
 
 ENDMACRO(ADD_TORCH_DOK)
 
 INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_INSTALL_PREFIX}/bin/lua -ltorch -ldok -e \"dok.installsearch()\")")
-INSTALL(FILES "${CMAKE_BINARY_DIR}/dokindex.lua" DESTINATION "${Torch_INSTALL_SHARE_SUBDIR}/torch")
