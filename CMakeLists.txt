@@ -13,6 +13,8 @@ INCLUDE(TorchPathsInit)
 INCLUDE(TorchCFlags)
 INCLUDE(TorchDOK)
 INCLUDE(TorchLua2exe)
+INCLUDE(TorchPackage)
+INCLUDE(TorchWrap)
 
 # Torch executables
 ADD_SUBDIRECTORY(exe)
@@ -20,14 +22,10 @@ ADD_SUBDIRECTORY(exe)
 # Torch libraries
 ADD_SUBDIRECTORY(lib)
 
-# Find our own Lua
-FIND_PACKAGE(Lua REQUIRED)
-SET(Torch_SOURCE_INCLUDES "${LUA_INCLUDE_DIR}" "${Torch_SOURCE_INCLUDES}")
-
-INCLUDE(TorchPackage)
-INCLUDE(TorchWrap)
-
+# Torch base packages
 ADD_SUBDIRECTORY(pkg)
+
+# Torch extra packages
 ADD_SUBDIRECTORY(extra)
 
 # External packages support

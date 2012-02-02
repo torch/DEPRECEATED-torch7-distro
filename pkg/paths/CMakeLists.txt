@@ -16,9 +16,7 @@ IF (UNIX OR NOT WIN32)
 ENDIF (UNIX OR NOT WIN32)
 
 
-INCLUDE_DIRECTORIES(
-  "${CMAKE_CURRENT_SOURCE_DIR}"
-  "${CMAKE_CURRENT_BINARY_DIR}")
+INCLUDE_DIRECTORIES("${CMAKE_CURRENT_BINARY_DIR}")
 
 CONFIGURE_FILE("paths.h.in" "${CMAKE_CURRENT_BINARY_DIR}/paths.h")
 CONFIGURE_FILE("init.lua.in" "${CMAKE_CURRENT_BINARY_DIR}/init.lua")
@@ -33,4 +31,4 @@ SET(luasrc
 ADD_TORCH_PACKAGE(paths "${src}" "${luasrc}")
 ADD_TORCH_DOK(dok paths "Fundamentals" "Paths and files utilities" 1.)
 
-TARGET_LINK_LIBRARIES(paths ${LUA_LIBRARIES})
+TARGET_LINK_LIBRARIES(paths liblua-shared)
