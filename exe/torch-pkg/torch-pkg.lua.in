@@ -29,29 +29,24 @@ info = function(msg) print('--> ' .. msg) end
 infoarg = function(msg) print('    ' .. msg) end
 
 -- some binaries
-wget = '@WGET_EXECUTABLE@' if wget == '' then wget = nil end
-curl = '@CURL_EXECUTABLE@' if curl == '' then curl = nil end
-git = '@GIT_EXECUTABLE@'   if git  == '' then git  = nil end
+wget = '@WGET_EXECUTABLE@ ' if wget == '' then wget = nil end
+curl = '@CURL_EXECUTABLE@ ' if curl == '' then curl = nil end
+git = '@GIT_EXECUTABLE@ '   if git  == '' then git  = nil end
 if not wget and not curl or not git then
    error('torch-pkg cannot run without git and one of wget | curl')
    os.exit()
 end
 
 -- config
-configfile = paths.concat(os.getenv('HOME'), '.torchpkg', 'config')
+configfile = paths.concat(os.getenv('HOME'), '.torch', 'config.th7')
 if not paths.filep(configfile) then
    defurls = {
-      'https://github.com/clementfarabet/lua---',
-      'https://github.com/clementfarabet/',
-      'https://github.com/andresy/',
-      'https://github.com/koraykv/',
-      'https://github.com/marcoscoffier/lua---',
-      'https://github.com/marcoscoffier/'
+      'http://data.neuflow.org/lua/packages.th7'
    }
    os.execute(mkdir .. paths.dirname(configfile))
-   os.execute('echo "config = {urls={}}" > ' .. configfile)
+   os.execute('echo "pkgconfig = {urls={}}" > ' .. configfile)
    for _,url in ipairs(defurls) do
-      os.execute('echo "table.insert(config.urls, \'' .. url .. '\')" >> ' .. configfile)
+      os.execute('echo "table.insert(pkgconfig.urls, \'' .. url .. '\')" >> ' .. configfile)
    end
 end
 dofile(configfile)
@@ -142,6 +137,29 @@ else
    end
 end
 
+-- a function to retrieve package lists
+function getpkglist()
+   info('retrieving package lists from servers')
+   for _,url in ipairs(pkgconfig.urls) do
+      infoarg('url: ' .. url)
+      local file = paths.basename(url)
+      if wget then
+         os.execute(rm .. paths.concat(tmp,file))
+         os.execute(cd .. tmp .. '; ' .. wget .. ' -q ' .. url)
+      else
+         os.execute(rm .. paths.concat(tmp,file))
+         os.execute(curl .. url .. ' -s -o ' .. paths.concat(tmp,file))
+      end
+      if paths.filep(paths.concat(tmp,file)) then
+         dofile(paths.concat(tmp,file))
+      else
+         error('package repository at ' .. url .. ' could not be retrieved')
+         os.exit()
+      end
+   end
+   return pkg
+end
+
 -- now execute command
 if command == 'help' then
 
@@ -167,23 +185,23 @@ elseif command == 'install' then
    exec(mkdir .. tmp)
    exec(rm .. paths.concat(tmp,package))
 
-   for _,url in ipairs(config.urls) do
-      info('trying to fetch package from server: ' .. url)
-      exec(git .. ' clone ' .. url .. package .. ' ' .. paths.concat(tmp,package))
-      if paths.dirp(paths.concat(tmp,package)) then
-         found = paths.concat(tmp,package)
-         info('just found it!')
-         break
-      end
-   end
+   packages = getpkglist()
 
-   if not found then
+   pkg = packages[package]
+   if not pkg then
       error('could not find package ' .. package .. ' in any of the registered repos')
       os.exit()
    end
 
+   info('downloading package ' .. package .. ' from: ' .. pkg.git)
+   exec(git .. ' clone ' .. pkg.git .. ' ' .. paths.concat(tmp,package))
+
+   if #pkg.dependencies > 0 then
+      info('retrieving dependencies:')
+   end
+
    info('building & deploying')
-   exec(cd .. found .. '; ' .. make .. '; ' .. install)
+   exec(cd .. paths.concat(tmp,package) .. '; ' .. make .. '; ' .. install)
 
 elseif command == 'download' then
 
@@ -201,25 +219,19 @@ elseif command == 'download' then
       os.exit()
    end
 
-   if paths.filep(package) or paths.dirp(package) then
-      error('file ' .. package .. ' already exists locally, aborting')
-      os.exit()
-   end
+   exec(mkdir .. tmp)
+   exec(rm .. paths.concat(tmp,package))
 
-   for _,url in ipairs(config.urls) do
-      info('trying to fetch package from server: ' .. url)
-      exec(git .. ' clone ' .. url .. package .. ' ' .. package)
-      if paths.dirp(package) then
-         found = package
-         info('just found it, and saved in ' .. package)
-         break
-      end
-   end
+   packages = getpkglist()
 
-   if not found then
+   pkg = packages[package]
+   if not pkg then
       error('could not find package ' .. package .. ' in any of the registered repos')
       os.exit()
    end
+
+   info('downloading package ' .. package .. ' from: ' .. pkg.git)
+   exec(git .. ' clone ' .. pkg.git .. ' ' .. package)
 
 elseif command == 'build' then
 
@@ -251,11 +263,39 @@ elseif command == 'show' then
 
 elseif command == 'list' then
 
-   error(command .. ' is not implemented yet')
+   packages = getpkglist()
+
+   print()
+   for name,pkg in pairs(packages) do
+      info(name)
+      infoarg(pkg.description)
+      infoarg('hosted at: ' .. pkg.git)
+      print()
+   end
 
 elseif command == 'search' then
 
-   error(command .. ' is not implemented yet')
+   if not arguments[1] then
+      print(help)
+      print()
+      error('please provide a package name or a path to a tar/tgz')
+      os.exit()
+   end
+
+   package = arguments[1]
+   
+   packages = getpkglist()
+
+   if not packages[package] then
+      error('package could not be found in any of the registered repos')
+      os.exit()
+   end
+
+   print()
+   info(package)
+   infoarg(packages[package].description)
+   infoarg('hosted at: ' .. packages[package].git)
+   print()
 
 elseif command == 'add' then
 

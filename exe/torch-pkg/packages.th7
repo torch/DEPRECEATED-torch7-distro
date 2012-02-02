@@ -1,0 +1,23 @@
+
+-- this file is a simple list of repositories that can
+-- be installed with torck-pkg
+
+pkg = pkg or {}
+
+pkg.image = {
+	git = 'https://github.com/clementfarabet/lua---image',
+	description = 'An image-processing toolbox for Torch7',
+	dependencies = {'sys', 'xlua'}
+}
+
+pkg.sys = {
+	git = 'https://github.com/clementfarabet/lua---sys',
+	description = 'A system toolbox for Torch7',
+	dependencies = {}
+}
+
+pkg.xlua = {
+	git = 'https://github.com/clementfarabet/lua---xlua',
+	description = 'A toolbox of conveniency functions (mostly for argument parsing)',
+	dependencies = {'sys'}
+}
