@@ -1,8 +1,3 @@
-#!@Torch_INSTALL_BIN@/torch-lua
-
--- PREFIX
-PREFIX = '@Torch_INSTALL_BIN@'
-
 -- use paths lib
 require 'paths'
 
@@ -29,7 +24,7 @@ Qt options:
 lua = 'torch-qlua'
 
 -- preload torch environment
-env = ' -e "' .. "require 'torch'; torch.include('torch','torch.lua'); " .. '" '
+env = ' -e "' .. "require 'torch-env'" .. '" '
 
 -- by default, be interactive
 interactive = true
@@ -49,7 +44,7 @@ for i,a in ipairs(arg) do
    -- version?
    if a == '-v' or a == '-version' then
       print('Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU')
-      os.execute(paths.concat(PREFIX,lua) .. ' -v')
+      os.execute(paths.concat(paths.install_bin,lua) .. ' -v')
       os.exit()
    end
    -- bare env?
@@ -78,7 +73,7 @@ end
 args = table.concat(arg, ' ')
 
 -- test qlua existence
-if lua == 'torch-qlua' and not paths.filep(paths.concat(PREFIX,lua)) then
+if lua == 'torch-qlua' and not paths.filep(paths.concat(paths.install_bin,lua)) then
    print('Install Qt4 and rebuild Torch7 for graphics capability (graphics disabled)')
    lua = 'torch-lua'
 elseif os.getenv('DISPLAY') == '' or os.getenv('DISPLAY') == nil then
@@ -90,4 +85,4 @@ end
 
 -- finally execute main thread, with proper options
 print('Type help() for more info')
-os.execute(paths.concat(PREFIX,lua) .. env .. args)
+os.execute(paths.concat(paths.install_bin,lua) .. env .. args)

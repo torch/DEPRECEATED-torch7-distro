@@ -47,3 +47,6 @@ ENDIF(WITH_QTLUA)
 
 # Our package manager
 ADD_SUBDIRECTORY(torch-pkg)
+
+# Our torch executable
+ADD_SUBDIRECTORY(torch-exe)
