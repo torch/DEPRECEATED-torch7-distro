@@ -10,9 +10,11 @@ INSTALL(
   "cmake/TorchPackage.cmake"
   "cmake/TorchWrap.cmake"
   "cmake/TorchDOK.cmake"
+  "cmake/TorchLua2exe.cmake"
   DESTINATION "${Torch_INSTALL_CMAKE_SUBDIR}")
 
 INSTALL(
   DIRECTORY
   "cmake/dok"
+  "cmake/lua2exe"
   DESTINATION "${Torch_INSTALL_CMAKE_SUBDIR}")

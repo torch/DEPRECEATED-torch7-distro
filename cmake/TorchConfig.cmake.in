@@ -29,6 +29,7 @@ INCLUDE(TorchPathsInit)
 INCLUDE(TorchPackage)
 INCLUDE(TorchWrap)
 INCLUDE(TorchDOK)
+INCLUDE(TorchLua2exe)
 
 # Define Torch basic targets
 INCLUDE(TorchExports)
