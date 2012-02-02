@@ -46,10 +46,12 @@ end
 configfile = paths.concat(os.getenv('HOME'), '.torchpkg', 'config')
 if not paths.filep(configfile) then
    defurls = {
-      'https://github.com/andresy/',
-      'https://github.com/clementfarabet/',
       'https://github.com/clementfarabet/lua---',
-      'https://github.com/koraykv/'
+      'https://github.com/clementfarabet/',
+      'https://github.com/andresy/',
+      'https://github.com/koraykv/',
+      'https://github.com/marcoscoffier/lua---',
+      'https://github.com/marcoscoffier/'
    }
    os.execute(mkdir .. paths.dirname(configfile))
    os.execute('echo "config = {urls={}}" > ' .. configfile)
