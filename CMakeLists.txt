@@ -12,6 +12,7 @@ INCLUDE(TorchPaths)
 INCLUDE(TorchPathsInit)
 INCLUDE(TorchCFlags)
 INCLUDE(TorchDOK)
+INCLUDE(TorchLua2exe)
 
 # Torch executables
 ADD_SUBDIRECTORY(exe)
