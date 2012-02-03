@@ -725,34 +725,4 @@ real THTensor_(get4d)(THTensor *tensor, long x0, long x1, long x2, long x3)
   return THStorage_(get)(tensor->storage, tensor->storageOffset+x0*tensor->stride[0]+x1*tensor->stride[1]+x2*tensor->stride[2]+x3*tensor->stride[3]);
 }
 
-void THTensor_(setValByIndex)(THTensor *tensor, THByteTensor *index, real value)
-{
-  TH_TENSOR_APPLY2(real, tensor, unsigned char, index,
-		   if (*index_data > 1) THError("Index tensor can have 0 and 1");
-		   else if (*index_data == 1) *tensor_data = value;);
-}
-
-void THTensor_(setTensorByIndex)(THTensor *tensor, THByteTensor *index, THTensor* src )
-{
-  THTensor *srct = THTensor_(newContiguous)(src);
-  real *src_data = srct->storage->data;
-  long cntr = 0;
-  long nelem = THTensor_(nElement)(srct);
-  TH_TENSOR_APPLY2(real, tensor, unsigned char, index,
-		   if (*index_data > 1)
-		   {
-		     THError("setTensorByIndex: Index tensor can have 0 and 1");
-		   }
-		   else if (*index_data == 1)
-		   {
-		     *tensor_data = *src_data;
-		     src_data++;
-		     cntr++;
-		     if (cntr > nelem)
-		       THError("setTensorByIndex : Number of elements of src != index");
-		   });
-  if (cntr != nelem)
-    THError("Number of elements of src != index");
-}
-
 #endif

@@ -347,13 +347,13 @@ end
 function torchtest.logical()
    local x = torch.rand(100,100)*2-1;
    local xx = x:clone()
-   
+
    local xgt = torch.gt(x,1)
    local xlt = torch.lt(x,1)
 
    local xeq = torch.eq(x,1)
    local xne = torch.ne(x,1)
-   
+
    local neqs = xgt+xlt
    local all = neqs + xeq
    mytester:asserteq(neqs:sumall(), xne:sumall(), 'torch.logical')
