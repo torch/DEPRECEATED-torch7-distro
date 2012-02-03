@@ -26,7 +26,7 @@ NODOTABIVER=  51
 # Change the installation path as needed. This automatically adjusts
 # the paths in src/luaconf.h, too. Note: PREFIX must be an absolute path!
 #
-export PREFIX= /Users/ronan/torch7/exe/luajit-2.0/src
+export PREFIX= /usr/local
 ##############################################################################
 
 DPREFIX= $(DESTDIR)$(PREFIX)
@@ -77,7 +77,7 @@ FILE_MAN= luajit.1
 FILE_PC= luajit.pc
 FILES_INC= lua.h lualib.h lauxlib.h luaconf.h lua.hpp luajit.h
 FILES_JITLIB= bc.lua v.lua dump.lua dis_x86.lua dis_x64.lua dis_arm.lua \
-	      dis_ppc.lua bcsave.lua vmdef.lua
+	      dis_ppc.lua dis_mips.lua dis_mipsel.lua bcsave.lua vmdef.lua
 
 ifeq (,$(findstring Windows,$(OS)))
   ifeq (Darwin,$(shell uname -s))

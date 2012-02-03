@@ -590,7 +590,7 @@ lj_folddef.h: $(BUILDVM_T) lj_opt_fold.c
 ##############################################################################
 
 %.o: %.c
-	$(E) "CC xx        $@"$(TARGET_CC) $(TARGET_ACFLAGS)
+	$(E) "CC        $@"
 	$(Q)$(TARGET_DYNCC) $(TARGET_ACFLAGS) -c -o $(@:.o=_dyn.o) $<
 	$(Q)$(TARGET_CC) $(TARGET_ACFLAGS) -c -o $@ $<
 

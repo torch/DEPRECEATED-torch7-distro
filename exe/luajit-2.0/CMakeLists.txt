@@ -61,16 +61,6 @@ IF(READLINE_FOUND)
   SET(LUAJIT_USE_READLINE 1)
 ENDIF(READLINE_FOUND)
 
-if ( LUA_WIN )
-  # Add extra rc files to the windows build
-  if ( MSVC OR MINGW )
-    set ( LUA_DEF src/lua.def )
-    set ( LUA_DLL_RC src/lua_dll.rc )
-    set ( LUA_RC src/lua.rc )
-    set ( LUAC_RC src/luac.rc )
-  endif ()
-endif ()
-
 IF (CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL CMAKE_SHARED_MODULE_SUFFIX)
   SET(LUA_USE_MODULE_AND_LIBRARY 0)
 ELSE (CMAKE_SHARED_LIBRARY_SUFFIX STREQUAL CMAKE_SHARED_MODULE_SUFFIX)
