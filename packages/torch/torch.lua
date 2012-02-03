@@ -9,6 +9,9 @@ _PROMPT2 = '. > '
 -- helper
 local function sizestr(x)
    local strt = {}
+   if _G.torch.typename(x):find('torch.*Storage') then
+      return _G.torch.typename(x):match('torch%.(.+)') .. ' - size: ' .. x:size()
+   end
    if x:nDimension() == 0 then
       table.insert(strt, _G.torch.typename(x):match('torch%.(.+)') .. ' - empty')
    else
