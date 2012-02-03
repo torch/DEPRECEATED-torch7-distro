@@ -63,7 +63,6 @@ Supported Commands:
   download        download a package locally
   build           build a local package
   deploy          deploy a package (build it if necessary)
-  show            show information about a package
   list            list available packages
   search          search for a package
   add             add a server address to local config ($HOME/.torchpkg/config)
@@ -78,6 +77,8 @@ Arguments for add:
 
 Options:
   -v|-verbose     be more verbose
+  -l|-local       local install
+  -n|-nodeps      do not install dependencies (when installing)
   -d|-dry         dry run ]=]
 
 -- no args?
@@ -123,6 +124,14 @@ for i,opt in ipairs(options) do
    end
    if opt == '-d' or opt == '-dry' then
       dry = true
+   end
+   if opt == '-l' or opt == '-local' then
+      localinstall = true
+      error('local install not supported for now')
+      os.exit()
+   end
+   if opt == '-n' or opt == '-nodeps' then
+      nodeps = true
    end
 end
 
@@ -187,21 +196,38 @@ elseif command == 'install' then
 
    packages = getpkglist()
 
-   pkg = packages[package]
-   if not pkg then
-      error('could not find package ' .. package .. ' in any of the registered repos')
-      os.exit()
+   function doit(package)
+      local pkg = packages[package]
+      if not pkg then
+         error('could not find package ' .. package .. ' in any of the registered repos')
+         os.exit()
+      end
+      if pkg.done then
+         info('skipping package: ' .. package .. ', already installed')
+      end
+
+      info('downloading package ' .. package .. ' from: ' .. pkg.git)
+      exec(git .. ' clone ' .. pkg.git .. ' ' .. paths.concat(tmp,package))
+
+      if pkg.commit then
+         exec(cd .. paths.concat(tmp,package) .. '; ' .. git .. ' checkout ' .. pkg.commit)
+      end
+
+      if #pkg.dependencies > 0 and not nodeps then
+         info('processing ' .. package .. '\'s dependencies:')
+         for _,name in ipairs(pkg.dependencies) do
+            doit(name)
+         end
+      end
+
+      info('building & deploying')
+      exec(cd .. paths.concat(tmp,package) .. '; ' .. make .. '; ' .. install)
+
+      info('successfully deployed ' .. package)
+      pkg.done = true
    end
 
-   info('downloading package ' .. package .. ' from: ' .. pkg.git)
-   exec(git .. ' clone ' .. pkg.git .. ' ' .. paths.concat(tmp,package))
-
-   if #pkg.dependencies > 0 then
-      info('retrieving dependencies:')
-   end
-
-   info('building & deploying')
-   exec(cd .. paths.concat(tmp,package) .. '; ' .. make .. '; ' .. install)
+   doit(package)
 
 elseif command == 'download' then
 
@@ -233,6 +259,10 @@ elseif command == 'download' then
    info('downloading package ' .. package .. ' from: ' .. pkg.git)
    exec(git .. ' clone ' .. pkg.git .. ' ' .. package)
 
+   if pkg.commit then
+      exec(cd .. paths.concat(tmp,package) .. '; ' .. git .. ' checkout ' .. pkg.commit)
+   end
+
 elseif command == 'build' then
 
    found = arguments[1] or '.'
@@ -256,10 +286,6 @@ elseif command == 'deploy' then
 
    info('building package in ' .. found)
    exec(cd .. found .. '; ' .. make .. '; ' .. install)
-
-elseif command == 'show' then
-
-   error(command .. ' is not implemented yet')
 
 elseif command == 'list' then
 

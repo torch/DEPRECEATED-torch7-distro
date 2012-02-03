@@ -7,17 +7,34 @@ pkg = pkg or {}
 pkg.image = {
 	git = 'https://github.com/clementfarabet/lua---image',
 	description = 'An image-processing toolbox for Torch7',
-	dependencies = {'sys', 'xlua'}
+	dependencies = {'sys', 'xlua'},
+	commit = 'master'
 }
 
 pkg.sys = {
 	git = 'https://github.com/clementfarabet/lua---sys',
 	description = 'A system toolbox for Torch7',
-	dependencies = {}
+	dependencies = {},
+	commit = 'master'
 }
 
 pkg.xlua = {
 	git = 'https://github.com/clementfarabet/lua---xlua',
 	description = 'A toolbox of conveniency functions (mostly for argument parsing)',
-	dependencies = {'sys'}
+	dependencies = {'sys'},
+	commit = 'master'
+}
+
+pkg.camera = {
+	git = 'https://github.com/clementfarabet/lua---camera',
+	description = 'A camera interface (Mac OSX, Ubuntu and OpenCV)',
+	dependencies = {'image'},
+	commit = 'master'
+}
+
+pkg.ffmpeg = {
+	git = 'https://github.com/clementfarabet/lua---ffmpeg',
+	description = 'A simple video object that relies on ffmpeg',
+	dependencies = {'image'},
+	commit = 'master'
 }
