@@ -107,7 +107,12 @@ function CInterface:register(name)
    self.registry = {}
 end
 
-function CInterface:tostdio()
+function CInterface:cleanhistory()
+   self.txt = {}
+   self.registry = {}
+end
+
+function CInterface:tostring()
    return table.concat(self.txt, '\n')
 end
 

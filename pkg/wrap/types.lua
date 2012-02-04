@@ -34,7 +34,13 @@ wrap.argtypes.Tensor = {
           end,
 
    init = function(arg)
-             return string.format('arg%d = TH%s_new();', arg.i, typename)
+             if type(arg.default) == 'boolean' then
+                return string.format('arg%d = THTensor_(new)();', arg.i)
+             elseif type(arg.default) == 'number' then
+                return string.format('arg%d = %s;', arg.i, arg.args[arg.default]:carg())
+             else
+                error('unknown default tensor type value')
+             end
           end,
    
    carg = function(arg, idx)
@@ -50,10 +56,21 @@ wrap.argtypes.Tensor = {
                 if arg.default and arg.returned then
                    table.insert(txt, string.format('if(arg%d_idx)', arg.i)) -- means it was passed as arg
                    table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
-                   table.insert(txt, string.format('else')) -- means we did a new()
-                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                   table.insert(txt, string.format('else'))
+                   if type(arg.default) == 'boolean' then -- boolean: we did a new()
+                      table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                   else  -- otherwise: point on default tensor --> retain
+                      table.insert(txt, string.format('{'))
+                      table.insert(txt, string.format('THTensor_(retain)(arg%d);', arg.i)) -- so we need a retain
+                      table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_(Tensor_id));', arg.i))
+                      table.insert(txt, string.format('}'))
+                   end
                 elseif arg.default then
-                   error('a tensor cannot be optional if not returned')
+                   -- we would have to deallocate the beast later if we did a new
+                   -- unlikely anyways, so i do not support it for now
+                   if type(arg.default) == 'boolean' then
+                      error('a tensor cannot be optional if not returned')
+                   end
                 elseif arg.returned then
                    table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
                 end
@@ -177,7 +194,13 @@ for _,typename in ipairs({"ByteTensor", "CharTensor", "ShortTensor", "IntTensor"
              end,
       
       init = function(arg)
-                return string.format('arg%d = TH%s_new();', arg.i, typename)
+                if type(arg.default) == 'boolean' then
+                   return string.format('arg%d = TH%s_new();', arg.i, typename)
+                elseif type(arg.default) == 'number' then
+                   return string.format('arg%d = %s;', arg.i, arg.args[arg.default]:carg())
+                else
+                   error('unknown default tensor type value')
+                end
              end,
 
       carg = function(arg, idx)
@@ -193,10 +216,21 @@ for _,typename in ipairs({"ByteTensor", "CharTensor", "ShortTensor", "IntTensor"
                    if arg.default and arg.returned then
                       table.insert(txt, string.format('if(arg%d_idx)', arg.i)) -- means it was passed as arg
                       table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
-                      table.insert(txt, string.format('else')) -- means we did a new()
-                      table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_%s_id);', arg.i, typename))
+                      table.insert(txt, string.format('else'))
+                      if type(arg.default) == 'boolean' then -- boolean: we did a new()
+                         table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_%s_id);', arg.i, typename))
+                      else  -- otherwise: point on default tensor --> retain
+                         table.insert(txt, string.format('{'))
+                         table.insert(txt, string.format('TH%s_retain(arg%d);', typename, arg.i)) -- so we need a retain
+                         table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_%s_id);', arg.i, typename))
+                         table.insert(txt, string.format('}'))
+                      end
                    elseif arg.default then
-                      error('a tensor cannot be optional if not returned')
+                      -- we would have to deallocate the beast later if we did a new
+                      -- unlikely anyways, so i do not support it for now
+                      if type(arg.default) == 'boolean' then
+                         error('a tensor cannot be optional if not returned')
+                      end
                    elseif arg.returned then
                       table.insert(txt, string.format('lua_pushvalue(L, arg%d_idx);', arg.i))
                    end
