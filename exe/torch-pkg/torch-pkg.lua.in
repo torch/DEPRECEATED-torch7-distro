@@ -191,9 +191,6 @@ elseif command == 'install' then
       os.exit()
    end
 
-   exec(mkdir .. tmp)
-   exec(rm .. paths.concat(tmp,package))
-
    packages = getpkglist()
 
    function doit(package)
@@ -205,6 +202,9 @@ elseif command == 'install' then
       if pkg.done then
          info('skipping package: ' .. package .. ', already installed')
       end
+
+      exec(mkdir .. tmp)
+      exec(rm .. paths.concat(tmp,package))
 
       info('downloading package ' .. package .. ' from: ' .. pkg.git)
       exec(git .. ' clone ' .. pkg.git .. ' ' .. paths.concat(tmp,package))

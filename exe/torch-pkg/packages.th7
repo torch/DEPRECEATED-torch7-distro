@@ -38,3 +38,10 @@ pkg.ffmpeg = {
 	dependencies = {'image'},
 	commit = 'master'
 }
+
+pkg.imgraph = {
+	git = 'https://github.com/clementfarabet/lua---imgraph',
+	description = 'A package to construct and manupulate graphs/trees over images',
+	dependencies = {'image','xlua'},
+	commit = 'newpack'
+}
