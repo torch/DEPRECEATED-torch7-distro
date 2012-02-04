@@ -149,6 +149,7 @@ end
 -- a function to retrieve package lists
 function getpkglist()
    info('retrieving package lists from servers')
+   exec(mkdir .. tmp)
    for _,url in ipairs(pkgconfig.urls) do
       infoarg('url: ' .. url)
       local file = paths.basename(url)
@@ -203,7 +204,6 @@ elseif command == 'install' then
          info('skipping package: ' .. package .. ', already installed')
       end
 
-      exec(mkdir .. tmp)
       exec(rm .. paths.concat(tmp,package))
 
       info('downloading package ' .. package .. ' from: ' .. pkg.git)
