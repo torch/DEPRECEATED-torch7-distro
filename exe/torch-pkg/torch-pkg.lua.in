@@ -227,7 +227,9 @@ elseif command == 'install' then
       pkg.done = true
    end
 
-   doit(package)
+   for _,package in ipairs(arguments) do
+      doit(package)
+   end
 
 elseif command == 'download' then
 
