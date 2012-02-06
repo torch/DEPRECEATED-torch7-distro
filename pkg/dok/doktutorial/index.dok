@@ -31,53 +31,29 @@ If you have got this far, hopefully your Torch installation works. A simple
 way to make sure it does is to start Lua from the shell command line, 
 and then try to start Torch:
 <file>
+$ torch
 Try the IDE: torch -ide
 Type help() for more info
 Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU
 Lua 5.1  Copyright (C) 1994-2008 Lua.org, PUC-Rio
-torch> 
-torch> x = torch.Tensor()
-torch> print(x)
+t7> 
+t7> x = torch.Tensor()
+t7> print(x)
 [torch.DoubleTensor with no dimension]
 
 </file>
 
 You might have to specify the exact path of the ''torch'' executable
-if you installed Torch in a non-standard path. The ''torch''
-executable is just a shell wrapper around ''lua'' with some libraries
-being preloaded. It is equivalent to running
-
-<file>
-$lua -ltorch -llab -lgnuplot -ldok
-</file>
-
-The same effect can also be achieved by explicitely loading these libraries.
-
-<file>
-$ lua
-Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
-> require 'torch'
-> require 'lab'
-> require 'gnuplot'
-> require 'dok'
-</file>
+if you installed Torch in a non-standard path.
 
 In this example, we checked Torch was working by creating an empty
 [[..:torch:tensor|Tensor]] and printing it on the screen.  The Tensor
 is the main tool in Torch, and is used to represent vector, matrices
 or higher-dimensional objects (tensors).
 
-''require "torch"'' only installs the basic parts of torch (including
-Tensors).  The list of all the basic Torch objects installed are
-described [[..:torch:index|here]].  However, there are several other
-//external// Torch packages that you might want to use, for example
-the [[..:lab:index|lab]] package.  This package provides Matlab-like
-functions for linear algebra.  We will use some of these functions in
-this tutorial.  To require this package you simply have to type:
-<file> require "lab" </file>
-
-To see the list of all packages distributed with Torch7, click
-[[..:index|here]].
+''torch'' only preloads the basic parts of torch (including
+Tensors). To see the list of all packages distributed with Torch7,
+click [[..:index|here]].
 
 ====== Getting Help ======
 
@@ -89,13 +65,13 @@ calling the ''help()'' function.
 
 <file>
 
-torch> help(lab.rand)
+t7> help(torch.rand)
 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-lab.rand( [res,] m [, n, k, ...])        
- y=lab.rand(n) returns a one-dimensional tensor of size n filled with 
+torch.rand( [res,] m [, n, k, ...])        
+ y=torch.rand(n) returns a one-dimensional tensor of size n filled with 
 random numbers from a uniform distribution on the interval (0,1).
- y=lab.rand(m,n) returns a mxn tensor of random numbers from a uniform 
+ y=torch.rand(m,n) returns a mxn tensor of random numbers from a uniform 
 distribution on the interval (0,1).
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -109,18 +85,18 @@ also causes the help for that particular function to be printed.
 
 <file>
 
-torch> lab.randn( -- enter double TAB after (
+t7> torch.randn( -- enter double TAB after (
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-lab.randn( [res,] m [, n, k, ...])       
- y=lab.randn(n) returns a one-dimensional tensor of size n filled with 
+torch.randn( [res,] m [, n, k, ...])       
+ y=torch.randn(n) returns a one-dimensional tensor of size n filled with 
 random numbers from a normal distribution with mean zero and variance 
 one.
- y=lab.randn(m,n) returns a mxn tensor of random numbers from a normal 
+ y=torch.randn(m,n) returns a mxn tensor of random numbers from a normal 
 distribution with mean zero and variance one.
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 /  \  
-torch> lab.randn(
+t7> torch.randn(
 
 </file>
 
@@ -156,31 +132,28 @@ for i=1,5 do
 end
 </file>
 
-Another way to do the same thing as the code above is provided by the 
-[[..:lab:index|lab]] package:
+Another way to do the same thing as the code above is provided by torch:
 
 <file>
-require "lab"
-x=lab.rand(5,5)
+x=torch.rand(5,5)
 </file>
 
-The [[..:lab:index|lab]] package contains a wide variety of commands 
+The [[..:torch:maths|torch]] package contains a wide variety of commands 
 for manipulating Tensors that follow rather closely the equivalent
 Matlab commands. For example one can construct Tensors using the commands
-[[..:lab:index#lab.ones|ones]], 
-[[..:lab:index#lab.zeros|zeros]], 
-[[..:lab:index#lab.rand|rand]],
-[[..:lab:index#lab.randn|randn]] and
-[[..:lab:index#lab.eye|eye]], amongst others.
+[[..:torch:maths#torch.ones|ones]], 
+[[..:torch:maths#torch.zeros|zeros]], 
+[[..:torch:maths#torch.rand|rand]],
+[[..:torch:maths#torch.randn|randn]] and
+[[..:torch:maths#torch.eye|eye]], amongst others.
 
 Similarly, row or column-wise operations such as 
-[[..:lab:index#lab.sum|sum]] and 
-[[..:lab:index#lab.max|max]] are called in the same way:
+[[..:torch:maths#torch.sum|sum]] and 
+[[..:torch:maths#torch.max|max]] are called in the same way:
 
 <file>
-> require "lab"
-> x1=lab.rand(5,5)
-> x2=lab.sum(x1); 
+> x1=torch.rand(5,5)
+> x2=torch.sum(x1); 
 > print(x2) 
  2.3450
  2.7099
@@ -252,11 +225,10 @@ as long as the required operators/methods are implemented.
 
 Here is an example of making a dataset for an XOR type problem:
 <file>
-require "lab"
 dataset={};
 function dataset:size() return 100 end -- 100 examples
 for i=1,dataset:size() do 
-	local input= lab.randn(2);     --normally distributed example in 2d
+	local input= torch.randn(2);     --normally distributed example in 2d
 	local output= torch.Tensor(1);
 	if input[1]*input[2]>0 then    --calculate label for XOR function
 		output[1]=-1;
@@ -376,7 +348,6 @@ In the following code example we create the same XOR data on the fly
 and train each example online.
 
 <file>
-require "lab"
 criterion = nn.MSECriterion()  
 mlp=nn.Sequential();  -- make a multi-layer perceptron
 inputs=2; outputs=1; HUs=20;
@@ -386,7 +357,7 @@ mlp:add(nn.Linear(HUs,outputs))
 
 for i = 1,2500 do
   -- random sample
-  local input= lab.randn(2);     -- normally distributed example in 2d
+  local input= torch.randn(2);     -- normally distributed example in 2d
   local output= torch.Tensor(1);
   if input[1]*input[2] > 0 then  -- calculate label for XOR function
     output[1] = -1
