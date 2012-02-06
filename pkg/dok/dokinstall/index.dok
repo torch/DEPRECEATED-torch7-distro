@@ -1,11 +1,8 @@
 ====== Torch Installation Manual ======
 {{anchor:install.dok}}
 
-There are two main ways for installing Torch. If you would like to try
-out Torch quickly, we suggest using [[#install.rocks|luarocks]] based
-installation instructions. If you would like to install using
-libraries at custom locations and develop your packages, we suggest
-[[#install.sources|installing from sources]].
+Currently Torch7 installation can be done only from the
+sources. Binary releaseses will be distributed soon.
 
 ======  Installing from sources ======
 {{anchor:install.sources}}
@@ -343,12 +340,6 @@ when compiling.
   * ''CMAKE_C_FLAGS'': add here the flags you want to pass to the C compiler (like ''-Wall'' for e.g.)
 
 
-====== Installing using Luarocks ======
-{{anchor:install.rocks}}
-
-We need doc here.
-
-
 =====  Development Torch packages =====
 {{anchor:DevPackages}}
 
@@ -356,6 +347,13 @@ If you want to develop your own package, you can put it in the ''dev''
 sub-directory. Packages in ''dev'' are all compiled in the same way that the
 ones in ''packages'' sub-directory. We prefer to have this directory to make a
 clear difference between official packages and development packages.
+
+===== The Torch Package Management System =====
+
+Torch7 has a built-in package management system that makes it very easy for 
+anyone to get one of the experimental packages listed on the Torch7 web page.
+
+** We need details of the list that we put on torch.ch and also, some tutorial **
 
 ======  Installing from binaries ======
 {{anchor:install.binary}}
