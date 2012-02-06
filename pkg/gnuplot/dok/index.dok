@@ -42,8 +42,8 @@ with custom line specifictions.
 Plot vector '' x '' using dots of first default ''Gnuplot'' type.
 
 <file lua>
-x=lab.linspace(-2*math.pi,2*math.pi)
-gnuplot.plot(lab.sin(x))
+x=torch.linspace(-2*math.pi,2*math.pi)
+gnuplot.plot(torch.sin(x))
 </file>
 {{plot_x.png?400}}
 
@@ -57,16 +57,16 @@ specified. The possible entries of format string can be
   * '|' for using boxes
 
 <file lua>
-x=lab.linspace(-2*math.pi,2*math.pi)
-gnuplot.plot('Sin',x/math.pi,lab.sin(x),'|')
+x=torch.linspace(-2*math.pi,2*math.pi)
+gnuplot.plot('Sin',x/math.pi,torch.sin(x),'|')
 </file>
 {{plot_xyf.png?400}}
 
 To plot multiple curves at a time, one can pass each plot struct in a table.
 
 <file lua>
-x=lab.linspace(-2*math.pi,2*math.pi)
-gnuplot.plot({'Cos',x/math.pi,lab.cos(x),'~'},{'Sin',x/math.pi,lab.sin(x),'|'})
+x=torch.linspace(-2*math.pi,2*math.pi)
+gnuplot.plot({'Cos',x/math.pi,torch.cos(x),'~'},{'Sin',x/math.pi,torch.sin(x),'|'})
 </file>
 {{plot_sincos.png?400}}
 
@@ -85,10 +85,10 @@ zooming is also possible.
 
 Plot surface '' z '' in 3D.
 <file lua>
-x=lab.linspace(-1,1)
+x=torch.linspace(-1,1)
 xx = torch.Tensor(x:size(1),x:size(1)):zero():addr(1,x,x)
 xx = xx*math.pi*6
-gnuplot.splot(lab.sin(xx))
+gnuplot.splot(torch.sin(xx))
 </file>
 {{plot_splot.png?400}}
 
@@ -99,10 +99,10 @@ to be the same shape as ''z''.
 One can also display multiple surfaces at a time.
 
 <file lua>
-x=lab.linspace(-1,1)
+x=torch.linspace(-1,1)
 xx = torch.Tensor(x:size(1),x:size(1)):zero():addr(1,x,x)
 xx = xx*math.pi*2
-gnuplot.splot({lab.sin(xx)},{lab.sin(xx)+2})
+gnuplot.splot({torch.sin(xx)},{torch.sin(xx)+2})
 </file>
 {{plot_splot2.png?400}}
 
@@ -120,10 +120,10 @@ used, however, one can also use any color palette available in
 ''Gnuplot''.
 
 <file lua>
-x=lab.linspace(-1,1)
+x=torch.linspace(-1,1)
 xx = torch.Tensor(x:size(1),x:size(1)):zero():addr(1,x,x)
 xx = xx*math.pi*6
-gnuplot.imagesc(lab.sin(xx),'color')
+gnuplot.imagesc(torch.sin(xx),'color')
 </file>
 {{plot_imagesc.png?400}}
 
@@ -140,7 +140,7 @@ Plot the histogram of values in ''N-D'' tensor ''x'', optionally using ''nbins''
 number of bins and only using values between ''min'' and ''max''.
 
 <file lua>
-gnuplot.hist(lab.randn(100000),100)
+gnuplot.hist(torch.randn(100000),100)
 </file>
 {{plot_hist.png?400}}
 
@@ -153,7 +153,7 @@ command ensures that all output is written to the file properly.
 
 <file lua>
 gnuplot.epsfigure('test.eps')
-gnuplot.plot({'Sin Curve',lab.sin(lab.linspace(-5,5))})
+gnuplot.plot({'Sin Curve',torch.sin(torch.linspace(-5,5))})
 gnuplot.xlabel('X')
 gnuplot.ylabel('Y')
 gnuplot.plotflush()
