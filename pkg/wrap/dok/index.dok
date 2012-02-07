@@ -1,0 +1,49 @@
+====== Wrap package ======
+
+The **wrap** package helps you to automate the generation of Lua/C wrappers
+around existing C functions, such that these functions would be callable
+from Lua. This package is used by the **torch** package, but does not depend on
+anything, and could be used by anyone using Lua.
+
+**DISCLAIMER** Before going any further, we assume the reader has a good
+knowledge of how to interface C functions with Lua. A good start would be
+the [[http://www.lua.org/manual/5.1|Lua reference manual]], or the book
+[[http://www.inf.puc-rio.br/~roberto/pil2|Programming in Lua]].
+
+As an example is often better than lengthy explanations, let's consider the
+case of a function
+<file c>
+int numel(THDoubleTensor *t);
+</file>
+which returns the number of elements of ''t''.
+Writing a complete wrapper of this function would look like:
+<file c>
+int wrapper_numel(lua_State *L)
+{
+  THDoubleTensor *t;
+
+  /* always good to check the number of arguments */
+  if(lua_gettop(L) != 1)
+    error("invalid number of arguments: <tensor> expected");
+
+  /* check if we have a tensor on the stack */
+  /* we use the luaT library, which deals with Torch objects */
+  /* we assume the torch_DoubleTensor_id has been already initialized */
+  t = luaT_checkudata(L, 1, torch_DoubleTensor_id);
+
+  /* push result on stack */
+  lua_pushnumber(L, numel(t));
+
+  /* the number of returned variables */
+  return 1;
+}
+</file>
+
+For anybody familiar with the Lua C API, this should look very simple (and
+//it is simple//, Lua has been designed for that!). Nevertheless, the
+wrapper contains about 7 lines of C code, for a quite simple
+function. Writing wrappers for C functions with multiple arguments, where
+some of them might be optional, can become very quickly a tedious task. The
+**wrap** package is here to help the process. Remember however that even
+though you might be able to treat most complex cases with **wrap**,
+sometimes it is also good to do everything by hand yourself!
