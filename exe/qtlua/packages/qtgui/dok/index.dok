@@ -1103,22 +1103,22 @@ or invalid, the action is simply appended.
 ===  qwidget:mapToGlobal(qpoint) ===
 {{anchor:qwidget.mapToGlobal}}
 
-Translates the widget coordinates =qpoint= to global screen coordinates.
-Both argument =qpoint= and the return value are Qt value of class
-[[..:qtcore:index#qpoint][=qt.QPoint=]].
+Translates the widget coordinates ''qpoint'' to global screen coordinates.
+Both argument ''qpoint'' and the return value are Qt value of class
+[[..:qtcore:index#qpoint|qt.QPoint]].
 
 ===  qwidget:mapFromGlobal(qpoint) ===
 {{anchor:qwidget.mapFromGlobal}}
 
-Translates the global screen coordinates =qpoint= to widget coordinates.
-Both argument =qpoint= and the return value are Qt value of class
-[[..:qtcore:index#qpoint][=qt.QPoint=]].    
+Translates the global screen coordinates ''qpoint'' to widget coordinates.
+Both argument ''qpoint'' and the return value are Qt value of class
+[[..:qtcore:index#qpoint|qt.QPoint]].    
 
 
 ===  qwidget:removeAction(qaction) ===
 {{anchor:qwidget.removeAction}}
 
-Removes action =qaction= from the 
+Removes action ''qaction'' from the 
 list actions associated with this widget.
 
 
@@ -1133,8 +1133,8 @@ The optional argument ''pointer'' can be a
 pointer to a ''QPainter'' or a ''QPaintDevice''
 where the widget should be rendered.
 Such pointers can be obtained using functions 
-[[..:qtwidget:index#painterpainter][''painter:painter'']] or
-[[..:qtwidget:index#painterdevice][''painter:device'']].
+[[..:qtwidget:index#painterpainter|painter:painter]] or
+[[..:qtwidget:index#painterdevice|painter:device]].
 When such an argument is specified,
 nothing is returned.
 
@@ -1142,7 +1142,7 @@ nothing is returned.
 {{anchor:qwidget.setAttribute}}
 
 Sets the specified
-[[http://doc.trolltech.com/4.4/qt.html#WidgetAttribute-enum][widget attribute]]
+[[http://doc.trolltech.com/4.4/qt.html#WidgetAttribute-enum|widget attribute]]
 to boolean value ''value''.
 Some of these flags are used internally by Qt. 
 Care is required.
@@ -1151,8 +1151,8 @@ Care is required.
 {{anchor:qwidget.setWindowFlag}}
 
 Sets the specified
-[[http://doc.trolltech.com/4.4/qt.html#WindowType-enum][window flag]]
-to boolean value =value=.
+[[http://doc.trolltech.com/4.4/qt.html#WindowType-enum|window flag]]
+to boolean value ''value''.
 Flags indicating a window type 
 are handled as exclusive flags.
 Setting these flags usually hides the window.
@@ -1162,7 +1162,7 @@ You need to do call ''qwidget:show'' again.
 {{anchor:qwidget.testAttribute}}
 
 Returns a boolean indicating the value of the specified
-[[http://doc.trolltech.com/4.4/qt.html#WidgetAttribute-enum][widget attribute]].
+[[http://doc.trolltech.com/4.4/qt.html#WidgetAttribute-enum|widget attribute]].
 Flags indicating a window type 
 are handled as exclusive flags.
 
@@ -1170,21 +1170,21 @@ are handled as exclusive flags.
 {{anchor:qwidget.testWindowFlag}}
 
 Returns a boolean indicating the value of the specified
-[[http://doc.trolltech.com/4.4/qt.html#WindowType-enum][window flag]].
+[[http://doc.trolltech.com/4.4/qt.html#WindowType-enum|window flag]].
 Flags indicating a window type 
 are handled as exclusive flags.
 
 ===  qwidget:window() ===
 {{anchor:qwidget.window}}
 
-Expression =qwidget:window()= returns the window for widget =qwidget=,
+Expression ''qwidget:window()'' returns the window for widget ''qwidget'',
 that is the next ancestor that is (or could be) displayed
 with a window frame.
 
 For instance the following code changes the
-title of the window containing widget =qwidget=.
+title of the window containing widget ''qwidget''.
 <file lua>
-   qwidget:window().windowTitle = "New Title"
+   qwidget:window().windowTitle "New Title"
 </file>
 
 
