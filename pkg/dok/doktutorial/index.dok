@@ -30,7 +30,7 @@ described in the [[..:install:index|installation help]].
 If you have got this far, hopefully your Torch installation works. A simple
 way to make sure it does is to start Lua from the shell command line, 
 and then try to start Torch:
-<file>
+<file lua>
 $ torch
 Try the IDE: torch -ide
 Type help() for more info
@@ -63,7 +63,7 @@ inline help in torch interpreter. The ''torch'' executable also
 integrates this capability. Help about any function can be accessed by
 calling the ''help()'' function.
 
-<file>
+<file lua>
 
 t7> help(torch.rand)
 
@@ -83,7 +83,7 @@ consecutive ''TAB'' characters (''double TAB'') to get the syntax
 completion. Moreover entering ''double TAB'' at an open paranthesis
 also causes the help for that particular function to be printed.
 
-<file>
+<file lua>
 
 t7> torch.randn( -- enter double TAB after (
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -106,10 +106,10 @@ Ok, now we are ready to actually do something in Torch.  Lets start by
 constructing a vector, say a vector with 5 elements, and filling the
 i-th element with value i. Here's how:
 
-<file>
-> x=torch.Tensor(5)
-> for i=1,5 do x[i]=i; end
-> print(x)
+<file lua>
+t7> x=torch.Tensor(5)
+t7> for i=1,5 do x[i]=i; end
+t7> print(x)
 
  1
  2
@@ -118,12 +118,40 @@ i-th element with value i. Here's how:
  5
 [torch.DoubleTensor of dimension 5] 
 
->
+t7>
 </file>
 
-To make a matrix (2-dimensional Tensor), one simply does something like
-''x=torch.Tensor(5,5)'' instead:
-<file>
+However, making use of Lua's powerfull closures and functions being
+first class citizens of the language, the same code could be written
+in much nicer way:
+
+<file lua>
+t7> x=torch.Tensor(5)
+t7> i=0;x:apply(function() i=i+1;return i; end)
+t7> =x
+ 1
+ 2
+ 3
+ 4
+ 5
+[torch.DoubleTensor of dimension 5]
+
+t7> x:apply(function(x) return x^2; end)
+t7> =x
+  1
+  4
+  9
+ 16
+ 25
+[torch.DoubleTensor of dimension 5]
+
+t7> 
+</file>
+
+To make a matrix (2-dimensional Tensor), one simply does something
+like ''x=torch.Tensor(5,5)'' instead:
+
+<file lua>
 x=torch.Tensor(5,5)
 for i=1,5 do 
  for j=1,5 do 
@@ -134,7 +162,7 @@ end
 
 Another way to do the same thing as the code above is provided by torch:
 
-<file>
+<file lua>
 x=torch.rand(5,5)
 </file>
 
@@ -151,10 +179,10 @@ Similarly, row or column-wise operations such as
 [[..:torch:maths#torch.sum|sum]] and 
 [[..:torch:maths#torch.max|max]] are called in the same way:
 
-<file>
-> x1=torch.rand(5,5)
-> x2=torch.sum(x1); 
-> print(x2) 
+<file lua>
+t7> x1=torch.rand(5,5)
+t7> x2=torch.sum(x1); 
+t7> print(x2) 
  2.3450
  2.7099
  2.5044
@@ -162,7 +190,7 @@ Similarly, row or column-wise operations such as
  2.4089
 [torch.DoubleTensor of dimension 5x1]
 
->
+t7>
 </file>
 
 
@@ -173,11 +201,11 @@ tensors are created using ''double'' type. ''torch.Tensor'' is a
 convenience call to ''torch.DoubleTensor''. One can easily switch the
 default tensor type to other types, like ''float''.
 
-<file>
-> =torch.Tensor()
+<file lua>
+t7> =torch.Tensor()
 [torch.DoubleTensor with no dimension]
-> torch.setdefaulttensortype('torch.FloatTensor')
-> =torch.Tensor()
+t7> torch.setdefaulttensortype('torch.FloatTensor')
+t7> =torch.Tensor()
 [torch.FloatTensor with no dimension]
 </file>
 
@@ -224,7 +252,7 @@ Such a dataset is easily constructed by using Lua tables, but it could any objec
 as long as the required operators/methods are implemented.
 
 Here is an example of making a dataset for an XOR type problem:
-<file>
+<file lua>
 dataset={};
 function dataset:size() return 100 end -- 100 examples
 for i=1,dataset:size() do 
@@ -248,7 +276,7 @@ our network architecture, and train it.
 To use Neural Networks in Torch you have to require the 
 [[..:nn:index|nn]] package. 
 A classical feed-forward network is created with the ''Sequential'' object:
-<file>
+<file lua>
 require "nn"
 mlp=nn.Sequential();  -- make a multi-layer perceptron
 </file>
@@ -263,7 +291,7 @@ The Linear layer is created with two parameters: the number of input
 dimensions, and the number of output dimensions. 
 So making a classical feed-forward neural network with one hidden layer with 
 //HUs// hidden units is as follows:
-<file>
+<file lua>
 require "nn"
 mlp=nn.Sequential();  -- make a multi-layer perceptron
 inputs=2; outputs=1; HUs=20;
@@ -277,7 +305,7 @@ mlp:add(nn.Linear(HUs,outputs))
 
 Now we're ready to train.
 This is done with the following code:
-<file>
+<file lua>
 criterion = nn.MSECriterion()  
 trainer = nn.StochasticGradient(mlp, criterion)
 trainer.learningRate = 0.01
@@ -285,7 +313,7 @@ trainer:train(dataset)
 </file>
 
 You should see printed on the screen something like this:
-<file>
+<file lua>
 # StochasticGradient: training
 # current error = 0.94550937745458
 # current error = 0.83996744568527
@@ -301,7 +329,7 @@ You should see printed on the screen something like this:
 </file>
 
 Some other options of the //trainer// you might be interested in are for example:
-<file>
+<file lua>
 trainer.maxIteration = 10
 trainer.shuffleIndices = false
 </file>
@@ -313,7 +341,7 @@ for more details.
 =====  Torch basics: testing your neural network =====
 
 To test your network on a single example you can do this:
-<file>
+<file lua>
 x=torch.Tensor(2);   -- create a test example Tensor
 x[1]=0.5; x[2]=-0.5; -- set its values
 pred=mlp:forward(x)  -- get the prediction of the mlp 
@@ -321,20 +349,20 @@ print(pred)          -- print it
 </file>
 
 You should see that your network has learned XOR:
-<file>
-> x=torch.Tensor(2); x[1]=0.5; x[2]=0.5; print(mlp:forward(x))
+<file lua>
+t7> x=torch.Tensor(2); x[1]=0.5; x[2]=0.5; print(mlp:forward(x))
 -0.5886
 [torch.DoubleTensor of dimension 1]
 
-> x=torch.Tensor(2); x[1]=-0.5; x[2]=0.5; print(mlp:forward(x))
+t7> x=torch.Tensor(2); x[1]=-0.5; x[2]=0.5; print(mlp:forward(x))
  0.9261
 [torch.DoubleTensor of dimension 1]
 
-> x=torch.Tensor(2); x[1]=0.5; x[2]=-0.5; print(mlp:forward(x))
+t7> x=torch.Tensor(2); x[1]=0.5; x[2]=-0.5; print(mlp:forward(x))
  0.7913
 [torch.DoubleTensor of dimension 1]
 
-> x=torch.Tensor(2); x[1]=-0.5; x[2]=-0.5; print(mlp:forward(x))
+t7> x=torch.Tensor(2); x[1]=-0.5; x[2]=-0.5; print(mlp:forward(x))
 -0.5576
 [torch.DoubleTensor of dimension 1]
 </file>
@@ -347,7 +375,7 @@ This gives you greater flexibility.
 In the following code example we create the same XOR data on the fly
 and train each example online.
 
-<file>
+<file lua>
 criterion = nn.MSECriterion()  
 mlp=nn.Sequential();  -- make a multi-layer perceptron
 inputs=2; outputs=1; HUs=20;
