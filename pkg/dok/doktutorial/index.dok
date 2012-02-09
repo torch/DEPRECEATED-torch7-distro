@@ -100,7 +100,7 @@ t7> torch.randn(
 
 </file>
 
-======  Torch basics: playing with Tensors ======
+======  Torch Basics: Playing with Tensors ======
 
 Ok, now we are ready to actually do something in Torch.  Lets start by
 constructing a vector, say a vector with 5 elements, and filling the
@@ -181,7 +181,7 @@ Similarly, row or column-wise operations such as
 
 <file lua>
 t7> x1=torch.rand(5,5)
-t7> x2=torch.sum(x1); 
+t7> x2=torch.sum(x1,2); 
 t7> print(x2) 
  2.3450
  2.7099
@@ -193,6 +193,41 @@ t7> print(x2)
 t7>
 </file>
 
+Naturally, many BLAS operations like matrix-matrix, matrix-vector products
+are implemented. We suggest everyone to install ATLAS or MKL libraries since
+Torch7 can optionally take advantage with these very efficient and multi-threaded 
+libraries if they are found in your system. Checkout 
+[[..:torch:maths|Mathematical operations using tensors.]] for details.
+
+<file lua>
+
+t7> a=torch.ones(5,5)
+t7> b=torch.ones(5,2)
+t7> =a
+ 1  1  1  1  1
+ 1  1  1  1  1
+ 1  1  1  1  1
+ 1  1  1  1  1
+ 1  1  1  1  1
+[torch.DoubleTensor of dimension 5x5]
+
+t7> =b
+ 1  1
+ 1  1
+ 1  1
+ 1  1
+ 1  1
+[torch.DoubleTensor of dimension 5x2]
+
+t7> =torch.mm(a,b)
+ 5  5
+ 5  5
+ 5  5
+ 5  5
+ 5  5
+[torch.DoubleTensor of dimension 5x2]
+
+</file>
 
 ====== Types in Torch7 ======
 
