@@ -43,11 +43,11 @@ wrap.argtypes.Tensor = {
              end
           end,
    
-   carg = function(arg, idx)
+   carg = function(arg)
              return string.format('arg%d', arg.i)
           end,
 
-   creturn = function(arg, idx)
+   creturn = function(arg)
                 return string.format('arg%d', arg.i)
              end,
    
@@ -120,11 +120,11 @@ wrap.argtypes.IndexTensor = {
              return string.format('arg%d = THLongTensor_new();', arg.i)
           end,
    
-   carg = function(arg, idx)
+   carg = function(arg)
              return string.format('arg%d', arg.i)
           end,
 
-   creturn = function(arg, idx)
+   creturn = function(arg)
                 return string.format('arg%d', arg.i)
              end,
    
@@ -203,11 +203,11 @@ for _,typename in ipairs({"ByteTensor", "CharTensor", "ShortTensor", "IntTensor"
                 end
              end,
 
-      carg = function(arg, idx)
+      carg = function(arg)
                 return string.format('arg%d', arg.i)
              end,
 
-      creturn = function(arg, idx)
+      creturn = function(arg)
                    return string.format('arg%d', arg.i)
              end,
       
@@ -302,11 +302,11 @@ wrap.argtypes.index = {
              end
           end,
 
-   carg = function(arg, idx)
+   carg = function(arg)
              return string.format('arg%d', arg.i)
           end,
 
-   creturn = function(arg, idx)
+   creturn = function(arg)
                 return string.format('arg%d', arg.i)
              end,
 
@@ -354,11 +354,11 @@ for _,typename in ipairs({"real", "unsigned char", "char", "short", "int", "long
                 end
              end,
       
-      carg = function(arg, idx)
+      carg = function(arg)
                 return string.format('arg%d', arg.i)
              end,
 
-      creturn = function(arg, idx)
+      creturn = function(arg)
                    return string.format('arg%d', arg.i)
                 end,
       
@@ -408,11 +408,11 @@ wrap.argtypes.boolean = {
              end
           end,
 
-   carg = function(arg, idx)
+   carg = function(arg)
              return string.format('arg%d', arg.i)
           end,
 
-   creturn = function(arg, idx)
+   creturn = function(arg)
                 return string.format('arg%d', arg.i)
              end,
 

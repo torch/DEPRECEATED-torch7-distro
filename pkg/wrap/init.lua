@@ -107,7 +107,7 @@ function CInterface:register(name)
    self.registry = {}
 end
 
-function CInterface:cleanhistory()
+function CInterface:clearhistory()
    self.txt = {}
    self.registry = {}
 end
