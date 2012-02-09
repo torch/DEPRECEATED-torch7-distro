@@ -134,6 +134,8 @@ properly the ''argtypes'' table. See the section [[#CInterface.argtypes]]
 for more details about defined types, and
 [[#CInterface.userargtypes|how to define additional ones]].
 
+=== Argument fields ===
+
 Apart the field ''name'', each list describing an argument can contain several optional fields:
 
 ''default'': this means the argument will optional in Lua, and the argument will be initialized
@@ -155,6 +157,35 @@ recommended: use with care.
 
 While these optional fields are generic to any argument types, some types might define additional optional fields.
 Again, see [[#CInterface.argtypes]] for more details.
+
+=== Handling multiple variants of arguments ===
+
+Sometimes, one cannot describe fully the behavior one wants with only a set of possible arguments.
+Take the example of the ''cos()'' function: we might want to apply it to a number, if the given argument
+is a number, or to a Tensor, if the given argument is a Tensor.
+
+''wrap()'' can be called with extra pairs of ''cname, args'' if needed. (There are no limitations on the number extra paris).
+For example, if you need to handle three cases, it might be
+<file lua>
+interface:wrap(luaname, cname1, args1, cname2, args2, cname3, args3)
+</file>
+For each given C function name ''cname'', the corresponding argument list ''args'' should match.
+As a more concrete example, here is a way to generate a wrapper for ''cos()'', which would handle both numbers
+and DoubleTensors.
+<file lua>
+interface:wrap("cos", -- the Lua function name
+
+"THDoubleTensor_cos", { -- C function called for DoubleTensor
+{name="DoubleTensor", default=true, returned=true}, -- returned tensor (if not present, we create an empty tensor)
+{name="DoubleTensor"} -- input tensor
+},
+
+"cos", { -- the standard C math cos function
+{name="double", creturned="true"}, -- returned value
+{name="double"} -- input value
+}
+)
+</file>
 
 ==== print(str) ====
 {{anchor:CInterface.print}}
@@ -321,9 +352,186 @@ check. E.g.,
 </file>
 expect a matrix of doubles.
 
-===== Adding Your Own Types =====
+===== User Types =====
 {{anchor:CInterface.userargtypes}}
 
-arg.i
-arg.__metatable
-arg.args
+Types available by default in ''CInterface'' might not be enough for your needs. Also, sometimes you might
+need to change sliglty the behavior of existing types. In that sort of cases, you will need to
+know more about what is going on under the hood.
+
+When you do a call to [[#CInterface.wrap|wrap()]],
+<file lua>
+interface:wrap(
+   "numel", -- the Lua name
+   "numel", -- the C function name, here the same
+   -- now we describe the 'arguments' of the C function
+   -- (or possible returned values)
+   {
+      {name="DoubleTensor"},
+      {name="int", creturned=true} -- this one is returned by the C function
+   }
+)
+</file>
+the method will examine each argument you provide. For example, let's consider:
+<file lua>
+{name="int", creturned=true}
+</file>
+Considering the argument field ''name'', **wrap** will check if the field
+''interface.argtypes['int']'' exists or not. If it does not exist, an error will be raised.
+
+In order to describe what happens next, we will now denote
+<file lua>
+arg = {name="int", creturned=true}
+</file>
+First thing which is done is assigning ''interface.argtypes['int']'' as a metatable to ''arg'':
+<file lua>
+setmetatable(arg, interface.argtypes[arg.name])
+</file>
+Then, a number of fields are populated in ''arg'' by **wrap**:
+<file lua>
+arg.i = 2 -- argument index (in the argument list) in the wrap() call
+arg.__metatable = interface.argtypes[arg.name]
+arg.args = ... -- the full list of arguments given in the wrap() call
+</file>
+
+
+[[#CInterface.wrap|wrap()]] will then call a several methods which are
+assumed to be present in ''arg'' (see below for the list).  Obviously, in
+most cases, methods will be found in the metatable of ''arg'', that is in
+''interface.argtypes[arg.name]''. However, if you need to override a method
+behavior for one particular argument, this method could be defined in the
+table describing the argument, when calling [[#CInterface.wrap|wrap()]].
+
+The extra fields mentionned above (populated by **wrap**) can be used in the argument
+methods to suit your needs (they are enough to handle most complex cases).
+
+We will now describe methods which must be defined for each type. We will
+take as example ''boolean'', to make things more clear. If you want to see
+more complex examples, you can have a look into the ''types.lua'' file,
+provided by the **wrap** package.
+
+==== helpname(arg) ====
+
+Returns a string describing (in a human readable fashion) the name of the given arg.
+
+Example:
+<file lua>
+function helpname(arg)
+   return "boolean"
+end
+</file>
+
+==== declare(arg) ====
+
+Returns a C code string declaring the given arg.
+
+Example:
+<file lua>
+function declare(arg)
+   return string.format("int arg%d = 0;", arg.i)
+end
+</file>
+
+==== check(arg, idx) ====
+
+Returns a C code string checking if the value at index ''idx'' on the Lua stack
+corresponds to the argument type. The string will appended in a ''if()'', so it should
+not contain a final '';''.
+
+Example:
+<file lua>
+function check(arg, idx)
+   return string.format("lua_isboolean(L, %d)", idx)
+end
+</file>
+
+==== read(arg, idx) ====
+
+Returns a C code string converting the value a index ''idx'' on the Lua stack, into
+the desired argument. This method will be called **only if** the C check given by
+[[#CInterface.arg.check|check()]] succeeded.
+
+Example:
+<file lua>
+function read(arg, idx)
+   return string.format("arg%d = lua_toboolean(L, %d);", arg.i, idx)
+end
+</file>
+
+==== init(arg) ====
+
+Returns a C code string initializing the argument by its default
+value. This method will be called **only if** (1) ''arg'' has a ''default''
+field and (2) the C check given by [[#CInterface.arg.check|check()]]
+failed (so the C code in [[#CInterface.arg.read|read()]] was not called).
+
+Example:
+<file lua>
+function init(arg)
+   local default
+   if arg.default then
+      default = 1
+   else
+      default = 0
+   end
+   return string.format("arg%d = %s;", arg.i, default)
+end
+</file>
+
+==== carg(arg) ====
+
+Returns a C code string describing how to pass
+the given ''arg'' as argument when calling the C function.
+
+In general, it is just the C arg name itself (except if you need to pass
+the argument "by address", for example).
+
+Example:
+<file lua>
+function carg(arg)
+   return string.format('arg%d', arg.i)
+end
+</file>
+
+==== creturn(arg) ====
+
+Returns a C code string describing how get the argument if it
+is returned from the C function.
+
+In general, it is just the C arg name itself (except if you need to assign
+a pointer value, for example).
+
+<file lua>
+function creturn(arg)
+   return string.format('arg%d', arg.i)
+end
+</file>
+
+==== precall(arg) ====
+
+Returns a C code string if you need to execute specific code related to
+''arg'', before calling the C function.
+
+For e.g., if you created an object in the calls before, you might want to
+put it on the Lua stack here, such that it is garbage collected by Lua, in case
+the C function call fails.
+
+<file lua>
+function precall(arg)
+-- nothing to do here, for boolean
+end
+</file>
+
+==== postcall(arg) ====
+
+Returns a C code string if you need to execute specific code related to
+''arg'', after calling the C function. You can for e.g. push the argument
+on the stack, if needed.
+
+<file lua>
+function postcall(arg)
+   if arg.creturned or arg.returned then
+      return string.format('lua_pushboolean(L, arg%d);', arg.i)
+   end
+end
+</file>
