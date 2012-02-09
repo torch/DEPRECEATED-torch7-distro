@@ -207,6 +207,7 @@ elseif command == 'install' then
       end
       if pkg.done then
          info('skipping package: ' .. package .. ', already installed')
+         return
       end
 
       exec(rm .. paths.concat(tmp,package))
