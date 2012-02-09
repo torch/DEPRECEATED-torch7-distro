@@ -27,7 +27,7 @@ local function install(entries, dir)
    local vars = {}
    for i,entry in ipairs(entries) do
       table.insert(vars, 's[' .. (i-1) .. '] = "' 
-                .. table.concat(entry, '^'):gsub('"','\\"'):gsub('\n',' ') .. '";')
+                .. table.concat(entry, '^~^'):gsub('"','\\"'):gsub('\n',' ') .. '";')
    end
    local array = table.concat(vars, '\n')
    local f = paths.concat(paths.install_html, paths.basename(dir), 'jse_form.js')

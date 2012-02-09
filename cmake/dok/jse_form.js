@@ -34,7 +34,7 @@ function dosearch(d) {
             }
         }
         for (var a = 0; a < w.length; a++) {
-            w[a] = w[a].replace(/^\-|^\+/gi, "");
+            w[a] = w[a].replace(/^~^\-|^~^\+/gi, "");
         }
         a = 0;
         for (var c = 0; c < s.length; c++) {
@@ -89,7 +89,7 @@ function out_jse() {
         return res;
     }
     for (var a = 0; a < r.length; a++) {
-        var os = r[a].split("^");
+        var os = r[a].split("^~^");
         if (bold == 1 && m == 1) {
             var br = "<b>" + d + "</b>";
             os[2] = os[2].replace(pat, br);
