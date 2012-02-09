@@ -18,8 +18,8 @@ cmake = 'CMAKE_PREFIX_PATH=' .. paths.install_prefix .. ' cmake .. '
 for var,val in pairs(cmake_conf) do
    cmake = cmake .. '-D' .. var .. '=' .. val .. ' '
 end
-cmake = cmake .. '; '
-make = mkdir .. 'build; ' .. cd .. 'build; ' .. cmake .. 'make'
+configure = mkdir .. 'build; ' .. cd .. 'build; ' .. cmake
+make = 'make'
 install = 'make install'
 
 -- shortcuts
@@ -55,7 +55,7 @@ dofile(configfile)
 help = 
 [=[Torch7 Package Manager
 
-Usage: torch-pkg [options] <command> [argument]
+Usage: torch-pkg [options] <command> [argument] [cmake flags]
 
 Supported Commands:
   help            print this help
@@ -74,6 +74,9 @@ Arguments for install|download:
 
 Arguments for add:
   <base-url>      a base URL where GIT repos or tars can be found
+
+CMake flags for install|build
+  VAR=VAL         set a CMake var (ex: torch-pkg install torch WITH_LUA_JIT=1)
 
 Options:
   -v|-verbose     be more verbose
@@ -185,11 +188,13 @@ elseif command == 'install' then
       os.exit()
    end
 
-   package = arguments[1]
-
-   if package:find('%.tar$') or package:find('%.tgz$') or package:find('%.tar.gz$') then
-      error('only supporting git repos for now')
-      os.exit()
+   to_build = {}
+   for i = 1,#arguments do
+      if arguments[i]:find('=') then -- cmake flag
+         configure = configure .. '-D' .. arguments[i] .. ' '
+      else
+         append(to_build, arguments[i])
+      end
    end
 
    packages = getpkglist()
@@ -221,13 +226,13 @@ elseif command == 'install' then
       end
 
       info('building & deploying')
-      exec(cd .. paths.concat(tmp,package) .. '; ' .. make .. '; ' .. install)
+      exec(cd .. paths.concat(tmp,package) .. '; ' .. configure .. '; ' .. make .. '; ' .. install)
 
       info('successfully deployed ' .. package)
       pkg.done = true
    end
 
-   for _,package in ipairs(arguments) do
+   for _,package in ipairs(to_build) do
       doit(package)
    end
 
@@ -269,15 +274,25 @@ elseif command == 'download' then
 
 elseif command == 'build' then
 
-   found = arguments[1] or '.'
+   found = '.'
+
+   if arguments[1] and not arguments[1]:find('=') then
+      found = arguments[1]
+   end
 
    if not paths.filep(paths.concat(found, 'CMakeLists.txt')) then
       error('not a valid package, please specify a path to a valid package')
       os.exit()
    end
 
+   for i = 1,#arguments do
+      if arguments[i]:find('=') then -- cmake flag
+         configure = configure .. '-D' .. arguments[i] .. ' '
+      end
+   end
+
    info('building package in ' .. found)
-   exec(cd .. found .. '; ' .. make)
+   exec(cd .. found .. '; ' .. configure .. '; ' .. make)
 
 elseif command == 'deploy' then
 
