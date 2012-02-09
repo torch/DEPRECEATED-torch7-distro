@@ -297,15 +297,29 @@ elseif command == 'build' then
 
 elseif command == 'deploy' then
 
-   found = arguments[1] or '.'
+   found = '.'
+
+   if arguments[1] and not arguments[1]:find('=') then
+      found = arguments[1]
+   end
 
    if not paths.filep(paths.concat(found, 'CMakeLists.txt')) then
       error('not a valid package, please specify a path to a valid package')
       os.exit()
    end
 
-   info('building package in ' .. found)
-   exec(cd .. found .. '; ' .. make .. '; ' .. install)
+   for i = 1,#arguments do
+      if arguments[i]:find('=') then -- cmake flag
+         configure = configure .. '-D' .. arguments[i] .. ' '
+      end
+   end
+
+   if not paths.filep(paths.concat(found, 'build', 'CMakeCache.txt')) then
+      info('configuring package in ' .. found)
+      exec(cd .. found .. '; ' .. configure)
+   end
+   info('deploying package in ' .. found)
+   exec(cd .. paths.concat(found,'build') .. '; ' .. make .. '; ' .. install)
 
 elseif command == 'list' then
 
