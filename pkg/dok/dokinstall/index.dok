@@ -165,13 +165,13 @@ installing Torch in ''/usr/local''.
 
 Now Torch should be installed in ''/usr/local'' or in
 ''/my/install/path'' if you chose to use the ''CMAKE_INSTALL_PREFIX''
-when configuring with CMake.  Lua executables (''lua'', ''qlua'' and
-''torch'') are found in the ''bin'' sub-directory of these
-installation directories.
+when configuring with CMake.  Lua executables (''torch-lua'', 
+''torch-qlua'' and ''torch'') are found in the ''bin'' sub-directory of 
+these installation directories.
 
 <file>
-/usr/local/bin/lua
-Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
+/usr/local/bin/torch-lua
+Lua 5.1.4  Copyright (C) 1994-2008 Lua.org, PUC-Rio
 > require 'torch'
 > = torch.Tensor(5):zero()
 
@@ -186,14 +186,13 @@ Lua 5.1.3  Copyright (C) 1994-2008 Lua.org, PUC-Rio
 </file>
 
 For convenience, you might want to add to your ''PATH'' the path to
-lua binaries. The executable ''lua'' is a simple Lua interpreter (as
-provided on [[http://www.lua.org|Lua website]]), while ''qlua'' has
-enhanced interactivity (like completion) and is able to handle
+lua binaries. The executable ''torch-lua'' is a simple Lua interpreter 
+(as provided on [[http://www.lua.org|Lua website]]), while ''torch-qlua'' 
+has enhanced interactivity (like completion) and is able to handle
 graphics and QT widgets.
 
-For best experience we suggest using the ''torch'' executable which is
-in the same place as ''lua'' and ''qlua'' since it preloads several
-most commonly used libraries into global namespace.
+For best experience we suggest using the ''torch'' executable, which
+preloads the most commonly used libraries into the global namespace.
 
 <file>
 /usr/local/bin/torch
@@ -216,6 +215,28 @@ torch> =lab.randn(10,10)
 
 torch> 
 
+</file>
+
+You can get more help about ''torch'':
+
+<file>
+/usr/local/bin/torch -h
+Torch7 Shell
+
+Usage: torch [options] [script [args]]
+
+General options:
+  -b|-bare         start a bare environment (no libs preloaded)
+  -e string        execute string
+  -l lib           require lib
+  -i               enter interactive mode after executing script [false]
+  -v|-version      show version information [false]
+  -h|-help         this help [false]
+
+Qt options:
+  -nographics|-ng  disable all the graphical capabilities [false]
+  -ide             enable IDE (graphical console) [false]
+  -onethread       run lua in the main thread (might be safer) [false] 
 </file>
 
 =====  MacOS X =====
@@ -277,7 +298,6 @@ Same as [[#install.compile|compiling]] for linux.
 ==== E. Running Torch ====
 
 Same as [[#install.run|runnning]] for linux.
-
 
 =====  Cygwin =====
 
@@ -348,12 +368,128 @@ sub-directory. Packages in ''dev'' are all compiled in the same way that the
 ones in ''packages'' sub-directory. We prefer to have this directory to make a
 clear difference between official packages and development packages.
 
+Alternatively, you can use [[#PackageManager|Torch package manager]] 
+to build and distribute your packages.
+
 ===== The Torch Package Management System =====
+{{anchor:PackageManager}}
 
-Torch7 has a built-in package management system that makes it very easy for 
-anyone to get one of the experimental packages listed on the Torch7 web page.
+Torch7 has a built-in package management system that makes it very easy 
+for anyone to get extra (experimental) packages, and create and distribute
+yours.
 
-** We need details of the list that we put on torch.ch and also, some tutorial **
+Calling ''torch-pkg'' without arguments will give you some help:
+
+<file>
+/usr/local/bin/torch-pkg
+Torch7 Package Manager
+
+Usage: torch-pkg [options] <command> [argument]
+
+Supported Commands:
+  help            print this help
+  install         install a package (download + build + deploy)
+  download        download a package locally
+  build           build a local package
+  deploy          deploy a package (build it if necessary)
+  list            list available packages
+  search          search for a package
+  add             add a server address to local config ($HOME/.torchpkg/config)
+
+Arguments for install|download:
+  <pkg-name>      a package name (to be found in one of the configured repos)
+  <pkg-repo>      the full address of a GIT repository
+  <pkg-url>       the URL of a simple package (should be a tar/tgz/tbz)
+
+Arguments for add:
+  <base-url>      a base URL where GIT repos or tars can be found
+
+Options:
+  -v|-verbose     be more verbose
+  -l|-local       local install
+  -n|-nodeps      do not install dependencies (when installing)
+  -d|-dry         dry run 
+</file>
+
+It's fairly self-explanatory. You can easily get a list of the available
+packages:
+
+<file>
+/usr/local/bin/torch-pkg list
+
+--> retrieving package lists from servers
+
+--> parallel
+    A parallel computing framework for Torch7, with serialization facilities
+    hosted at: https://github.com/clementfarabet/lua---parallel
+
+--> image
+    An image-processing toolbox for Torch7
+    hosted at: https://github.com/clementfarabet/lua---image
+
+--> optim
+    An optimization toolbox for Torch7
+    hosted at: https://github.com/koraykv/optim
+
+...
+</file>
+
+To install a new package, simply do:
+
+<file>
+/usr/local/bin/torch-pkg install pkgname
+</file>
+
+If you need to look at the sources of a package, you can get
+it like this:
+
+<file>
+/usr/local/bin/torch-pkg download pkgname
+</file>
+
+And then build it and install it:
+
+<file>
+cd pkgname
+/usr/local/bin/torch-pkg build
+/usr/local/bin/torch-pkg deploy
+</file>
+
+If you need to distribute your own packages, you just have
+to create a package file, which contains one entry per package,
+and then make it available online. Users can then easily add
+that file to their repository by doing:
+
+<file>
+/usr/local/bin/torch-pkg add http://url/to/config
+</file>
+
+The config typically looks like:
+
+<file>
+pkg = pkg or {}
+
+pkg.image = {
+  git = 'https://github.com/clementfarabet/lua---image',
+  description = 'An image-processing toolbox for Torch7',
+  dependencies = {'sys', 'xlua'},
+  commit = 'master'
+}
+
+pkg.optim = {
+  git = 'https://github.com/koraykv/optim',
+  description = 'An optimization toolbox for Torch7',
+  dependencies = {},
+  commit = 'newpack'
+}
+
+pkg.parallel = {
+  git = 'https://github.com/clementfarabet/lua---parallel',
+  description = 'A parallel computing framework for Torch7, with serialization facilities',
+  dependencies = {'sys'},
+  commit = 'newpack'
+}
+</file>
 
 ======  Installing from binaries ======
 {{anchor:install.binary}}
