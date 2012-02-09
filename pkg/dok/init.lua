@@ -231,7 +231,7 @@ function dok.dok2html(txt)
                                        end)
 
    -- note: we do not support code-specific colorization yet
-   txt = txt:gsub('<file%s-(%w-)>(.-)</file>', function(langstr,str)
+   txt = txt:gsub('<file%s-(%w-)%s->(.-)</file>', function(langstr,str)
                                           table.insert(file, str)
                                           table.insert(lang,langstr)
                                           return '\019' .. #file .. '\019'
@@ -503,7 +503,8 @@ function dok.dok2html(txt)
                                    end)
    txt = txt:gsub('\019(%d+)\019', function(id)
                                       id = tonumber(id) -- file
-                                      return '<pre class="brush: ' .. lang[id].. ';">' .. file[id] .. '</pre>'
+                                      local lng = lang[id] or 'lua'
+                                      return '<pre class="brush: ' .. lng .. ';">' .. file[id] .. '</pre>'
                                    end)
 
    return txt

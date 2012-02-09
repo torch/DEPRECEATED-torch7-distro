@@ -12,7 +12,7 @@ INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/html/" DESTINATION "${Torch_INSTALL_HTML_
 SET(TORCH_DOK_HTML_TEMPLATE "${Torch_SOURCE_CMAKE}/dok/doktemplate.html"
   CACHE FILEPATH "List of files needed for HTML doc creation")
 
-SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_CMAKE}/dok/doctorch.css;${Torch_SOURCE_CMAKE}/dok/torchlogo.png;${Torch_SOURCE_CMAKE}/dok/jquery.js;${Torch_SOURCE_CMAKE}/dok/shCore.js;${Torch_SOURCE_CMAKE}/dok/shBrushLua.js;${Torch_SOURCE_CMAKE}/dok/shBrushCpp.js;${Torch_SOURCE_CMAKE}/dok/shCore.css;${Torch_SOURCE_CMAKE}/dok/jse_form.js"
+SET(TORCH_DOK_HTML_FILES "${Torch_SOURCE_CMAKE}/dok/doctorch.css;${Torch_SOURCE_CMAKE}/dok/torchlogo.png;${Torch_SOURCE_CMAKE}/dok/jquery.js;${Torch_SOURCE_CMAKE}/dok/shCore.js;${Torch_SOURCE_CMAKE}/dok/shBrushLua.js;${Torch_SOURCE_CMAKE}/dok/shBrushLua.js;${Torch_SOURCE_CMAKE}/dok/shBrushBash.js;${Torch_SOURCE_CMAKE}/dok/shCore.css;${Torch_SOURCE_CMAKE}/dok/jse_form.js"
   CACHE STRING "HTML template needed for HTML doc creation")
 
 MARK_AS_ADVANCED(TORCH_DOK_HTML_FILES TORCH_DOK_HTML_TEMPLATE)
