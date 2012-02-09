@@ -247,9 +247,6 @@ elseif command == 'download' then
       os.exit()
    end
 
-   exec(mkdir .. tmp)
-   exec(rm .. paths.concat(tmp,package))
-
    packages = getpkglist()
 
    pkg = packages[package]
@@ -258,11 +255,16 @@ elseif command == 'download' then
       os.exit()
    end
 
+   if paths.dirp(package) or paths.filep(package) then
+      error('directory ' .. package .. ' already exists, aborting...')
+      os.exit()
+   end
+
    info('downloading package ' .. package .. ' from: ' .. pkg.git)
    exec(git .. ' clone ' .. pkg.git .. ' ' .. package)
 
    if pkg.commit then
-      exec(cd .. paths.concat(tmp,package) .. '; ' .. git .. ' checkout ' .. pkg.commit)
+      exec(cd .. package .. '; ' .. git .. ' checkout ' .. pkg.commit)
    end
 
 elseif command == 'build' then
