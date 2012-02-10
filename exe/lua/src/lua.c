@@ -386,7 +386,9 @@ static void lua_rl_init(lua_State *L)
   if ((s = getenv("LUA_HISTSIZE")) &&
       (lua_rl_histsize = atoi(s))) stifle_history(lua_rl_histsize);
   if (!(lua_rl_hist = getenv("LUA_HISTORY"))) {
-    lua_rl_hist = strcat(getenv("HOME"), "/.luahistory");
+    char *ss = (char*)malloc((strlen(getenv("HOME"))+13)*sizeof(char));
+    strcpy(ss,getenv("HOME"));
+    lua_rl_hist = strcat(ss, "/.luahistory");
   }
   read_history(lua_rl_hist);
 }
