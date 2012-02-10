@@ -21,9 +21,9 @@ INCLUDE(CheckLibraryExists)
 
 # LuaJIT specific
 option ( LUAJIT_DISABLE_FFI "Disable FFI." OFF )
-option ( LUAJIT_ENABLE_LUA52COMPAT "Enable Lua 5.2 compatibility." ON )
+option ( LUAJIT_ENABLE_LUA52COMPAT "Enable Lua 5.2 compatibility." OFF )
 option ( LUAJIT_DISABLE_JIT "Disable JIT." OFF )
-option ( LUAJIT_CPU_SSE2 "Disable SSE2." OFF )
+option ( LUAJIT_CPU_SSE2 "Use SSE2 instead of x87 instructions." ON )
 option ( LUAJIT_CPU_NOCMOV "Disable NOCMOV." OFF )
 option ( LUAJIT_RUN_DYNASM "Re-generate headers with DynASM." OFF )
 MARK_AS_ADVANCED(LUAJIT_DISABLE_FFI LUAJIT_ENABLE_LUA52COMPAT LUAJIT_DISABLE_JIT LUAJIT_CPU_SSE2 LUAJIT_CPU_NOCMOV LUAJIT_RUN_DYNASM)
