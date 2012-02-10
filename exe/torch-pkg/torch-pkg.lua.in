@@ -130,8 +130,8 @@ for i,opt in ipairs(options) do
    end
    if opt == '-l' or opt == '-local' then
       localinstall = true
-      error('local install not supported for now')
-      os.exit()
+      installdir = paths.concat(os.getenv('HOME'),'.torch','usr')
+      configure=configure:gsub('(.*)(CMAKE_INSTALL_PREFIX=)([%w%p]+)(%s*)','mkdir -p '..installdir..'; %1%2'..installdir..'%4')
    end
    if opt == '-n' or opt == '-nodeps' then
       nodeps = true
