@@ -12,6 +12,7 @@ General options:
   -e string        execute string
   -l lib           require lib
   -i               enter interactive mode after executing script [false]
+  -m               import torch and gnuplot packages into global namespace
   -v|-version      show version information [false]
   -h|-help         this help [false]
 
@@ -46,6 +47,12 @@ for i,a in ipairs(arg) do
       print('Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU')
       os.execute(paths.concat(paths.install_bin,lua) .. ' -v')
       os.exit()
+   end
+   -- use import
+   if a == '-m' or a == '--import' then
+      env = ' -e "loadwithimport=true"' .. env
+      -- we don't pass this to qlua
+      arg[i] = ' '
    end
    -- bare env?
    if a == '-b' or a == '-bare' then

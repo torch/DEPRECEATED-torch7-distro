@@ -179,10 +179,21 @@ function install(path)
    print('--> module installed')
 end
 
--- preload basic libraries
-import 'torch'
-import 'gnuplot'
-import 'dok'
+function loaddefaultlibs(loadwithimport)
+   if loadwithimport == nil then loadwithimport = false end
+   if not loadwithimport then
+      -- preload basic libraries
+      require 'torch'
+      require 'gnuplot'
+      require 'dok'
+   else
+      import 'torch'
+      import 'gnuplot'
+      import 'dok'
+   end
+end
+
+loaddefaultlibs(loadwithimport)
 
 -- setup local paths
 local localinstalldir = paths.concat(os.getenv('HOME'),'.torch','usr')
