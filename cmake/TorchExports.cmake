@@ -7,6 +7,7 @@ INSTALL(
   FILES
   "${CMAKE_CURRENT_BINARY_DIR}/cmake-exports/TorchConfig.cmake"
   "cmake/TorchPathsInit.cmake"
+  "cmake/TorchCFlags.cmake"
   "cmake/TorchPackage.cmake"
   "cmake/TorchWrap.cmake"
   "cmake/TorchDOK.cmake"
