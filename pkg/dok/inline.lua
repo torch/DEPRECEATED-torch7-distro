@@ -185,10 +185,11 @@ function dok.refresh()
                   local html = dok.dok2html(content)
                   local funcs = dok.html2funcs(html, package)
                   local pkg = _G[package]
-                  if type(pkg) ~= 'table' then -- unsafe import, use protected import
+                  if type(pkg) ~= 'table' and _G._torchimport then 
+                     -- unsafe import, use protected import
                      pkg = _G._torchimport[package]
                   end
-                  if pkg then
+                  if pkg and type(pkg) == 'table' then
                      -- level 0: the package itself
                      dok.inline[pkg] = dok.inline[pkg] or funcs['dok'] or funcs['reference.dok'] or funcs['overview.dok']
                      -- next levels
