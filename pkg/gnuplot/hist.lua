@@ -101,8 +101,8 @@ function gnuplot.histc(...)
    -- cleanup hist
    local cleanhist = {}
    cleanhist.raw = hist
-   local mx = torch.max(cleanhist.raw)
-   local mn = torch.min(cleanhist.raw)
+   local _,mx = torch.max(cleanhist.raw,1)
+   local _,mn = torch.min(cleanhist.raw,1)
    cleanhist.bins = bins
    cleanhist.binwidth = (max-min)/bins
    for i = 1,bins do
@@ -110,8 +110,8 @@ function gnuplot.histc(...)
       cleanhist[i].val = min + (i-0.5)*cleanhist.binwidth
       cleanhist[i].nb = hist[i]
    end
-   cleanhist.max = mx
-   cleanhist.min = mn
+   cleanhist.max = mx[1]
+   cleanhist.min = mn[1]
 
    -- print function
    setmetatable(cleanhist, {__tostring=histc__tostring})
