@@ -13,7 +13,7 @@ information, or have a look on the [[LuaManual|Lua Reference Manual]].
 
 =====  Why choose Lua? =====
 
-===  Lua is a proven and robust language ===
+====  Lua is a proven and robust language ====
 
  Lua has been used in
 [[http://www.lua.org/uses.html|many industrial applications]] (e.g.,
@@ -25,7 +25,7 @@ is currently the leading scripting language in games. Lua has a solid
 [[http://www.lua.org/versions.html|versions]] of Lua have been released
 and used in real applications since its creation in 1993.
 
-===  Lua is fast  ===
+====  Lua is fast  ====
 
 Lua has a deserved reputation for performance. To
 claim to be "as fast as Lua" is an aspiration of other scripting
@@ -34,7 +34,7 @@ of interpreted scripting languages. Lua is fast not only in fine-tuned
 benchmark programs, but in real life too. A substantial fraction of large
 applications have been written in Lua.
 
-===  Lua is portable  ===
+====  Lua is portable  ====
 
 Lua is [[http://www.lua.org/download.html|distributed]] in a small
 package that builds out-of-the-box in all platforms that have an ''ANSI/ISO C''
@@ -43,7 +43,7 @@ devices (such as handheld computers and cell phones that use ''BREW'', ''Symbian
 ''Pocket PC'', etc.) and embedded microprocessors (such as ''ARM'' and ''Rabbit'') for
 applications like ''Lego MindStorms''.
 
-===  Lua is embeddable  === 
+====  Lua is embeddable  ==== 
 
 Lua is a fast language engine with small footprint that you can embed into
 your application. Lua has a simple and well documented ''API'' that allows
@@ -55,7 +55,7 @@ extend programs written not only in ''C'' and ''C++'', but also in ''Java'', ''C
 such as
 ''Perl'' and ''Ruby''.
 
-===  Lua is simple and powerful  === 
+====  Lua is simple and powerful  ==== 
 
 A fundamental concept in the design of Lua is to provide //meta-mechanisms//
 for implementing features, instead of providing a host of features directly
@@ -65,14 +65,14 @@ inheritance. Lua's meta-mechanisms bring an economy of concepts and keep
 the language small, while allowing the semantics to be extended in
 unconventional ways.
 
-===  Lua is free  ===
+====  Lua is free  ====
 
 Lua is free software, distributed under a
 [[http://www.lua.org/license.html|liberal license]] (the well-known ''MIT''
 license). It can be used for both academic and commercial purposes at
 absolutely no cost. Just [[http://www.lua.org/download.html|download]] it and use it.
 
-=====  Where does Lua come from? =====
+====  Where does Lua come from? ====
 
 Lua is designed and implemented by a team at
 [[http://www.puc-rio.br/|PUC-Rio]], the Pontifical Catholic University of

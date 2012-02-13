@@ -12,7 +12,7 @@ automatically expose [[..:qt:index#qt.QObjects|properties, slots and
 signals]].
 
 
-====  qt.QAction, qt.QtLuaAction ====
+=====  qt.QAction, qt.QtLuaAction =====
 {{anchor:qaction}}
 {{anchor:qtluaaction}}
 
@@ -23,7 +23,7 @@ that represents actions associated with menu items
 and toolbar icons.  
 
 
-===  qt.QAction([arg]) ===
+====  qt.QAction([arg]) ====
 {{anchor:qaction}}
 
 Expression ''qt.QAction([arg])'' returns a new ''QAction'' object.
@@ -36,8 +36,8 @@ of the qt action object.
 
 Example:
 <file lua>
-  a = qt.QAction { text="Automatic Mode", 
-                   checkable = true, checked = false,
+  a === qt.QAction { text="Automatic Mode", 
+                   checkable === true, checked === false,
                    function(b) setAutoMode(b) end }
 </file>
 
@@ -49,18 +49,18 @@ it is no longer referenced.
 Actions are always created from the main thread using
 the [[..:qt:index#qt.qcall|thread hopping]] mechanism.
 
-===  qaction:menu() ===
+====  qaction:menu() ====
 {{anchor:qaction.menu}}
 
 Same as the C++ function ''QAction::menu()''.
 
-===  qaction:setMenu() ===
+====  qaction:setMenu() ====
 {{anchor:qaction.setmenu}}
 
 
 Same as the C++ function ''QAction::setMenu()''.
 
-===  qt.QtLuaAction([arg]) ===
+====  qt.QtLuaAction([arg]) ====
 {{anchor:qtluaaction}}
 
 This constructor takes the same arguments as ''qt.QAction''
@@ -74,7 +74,7 @@ functions connected to Qt signals.
 Otherwise the action is disabled regardless
 of the value of property ''enabled''.
 
-===  qtluaaction.autoDisable ===
+====  qtluaaction.autoDisable ====
 {{anchor:qtluaaction.autodisable}}
 
 This property applies only to action objects of class ''qt.QtLuaAction''.
@@ -83,43 +83,43 @@ when the Lua engine is not available.
 The default is ''true''.
 
 
-====  qt.QApplication ====
+=====  qt.QApplication =====
 {{anchor:qapplication}}
 
 Qt class [[http://doc.trolltech.com/4.4/qapplication.html|QApplication]]
 manages the GUI application's control flow and main settings. This is a 
 subclass of [[..:qtcore:index#qcoreapplication|QCoreApplication]].
 
-===  qt.QApplication.changeOverrideCursor(qcursor) ===
+====  qt.QApplication.changeOverrideCursor(qcursor) ====
 {{anchor:qapplication.changeOverrideCursor}}
 
 Changes the currently active application override cursor to cursor
 without disturbing the cursor stack. This function has no 
 effect if ''setOverrideCursor()'' was not called.
 
-===  qt.QApplication.keyboardModifiers() ===
+====  qt.QApplication.keyboardModifiers() ====
 {{anchor:qapplication.keyboardModifiers}}
 
 Returns a string describing the currently depressed keyboard modifiers.
 
-===  qt.QApplication.mouseButtons() ===
+====  qt.QApplication.mouseButtons() ====
 {{anchor:qapplication.mouseButtons}}
 
 Returns a string describing the currently depressed mouse buttons.
 
-===  qt.QApplication.overrideCursor() ===
+====  qt.QApplication.overrideCursor() ====
 {{anchor:qapplication.overrideCursor}}
 
 Returns the active application override cursor.
 This function returns ''nil'' if no application cursor 
 has been defined (i.e. the internal cursor stack is empty).
 
-===  qt.QApplication.restoreOverrideCursor() ===
+====  qt.QApplication.restoreOverrideCursor() ====
 {{anchor:qapplication.restoreOverrideCursor}}
 
 Undoes the last ''setOverrideCursor()''.
 
-===  qt.QApplication.setOverrideCursor(qcursor) ===
+====  qt.QApplication.setOverrideCursor(qcursor) ====
 {{anchor:qapplication.setoverridecursor}}
 
 Sets the application override cursor to ''qcursor''.
@@ -129,7 +129,7 @@ Override cursors are stored on a stack. Function ''setOverrideCursor()'' pushes 
 Function ''restoreOverrideCursor()'' pops the stack.
 
 
-====  qt.QBrush ====
+=====  qt.QBrush =====
 {{anchor:qbrush}}
 
 Qt class 
@@ -139,7 +139,7 @@ are filled and how text is rendered.  Brushes are represented
 by Qt variants of class ''qt.QBrush''.
 
 
-===  qt.QBrush(table) ===
+====  qt.QBrush(table) ====
 {{anchor:qbrush}}
 {{anchor:qbrushfromtable}}
 
@@ -158,7 +158,7 @@ The following fields are recognized:
   * Field ''style'' contains the name of the [[http://doc.trolltech.com/4.4/qt.html#BrushStyle-enum|brush style]]. The default brush style is ''SolidPatter'' when field ''color'' is defined, ''TexturePattern'' when field ''texture'' is defined, or one of the gradient styles when field ''gradient'' is defined.  Otherwise the default style is ''NoBrush'' meaning that nothing is painted.
 
 
-===  qbrush:totable() ===
+====  qbrush:totable() ====
 {{anchor:qbrush.totable}}
 
 Expression ''qbrush:totable()'' returns a table describing the brush.
@@ -166,19 +166,19 @@ See the documentation of [[#qbrushfromtable|qt.QBrush(table)]]
 for a description of the table fields.
 
 
-====  qt.QColor ====
+=====  qt.QColor =====
 {{anchor:qcolor}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qcolor.html|QColor]] 
 represents colors for painting purposes.
 Qt variant of class ''qt.QColor'' have a textual representation
-of the form ="#RRGGBB" where letters ''R'', ''G'', or ''B'' are
+of the form =="#RRGGBB" where letters ''R'', ''G'', or ''B'' are
 hexadecimal digits representing the intensities of the 
 color components.
 
 
-===  qt.QColor(...) ===
+====  qt.QColor(...) ====
 {{anchor:qcolor}}
 
 There are several ways to construct a Qt variant of class ''qt.QColor''.
@@ -194,7 +194,7 @@ The default value for argument ''a'' is ''1'' for a fully opaque color.
 Argument ''string'' is a string representing a color name.
 All [[http://www.w3.org/TR/SVG/types.html#ColorKeywords|SVG color names]]
 are recognized.Color names can have also the format ''"#RGB"'', 
-''"#RRGGBB"'', ''"#RRRGGGBBB"'', or ="#RRRRGGGGBBBB"
+''"#RRGGBB"'', ''"#RRRGGGBBB"'', or =="#RRRRGGGGBBBB"
 where letters ''R'', ''G'', or ''B'' represent hexadecimal 
 digits for each of the color component.
 
@@ -205,7 +205,7 @@ contain numbers in range ''[0,1]'' representing the intensities
 of the red, green, blue, and alpha channels.  Such a table 
 is returned by function [[#qcolortotable|qcolor:totable()]].
 
-===  qcolor:totable() ===
+====  qcolor:totable() ====
 {{anchor:qcolor.totable}}
 {{anchor:qcolortotable}}
 
@@ -215,7 +215,7 @@ representing the intensities of the red, green, blue,
 and alpha channels.
 
 
-====  qt.QColorDialog ====
+=====  qt.QColorDialog =====
 {{anchor:qcolordialog}}
 
 Qt class
@@ -223,7 +223,7 @@ Qt class
 implements a dialog for selecting colors.  
 The recommended way to use this class is the static function ''getColor''.
 
-===  qt.QColorDialog.getColor([font],[parent]) ===
+====  qt.QColorDialog.getColor([font],[parent]) ====
 {{anchor:qcolordialog.getcolor}}
 
 Pops up a dialog for selecting a color.
@@ -232,64 +232,64 @@ Argument ''parent'' is the parent widget.
 This function returns ''nil'' if the no color was selected.
 Otherwise it returns a qvariant of type [[#qcolor|qt.QColor]].
 
-====  qt.QCursor ====
+=====  qt.QCursor =====
 {{anchor:qcursor}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qcursor.html|QCursor]] 
 provides a mouse cursor with an arbitrary shape.
 
-===  qt.QCursor(cursorshape) ===
+====  qt.QCursor(cursorshape) ====
 {{anchor:qcursor}}
 
 Returns a standard cursor.
 Argument ''cursorshape'' is the name of a 
 [[http://doc.trolltech.com/4.4/qt.html#CursorShape-enum|standard shape]].
 
-===  qt.QCursor(image,[mask],[posx,[posy]) ===
+====  qt.QCursor(image,[mask],[posx,[posy]) ====
 {{anchor:qcursor}}
 
 Constructs a cursor with the specified image, mask and hot spot.
 
-===  qcursor:hotSpot() ===
+====  qcursor:hotSpot() ====
 {{anchor:qcursor.hotSpot}}
 
 Return a ''qt.QPoint'' with the cursor's hot spot coordinates.
 
-===  qcursor:mask() ===
+====  qcursor:mask() ====
 {{anchor:qcursor.mask}}
 
 Return the cursor's mask.
 
-===  qcursor:pixmap() ===
+====  qcursor:pixmap() ====
 {{anchor:qcursor.pixmap}}
 
 Return the cursor's pixmap.
 
-===  qcursor:shape() ===
+====  qcursor:shape() ====
 {{anchor:qcursor.shape}}
 
 Return the name of the cursor's
 [[http://doc.trolltech.com/4.4/qt.html#CursorShape-enum|standard shape]].
 
-===  qt.QCursor.pos() ===
+====  qt.QCursor.pos() ====
 {{anchor:qcursor.pos}}
 
 Returns a ''QPoint'' with the global coordinates of the mouse cursor.
 
-===  qt.QCursor.setPos(qpoint) ===
+====  qt.QCursor.setPos(qpoint) ====
 {{anchor:qcursor.setPos}}
 
 Sets the global coordinates of the mouse cursor.
 
-====  qt.QDialog ====
+=====  qt.QDialog =====
 {{anchor:qdialog}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qdialog.html|QDialog]] 
 is the base class of dialog windows.
 
-===  qt.QDialog([parent]) ===
+====  qt.QDialog([parent]) ====
 {{anchor:qdialog}}
 
 Expression ''qt.QDialog(parent)'' returns a new ''QDialog'' instance.
@@ -299,14 +299,14 @@ the new widget is owned by the Lua interpreter
 and is automatically destroyed when the garbage collector
 determines that it is no longer referenced.
 
-===  qdialog:result() ===
+====  qdialog:result() ====
 {{anchor:qdialog.result}}
 
 Gets the dialog's result code as an integer.
 This is usually ''1'' when the dialog has been accepted
 and ''0'' when the dialog has been rejected.
 
-===  qdialog:setResult(integer) ===
+====  qdialog:setResult(integer) ====
 {{anchor:qdialog.setresult}}
 
 Sets the dialog's result code.
@@ -314,7 +314,7 @@ This is usually ''1'' when the dialog has been accepted
 and ''0'' when the dialog has been rejected.
 
 
-====  qt.QFileDialog ====
+=====  qt.QFileDialog =====
 {{anchor:qfiledialog}}
 
 Qt class 
@@ -322,7 +322,7 @@ Qt class
 provides a dialog that allow users to select files or directories. 
 This is a subclass of [[#qdialog|qt.QDialog]].
 
-===  qt.QFileDialog.getExistingDirectory([p.[c,[d,[opt]]]]) ===
+====  qt.QFileDialog.getExistingDirectory([p.[c,[d,[opt]]]]) ====
 {{anchor:qfiledialog.getExistingDirectory}}
 
 This convenience function shows a file dialog
@@ -334,7 +334,7 @@ Argument ''opt'' are the [[http://doc.trolltech.com/4.4/qfiledialog.html#Option-
 
 The function returns a ''qt.QString'' containing the selected directory name.
 
-===  qt.QFileDialog.getOpenFileName([p,[c,[d,[f,[s,[opt]]]]]]) ===
+====  qt.QFileDialog.getOpenFileName([p,[c,[d,[f,[s,[opt]]]]]]) ====
 {{anchor:qfiledialog.getOpenFileName}}
 
 This convenience function shows a file dialog
@@ -349,7 +349,7 @@ for selecting an existing file.
 The function returns a ''qt.QString'' containing the selected file name
 and a ''qt.QString'' contaning the selected filter.
 
-===  qt.QFileDialog.getOpenFileNames([p,[c,[d,[f,[s,[opt]]]]]]) ===
+====  qt.QFileDialog.getOpenFileNames([p,[c,[d,[f,[s,[opt]]]]]]) ====
 {{anchor:qfiledialog.getOpenFileNames}}
 
 This convenience function shows a file dialog
@@ -364,7 +364,7 @@ for selecting multiple existing files.
 The function returns a ''qt.QStringList'' containing the file names
 and a ''qt.QString'' contaning the selected filter.
 
-===  qt.QFileDialog.getSaveFileName([p,[c,[d,[f,[s,[opt]]]]]]) ===
+====  qt.QFileDialog.getSaveFileName([p,[c,[d,[f,[s,[opt]]]]]]) ====
 {{anchor:qfiledialog.getsavefilename}}
 
 This convenience function shows a file dialog
@@ -379,7 +379,7 @@ for selecting a file name for saving data.
 The function returns a ''qt.QString'' containing the selected file name
 and a ''qt.QString'' contaning the selected filter.
 
-===  qt.QFileDialog.new([parent.[caption,[dir,[filters]]]]) ===
+====  qt.QFileDialog.new([parent.[caption,[dir,[filters]]]]) ====
 {{anchor:qfiledialog.new}}
 
 Function ''qt.QFileDialog.new'' returns a new file dialog object.
@@ -393,37 +393,37 @@ the new widget is owned by the Lua interpreter
 and is automatically destroyed when the garbage collector
 determines that it is no longer referenced.
 
-===  qfiledialog:directory() ===
+====  qfiledialog:directory() ====
 {{anchor:qfiledialog.directory}}
 
 Returns a ''qt.QString'' containing the path of the selected directory.
 
-===  qfiledialog:nameFilters() ===
+====  qfiledialog:nameFilters() ====
 {{anchor:qfiledialog.nameFilters}}
 
 Returns a ''qt.QStringList'' containing the name filters.
 
-===  qfiledialog:selectedFiles() ===
+====  qfiledialog:selectedFiles() ====
 {{anchor:qfiledialog.selectedFiles}}
 
 Returns a ''qt.QStringList'' containing the selected files.
 
-===  qfiledialog:selectFile(fname) ===
+====  qfiledialog:selectFile(fname) ====
 {{anchor:qfiledialog.selectFile}}
 
 Select file ''fname'' in the file dialog.
 
-===  qfiledialog:selectNameFilter(filter) ===
+====  qfiledialog:selectNameFilter(filter) ====
 {{anchor:qfiledialog.selectNameFilter}}
 
 Select name filter ''filter'' in the file dialog.
 
-===  qfiledialog:setDirectory(dirname) ===
+====  qfiledialog:setDirectory(dirname) ====
 {{anchor:qfiledialog.setDirectory}}
 
 Set the file dialog directory to ''dirname''.
 
-===  qfiledialog:setNameFilters(filters) ===
+====  qfiledialog:setNameFilters(filters) ====
 {{anchor:qfiledialog.setNameFilters}}
 
 Set the file dialog name filters to ''filters''.
@@ -431,20 +431,20 @@ Argument ''filters'' may be a ''qt.QStringList''
 or a string containing the filters separated by 
 two semicolons ''";;"''.
 
-===  qfiledialog:setOption(option, bool) ===
+====  qfiledialog:setOption(option, bool) ====
 {{anchor:qfiledialog.setOption}}
 
 Sets the specified
 [[http://doc.trolltech.com/4.5/qfiledialog.html#Option-enum|file dialog option]]
 to the boolean value ''bool''.  Not available before Qt-4.5.
 
-===  qfiledialog:testOption(option) ===
+====  qfiledialog:testOption(option) ====
 
 Returns the value of the specified
 [[http://doc.trolltech.com/4.5/qfiledialog.html#Option-enum|file dialog option]].
 Not available before Qt-4.5.
 
-====  qt.QFont ====
+=====  qt.QFont =====
 {{anchor:qfont}}
 
 Qt class 
@@ -453,7 +453,7 @@ represents the painter settings that determine the font(s)
 used to display text. 
 
 
-===  qt.QFont(arg) ===
+====  qt.QFont(arg) ====
 {{anchor:qfont}}
 {{anchor:qfontfromtable}}
 
@@ -504,7 +504,7 @@ Example:
 </file>
 
 
-===  qfont:totable() ===
+====  qfont:totable() ====
 {{anchor:qfont.totable}}
 
 Expression ''qfont:totable()'' returns a table
@@ -518,7 +518,7 @@ Example:
    for k,v in pairs(f:totable()) do print(k,v) end 
 </file>
 
-===  qfont:tostring() ===
+====  qfont:tostring() ====
 {{anchor:qfonttostring}}
 {{anchor:qfont.tostring}}
 
@@ -528,7 +528,7 @@ suitable for storing in configuration files for instance.
 Use [[#qfontfromtable|qt.QFont(string)]] to
 reconstruct the corresponding font object.
 
-===  qfont:info() ===
+====  qfont:info() ====
 {{anchor:qfontinfo}}
 {{anchor:qfont.info}}
 
@@ -543,7 +543,7 @@ This is achieved using the Qt class
 Fields ''"underline"'', ''"overline"'', ''"strikeOut"'', and ''"stretch"'' 
 are copied verbatim from the ''qfont'' object.
 
-====  qt.QFontDialog ====
+=====  qt.QFontDialog =====
 {{anchor:qfontdialog}}
 
 Qt class
@@ -551,7 +551,7 @@ Qt class
 implements a dialog for selecting fonts.  
 The recommended way to use this class is the static function ''getFont''.
 
-===  qt.QFontDialog.getFont([font],[parent, [caption]]) ===
+====  qt.QFontDialog.getFont([font],[parent, [caption]]) ====
 {{anchor:qfontdialog.getfont}}
 
 Pops up a dialog for selecting a font.
@@ -563,7 +563,7 @@ This function returns ''nil'' if the no font was selected.
 Otherwise it returns a qvariant of type [[#qfont|qt.QFont]].
 
 
-====  qt.QGradient ====
+=====  qt.QGradient =====
 {{anchor:qgradient}}
 
 Qt class 
@@ -572,14 +572,14 @@ represents a color gradient for use in [[#qbrush|gradient brushes]].
 No specific Lua methods have been defined for this Qt variant class.
 
 
-====  qt.QIcon ====
+=====  qt.QIcon =====
 {{anchor:qicon}}
 
 Qt class 
 [[http://doc.trolltech.com/4.4/qimage.html|QIcon]] 
 provides scalable icons in different modes and states.
 
-===  qt.QIcon([arg]) ===
+====  qt.QIcon([arg]) ====
 {{anchor:qicon}}
 
 Returns a new icon.
@@ -590,7 +590,7 @@ Alternatively, argument ''arg'' may be a
 file name that will be loaded on demand.
 
 
-====  qt.QImage ====
+=====  qt.QImage =====
 {{anchor:qimage}}
 
 Qt class 
@@ -599,7 +599,7 @@ represents a device independent off-screen image.
 Such images are represented in Lua 
 as Qt variants of class ''qt.QImage''.
 
-===  qt.QImage(...) ===
+====  qt.QImage(...) ====
 {{anchor:qimage}}
 
 There are several ways to construct a Qt variant of class ''qt.QImage''.
@@ -618,21 +618,21 @@ The [[#qimageformats|file format]] is determined
 by the optional string ''format'' or by the file name extension.
 
 
-===  qimage:depth() ===
+====  qimage:depth() ====
 {{anchor:qimage.depth}}
 
 Expression ''qimage:depth()'' returns the depth of the image ''qimage''.
 A depth of 1 indicates a bitonal image.
 A depth of 24 or 32 indicates a true color image.
 
-===  qimage:rect() ===
+====  qimage:rect() ====
 {{anchor:qimage.rect}}
 
 Expression ''qimage:rect()'' returns a Qt variant of class
 [[..:qtcore:index#qrect|qt.QRect]] representing the
 boundaries of the image ''qimage''.
 
-===  qimage:save(f,[format]) ===
+====  qimage:save(f,[format]) ====
 {{anchor:qimage.save}}
 
 Expression ''qimage:save(f,format)'' saves the image data into file ''f''.
@@ -640,14 +640,14 @@ Argument ''f'' can be a file name or a Lua file descriptor.
 The [[#qimageformats|file format]] is determined by the 
 optional string ''format'' or by the file name extension.
 
-===  qimage:size() ===
+====  qimage:size() ====
 {{anchor:qimage.size}}
 
 Expression ''qimage:size()'' returns a Qt variant of class
 [[..:qtcore:index#qsize|qt.QSize]] representing the
 size of the image ''qimage''.
 
-===  qt.QImage.formats([string]) ===
+====  qt.QImage.formats([string]) ====
 {{anchor:qimage.formats}}
 {{anchor:qimageformats}}
 
@@ -663,14 +663,14 @@ returns a ''qt.QStringList'' with the supported formats.
 
 
 
-====  qt.QKeySequence ====
+=====  qt.QKeySequence =====
 {{anchor:qkeysequence}}
 
 Qt class
 [[http://doc.trolltech.com/4.4/qkeysequence.html|QKeySequence]] 
 encapsulates a key sequence as used by shortcuts.
 
-===  qt.QKeySequence(string) ===
+====  qt.QKeySequence(string) ====
 {{anchor:qkeysequence}}
 
 Returns a Qt value of class ''qt.QKeySequence'' 
@@ -678,13 +678,13 @@ associated with the key combination described in string ''string''.
 Up to four key codes may be entered by separating 
 them with commas, e.g. ''"Alt+V,Ctrl+Down,A,Shift+Home"''.
 
-===  qkeysequence:tostring() ===
+====  qkeysequence:tostring() ====
 {{anchor:qkeysequence.tostring}}
 
 Returns a string describing the keys in the key sequence.
 
 
-====  qt.QMainWindow ====
+=====  qt.QMainWindow =====
 {{anchor:qmainwindow}}
 
 Qt class 
@@ -692,7 +692,7 @@ Qt class
 provides a main application window with menu, statusbar, toolbars
 and dockable widgets. This is a subclass of [[#qwidget|QWidget]].
 
-===  qt.QMainWindow([parent]) ===
+====  qt.QMainWindow([parent]) ====
 {{anchor:qmainwindow}}
 
 Expression ''qt.QMainWindow(parent)'' returns a new ''QMainWindow'' instance.
@@ -702,41 +702,41 @@ the new widget is owned by the Lua interpreter
 and is automatically destroyed when the garbage collector
 determines that it is no longer referenced.
 
-===  qmainwindow:centralWidget() ===
+====  qmainwindow:centralWidget() ====
 {{anchor:qmainwindow.centralWidget}}
 
 Expression ''qmainwindow:centralWidget()'' returns the
 central widget managed by the main window.
 
-===  qmainwindow:menuBar() ===
+====  qmainwindow:menuBar() ====
 {{anchor:qmainwindow.menuBar}}
 
 Returns the main window's menu bar.
 This function creates and returns an empty menu bar
 if the menu bar does not exist yet.
 
-===  qmainwindow:setCentralWidget(qwidget) ===
+====  qmainwindow:setCentralWidget(qwidget) ====
 {{anchor:qmainwindow.setcentralwidget}}
 
 Sets the widget ''qwidget'' to be the main window's central widget.
 The main window takes ownership of the widget pointer and 
 deletes it at the appropriate time.
 
-===  qmainwindow:setMenuBar(qmenubar) ===
+====  qmainwindow:setMenuBar(qmenubar) ====
 {{anchor:qmainwindow.setmenubar}}
 
 Sets the menu bar for the main window to ''qmenubar''.
 The main window takes ownership of the menu bar and 
 deletes it at the appropriate time.
 
-===  qmainwindow:setStatusBar(qstatusbar) ===
+====  qmainwindow:setStatusBar(qstatusbar) ====
 {{anchor:qmainwindow.setstatusbar}}
 
 Sets the status bar for the main window to ''qstatusbar''.
 The main window takes ownership of the status bar and 
 deletes it at the appropriate time.
 
-===  qmainwindow:statusBar() ===
+====  qmainwindow:statusBar() ====
 {{anchor:qmainwindow.statusBar}}
 
 Returns the main window's status bar.
@@ -744,7 +744,7 @@ This function creates and returns an empty status bar
 if the status bar does not exist yet.
 
 
-====  qt.QMenu ====
+=====  qt.QMenu =====
 {{anchor:qmenu}}
 
 Qt class 
@@ -764,7 +764,7 @@ Function ''qmenu:addLuaAction'' provides a more convenient way
 to create menu items bound to specific lua functions.
 See [[#qmenubar|qt.QMenuBar]] for an example.
 
-===  qmenu:addLuaAction([icon,]text[,keys[,statustip]][,function]) ===
+====  qmenu:addLuaAction([icon,]text[,keys[,statustip]][,function]) ====
 {{anchor:qmenu.addLuaAction}}
 
 Creates a new [[#qaction|QtLuaAction]] owned by the menu
@@ -779,33 +779,33 @@ Finally argument ''function'' is a Lua function that is
 connected to the action signal ''triggered(bool)'' and
 therefore is called when the menu item is selected. 
 
-===  qmenu:addMenu(newqmenu) ===
+====  qmenu:addMenu(newqmenu) ====
 {{anchor:qmenu.addMenu}}
 
 Adds the menu ''newqmenu'' as a submenu of the menu ''qmenu''
 and returns the corresponding action object.
 
-===  qmenu:addMenu([icon,] text) ===
+====  qmenu:addMenu([icon,] text) ====
 {{anchor:qmenu.addMenu}}
 
 Creates a new submenu with the specified ''icon'' and ''text''
 and adds it into the menu ''qmenu''. This function returns
 the new menu as an object of class ''qt.QMenu''.
 
-===  qmenu:addSeparator() ===
+====  qmenu:addSeparator() ====
 {{anchor:qmenu.addSeparator}}
 
 Adds a separator into the menu
 and returns the corresponding action object.
 
-===  qmenu:clear() ===
+====  qmenu:clear() ====
 {{anchor:qmenu.clear}}
 
 Removes all the menu items.
 Actions owned by the menu and not shown 
 in any other widget are deleted.
 
-===  qmenu:exec([qpoint[, defaultqaction]]) ===
+====  qmenu:exec([qpoint[, defaultqaction]]) ====
 {{anchor:qmenu.exec}}
 
 Pops up the menu ''qmenu'' at position ''qpoint'' and returns 
@@ -820,7 +820,7 @@ are automatically disabled while Lua is running.
 Therefore such actions cannot be used with
 ''qmenu:exec'' because they would all be disabled.
 
-===  qmenu:insertMenu(beforeqaction, newqmenu) ===
+====  qmenu:insertMenu(beforeqaction, newqmenu) ====
 {{anchor:qmenu.insertMenu}}
 
 Inserts the menu ''newqmenu'' as a submenu into the menu ''qmenu''
@@ -828,18 +828,18 @@ and returns the corresponding action object.
 The submenu is inserted before action ''beforeqaction'' 
 or is appended when ''beforeqaction'' is null or invalid for this widget.
 
-===  qmenu:insertSeparator(beforeqaction) ===
+====  qmenu:insertSeparator(beforeqaction) ====
 {{anchor:qmenu.insertSeparator}}
 
 Inserts a new separator before action ''beforeqaction'' 
 and returns the corresponding action object.
 
-===  qmenu:menuAction() ===
+====  qmenu:menuAction() ====
 {{anchor:qmenu.menuAction}}
 
 Returns the action associated with the menu ''qmenu''.
 
-====  qt,QMenuBar ====
+=====  qt,QMenuBar =====
 {{anchor:qmenubar}}
 
 Qt class 
@@ -849,40 +849,40 @@ This is a subclass of [[#qwidget|qt.QWidget]].
 
 Example:
 <file lua>
-  w = qt.QMainWindow()
+  w === qt.QMainWindow()
   w:setCentralWidget(...) -- do something smart here
-  menubar = w:menuBar()
-  filemenu = menubar:addMenu("&File")
+  menubar === w:menuBar()
+  filemenu === menubar:addMenu("&File")
   filemenu:addLuaAction("&Open", "Ctrl+O", function() doOpen(w) end)
   filemenu:addLuaAction("&Close", "Ctrl+W", function() w:close() end)
-  editmenu = menubar:addMenu("&Edit")
+  editmenu === menubar:addMenu("&Edit")
   editmenu:addLuaAction("&Cu&t", "Ctrl+X", function() doCut(w) end)
   editmenu:addLuaAction("&Copy", "Ctrl+C", function() doCopy(w) end)
   editmenu:addLuaAction("&Paste", "Ctrl+V", function() doPaste(w) end)
   w:show()
 </file>
 
-===  qmenubar:addMenu(qmenu) ===
+====  qmenubar:addMenu(qmenu) ====
 {{anchor:qmenubar.addMenu}}
 
 Adds the menu ''qmenu'' as a menu of the menubar ''qmenubar''
 and returns the corresponding action object.
 
-===  qmenubar:addMenu([icon,] text) ===
+====  qmenubar:addMenu([icon,] text) ====
 {{anchor:qmenubar.addMenu}}
 
 Creates a new menu with the specified ''icon'' and ''text''
 and adds it into the menubar ''qmenubar''. This function returns
 the new menu as an object of class ''qt.QMenu''.
 
-===  qmenubar:clear() ===
+====  qmenubar:clear() ====
 {{anchor:qmenubar.clear}}
 
 Removes all the menus and actions from the menu bar.
 Actions owned by the menu and not shown 
 in any other widget are deleted.
 
-===  qmenubar:insertMenu(beforeqaction, qmenu) ===
+====  qmenubar:insertMenu(beforeqaction, qmenu) ====
 {{anchor:qmenubar.insertMenu}}
 
 Inserts the menu ''qmenu'' into the menu bar ''qmenubar''
@@ -890,13 +890,13 @@ and returns the corresponding action object.
 The submenu is inserted before action ''beforeqaction'' 
 or is appended when ''beforeqaction'' is null or invalid for this widget.
 
-===  qmenubar:insertSeparator(beforeqaction) ===
+====  qmenubar:insertSeparator(beforeqaction) ====
 {{anchor:qmenubar.insertSeparator}}
 
 Inserts a new separator before action ''beforeqaction'' 
 and returns the corresponding action object.
 
-====  qt.QPainterPath ====
+=====  qt.QPainterPath =====
 {{anchor:qpainterpath}}
 
 Qt class 
@@ -907,7 +907,7 @@ or delimited using [[..:qtwidget:index#painterstroke|painter:stroke]].
 No specific Lua methods have been defined for this Qt variant class.
 
 
-====  qt.QPixmap ====
+=====  qt.QPixmap =====
 {{anchor:qpixmap}}
 
 Qt class 
@@ -916,7 +916,7 @@ represents a server-side image containing device-dependent data.
 No specific Lua methods have been defined for this Qt variant class.
 
 
-====  qt.QPen ====
+=====  qt.QPen =====
 {{anchor:qpen}}
 
 Qt class 
@@ -924,7 +924,7 @@ Qt class
 represents the painter settings that determine how 
 lines are drawn.
 
-===  qt.QPen(table) ===
+====  qt.QPen(table) ====
 {{anchor:qpen}}
 {{anchor:qpenfromtable}}
 
@@ -951,7 +951,7 @@ The following fields are recognized:
   * Numerical field ''miterLimit'' determines how far a [[http://doc.trolltech.com/4.4/qpen.html#setMiterLimit|miter join]] can extend from the join point. This is used to reduce artifacts between line joins where the lines are close to parallel.
 
 
-===  qpen:totable() ===
+====  qpen:totable() ====
 {{anchor:qpen.totable}}
 
 Expression ''qpen:totable()'' returns a table describing the pen.
@@ -959,7 +959,7 @@ See the documentation of [[#qpenfromtable|qt.QPen(table)]]
 for a description of the table fields.
 
 
-====  qt.QTransform ====
+=====  qt.QTransform =====
 {{anchor:qtransform}}
 
 Qt class 
@@ -968,7 +968,7 @@ represents a 2D transformation of a coordinate system.
 Transformation matrices are represented as Qt variants 
 of class ''qt.QTransform''.
 
-===  qt.QTransform([table[,table]]) ===
+====  qt.QTransform([table[,table]]) ====
 {{anchor:qtransform}}
 {{anchor:qtransformfromtable}}
 
@@ -983,20 +983,20 @@ that maps the quad ''fquad'' to the quad ''tquad''.
 Both arguments ''fquad'' and ''tquad'' are table containing exactly four
 [[..:qtcore:index#qpoint|qt.QPointF]] representing the four corners of the quad.
 
-===  qtransform:totable() ===
+====  qtransform:totable() ====
 {{anchor:qtransform.totable}}
 
 Expression ''qtransform:totable()'' returns a table suitable
 for use with expression [[#qtransformfromtable|qt.QTransform(table)]].
 
-===  qtransform:scaled(sx,sy) ===
+====  qtransform:scaled(sx,sy) ====
 {{anchor:qtransform.scaled}}
 
 Function ''qtransform:scaled'' returns a new transformation matrix
 representing a coordinate system whose axes have been
 scaled by coefficient ''sx'' and ''sy''.  
 
-===  qtransform:translated(dx,dy) ===
+====  qtransform:translated(dx,dy) ====
 {{anchor:qtransform.translated}}
 
 Function ''qtransform:translated'' returns a new transformation matrix
@@ -1004,7 +1004,7 @@ representing a coordinate system whose origin has been
 translated by ''dx'' units along the X axis and ''dy'' units along the Y axis.
 
 
-===  qtransform:sheared(cx,cy) ===
+====  qtransform:sheared(cx,cy) ====
 {{anchor:qtransform.sheared}}
 
 Function ''qtransform:sheared'' returns a new transformation matrix
@@ -1012,7 +1012,7 @@ representing a coordinate system that has been sheared using coefficients
 ''cx'' horizontally and ''cy'' vertically.
 
 
-===  qtransform:rotated(angle,[axis,[unit]]) ===
+====  qtransform:rotated(angle,[axis,[unit]]) ====
 {{anchor:qtransform.rotated}}
 
 Function ''qtransform:rotated'' returns a new transformation matrix 
@@ -1022,14 +1022,14 @@ defaults to ''ZAxis''. The optional string argument ''unit'' may
 be ''Degrees'' or ''Radians''
 and default to ''Degrees''.
 
-===  qtransform:inverted() ===
+====  qtransform:inverted() ====
 {{anchor:qtransform.inverted}}
 
 Function ''qtransform:inverted'' returns 
 the inverse transform of its argument
 or ''nil'' when it is not invertible.
 
-===  qtransform:map(...) ===
+====  qtransform:map(...) ====
 {{anchor:qtransform.map}}
 
 Function ''qtransform:map'' applies 
@@ -1044,7 +1044,7 @@ This function also take as argument to reals representing
 the coordinates of a point and return two reals
 representing the transformed coordinates.
 
-====  qt.QWidget ====
+=====  qt.QWidget =====
 {{anchor:qwidget}}
 
 Qt class 
@@ -1053,7 +1053,7 @@ is the base class of all graphical interface components.
 All widgets inherit class ''qt.QWidget'' and
 its superclass [[..:qtcore:index#qobject|qt.QObject]].
 
-===  qt.QWidget([parent]) ===
+====  qt.QWidget([parent]) ====
 {{anchor:qwidget}}
 
 Expression ''qt.QWidget(parent)'' returns a new widget.
@@ -1067,14 +1067,14 @@ and is automatically destroyed when the garbage collector
 determines that it is no longer referenced.
 
 
-===  qwidget:actions() ===
+====  qwidget:actions() ====
 {{anchor:qwidget.actions}}
 
 Expression ''qwidget:actions()'' returns a 
 qt value of class [[..:qtcore:index#qvariantlist|qt.QVariantList]]
 containing list of actions associated with this widget.
 
-===  qwidget:addAction(qaction) ===
+====  qwidget:addAction(qaction) ====
 {{anchor:qwidget.addAction}}
 
 Appends action ''qaction'' to the 
@@ -1082,32 +1082,32 @@ list of actions associated with this widget.
 
 Example: creating a context menu
 <file lua>
-   action1 = qt.QtLuaAction{text="Checkme", checkable=true,
+   action1 === qt.QtLuaAction{text="Checkme", checkable=true,
                function(b) print("checked:", b) end}
-   action2 = qt.QtLuaAction{text="Pickme",
+   action2 === qt.QtLuaAction{text="Pickme",
                function() print("picked") end}
    w:addAction(action1)
    w:addAction(action2)
    w.contextMenuPolicy='ActionsContextMenu'
 </file>
 
-===  qwidget:insertAction(beforeqaction, qaction) ===
+====  qwidget:insertAction(beforeqaction, qaction) ====
 {{anchor:qwidget.insertAction}}
 
-Insert action =qaction= into the 
+Insert action ==qaction== into the 
 list actions associated with this widget.
-Argument =beforeqaction= indicates at which position
-to insert the action. If =beforeqaction= is omitted
+Argument ==beforeqaction== indicates at which position
+to insert the action. If ==beforeqaction== is omitted
 or invalid, the action is simply appended.
 
-===  qwidget:mapToGlobal(qpoint) ===
+====  qwidget:mapToGlobal(qpoint) ====
 {{anchor:qwidget.mapToGlobal}}
 
 Translates the widget coordinates ''qpoint'' to global screen coordinates.
 Both argument ''qpoint'' and the return value are Qt value of class
 [[..:qtcore:index#qpoint|qt.QPoint]].
 
-===  qwidget:mapFromGlobal(qpoint) ===
+====  qwidget:mapFromGlobal(qpoint) ====
 {{anchor:qwidget.mapFromGlobal}}
 
 Translates the global screen coordinates ''qpoint'' to widget coordinates.
@@ -1115,14 +1115,14 @@ Both argument ''qpoint'' and the return value are Qt value of class
 [[..:qtcore:index#qpoint|qt.QPoint]].    
 
 
-===  qwidget:removeAction(qaction) ===
+====  qwidget:removeAction(qaction) ====
 {{anchor:qwidget.removeAction}}
 
 Removes action ''qaction'' from the 
 list actions associated with this widget.
 
 
-===  qwidget:render([pointer]) ===
+====  qwidget:render([pointer]) ====
 {{anchor:qwidget.render}}
 
 When called without argument, 
@@ -1138,7 +1138,7 @@ Such pointers can be obtained using functions
 When such an argument is specified,
 nothing is returned.
 
-===  qwidget:setAttribute(widgetattribute,[value]) ===
+====  qwidget:setAttribute(widgetattribute,[value]) ====
 {{anchor:qwidget.setAttribute}}
 
 Sets the specified
@@ -1147,7 +1147,7 @@ to boolean value ''value''.
 Some of these flags are used internally by Qt. 
 Care is required.
 
-===  qwidget:setWindowFlag(windowflag,[value]) ===
+====  qwidget:setWindowFlag(windowflag,[value]) ====
 {{anchor:qwidget.setWindowFlag}}
 
 Sets the specified
@@ -1158,7 +1158,7 @@ are handled as exclusive flags.
 Setting these flags usually hides the window.
 You need to do call ''qwidget:show'' again.
 
-===  qwidget:testAttribute(widgetattribute) ===
+====  qwidget:testAttribute(widgetattribute) ====
 {{anchor:qwidget.testAttribute}}
 
 Returns a boolean indicating the value of the specified
@@ -1166,7 +1166,7 @@ Returns a boolean indicating the value of the specified
 Flags indicating a window type 
 are handled as exclusive flags.
 
-===  qwidget:testWindowFlag(windowflag) ===
+====  qwidget:testWindowFlag(windowflag) ====
 {{anchor:qwidget.testWindowFlag}}
 
 Returns a boolean indicating the value of the specified
@@ -1174,7 +1174,7 @@ Returns a boolean indicating the value of the specified
 Flags indicating a window type 
 are handled as exclusive flags.
 
-===  qwidget:window() ===
+====  qwidget:window() ====
 {{anchor:qwidget.window}}
 
 Expression ''qwidget:window()'' returns the window for widget ''qwidget'',

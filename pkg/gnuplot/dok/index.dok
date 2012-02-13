@@ -30,14 +30,14 @@ therefore each plotting session is persistent and additional commands
 can be sent. For advanced users [[#gnuplot.raw|gnuplot.raw]]
 provides a free form interface to gnuplot.
 
-====== Line Plotting ======
+===== Line Plotting =====
 {{anchor:gnuplot.line.dok}}
 
 Line plotting functionality covers many configurations from simplest
 case of plotting a single vector to displaying multiple lines at once
 with custom line specifictions.
 
-=====  gnuplot.plot(x) =====
+====  gnuplot.plot(x) ====
 {{anchor:gnuplot.plot}}
 Plot vector '' x '' using dots of first default ''Gnuplot'' type.
 
@@ -70,7 +70,7 @@ gnuplot.plot({'Cos',x/math.pi,torch.cos(x),'~'},{'Sin',x/math.pi,torch.sin(x),'|
 </file>
 {{plot_sincos.png?400}}
 
-====== Plotting 3D Surfaces ======
+===== Plotting 3D Surfaces =====
 {{anchor:gnuplot.surface.dok}}
 
 Surface plotting creates a 3D surface plot of a given matrix '' z
@@ -80,7 +80,7 @@ in '' z ''. If a terminal with interactive capabilities is being used
 by ''Gnuplot'' backend (like ''x11'' or ''wxt''), then rotating,
 zooming is also possible.
 
-=====  gnuplot.splot(z) =====
+====  gnuplot.splot(z) ====
 {{anchor:gnuplot.splot}}
 
 Plot surface '' z '' in 3D.
@@ -106,12 +106,12 @@ gnuplot.splot({torch.sin(xx)},{torch.sin(xx)+2})
 </file>
 {{plot_splot2.png?400}}
 
-======  Plotting Matrices as Images ======
+=====  Plotting Matrices as Images =====
 {{anchor:gnuplot.image.dok}}
 
 A given matrix can be plotted using 2D contour plot on a surface.
 
-=====  gnuplot.imagesc(z, ['color' or 'gray']) =====
+====  gnuplot.imagesc(z, ['color' or 'gray']) ====
 {{anchor:gnuplot.imagesc}}
 
 Plot surface '' z '' using contour plot. The second argument defines
@@ -127,13 +127,13 @@ gnuplot.imagesc(torch.sin(xx),'color')
 </file>
 {{plot_imagesc.png?400}}
 
-====== Histograms ======
+===== Histograms =====
 {{anchor:gnuplot.histogram.dok}}
 
 Given a tensor, the distribution of values can be plotted using
 ''gnuplot.hist'' function.
 
-=====  gnuplot.hist(x, [nbins, min, max]) =====
+====  gnuplot.hist(x, [nbins, min, max]) ====
 {{anchor:gnuplot.hist}}
 
 Plot the histogram of values in ''N-D'' tensor ''x'', optionally using ''nbins''
@@ -144,7 +144,7 @@ gnuplot.hist(torch.randn(100000),100)
 </file>
 {{plot_hist.png?400}}
 
-====== Plotting Directly into Files ======
+===== Plotting Directly into Files =====
 {{anchor:gnuplot.files.dok}}
 
 Any of the above plotting utilities can also be used for directly
@@ -159,7 +159,7 @@ gnuplot.ylabel('Y')
 gnuplot.plotflush()
 </file>
 
-====== Common Operations ======
+===== Common Operations =====
 {{anchor:gnuplot.commons.dok}}
 
 It is possible to manage multiple plots at a time, printing plots to
@@ -169,91 +169,91 @@ There are also several handy operations for decorating plots which are
 common to many of the plotting functions.
 
 
-=====  gnuplot.setgnuplotexe(exe) =====
+====  gnuplot.setgnuplotexe(exe) ====
 {{anchor:gnuplot.setgnuplotexe}}
 
 Manually set the location of gnuplot executable.
 
-=====  gnuplot.setterm(teerm) =====
+====  gnuplot.setterm(teerm) ====
 {{anchor:gnuplot.setterm}}
 
 Manually set the gnuplot terminal.
 
-=====  gnuplot.closeall() =====
+====  gnuplot.closeall() ====
 {{anchor:gnuplot.closeall}}
 
 Close all gnuplot active connections. This will not be able to close
 open windows, since on the backend gnuplot also can not close windows.
 
-=====  gnuplot.figure([n]) =====
+====  gnuplot.figure([n]) ====
 {{anchor:gnuplot.figure}}
 
 Select (or create) a new figure with id ''n''. Note that until a plot
 command is given, the window will not be created. When ''n'' is
 skipped, a new figure is created with the next consecutive id.
 
-=====  gnuplot.epsfigure(fname) =====
+====  gnuplot.epsfigure(fname) ====
 {{anchor:gnuplot.epsfigure}}
 
 Creates a figure directly on the ''eps'' file given with
 ''fname''. This uses ''Gnuplot'' terminal ''postscricpt eps enhanced color''.
 
-=====  gnuplot.pngfigure(fname) =====
+====  gnuplot.pngfigure(fname) ====
 {{anchor:gnuplot.pngfigure}}
 
 Creates a figure directly on the ''png'' file given with
 ''fname''. This uses ''Gnuplot'' terminal ''png''.
 
-=====  gnuplot.plotflush([n]) =====
+====  gnuplot.plotflush([n]) ====
 {{anchor:gnuplot.plotflush}}
 
 This command sends ''unset output'' to underlying gnuplot. Usefull for
 flushing file based terminals.
 
-=====  gnuplot.figprint(fname) =====
+====  gnuplot.figprint(fname) ====
 {{anchor:gnuplot.figprint}}
 
 Prints the current figure to the given file with name ''fname''. Only
 ''png'' or ''eps'' files are supported.
 
-=====  gnuplot.xlabel(label) =====
+====  gnuplot.xlabel(label) ====
 {{anchor:gnuplot.xlabel}}
 
 Sets the label of ''x'' axis to ''label''. Only supported for gnuplot
 version 4.4 and above.
 
-=====  gnuplot.ylabel(label) =====
+====  gnuplot.ylabel(label) ====
 {{anchor:gnuplot.ylabel}}
 
 Sets the label of ''y'' axis to ''label''. Only supported for gnuplot
 version 4.4 and above.
 
-=====  gnuplot.zlabel(label) =====
+====  gnuplot.zlabel(label) ====
 {{anchor:gnuplot.zlabel}}
 
 Sets the label of ''z'' axis to ''label''. Only supported for gnuplot
 version 4.4 and above.
 
-=====  gnuplot.title(title) =====
+====  gnuplot.title(title) ====
 {{anchor:gnuplot.title}}
 
 Sets the title of the plot to ''title''. Only supported for gnuplot
 version 4.4 and above.
 
-=====  gnuplot.grid(toggle) =====
+====  gnuplot.grid(toggle) ====
 {{anchor:gnuplot.grid}}
 
 If ''toggle'' is ''true'' then a grid is displayed, else it is
 hidden. Only supported for gnuplot version 4.4 and above.
 
-=====  gnuplot.movelegend(hloc,vloc) =====
+====  gnuplot.movelegend(hloc,vloc) ====
 {{anchor:gnuplot.movelegend}}
 
 Set the location of legend key. ''hloc'' can be '''left', 'right' or
 'center'''. ''vloc'' can be '''top', 'bottom' or 'middle'''. Only
 supported for gnuplot version 4.4 and above.
 
-=====  gnuplot.raw(command) =====
+====  gnuplot.raw(command) ====
 {{anchor:gnuplot.raw}}
 
 This command is useful for advanced users of gnuplot. ''command'' is

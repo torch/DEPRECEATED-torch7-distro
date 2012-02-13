@@ -10,7 +10,7 @@ vectors, matrices and tensors and how to build and train a basic
 neural network. For anything else, you should know how to access the
 html help and read about how to do it.
 
-======  What is Torch? ======
+=====  What is Torch? =====
 
 Torch7 provides a Matlab-like environment for state-of-the-art machine
 learning algorithms. It is easy to use and provides a very efficient
@@ -18,14 +18,14 @@ implementation, thanks to a easy and fast scripting language (Lua) and
 an underlying C/C++ implementation.  You can read more about Lua
 [[http://www.lua.org|here]].
 
-======  Installation ======
+=====  Installation =====
 
 First before you can do anything, you need to install Torch7 on your
 machine.  That is not described in detail here, but is instead
 described in the [[..:install:index|installation help]].
 
 
-======  Checking your installation works and requiring packages ======
+=====  Checking your installation works and requiring packages =====
 
 If you have got this far, hopefully your Torch installation works. A simple
 way to make sure it does is to start Lua from the shell command line, 
@@ -55,7 +55,7 @@ or higher-dimensional objects (tensors).
 Tensors). To see the list of all packages distributed with Torch7,
 click [[..:index|here]].
 
-====== Getting Help ======
+===== Getting Help =====
 
 There are two main ways of getting help in Torch7. One way is ofcourse
 the html formatted help. However, another and easier method is to use
@@ -100,7 +100,7 @@ t7> torch.randn(
 
 </file>
 
-======  Torch Basics: Playing with Tensors ======
+=====  Torch Basics: Playing with Tensors =====
 
 Ok, now we are ready to actually do something in Torch.  Lets start by
 constructing a vector, say a vector with 5 elements, and filling the
@@ -229,7 +229,7 @@ t7> =torch.mm(a,b)
 
 </file>
 
-====== Types in Torch7 ======
+===== Types in Torch7 =====
 
 In Torch7, different types of tensors can be used. By default, all
 tensors are created using ''double'' type. ''torch.Tensor'' is a
@@ -244,12 +244,12 @@ t7> =torch.Tensor()
 [torch.FloatTensor with no dimension]
 </file>
 
-======  Example: training a neural network ======
+=====  Example: training a neural network =====
 
 We will show now how to train a neural network using the [[..:nn:index|nn]] package
 available in Torch.
 
-=====  Torch basics: building a dataset using Lua tables =====
+====  Torch basics: building a dataset using Lua tables ====
 
 In general the user has the freedom to create any kind of structure he
 wants for dealing with data.
@@ -302,7 +302,7 @@ for i=1,dataset:size() do
 end
 </file>
 
-=====  Torch basics: building a neural network =====
+====  Torch basics: building a neural network ====
 
 To train a neural network we first need some data.  We can use the XOR data
 we just generated in the section before.  Now all that remains is to define
@@ -336,7 +336,7 @@ mlp:add(nn.Linear(HUs,outputs))
 </file>
 
 
-=====  Torch basics: training a neural network =====
+====  Torch basics: training a neural network ====
 
 Now we're ready to train.
 This is done with the following code:
@@ -373,7 +373,7 @@ See the nn package description of the
 for more details.
 
 
-=====  Torch basics: testing your neural network =====
+====  Torch basics: testing your neural network ====
 
 To test your network on a single example you can do this:
 <file lua>
@@ -402,7 +402,7 @@ t7> x=torch.Tensor(2); x[1]=-0.5; x[2]=-0.5; print(mlp:forward(x))
 [torch.DoubleTensor of dimension 1]
 </file>
 
-=====  Manual Training of a Neural Network =====
+====  Manual Training of a Neural Network ====
 
 Instead of using the [[..:nn:index#nn.StochasticGradient|StochasticGradient]] class
 you can directly make the forward and backward calls on the network yourself.
@@ -448,7 +448,7 @@ end
 
 Super!
 
-====== Concluding remarks ======
+===== Concluding remarks =====
 
 That's the end of this tutorial, but not the end of what you have left
 to discover of Torch! To explore more of Torch, you should take a look

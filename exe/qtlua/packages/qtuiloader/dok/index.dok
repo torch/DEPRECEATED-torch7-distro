@@ -1,4 +1,4 @@
-======  QtUiLoader Package Reference Manual ====== 
+======  QtUiLoader Package Reference Manual ======
 {{anchor:qtuiloader.dok}}
 
 Package ''qtuiloader'' provides 
@@ -26,7 +26,7 @@ Then load file ''test.lua'' into the
 </file>
 
 
-====  Functions ====
+=====  Functions =====
 {{anchor:qtuiloader.functions}}
 
 Package ''qtuiloader'' provides a few convenience functions. 
@@ -38,7 +38,7 @@ this preallocated loader to construct a widget using a
 user interface description.
 
 
-===  qtuiloader.availableWidgets() ===
+====  qtuiloader.availableWidgets() ====
 {{anchor:qtuiloaderavailablewidgets}}
 {{anchor:qtuiloader.availablewidgets}}
 
@@ -47,7 +47,7 @@ Expression ''qtuiloader.availableWidgets()'' returns a
 containing the names of the supported widget classes.
 
 
-===  qtuiloader.createWidget(classname,[parent,[objectname]]) ===
+====  qtuiloader.createWidget(classname,[parent,[objectname]]) ====
 {{anchor:qtuiloader.createWidget}}
 
 Creates a [[..:qtgui:index#qwidget|widget]] of class ''classname''.
@@ -64,7 +64,7 @@ determines that it is no longer referenced.
 
 
 
-===  qtuiloader.load(filename,[parent]) ===
+====  qtuiloader.load(filename,[parent]) ====
 {{anchor:qtuiloaderload}}
 {{anchor:qtuiloader.load}}
 
@@ -79,7 +79,7 @@ and is automatically destroyed when the garbage collector
 determines that it is no longer referenced.
 
 
-===  qtuiloader.loader() ===
+====  qtuiloader.loader() ====
 {{anchor:qtuiloaderloader}}
 {{anchor:qtuiloader.loader}}
 
@@ -88,10 +88,10 @@ returns a preallocated instance
 of class [[#quiloader|qt.QUiLoader]].
 
 
-====  Classes ====
+=====  Classes =====
 {{anchor:qtuiloader.classes}}
 
-===  qt.QUiLoader ===
+====  qt.QUiLoader ====
 {{anchor:quiloader}}
 
 Class ''qt.QUiLoader'' provides bindings 

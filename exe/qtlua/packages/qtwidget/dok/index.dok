@@ -62,7 +62,7 @@ and you can erase everything with
   w:showpage()
 </file>
 
-====  High Level Interface ====
+===== High Level Interface =====
 {{anchor:highlevel}}
 
 The following convenience functions 
@@ -80,7 +80,7 @@ on these tables.
 
 
 
-===  qtwidget.newwindow(w,h,[title])  ===
+====  qtwidget.newwindow(w,h,[title])  ====
 {{anchor:qtwidgetnewwindow}}
 {{anchor:qtwidget.newwindow}}
 
@@ -93,7 +93,7 @@ String argument ''title'' specifies a window title.
 The expression returns a Lua table that 
 serves as a drawing port descriptor.
 
-===  qtwidget.newimage(...) ===
+====  qtwidget.newimage(...) ====
 {{anchor:qtwidgetnewimage}}
 {{anchor:qtwidget.newimage}}
 
@@ -127,7 +127,7 @@ This only works when both packages [[..:torch:index|torch]]
 and [[..:qttorch:index|qttorch]] have been loaded.
 
 
-===  qtwidget.newps(w,h,filename) ===
+====  qtwidget.newps(w,h,filename) ====
 {{anchor:qtwidgetnewps}}
 {{anchor:qtwidget.newps}}
 
@@ -142,7 +142,7 @@ The output file contains incomplete data until
 you delete the painter object or call 
 method [[#qtwidgetclose|close]].
 
-===  qtwidget.newpdf(w,h,filename) ===
+====  qtwidget.newpdf(w,h,filename) ====
 {{anchor:qtwidgetnewpdf}}
 {{anchor:qtwidget.newpdf}}
 
@@ -158,7 +158,7 @@ you delete the painter object or call
 method [[#qtwidgetclose|close]].
 
 
-===  qtwidget.newsvg(w,h,[filename]) ===
+====  qtwidget.newsvg(w,h,[filename]) ====
 {{anchor:qtwidgetnewsvg}}
 {{anchor:qtwidget.newsvg}}
 
@@ -178,7 +178,7 @@ accessible using expression
 [[..:qtsvg:index#qtluasvggeneratordata|desc.svg:data()]].
 
 
-===  qtwidget.newprint(w,h,[printername]) ===
+====  qtwidget.newprint(w,h,[printername]) ====
 {{anchor:qtwidgetnewprint}}
 {{anchor:qtwidget.newprint}}
 
@@ -194,7 +194,7 @@ initial size of the coordinate system.
 
 
 
-===  Painting Functions. ===
+====  Painting Functions. ====
 {{anchor:qtpaintingfunctions}}
 
 All the [[#qtluapainterfunctions|painting functions]] 
@@ -215,7 +215,7 @@ These calls are simply forwarded to the underlying
   * [[#qtluapainterfunctions|Link to the painting functions]].
 
 
-===  Other Functions and Fields. ===
+====  Other Functions and Fields. ====
 {{anchor:qtwidgetotherfunctions}}
 
 The following fields and functions are defined
@@ -227,7 +227,7 @@ on the descriptor tables returned by the functions
 [[#qtwidgetnewprint|qtwidget.newprint]].
 
 
-==  desc.port ==
+===  desc.port ===
 {{anchor:descport}}
 {{anchor:qtwidget.desc.port}}
 
@@ -236,7 +236,7 @@ Field ''desc.port'' contains the
 that is used to perform the drawings.
 
 
-==  desc.widget ==
+===  desc.widget ===
 {{anchor:qtwidget.desc.widget}}
 
 Field ''desc.widget'' contains the
@@ -245,7 +245,7 @@ that underlies drawing port descriptors created with
 [[#qtwidgetnewwindow|qtwidget.newwindow]].
 
 
-==  desc.listener ==
+===  desc.listener ===
 {{anchor:qtwidget.desc.listener}}
 
 Field ''desc.widget'' contains a
@@ -253,7 +253,7 @@ Field ''desc.widget'' contains a
 that can be used to capture events on the widget created by
 [[#qtwidgetnewwindow|qtwidget.newwindow]].
 
-==  desc.printer ==
+===  desc.printer ===
 {{anchor:qtwidget.desc.printer}}
 
 Field ''desc.printer'' contains the
@@ -263,7 +263,7 @@ that underlies drawing port descriptors created with
 [[#qtwidgetnewpdf|qtwidget.newpdf]], or
 [[#qtwidgetnewprint|qtwidget.newprint]].
 
-==  desc.svg ==
+===  desc.svg ===
 {{anchor:qtwidget.desc.svg}}
 
 Field ''desc.svg'' contains the
@@ -272,18 +272,18 @@ associated with drawing ports created with
 [[#qtwidgetnewsvg|qtwidget.newsvg]].
 
 
-==  desc.width ==
+===  desc.width ===
 {{anchor:qtwidget.desc.width}}
 
 Field ''desc.width'' contains the width of the drawing surface.
 
-==  desc.height ==
+===  desc.height ===
 {{anchor:qtwidget.desc.height}}
 
 Field ''desc.height'' contains the height of the drawing surface.
 
 
-==  desc:close() ==
+===  desc:close() ===
 {{anchor:qtwidgetclose}}
 {{anchor:qtwidget.desc.close}}
 
@@ -293,7 +293,7 @@ In the case of a drawing port descriptor returned by function
 this function also closes the [[..:qtgui:index#qwidget|qt.QWidget]] 
 and the windows disappears from the screen.
 
-==  desc:resize(w,h) ==
+===  desc:resize(w,h) ===
 {{anchor:qtwidget.desc.resize}}
 
 Function ''desc:resize(w,h)'' is only available for
@@ -302,7 +302,7 @@ drawing port descriptor returned by function
 It resizes the underlying widget.
 
 
-==  desc:onResize(f) ==
+===  desc:onResize(f) ===
 {{anchor:qtwidget.desc.onResize}}
 
 Function ''desc:onResize(f)'' is only available for
@@ -315,7 +315,7 @@ Each call of ''desc:onResize'' replaces the previous callback function by ''f''.
 Calling it with argument ''nil'' removes the current callback.
 
 
-==  desc:valid() ==
+===  desc:valid() ===
 {{anchor:qtwidget.desc.valid}}
 
 Expression ''desc:valid()'' returns ''false'' if the 
@@ -324,30 +324,30 @@ for instance because the window has been closed.
 Otherwise it returns ''true''.
 
 
-====  Classes ====
+===== Classes =====
 {{anchor:qtwidget.classes}}
 
-===  qt.QtLuaListener ===
+====  qt.QtLuaListener ====
 {{anchor:qtlualistener}}
 
 Class ''QtLuaListener'' emits signals when its parent receives event messages.
 This is convenient because the Lua program can define event handling functions
 using the signal connection function [[..:qt:index#qt.connect|qt.connect]].
 
-==  qt.QtLuaListener(qwidget) ==
+===  qt.QtLuaListener(qwidget) ===
 {{anchor:qtlualistener}}
 
 Expression ''qt.QtLuaListener(qwidget)'' returns a new ''QtLuaListener'' object
 that relays the event messages received by widget ''qwidget''.
 This object is a child of ''qwidget''.
 
-==  [QtLuaListener signal] sigClose()  ==
+===  [QtLuaListener signal] sigClose()  ===
 {{anchor:qtlualistener.sigClose}}
 
 Signal ''sigClose'' is emitted when the underlying widget receives a 
 [[http://doc.trolltech.com/4.4/qcloseevent.html|QCloseEvent]].
 
-==  [QtLuaListener signal] sigResize(int,int) ==
+===  [QtLuaListener signal] sigResize(int,int) ===
 {{anchor:qtlualistener.sigResize}}
 
 Signal ''sigResize'' is emitted whenever the underlying widget receives a
@@ -355,7 +355,7 @@ Signal ''sigResize'' is emitted whenever the underlying widget receives a
 because it has changed size.  The two arguments are the new widget size.
 
 
-==  [QtLuaListener signal] sigKeyPress(QString,QByteArray,QByteArray) ==
+===  [QtLuaListener signal] sigKeyPress(QString,QByteArray,QByteArray) ===
 {{anchor:qtlualistener.sigKeyPress}}
 
 Signal ''sigKeyPress'' is emitted whenever the underlying widget receives a
@@ -369,7 +369,7 @@ The third argument is a string containing the
 separated by a vertical bar.  
 
 
-==  [QtLuaListener signal] sigKeyRelease(QString,QByteArray,QByteArray) ==
+===  [QtLuaListener signal] sigKeyRelease(QString,QByteArray,QByteArray) ===
 {{anchor:qtlualistener.sigKeyRelease}}
 
 Signal ''sigKeyRelease'' is emitted whenever the underlying widget receives a
@@ -384,7 +384,7 @@ separated by a vertical bar.
 
 
 
-==  [QtLuaListener signal] sigMousePress(int,int,QByteArray,QByteArray,QByteArray) ==
+===  [QtLuaListener signal] sigMousePress(int,int,QByteArray,QByteArray,QByteArray) ===
 {{anchor:qtlualistener.sigMousePress}}
 
 Signal ''sigMousePress'' is emitted whenever the underlying widget receives a
@@ -402,7 +402,7 @@ separated by a vertical bar.
 
 
 
-==  [QtLuaListener signal] sigMouseRelease(int,int,QByteArray,QByteArray,QByteArray) ==
+===  [QtLuaListener signal] sigMouseRelease(int,int,QByteArray,QByteArray,QByteArray) ===
 {{anchor:qtlualistener.sigMouseRelease}}
 
 Signal ''sigMouseRelease'' is emitted whenever the underlying widget receives a
@@ -418,7 +418,7 @@ separated by a vertical bar.
 The fifth argument is a string containing the names of all depressed buttons
 separated by a vertical bar.  
 
-==  [QtLuaListener signal] sigMouseDoubleClick(int,int,QByteArray,QByteArray,QByteArray) =={{anchor:qtlualistener.sigMouseDoubleClick}}
+===  [QtLuaListener signal] sigMouseDoubleClick(int,int,QByteArray,QByteArray,QByteArray) =={{anchor:qtlualistener.sigMouseDoubleClick}}
 
 Signal ''sigMouseRelease'' is emitted whenever the underlying widget receives a
 [[http://doc.trolltech.com/4.4/qmouseevent.html|QMouseEvent]]
@@ -433,7 +433,7 @@ separated by a vertical bar.
 The fifth argument is a string containing the names of all depressed buttons
 separated by a vertical bar.  
 
-==  [QtLuaListener signal] sigMouseMove(int,int,QByteArray,QByteArray) ==
+===  [QtLuaListener signal] sigMouseMove(int,int,QByteArray,QByteArray) ===
 {{anchor:qtlualistener.sigMouseMove}}
 
 Signal ''sigMouseRelease'' is emitted whenever the underlying widget receives a
@@ -451,7 +451,7 @@ separated by a vertical bar.
 
 
 
-==  [QtLuaListener signal] sigEnter(bool) ==
+===  [QtLuaListener signal] sigEnter(bool) ===
 {{anchor:qtlualistener.sigEnter}}
 
 Signal ''sigEnter'' is emitted whenever the underlying widget receives an
@@ -462,7 +462,7 @@ or
 The boolean argument indicates whether the mouse pointer has just
 entered or left the widget area.
 
-==  [QtLuaListener signal] sigFocus(bool) ==
+===  [QtLuaListener signal] sigFocus(bool) ===
 {{anchor:qtlualistener.sigFocus}}
 
 Signal ''sigEnter'' is emitted whenever the underlying widget receives 
@@ -470,7 +470,7 @@ a [[http://doc.trolltech.com/4.4/qfocusevent.html|QFocusEvent]].
 The boolean argument indicates whether the widget has just gained
 or just lost the keyboard focus.
 
-==  [QtLuaListener signal] sigShow(bool) ==
+===  [QtLuaListener signal] sigShow(bool) ===
 {{anchor:qtlualistener.sigShow}}
 
 Signal ''sigEnter'' is emitted whenever the underlying widget receives 
@@ -480,13 +480,13 @@ The boolean argument indicates whether the widget has just been
 shown or just been hidden.
 
 
-==  [QtLuaListener signal] sigPaint() ==
+===  [QtLuaListener signal] sigPaint() ===
 {{anchor:qtlualistener.sigPaint}}
 
 Signal ''sigEnter'' is emitted whenever the underlying widget receives 
 a [[http://doc.trolltech.com/4.4/qpaintevent.html|QPaintEvent]].
 
-===  qt.QtLuaPainter ===
+====  qt.QtLuaPainter ====
 {{anchor:qtluapainter}}
 
 Painting in Qt is usually achieved using class
@@ -515,12 +515,12 @@ class [[http://doc.trolltech.com/4.4/qpainter.html|QPainter]]
 accurately describes how the painter settings affects drawing operations.
 
 
-==  qt.QtLuaPainter(...) ==
+===  qt.QtLuaPainter(...) ===
 {{anchor:qtluapainter}}
 
 Function ''qt.QtLuaPainter'' constructs a new ''QtLuaPainter'' instance.
 
-== ''qt.QtLuaPainter(qimage)'' ==
+=== ''qt.QtLuaPainter(qimage)'' ===
 {{anchor:qtluapainter}}
 
 Constructs a painter instance that targets an offscreen image.
@@ -530,7 +530,7 @@ passed as argument. Painting operations do not modify the image
 passed as argument. Instead a copy of the current image can be 
 accessed using expression [[#paintergrab|painter:image()]].
 
-== ''qt.QtLuaPainter(filename, [format])'' ==
+=== ''qt.QtLuaPainter(filename, [format])'' ===
 {{anchor:qtluapainter}}
 
 Constructs a painter instance that targets an offscreen image
@@ -540,7 +540,7 @@ The file format is determined by the optional string
 Use expression [[#paintergrab|painter.image()]] to 
 obtain a copy of the offscreen image.
 
-== ''qt.QtLuaPainter(w,h,[monoflag])'' ==
+=== ''qt.QtLuaPainter(w,h,[monoflag])'' ===
 {{anchor:qtluapainter}}
 
 Constructs a painter instance that targets an offscreen image
@@ -550,7 +550,7 @@ the image is a 32 bits RGBA image.
 Use expression [[#paintergrab|painter.image()]] to 
 obtain a copy of the offscreen image.
 
-== ''qt.QtLuaPainter(qpixmap)'' ==
+=== ''qt.QtLuaPainter(qpixmap)'' ===
 {{anchor:qtluapainter}}
 
 Constructs a painter instance that targets a 
@@ -564,7 +564,7 @@ the main thread, one must use [[..:qt:index#qt.qcall|qt.pcall]]
 to ensure that painting operations are performed from the main thread.
 Otherwise Qt prints a lot of warnings and behaves erratically.
 
-== ''qt.QtLuaPainter(qwidget,[buffered])'' ==
+=== ''qt.QtLuaPainter(qwidget,[buffered])'' ===
 {{anchor:qtluapainter}}
 
 Constructs a painter instance that targets the 
@@ -592,7 +592,7 @@ Unbuffered widget painters are therefore difficult to use for painting;
 they are mostly useful for grabbing the on-screen representation 
 of a widget using function [[#paintergrab|painter.image()]].
 
-== ''qt.QtLuaPainter(object)'' ==
+=== ''qt.QtLuaPainter(object)'' ===
 {{anchor:qtluapainter}}
 
 Constructs a painter instance that target the output
@@ -605,10 +605,10 @@ that indicates that the object is being destroyed.
 Class [[#qtluaprinter|qt.QtLuaPrinter]] does all this.
 
 
-==  QtLuaPainter Properties ==
+===  QtLuaPainter Properties ===
 {{anchor:qtluapainter.properties}}
 
-== + painter.angleUnit ==
+=== + painter.angleUnit ===
 {{anchor:qtluapainterangleunit}}
 {{anchor:qtluapainter.angleUnit}}
 
@@ -619,7 +619,7 @@ The acceptable values are the strings ''"Degrees"'' and ''"Radians"''.
 The default unit is the degree.
 
 
-== + painter.background ==
+=== + painter.background ===
 {{anchor:qtluapainterbackground}}
 {{anchor:qtluapainter.background}}
 
@@ -629,7 +629,7 @@ and the zero color of bitonal images.
 The default background brush is an empty brush
 meaning that these pixels are not painted at all.
 
-== + painter.brush ==
+=== + painter.brush ===
 {{anchor:qtluapainterbrush}}
 {{anchor:qtluapainter.painter}}
 
@@ -639,7 +639,7 @@ that determine how function [[#painterfill|painter:fill]]
 fills shapes and how function [[#painterfill|painter:show]] 
 draws text.
 
-== + painter.clippath ==
+=== + painter.clippath ===
 {{anchor:qtluapainterclippath}}
 {{anchor:qtluapainter.clippath}}
 
@@ -650,7 +650,7 @@ of the current clipping region. Drawing operations
 only modify pixels located within the clip region.
 An empty path means that no clipping is performed.
 
-== + painter.compositionMode ==
+=== + painter.compositionMode ===
 {{anchor:qtluapaintercompositionmode}}
 {{anchor:qtluapainter.compositionMode}}
 
@@ -666,7 +666,7 @@ In particular printers often support only the default composition mode.
 When a composition mode is not supported, the Qt library prints a warning.
 
 
-== + painter.depth ==
+=== + painter.depth ===
 {{anchor:qtluapainterdepth}}
 {{anchor:qtluapainter.depth}}
 
@@ -675,7 +675,7 @@ of the target surface for drawings.
 A depth of ''1'' indicates a bitonal surface.  
 A depth of ''24'' or ''32'' indicates a true color surface.
 
-== + painter.font ==
+=== + painter.font ===
 {{anchor:qtluapainterfont}}
 {{anchor:qtluapainter.font}}
 
@@ -683,7 +683,7 @@ Property ''painter.font'' contient a Qt variant of class
 [[..:qtgui:index#qfont|qt.QFont]] representing the font settings
 used for drawing text.
 
-== + painter.height ==
+=== + painter.height ===
 {{anchor:qtluapainterheight}}
 {{anchor:qtluapainter.height}}
 
@@ -694,7 +694,7 @@ is not affected by the current transformation matrix.
 It corresponds to the default coordinate system
 set by [[#painterinitmatrix|painter:initmatrix]].
 
-== + painter.matrix ==
+=== + painter.matrix ===
 {{anchor:qtluapaintermatrix}}
 {{anchor:qtluapainter.matrix}}
 
@@ -703,7 +703,7 @@ Property ''painter.font'' contient a Qt variant of class
 how coordinates passed to the path construction functions
 are transformed into device depending coordinates.
 
-== + painter.path ==
+=== + painter.path ===
 {{anchor:qtluapainterpath}}
 {{anchor:qtluapainter.path}}
 
@@ -717,7 +717,7 @@ and [[#painterstroke|painter:stroke]].
 The current path is modified by a rich collection
 of path defining functions.
 
-== + painter.pen ==
+=== + painter.pen ===
 {{anchor:qtluapainterpen}}
 {{anchor:qtluapainter.pen}}
 
@@ -726,7 +726,7 @@ Property ''painter.pen'' contains a Qt variant of class
 that determine how function [[#painterfill|painter:stroke]]
 draws shapes.
 
-== + painter.point ==
+=== + painter.point ===
 {{anchor:qtluapainterpoint}}
 {{anchor:qtluapainter.point}}
 
@@ -737,7 +737,7 @@ are used and updated implicitely by the majority
 of the path construction functions.
 
 
-== + painter.renderHints ==
+=== + painter.renderHints ===
 {{anchor:qtluapainterrenderhints}}
 {{anchor:qtluapainter.renderHints}}
 
@@ -748,7 +748,7 @@ the names of the active rendering flags (without the prefix ''QPainter::'')
 separated with a vertical bar "''|''" symbolizing a boolean ''or'' operator.
 
 
-== + painter.styleSheet ==
+=== + painter.styleSheet ===
 {{anchor:qtluapainterstylesheet}}
 {{anchor:qtluapainter.styleSheet}}
 
@@ -757,7 +757,7 @@ that is used when drawing rich text with
 function [[#paintershow|show]].
 
 
-== + painter.width ==
+=== + painter.width ===
 {{anchor:qtluapainterwidth}}
 {{anchor:qtluapainter.width}}
 
@@ -769,7 +769,7 @@ It corresponds to the default coordinate system
 set by [[#painterinitmatrix|painter:initmatrix]].
 
 
-==  QtLuaPainter Functions ==
+===  QtLuaPainter Functions ===
 {{anchor:qtluapainterfunctions}}
 
 Class ''QtLuaPainter'' provides a broad array of 
@@ -779,7 +779,7 @@ Additional functions provide capabilities
 that are unique to the Qt platform.
 
 
-== + painter:arc(x,y,r,angle1,angle2) ==
+=== + painter:arc(x,y,r,angle1,angle2) ===
 {{anchor:qtluapainter.arc}}
 
 Expression ''painter:arc(x,y,r,angle1,angle2)''
@@ -799,7 +799,7 @@ The default angle unit is the degree.
 
 See also: PostScript operator ''arc''.
 
-== + painter:arcn(x,y,r,angle1,angle2) ==
+=== + painter:arcn(x,y,r,angle1,angle2) ===
 {{anchor:qtluapainter.arcn}}
 
 Expression ''painter:arcn(x,y,r,angle1,angle2)''
@@ -818,7 +818,7 @@ The default angle unit is the degree.
 
 See also: PostScript operator ''arcn''. 
 
-== + painter:arcto(x1,y1,x2,y2,r) ==
+=== + painter:arcto(x1,y1,x2,y2,r) ===
 {{anchor:qtluapainter.arcto}}
 
 Expression ''painter:arcto(x1,y1,x2,y2,r)''
@@ -834,7 +834,7 @@ The second endpoint becomes the new current point.
 See also: PostScript operators ''arct'' and ''arcto''.
 
 
-== + painter:charpath(string) ==
+=== + painter:charpath(string) ===
 {{anchor:qtluapainter.charpath}}
 
 Expression ''painter:charpath(string)'' 
@@ -850,7 +850,7 @@ After calling this function, the current point is left unset.
 
 See also: PostScript operators ''charpath''.
 
-== + painter:clip(optnewpath) ==
+=== + painter:clip(optnewpath) ===
 {{anchor:painterclip}}
 {{anchor:qtluapainter.clip}}
 
@@ -879,7 +879,7 @@ to restore the initial clip region.
 See also: PostScript operator ''clip''.
 
 
-== + painter:close() ==
+=== + painter:close() ===
 {{anchor:painterclose}}
 {{anchor:qtluapainter.close}}
 
@@ -891,7 +891,7 @@ be closed before the underlying widget
 or printer is destroyed.
 
 
-== + painter:closepath() ==
+=== + painter:closepath() ===
 {{anchor:qtluapainter.closepath}}
 
 Expression ''painter:closepath()'' 
@@ -911,7 +911,7 @@ the current point is left unset.
 
 See also: PostScript operator ''closepath''.
 
-== + painter:concat(qtransform) ==
+=== + painter:concat(qtransform) ===
 {{anchor:qtluapainter.concat}}
 
 Expression ''painter:concat(qtransform)'' 
@@ -926,7 +926,7 @@ It is much easier to use functions
 
 See also: PostScript operator ''concat''.
 
-== + painter:currentangleunit() ==
+=== + painter:currentangleunit() ===
 {{anchor:qtluapainter.currentangleunit}}
 
 Expression ''painter:currentangleunit()'' returns the 
@@ -936,7 +936,7 @@ Possible values are strings ''"Degrees"'' and ''"Radians"''.
 The default angle unit are degrees.
 
 
-== + painter:currentbackground() ==
+=== + painter:currentbackground() ===
 {{anchor:qtluapainter.currentbackground}}
 
 Expression ''painter:currentbackground()''
@@ -947,7 +947,7 @@ dashed line, text, or bitonal images.
 The default is an empty brush.
 
 
-== + painter:currentbrush() ==
+=== + painter:currentbrush() ===
 {{anchor:qtluapainter.currentbrush}}
 
 Expression ''painter:currentbrush()''
@@ -957,14 +957,14 @@ used for filling path with [[#painterfill|painter:fill()]].
 The default is an empty brush.
 
 
-== + painter:currentclip() ==
+=== + painter:currentclip() ===
 {{anchor:qtluapainter.currentclip}}
 
 Expression ''painter:currentclip()''
 returns a [[..:qtgui:index#qpainterpath|QPainterPath]]
 representing the [[#qtluapainterclippath|current clip region]].
 
-== + painter:currentcolor() ==
+=== + painter:currentcolor() ===
 {{anchor:qtluapainter.currentcolor}}
 
 Expression ''painter:currentcolor()'' 
@@ -974,7 +974,7 @@ of the color of the [[..:qtgui:index#qbrush|current brush]].
 This numbers range from zero to one.
 
 
-== + painter:currentdash() ==
+=== + painter:currentdash() ===
 {{anchor:qtluapainter.currentdash}}
 
 Expression ''painter:currentdash()''
@@ -982,7 +982,7 @@ returns the dash pattern and the dash offset
 of the [[#qtluapainterpen|current pen]].
 
 
-== + painter:currentfont() ==
+=== + painter:currentfont() ===
 {{anchor:qtluapainter.currentfont}}
 
 Expression ''painter:currentfont()''
@@ -990,7 +990,7 @@ returns a [[..:qtgui:index#qfont|QFont]]
 describing the [[#qtluapainterfont|current font]]
 for drawing text.
 
-== + painter:currentfontsize() ==
+=== + painter:currentfontsize() ===
 {{anchor:qtluapainter.currentfontsize}}
 
 Expression ''painter:currentfontsize()''
@@ -998,7 +998,7 @@ returns the size in points of the
 [[#qtluapainterfont|current font]].
 
 
-== + painter:currenthints() ==
+=== + painter:currenthints() ===
 {{anchor:qtluapainter.currenthints}}
 
 Expression ''painter:currenthints()'' returns the 
@@ -1006,28 +1006,28 @@ Expression ''painter:currenthints()'' returns the
 controlling the quality of the drawings.
 
 
-== + painter:currentlinewidth() ==
+=== + painter:currentlinewidth() ===
 {{anchor:qtluapainter.currentlinewidth}}
 
 Expression ''painter:currentlinewidth()'' returns
 the line width associated with the 
 [[#qtluapainterpen|current pen]].
 
-== + painter:currentmatrix() ==
+=== + painter:currentmatrix() ===
 {{anchor:qtluapainter.currentmatrix}}
 
 Expression ''painter:currentmatrix()'' returns a Qt variant of class
 [[..:qtgui:index#qtransform|qt.QTransform]] representing the
 [[#qtluapaintermatrix|current transformation matrix]].
 
-== + painter:currentmode() ==
+=== + painter:currentmode() ===
 {{anchor:qtluapainter.currentmode}}
 
 Expression ''painter:currentmode()'' returns a string representing the 
 [[#qtluapaintercompositionmode|current composition mode]].
 
 
-== + painter:currentpath() ==
+=== + painter:currentpath() ===
 {{anchor:qtluapainter.currentpath}}
 
 Expression ''painter:currentpath()'' returns a Qt variant of class
@@ -1035,7 +1035,7 @@ Expression ''painter:currentpath()'' returns a Qt variant of class
 [[#qtluapainterpath|current path]].
 
 
-== + painter:currentpen() ==
+=== + painter:currentpen() ===
 {{anchor:qtluapainter.currentpen}}
 
 Expression ''painter:currentpath()'' returns a Qt variant of class
@@ -1043,7 +1043,7 @@ Expression ''painter:currentpath()'' returns a Qt variant of class
 [[#qtluapainterpen|current pen]].
 
 
-== + painter:currentpoint() ==
+=== + painter:currentpoint() ===
 {{anchor:qtluapainter.currentpoint}}
 
 Expression ''painter:currentpoint()'' returns two numbers
@@ -1051,7 +1051,7 @@ representing the coordinates of the
 [[#qtluapainterpoint|current point]].
 
 
-== + painter:currentsize() ==
+=== + painter:currentsize() ===
 {{anchor:paintercurrentsize}}
 {{anchor:qtluapainter.currentsize}}
 
@@ -1063,7 +1063,7 @@ They correspond to the default coordinate system
 sets by [[#painterinitmatrix|painter:initmatrix]].
 
 
-== + painter:currentstylesheet() ==
+=== + painter:currentstylesheet() ===
 {{anchor:paintercurrentstylesheet}}
 {{anchor:qtluapainter.currentstylesheet}}
 
@@ -1073,7 +1073,7 @@ used by function [[#paintershow|show]] for
 displaying rich text.
 
 
-== + painter:curveto(x1,y1,x2,y2,x3,y3) ==
+=== + painter:curveto(x1,y1,x2,y2,x3,y3) ===
 {{anchor:paintercurveto}}
 {{anchor:qtluapainter.curveto}}
 
@@ -1089,7 +1089,7 @@ when the current point is not set
 See also: PostScript operator ''curveto''.
 
 
-== + painter:device() ==
+=== + painter:device() ===
 {{anchor:painterdevice}}
 {{anchor:qtluapainter.device}}
 
@@ -1102,7 +1102,7 @@ is represented by a Qt variant of type =QPaintDevice*=.
 This is not very useful in Lua.
 
 
-== + painter:eoclip(optnewpath) ==
+=== + painter:eoclip(optnewpath) ===
 {{anchor:paintereoclip}}
 {{anchor:qtluapainter.eoclip}}
 
@@ -1114,7 +1114,7 @@ instead of the winding rule.
 
 
 
-== + painter:eofill(optnewpath) ==
+=== + painter:eofill(optnewpath) ===
 {{anchor:paintereofill}}
 {{anchor:qtluapainter.eofill}}
 
@@ -1126,7 +1126,7 @@ instead of the winding rule.
 
 See also: PostScript operator ''eofill''.
 
-== + painter:fill(optnewpath) ==
+=== + painter:fill(optnewpath) ===
 {{anchor:painterfill}}
 {{anchor:qtluapainter.fill}}
 
@@ -1145,7 +1145,7 @@ See function [[#paintereofill|painter:eofill]] for an alternative.
 See also: PostScript operator ''fill''.
 
 
-== + painter:gbegin() ==
+=== + painter:gbegin() ===
 {{anchor:paintergbegin}}
 {{anchor:qtluapainter.gbegin}}
 
@@ -1157,7 +1157,7 @@ usually postponed until the last call to ''painter:gend''.
 This is useful for implementing smooth transitions
 between successive drawings.
 
-== + painter:gend([invalidate]) ==
+=== + painter:gend([invalidate]) ===
 {{anchor:paintergend}}
 {{anchor:qtluapainter.gend}}
 
@@ -1177,7 +1177,7 @@ the underlying ''QPainter'' object without
 using the ''QtLuaPainter'' functions.
 
 
-== + painter:grestore() ==
+=== + painter:grestore() ===
 {{anchor:paintergrestore}}
 {{anchor:qtluapainter.grestore}}
 
@@ -1192,7 +1192,7 @@ remain unchanged.
 
 
 
-== + painter:gsave() ==
+=== + painter:gsave() ===
 {{anchor:paintergsave}}
 {{anchor:qtluapainter.gsave}}
 
@@ -1207,7 +1207,7 @@ to bracket code segments that perform some rendering
 in order to ensure that the painter settings 
 remain unchanged.
 
-== + painter:image() ==
+=== + painter:image() ===
 {{anchor:paintergrab}}
 {{anchor:qtluapainter.image}}
 
@@ -1226,7 +1226,7 @@ Note that this function must be invoked without arguments.
 Otherwise see the documentation for [[#painterblit|painter:image(...)]].
 
 
-== + painter:image(x,y,[w,h],image,[sx,sy,[sw,sh]]) ==
+=== + painter:image(x,y,[w,h],image,[sx,sy,[sw,sh]]) ===
 {{anchor:painterblit}}
 {{anchor:qtluapainter.image}}
 
@@ -1262,7 +1262,7 @@ Otherwise see the documentation for [[#paintergrab|painter:image()]].
 See also: PostScript operator ''image''.
 
 
-== + painter:initclip() ==
+=== + painter:initclip() ===
 {{anchor:painterinitclip}}
 {{anchor:qtluapainter.initclip}}
 
@@ -1277,7 +1277,7 @@ by a subsequent drawing operation.
 See also: PostScript operator ''initclip''.
 
 
-== + painter:initgraphics() ==
+=== + painter:initgraphics() ===
 {{anchor:painterinitgraphics}}
 {{anchor:qtluapainter.initgraphics}}
 
@@ -1299,7 +1299,7 @@ After calling this function:
 See also: PostScript operator ''initgraphics''.
 
 
-== + painter:initmatrix() ==
+=== + painter:initmatrix() ===
 {{anchor:painterinitmatrix}}
 {{anchor:qtluapainter.initmatrix}}
 
@@ -1315,7 +1315,7 @@ on most devices.
 
 See also: PostScript operator ''initmatrix''.
 
-== + painter:lineto(x,y) ==
+=== + painter:lineto(x,y) ===
 {{anchor:qtluapainter.lineto}}
 
 Expression ''painter:lineto(x,y)'' appends 
@@ -1331,7 +1331,7 @@ when the current point is not set
 See also: PostScript operator ''lineto''.
 
 
-== + painter:moveto(x,y) ==
+=== + painter:moveto(x,y) ===
 {{anchor:qtluapainter.moveto}}
 
 Expression ''painter:moveto(x,y)'' terminates the 
@@ -1341,7 +1341,7 @@ the current point to coordinates ''(x,y)''.
 See also: PostScript operator ''moveto''.
 
 
-== + painter:newpath() ==
+=== + painter:newpath() ===
 {{anchor:painternewpath }}
 {{anchor:qtluapainter.newpath}}
 
@@ -1350,7 +1350,7 @@ After calling this function, the current point is left unset.
 
 See also: PostScript operator ''newpath''.
 
-== + painter:object() ==
+=== + painter:object() ===
 {{anchor:painterobject}}
 {{anchor:qtluapainter.object}}
 
@@ -1361,7 +1361,7 @@ Typical return values are instance of class
 [[#qtluaprinter|qt.QtLuaPrinter]].
 
 
-== + painter:painter() ==
+=== + painter:painter() ===
 {{anchor:painterpainter}}
 {{anchor:qtluapainter.painter}}
 
@@ -1373,7 +1373,7 @@ is neither a Qt variant not a Qt object, this pointer
 is represented by a Qt variant of type =QPainter*=.
 
 
-== + painter:pixmap() ==
+=== + painter:pixmap() ===
 {{anchor:painterpixmap}}
 {{anchor:qtluapainter.pixmap}}
 
@@ -1387,7 +1387,7 @@ as a pixmap, for instance a printer,
 this function returns an empty pixmap for which method 
 [[..:qt:index#qt.tobool|tobool]] returns ''false''.
 
-== + painter:printer() ==
+=== + painter:printer() ===
 {{anchor:qtluapainter.printer}}
 
 Expression ''painter:printer()'' returns a pointer
@@ -1399,7 +1399,7 @@ is represented by a Qt variant of type =QPrinter*=.
 
 
 
-== + painter:rcurveto(x1,y1,x2,y2,x3,y3) ==
+=== + painter:rcurveto(x1,y1,x2,y2,x3,y3) ===
 {{anchor:qtluapainter.rcurveto}}
 
 This is similar to calling function 
@@ -1418,7 +1418,7 @@ when the current point is not set.
 
 See also: PostScript operator ''rcurveto''.
 
-== + painter:rect() ==
+=== + painter:rect() ===
 {{anchor:qtluapainter.rect}}
 
 Expression ''painter:rect()'' returns a Qt variant 
@@ -1434,7 +1434,7 @@ or properties [[#qtluapainterwidth|painter.width]]
 and [[#qtluapainterheight|painter.height]].
 
 
-== + painter:rectangle(x,y,w,h) ==
+=== + painter:rectangle(x,y,w,h) ===
 {{anchor:qtluapainter.rectangle}}
 
 Expression ''painter:rectangle(x,y,w,h)''
@@ -1447,7 +1447,7 @@ the current point is left unset.
 
 
 
-== + painter:refresh() ==
+=== + painter:refresh() ===
 {{anchor:qtluapainter.refresh}}
 
 Expression ''painter:refresh()'' immediately 
@@ -1458,7 +1458,7 @@ regardless of the nesting count of functions
 
 
 
-== + painter:rlineto(rx,ry) ==
+=== + painter:rlineto(rx,ry) ===
 {{anchor:qtluapainter.rlineto}}
 
 Expression ''painter:lineto(x,y)'' appends a line segment 
@@ -1472,7 +1472,7 @@ when the current point is not set
 
 See also: PostScript operator ''rlineto''.
 
-== + painter:rmoveto(rx,ry) ==
+=== + painter:rmoveto(rx,ry) ===
 {{anchor:qtluapainter.rmoveto}}
 
 Expression ''painter:moveto(x,y)'' terminates the 
@@ -1486,7 +1486,7 @@ when the current point is not set
 
 See also: PostScript operator ''rmoveto''.
 
-== + painter:rotate(angle) ==
+=== + painter:rotate(angle) ===
 {{anchor:painterrotate}}
 {{anchor:qtluapainter.rotate}}
 
@@ -1502,7 +1502,7 @@ The default angle unit is the degree.
 
 See also: PostScript operator ''rotate''.
 
-== + painter:scale(sx,sy) ==
+=== + painter:scale(sx,sy) ===
 {{anchor:painterscale}}
 {{anchor:qtluapainter.scale}}
 
@@ -1514,7 +1514,7 @@ the orientation of the axes are unaffected.
 See also: PostScript operator ''scale''.
 
 
-== + painter:setangleunit(unit) ==
+=== + painter:setangleunit(unit) ===
 {{anchor:paintersetangleunit}}
 {{anchor:qtluapainter.setangleunit}}
 
@@ -1529,7 +1529,7 @@ or ''"Radians"'' for expressing angles in radians.
 The default angle unit is the degree.
 
 
-== + painter:setbackground(brush) ==
+=== + painter:setbackground(brush) ===
 {{anchor:qtluapainter.setbackground}}
 
 Expression ''painter:setbackground(brush)'' sets the
@@ -1537,7 +1537,7 @@ Expression ''painter:setbackground(brush)'' sets the
 Argument ''brush'' must be a Qt variant of type
 [[..:qtgui:index#qbrush|qt.QBrush]].
 
-== + painter:setbrush(brush) ==
+=== + painter:setbrush(brush) ===
 {{anchor:qtluapainter.setbrush}}
 
 Expression ''painter:setbrush(brush)'' sets the
@@ -1545,7 +1545,7 @@ Expression ''painter:setbrush(brush)'' sets the
 Argument ''brush'' must be a Qt variant of type
 [[..:qtgui:index#qbrush|qt.QBrush]].
 
-== + painter:setclip(qpainterpath) ==
+=== + painter:setclip(qpainterpath) ===
 {{anchor:qtluapainter.setclip}}
 
 Expression ''painter:setclip(qpainterpath)'' sets the
@@ -1555,7 +1555,7 @@ Argument ''brush'' must be a Qt variant of type
 [[..:qtgui:index#qpainterpath|qt.QPainterPath]].
 
 
-== + painter:setcolor(...) ==
+=== + painter:setcolor(...) ===
 {{anchor:qtluapainter.setcolor}}
 
 Function ''painter:setcolor'' sets the color of both the 
@@ -1585,7 +1585,7 @@ representing the intensities of the red, green, blue, and alpha channels.
 The default value for argument ''a'' is ''1'' for a fully opaque color.
 
 
-== + painter:setdash([sizes,[offset]]) ==
+=== + painter:setdash([sizes,[offset]]) ===
 {{anchor:qtluapainter.setdash}}
 
 Function ''painter:setdash'' changes the 
@@ -1607,7 +1607,7 @@ The optional argument ''offset'' is a length
 representing the starting position of the dash sequence.
 
 
-== + painter:setfont(qfont) ==
+=== + painter:setfont(qfont) ===
 {{anchor:qtluapainter.setfont}}
 
 Expression ''painter:setfont(qfont)'' sets the
@@ -1615,7 +1615,7 @@ Expression ''painter:setfont(qfont)'' sets the
 Argument ''font'' must be a Qt variant of type
 [[..:qtgui:index#qfont|qt.QFont]].
 
-== + painter:setfontsize(size) ==
+=== + painter:setfontsize(size) ===
 {{anchor:qtluapainter.setfontsize}}
 
 Expression ''painter:setfontsize(size)'' changes the size
@@ -1623,7 +1623,7 @@ of the [[#qtluapainterfont|current font]].
 Argument ''size'' must be a positive number.
 
 
-== + painter:sethints(hints) ==
+=== + painter:sethints(hints) ===
 {{anchor:qtluapainter.sethints}}
 
 Expression ''painter:sethints(hints)'' sets the
@@ -1634,14 +1634,14 @@ a concatenation of the names of the active
 separated with a vertical bar "''|''".
 
 
-== + painter:setlinewidth(lw) ==
+=== + painter:setlinewidth(lw) ===
 {{anchor:qtluapainter.setlinewidth}}
 
 Expression ''painter:setlinewidth(lw)'' changes the line width
 of the [[#qtluapainterpen|current pen]].
 Argument ''lw'' must be a positive number.
 
-== + painter:setmatrix(qtransform) ==
+=== + painter:setmatrix(qtransform) ===
 {{anchor:qtluapainter.setmatrix}}
 
 Expression ''painter:setmatrix(qtransform)'' sets the
@@ -1650,7 +1650,7 @@ Argument ''qtransform'' must be a Qt variant of type
 [[..:qtgui:index#qtransform|qt.QTransform]].
 
 
-== + painter:setmode(compositionmode) ==
+=== + painter:setmode(compositionmode) ===
 {{anchor:qtluapainter.setmode}}
 
 Expression ''painter:setmode(compositionmode)'' sets the 
@@ -1660,7 +1660,7 @@ Argument ''compositionmode'' must be a string containing the name of a
 [[http://doc.trolltech.com/4.4/qpainter.html#CompositionMode-enum|composition mode]].
 
 
-== + painter:setpath(qpainterpath) ==
+=== + painter:setpath(qpainterpath) ===
 {{anchor:qtluapainter.setpath}}
 
 Expression ''painter:setpath(qpainterpath)'' sets the
@@ -1669,7 +1669,7 @@ Argument ''qpainterpath'' must be a Qt variant of type
 [[..:qtgui:index#qpainterpath|qt.QPainterPath]].
 
 
-== + painter:setpattern(pattern,[x,y]) ==
+=== + painter:setpattern(pattern,[x,y]) ===
 {{anchor:qtluapainter.setpattern}}
 
 Expression ''painter:setpattern(pattern,[x,y])'' 
@@ -1689,7 +1689,7 @@ The optional arguments ''x'' and ''y'' specify
 the origin of the pattern in the source image.
 
 
-== + painter:setpen(qpen) ==
+=== + painter:setpen(qpen) ===
 {{anchor:qtluapainter.setpen}}
 
 Expression ''painter:setpen(qpen)'' sets the
@@ -1698,7 +1698,7 @@ Argument ''qpen'' must be a Qt variant of type
 [[..:qtgui:index#qpen|qt.QPen]].
 
 
-== + painter:setpoint(x,y) ==
+=== + painter:setpoint(x,y) ===
 {{anchor:qtluapainter.setpoint}}
 
 Expression ''painter:setpoint(x,y)'' sets the
@@ -1706,7 +1706,7 @@ Expression ''painter:setpoint(x,y)'' sets the
 Arguments ''x'' and ''y'' must be valid numbers.
 
 
-== + painter:setstylesheet(s) ==
+=== + painter:setstylesheet(s) ===
 {{anchor:qtluapainter.setstylesheet}}
 
 Expression ''painter:setstylesheet(s)'' sets the 
@@ -1716,7 +1716,7 @@ displaying rich text.
 
 
 
-== + painter:show(string,[x,y,w,h,textflags]) ==
+=== + painter:show(string,[x,y,w,h,textflags]) ===
 {{anchor:paintershow}}
 {{anchor:qtluapainter.show}}
 
@@ -1765,7 +1765,7 @@ to specify more complicated formats.
 See also: PostScript operator ''show''.
 
 
-== + painter:showpage() ==
+=== + painter:showpage() ===
 {{anchor:qtluapainter.showpage}}
 
 Expression ''painter:showpage()'' 
@@ -1781,7 +1781,7 @@ unless some drawing operation is performed on each page.
 See also: PostScript operator ''showpage''.
 
 
-== + painter:size() ==
+=== + painter:size() ===
 {{anchor:qtluapainter.size}}
 
 Expression ''painter:size()'' returns a Qt variant 
@@ -1796,7 +1796,7 @@ using function [[#paintercurrentsize|painter:currentsize()]]
 or properties [[#qtluapainterwidth|painter.width]]
 and [[#qtluapainterheight|painter.height]].
 
-== + painter:stringrect(string,[x,y,w,h,textflags]) ==
+=== + painter:stringrect(string,[x,y,w,h,textflags]) ===
 {{anchor:qtluapainter.stringrect}}
 
 Function ''painter:stringrect'' returns a Qt variant of type
@@ -1806,7 +1806,7 @@ by calling function [[#paintershow|painter:show]]
 with the same arguments.
 
 
-== + painter:stringwidth(string) ==
+=== + painter:stringwidth(string) ===
 {{anchor:qtluapainter.stringwidth}}
 
 Fonction ''painter:stringwidth'' returns 
@@ -1817,7 +1817,7 @@ by expression [[#paintershow|show(string)]].
 See also: PostScript operator ''stringwidth''.
 
 
-== + painter:stroke(optnewpath) ==
+=== + painter:stroke(optnewpath) ===
 {{anchor:painterstroke}}
 {{anchor:qtluapainter.stroke}}
 
@@ -1832,7 +1832,7 @@ The default is to reset the current path.
 
 See also: PostScript operator ''stroke''.
 
-== + painter:translate(dx,dy) ==
+=== + painter:translate(dx,dy) ===
 {{anchor:paintertranslate}}
 {{anchor:qtluapainter.translate}}
 
@@ -1843,7 +1843,7 @@ the orientation of the axes are unaffected.
 
 See also: PostScript operator ''translate''.
 
-== + painter:widget() ==
+=== + painter:widget() ===
 {{anchor:qtluapainter.widget}}
 
 Expression ''painter:widget()'' returns the Qt object of class
@@ -1852,7 +1852,7 @@ When the painter is not associated with a widget,
 this expression returns ''nil''.
 
 
-== + painter:write(f,[format]) ==
+=== + painter:write(f,[format]) ===
 {{anchor:qtluapainter.write}}
 
 Expression ''painter:write(f)'' saves the image 
@@ -1867,7 +1867,7 @@ deduced from the file name extension.
 
 
 
-===  qt.QtLuaPrinter ===
+====  qt.QtLuaPrinter ====
 {{anchor:qtluaprinter}}
 
 Printing in Qt is usually achieved using class
@@ -1891,7 +1891,7 @@ Alternatively, function ''printer:setup()'' pops a print dialog
 that lets the user adjust these properties interactively.
 
 
-==  qt.QtLuaPrinter([mode]) ==
+===  qt.QtLuaPrinter([mode]) ===
 {{anchor:qtluaprinternew}}
 {{anchor:qtluaprinter}}
 
@@ -1909,7 +1909,7 @@ creating the [[#qtluapainter|qt.QtLuaPainter]]
 that will peform the drawings.
 
 
-==  printer:abort() ==
+===  printer:abort() ===
 {{anchor:qtluaprinter.abort}}
 
 Expression ''printer:abort()'' aborts the current print run. 
@@ -1918,40 +1918,40 @@ Property [[#printerprinterstate|printer.printerState]]
 will then be ''"Aborted"''.
 It is not always possible to abort a print job.
 
-==  printer.collateCopies ==
+===  printer.collateCopies ===
 {{anchor:qtluaprinter.collateCopies}}
 
 Boolean property ''printer.collateCopies'' specifies 
 if collation is turned on when multiple copies is selected. 
 
-==  printer.colorMode ==
+===  printer.colorMode ===
 {{anchor:qtluaprinter.colorMode}}
 
 Boolean property ''printer.colorMode'' is ''true''
 when one prints in color (the default) and ''false''
 when one prints in gray scale.
 
-==  printer.creator ==
+===  printer.creator ===
 {{anchor:qtluaprinter.creator}}
 
 Property ''printer.creator'' is a string containing
 the name of the application producing the printout.
 This information is passed to the print spooling system.
 
-==  printer.docName ==
+===  printer.docName ===
 {{anchor:qtluaprinter.docName}}
 
 Property ''printer.creator'' is a string containing
 the name of the document being printed.
 This information is passed to the print spooling system
 
-==  printer.doubleSidedPrinting ==
+===  printer.doubleSidedPrinting ===
 {{anchor:qtluaprinter.doubleSidedPrinting}}
 
 Boolean property ''printer.doubleSidedPrinting'' 
 indicates whether double sided printing is requested.
 
-==  printer.fontEmbeddingEnabled ==
+===  printer.fontEmbeddingEnabled ===
 {{anchor:qtluaprinter.fontEmbeddingEnabled}}
 
 Boolean property ''printer.fontEmbeddingEnabled'' indicates
@@ -1959,14 +1959,14 @@ whether the output data should embed a font description.
 This is ''true'' by default.
 
 
-==  printer.fromPage ==
+===  printer.fromPage ===
 {{anchor:qtluaprinter.fromPage}}
 
 Readonly numerical property ''printer.fromPage''
 contains the index of the first page to print.
 Use function [[#printersetfromto|printer:setFromTo]] to change it.
 
-==  printer.fullPage ==
+===  printer.fullPage ===
 {{anchor:qtluaprinter.fullPage}}
 
 Setting boolean property ''printer.fullPage'' to ''true''
@@ -1974,7 +1974,7 @@ enables support for painting over the entire page.
 Otherwise painting is restricted to the printable area 
 reported by the device.
 
-==  printer.landscape ==
+===  printer.landscape ===
 {{anchor:qtluaprinter.landscape}}
 
 Setting boolean property ''printer.landscape'' to ''true''
@@ -1982,7 +1982,7 @@ sets the printout in landscape mode.
 Otherwise printing happens in portrait mode.
 
 
-==  printer:newPage() ==
+===  printer:newPage() ===
 {{anchor:qtluaprinter.newPage}}
 
 Expression ''printer:newPage()''
@@ -1990,7 +1990,7 @@ tells the printer to eject the current page and
 to continue printing on a new page. 
 Returns ''true'' if this was successful.
 
-==  printer.numCopies ==
+===  printer.numCopies ===
 {{anchor:qtluaprinter.numCopies}}
 
 Property ''printer.numCopies'' contains the number of copies to be printed. 
@@ -2004,7 +2004,7 @@ On Windows, Mac OS X and X11 systems that support CUPS,
 reading property ''printer.numCopies'' always return 1 because these systems
 internally handle the number of copies.
 
-==  printer.outputFileName ==
+===  printer.outputFileName ===
 {{anchor:printeroutputfilename}}
 {{anchor:qtluaprinter.outputFileName}}
 
@@ -2013,7 +2013,7 @@ string indicates that printing should be redirected
 to the specified file.  
 
 
-==  printer.outputFormat ==
+===  printer.outputFormat ===
 {{anchor:printeroutputformat}}
 {{anchor:qtluaprinter.outputFormat}}
 
@@ -2023,7 +2023,7 @@ Recognized values are ''"PdfFormat"'', ''"PostScriptFormat"'',
 and ''"NativeFormat"''.
 
 
-==  printer.pageRect ==
+===  printer.pageRect ===
 {{anchor:printerpagerect}}
 {{anchor:qtluaprinter.pageRect}}
 
@@ -2040,7 +2040,7 @@ This coordinate system is not related the
 the drawing coordinate system.
 
 
-==  printer.pageSize ==
+===  printer.pageSize ===
 {{anchor:printerpagesize}}
 {{anchor:qtluaprinter.pageSize}}
 
@@ -2062,7 +2062,7 @@ When using an earlier version of Qt,
 setting this property to ''"Custom"'' does nothing.
 
 
-==  printer.paperRect ==
+===  printer.paperRect ===
 {{anchor:printerpaperrect}}
 {{anchor:qtluaprinter.paperRect}}
 
@@ -2077,7 +2077,7 @@ and with units specified according to
 This coordinate system is not related the
 the drawing coordinate system.
 
-==  printer.paperSize ==
+===  printer.paperSize ===
 {{anchor:printerpapersize}}
 {{anchor:qtluaprinter.paperSize}}
 
@@ -2097,7 +2097,7 @@ is equal to ''"Custom"'', property ''printer.paperSize''
 also specifies the size of the image described
 by the output file.
 
-==  printer:printer() ==
+===  printer:printer() ===
 {{anchor:printerprinter}}
 {{anchor:qtluaprinter.printer}}
 
@@ -2105,7 +2105,7 @@ Returns a pointer to the real ''QPrinter'' object
 which is a subclass of ''QPaintDevice''.
 
 
-==  printer.printProgram ==
+===  printer.printProgram ===
 {{anchor:qtluaprinter.printProgram}}
 
 Setting string property ''printer.printProgram'' overrides
@@ -2113,7 +2113,7 @@ the name of the program used to submit the printout
 to the spooling system.
 
 
-==  printer.printerName ==
+===  printer.printerName ===
 {{anchor:printerprintername}}
 {{anchor:qtluaprinter.printerName}}
 
@@ -2123,7 +2123,7 @@ This value is initially set to the name of the
 default printer for your system.
 
 
-==  printer.printerState ==
+===  printer.printerState ===
 {{anchor:printerprinterstate}}
 {{anchor:qtluaprinter.printerState}}
 
@@ -2133,7 +2133,7 @@ Possible values are ''Idle'', ''Active'', ''Aborted'' and ''Error''.
 That does not work on all systems.
 
 
-==  printer.resolution ==
+===  printer.resolution ===
 {{anchor:printerresolution}}
 {{anchor:qtluaprinter.resolution}}
 
@@ -2149,7 +2149,7 @@ when property [[#printerpapersize|printer.papersize]]
 does not contain a valid size.
 
 
-==  printer:setFromTo(frompage,topage) ==
+===  printer:setFromTo(frompage,topage) ===
 {{anchor:printersetfromto}}
 {{anchor:qtluaprinter.setFromTo}}
 
@@ -2158,7 +2158,7 @@ specifies the indices of the page range to print.
 If both ''frompage'' and ''topage'' are zero (the default),
 the whole document is printed.
 
-==  printer:setup([parentwidget]) ==
+===  printer:setup([parentwidget]) ===
 {{anchor:qtluaprinter.setup}}
 
 Expression ''printer:setup()'' displays a dialog
@@ -2167,7 +2167,7 @@ and select various print settings.
 It returns ''true'' if the user presses the button "Print"
 and ''false'' if the user cancels.
 
-==  printer.toPage ==
+===  printer.toPage ===
 {{anchor:qtluaprinter.toPage}}
 
 Readonly numerical property ''printer.toPage''
