@@ -729,7 +729,7 @@ end
 
 -- complete function: compute hist and display it
 function gnuplot.hist(tensor,bins,min,max)
-   local h = torch.histc(tensor,bins,min,max)
+   local h = gnuplot.histc(tensor,bins,min,max)
    local x_axis = torch.Tensor(#h)
    for i = 1,#h do
       x_axis[i] = h[i].val
