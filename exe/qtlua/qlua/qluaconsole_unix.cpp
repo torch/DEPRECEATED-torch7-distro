@@ -523,6 +523,9 @@ rtty_complete(const char *text, int start, int end)
   rtty_completions = &completions;
   char **result = rl_completion_matches(text, rtty_compentry);
   rtty_completions = 0;
+#if RL_READLINE_VERSION >= 0x0600
+  rl_completion_suppress_append = 1;
+#endif
   return result;
 }
 
@@ -537,16 +540,16 @@ rtty_prep()
   rl_getc_function = rtty_getchar;
   rl_attempted_completion_function = rtty_complete;
   rl_completer_quote_characters = "\"'";
+#if RL_READLINE_VERSION < 0x0600
   rl_completion_append_character = '\0';
-#ifdef RL_READLINE_VERSION
-# if RL_READLINE_VERSION > 0x402
+#endif
+#if RL_READLINE_VERSION > 0x402
   rl_set_paren_blink_timeout(250000);
   rl_bind_key (')', rl_insert_close);
   rl_bind_key (']', rl_insert_close);
   rl_bind_key ('}', rl_insert_close);
   rl_variable_bind("comment-begin","-- ");
-# endif
-#endif  
+#endif
   rl_initialize();
   // history
   rtty_history = ".luahistory";
