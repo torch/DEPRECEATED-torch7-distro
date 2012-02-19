@@ -5,6 +5,7 @@
 static int nnOmp_(Sqrt_updateOutputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  real bias = luaT_getfieldchecknumber(L,1,"eps");
   setompnthread(L,1,"nThread");
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
 
@@ -13,7 +14,7 @@ static int nnOmp_(Sqrt_updateOutputOmp)(lua_State *L)
   if (input->nDimension == 1 || !THTensor_(isContiguous)(input) || !THTensor_(isContiguous)(output))
   {
     TH_TENSOR_APPLY2(real, output, real, input,		\
-		     *output_data = sqrt(*input_data););
+		     *output_data = sqrt(*input_data + bias););
   }
   else
   {
@@ -29,7 +30,7 @@ static int nnOmp_(Sqrt_updateOutputOmp)(lua_State *L)
       long i;
       for (i = 0; i < input->stride[0]; i++)
       {
-	ptr_output[i] = sqrt(ptr_input[i]);
+	ptr_output[i] = sqrt(ptr_input[i] + bias);
       }
     }
   }
