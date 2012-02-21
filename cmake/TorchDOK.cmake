@@ -131,4 +131,4 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
 
 ENDMACRO(ADD_TORCH_DOK)
 
-INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_INSTALL_PREFIX}/bin/lua -ltorch -ldok -e \"dok.installsearch()\")")
+INSTALL(CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_INSTALL_PREFIX}/bin/torch-lua -ltorch -ldok -e \"dok.installsearch()\")")
