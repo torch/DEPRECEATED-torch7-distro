@@ -22,21 +22,23 @@ ADD_CUSTOM_TARGET(documentation-dok
   COMMENT "Built documentation")
 
 # copy extra files needed for HTML doc (main index)
-SET(htmldstdir "${CMAKE_BINARY_DIR}/html")
-SET(generatedfiles)
+IF(PROJECT_NAME STREQUAL "Torch")
+  SET(htmldstdir "${CMAKE_BINARY_DIR}/html")
+  SET(generatedfiles)
 
-FOREACH(extrafile ${TORCH_DOK_HTML_FILES}) 
-  GET_FILENAME_COMPONENT(_file_ "${extrafile}" NAME)
-  ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/${_file_}"
-    COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${extrafile}" "${htmldstdir}/${_file_}"
-    DEPENDS "${extrafile}")
-  SET(generatedfiles ${generatedfiles} "${htmldstdir}/${_file_}")
-ENDFOREACH(extrafile ${TORCH_DOK_HTML_FILES}) 
+  FOREACH(extrafile ${TORCH_DOK_HTML_FILES})
+    GET_FILENAME_COMPONENT(_file_ "${extrafile}" NAME)
+    ADD_CUSTOM_COMMAND(OUTPUT "${htmldstdir}/${_file_}"
+      COMMAND ${CMAKE_COMMAND} ARGS "-E" "copy" "${extrafile}" "${htmldstdir}/${_file_}"
+      DEPENDS "${extrafile}")
+    SET(generatedfiles ${generatedfiles} "${htmldstdir}/${_file_}")
+  ENDFOREACH(extrafile ${TORCH_DOK_HTML_FILES})
 
-# the doc depends on all these files to be generated
-ADD_CUSTOM_TARGET(main-index-dok-files
-  DEPENDS ${generatedfiles})
-ADD_DEPENDENCIES(documentation-dok main-index-dok-files)
+  # the doc depends on all these files to be generated
+  ADD_CUSTOM_TARGET(main-index-dok-files
+    DEPENDS ${generatedfiles})
+  ADD_DEPENDENCIES(documentation-dok main-index-dok-files)
+ENDIF(PROJECT_NAME STREQUAL "Torch")
 
 # used to make sure dokindex is built in a serial way
 SET(all-dok-index "" CACHE INTERNAL "dokindex previous dependencies" FORCE)
