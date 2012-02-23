@@ -7,7 +7,7 @@ implementation, thanks to an easy and fast scripting language (Lua) and a
 underlying C implementation.
 
 In order to install Torch7 you can follow these simple instructions, but 
-we suggest reading the detailed manual at www.torch.ch/installation.html
+we suggest reading the detailed manual at http://www.torch.ch/manual/install/index
 
 Requirements
 ============
@@ -49,6 +49,6 @@ Documentation
 =============
 The full documentation is installed in /my/install/path/share/torch/html/index.html
 
-Also, www.torch.ch/documentation.html points to the latest documentation of Torch7.
+Also, http://www.torch.ch/manual/index points to the latest documentation of Torch7.
 
 
