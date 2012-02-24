@@ -32,7 +32,7 @@ If you are a programmer, you might want to produce your own
 Torch compilation requires a number of standard packages described below:
   * **Mandatory:**
     * A ''C/C++'' compiler ([[http://gcc.gnu.org|GNU compiler]] or Intel compiler work fine)
-    * [[http://www.cmake.org|CMake]] version 2.8 or later is required.
+    * [[http://www.cmake.org|CMake]] version 2.6 or later is required.
     * [[http://gnuplot.info|Gnuplot]], version ''4.4'' or later is recommended for best experience.
 
   * **Recommended:**
@@ -246,7 +246,7 @@ Qt options:
 Torch compilation requires a number of standard packages described below:
   * **Mandatory:**
     * A ''C/C++'' compiler ([[http://gcc.gnu.org|GNU compiler]] or Intel compiler work fine)
-    * [[http://www.cmake.org|CMake]] version 2.8 or later is required.
+    * [[http://www.cmake.org|CMake]] version 2.6 or later is required.
     * [[http://gnuplot.info|Gnuplot]], version ''4.4'' or later is recommended for best experience.
 
   * **Recommended:**
@@ -264,10 +264,9 @@ installation DVD.
 CMake can be retrieved from
 [[http://www.cmake.org/HTML/Download.html|CMake website]] (you can
 take the **DMG** installer). However, we found it was as simple to use
-[[http://mxcl.github.com/homebrew/|Homebrew]], which are necessary
-anyway for git and the Readline library. We recommend to avoid
-[[http://finkproject.org/|Fink]] and
-[[http://www.macports.org/|MacPorts]], which tend to be always
+[[http://mxcl.github.com/homebrew/|Homebrew]], or [[http://www.macports.org/|MacPorts]]
+which are necessary anyway for git and the Readline library. We recommend to avoid
+[[http://finkproject.org/|Fink]], which tends to be always
 outdated. Assuming you installed Homebrew, just do:
 
 <file>
@@ -282,6 +281,59 @@ compile.  Instead, you can
 [[http://trolltech.com/downloads/opensource/appdev/mac-os-cpp|download]]
 the binary **DMG** file available on [[http://trolltech.com|Trolltech
 website]] and install it.
+
+==== B. Getting Torch sources ====
+
+Same as [[#install.sources|getting sources]] for linux.
+
+==== C. Configuring Torch ====
+
+Same as [[#install.config|configuring]] for linux.
+
+==== D. Compiling and Installing ====
+
+Same as [[#install.compile|compiling]] for linux.
+
+==== E. Running Torch ====
+
+Same as [[#install.run|runnning]] for linux.
+
+=====  FreeBSD =====
+{{anchor:install.freebsd}}
+
+==== A. Requirements ====
+
+Torch compilation requires a number of standard packages described below:
+  * **Mandatory:**
+    * A ''C/C++'' compiler ([[http://gcc.gnu.org|GNU compiler]] or Intel compiler work fine)
+    * [[http://www.cmake.org|CMake]] version 2.6 or later is required.
+    * [[http://gnuplot.info|Gnuplot]], version ''4.4'' or later is recommended for best experience.
+
+  * **Recommended:**
+    * [[http://tiswww.case.edu/php/chet/readline/rltop.html|GNU Readline]]
+    * [[http://git-scm.com/|Git]] to keep up-to-date sources
+    * [[http://trolltech.com/products|QT 4.4]] or newer development libraries
+    * CBLAS. Intel MKL library is recommended for that purpose on Intel computers.
+    * LAPACK. Intel MKL library is recommended for that purpose on Intel computers.
+
+This should be easily installed with
+<file>
+pkg_add -r readline
+pkg_add -r cmake
+pkg_add -r git
+pkg_add -r gnuplot
+</file>
+
+Note: on FreeBSD 9.0, it seems ''pdflib'' (a dependency of gnuplot) is not available as binary. Please,
+install gnuplot instead in the port tree:
+<file>
+cd /usr/ports/math/gnuplot
+make install clean
+</file>
+
+For installing QT, use also ''pkg_add -r qt4'', followed by ''pkg_add -r qt4-XXX'', where
+XXX is one of the components (or tools) listed on [[http://www.freebsd.org/doc/en/books/porters-handbook/using-qt.html|Qt FreeBSD page]].
+Be sure to install all components and tools listed there.
 
 ==== B. Getting Torch sources ====
 

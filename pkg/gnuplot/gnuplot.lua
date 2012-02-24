@@ -25,6 +25,8 @@ local function findos()
 	 return 'mac'
       elseif s:match('Linux') then
 	 return 'linux'
+      elseif s:match('FreeBSD') then
+	 return 'freebsd'
       else
 	 --error('I don\'t know your operating system')
 	 return '?'
@@ -119,6 +121,10 @@ local function getgnuplotdefaultterm(os)
    elseif os == 'linux' and gnuplothasterm('wxt') then
       return  'wxt'
    elseif os == 'linux' and gnuplothasterm('x11') then
+      return  'x11'
+   elseif os == 'freebsd' and gnuplothasterm('wxt') then
+      return  'wxt'
+   elseif os == 'freebsd' and gnuplothasterm('x11') then
       return  'x11'
    elseif os == 'mac' and gnuplothasterm('aqua') then
       return  'aqua'
