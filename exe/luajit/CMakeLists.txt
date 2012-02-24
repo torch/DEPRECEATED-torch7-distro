@@ -18,6 +18,7 @@ IF(NOT Lua_IS_SUBPROJECT)
 ENDIF()
 
 INCLUDE(CheckLibraryExists)
+INCLUDE(CheckFunctionExists)
 
 # LuaJIT specific
 option ( LUAJIT_DISABLE_FFI "Disable FFI." OFF )
@@ -39,14 +40,18 @@ else ()
 endif ()
 
 IF(NOT WIN32)
-  CHECK_LIBRARY_EXISTS(dl dlopen "" LUA_USE_DLOPEN)
+  FIND_LIBRARY(DL_LIBRARY "dl")
+  IF(DL_LIBRARY)
+    SET(CMAKE_REQUIRED_LIBRARIES ${DL_LIBRARY})
+    LIST(APPEND LIBS ${DL_LIBRARY})
+  ENDIF(DL_LIBRARY)
+  CHECK_FUNCTION_EXISTS(dlopen LUA_USE_DLOPEN)
   IF(NOT LUA_USE_DLOPEN)
     MESSAGE(FATAL_ERROR "Cannot compile a useful lua.
 Function dlopen() seems not to be supported on your platform.
 Apparently you are not on a Windows platform as well.
 So lua has no way to deal with shared libraries!")
   ENDIF(NOT LUA_USE_DLOPEN)
-  list ( APPEND LIBS dl )
 ENDIF(NOT WIN32)
 
 CHECK_LIBRARY_EXISTS(m sin "" LUA_USE_LIBM)
