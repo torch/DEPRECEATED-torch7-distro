@@ -30,10 +30,12 @@ local function install(entries, dir)
                 .. table.concat(entry, '^~^'):gsub('"','\\"'):gsub('\n',' ') .. '";')
    end
    local array = table.concat(vars, '\n')
+   array = array:gsub('%%','PERCENTFUCK')
    local f = paths.concat(paths.install_html, paths.basename(dir), 'jse_form.js')
    if paths.filep(f) then
       local js = io.open(f):read('*all')
       js = js:gsub('// SEARCH_ARRAY //', array)
+      js = js:gsub('PERCENTFUCK','%')
       local w = io.open(f,'w')
       w:write(js)
       w:close()
