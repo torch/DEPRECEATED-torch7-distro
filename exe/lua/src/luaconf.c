@@ -163,7 +163,7 @@ catpath(const char *from, const char *fname)
           continue;
         }
     }
-    if (sb.len==0 || sb.buffer && sb.buffer[sb.len-1]!='/')
+    if (sb.len==0 || (sb.buffer && sb.buffer[sb.len-1]!='/'))
       sbadd1(&sb, '/');
     while (*fname!=0 && *fname!='/')
       sbadd1(&sb, *fname++);

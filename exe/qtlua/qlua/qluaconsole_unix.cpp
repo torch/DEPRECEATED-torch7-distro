@@ -436,6 +436,7 @@ rtty_dummycomp(const char *text, int state)
     st = 1;
     return strdup("\\");
   }
+  return 0;
 }
 
 static char **
