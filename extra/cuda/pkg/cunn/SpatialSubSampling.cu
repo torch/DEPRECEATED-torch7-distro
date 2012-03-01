@@ -296,8 +296,6 @@ static int cunn_SpatialSubSampling_updateGradInput(lua_State *L)
   if (input->nDimension == 3) {
     long nInputCols = input->size[2];
     long nInputRows = input->size[1];
-    long nOutputCols = (nInputCols - kW) / dW + 1;
-    long nOutputRows = (nInputRows - kH) / dH + 1;
 
     float *weight_data = THCudaTensor_data(weight);
     float *gradOutput_data = THCudaTensor_data(gradOutput);
@@ -323,8 +321,6 @@ static int cunn_SpatialSubSampling_updateGradInput(lua_State *L)
     long nInputCols = input->size[3];
     long nInputRows = input->size[2];
     long nbatch = input->size[0];
-    long nOutputCols = (nInputCols - kW) / dW + 1;
-    long nOutputRows = (nInputRows - kH) / dH + 1;
 
     float *weight_data = THCudaTensor_data(weight);
     float *gradOutput_data = THCudaTensor_data(gradOutput);
@@ -380,8 +376,6 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
   if (input->nDimension == 3) {
     long nInputCols = input->size[2];
     long nInputRows = input->size[1];
-    long nOutputCols = (nInputCols - kW) / dW + 1;
-    long nOutputRows = (nInputRows - kH) / dH + 1;
 
     float *gradWeight_data = THCudaTensor_data(gradWeight);
     float *gradBias_data = THCudaTensor_data(gradBias);
@@ -405,8 +399,6 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
     long nInputCols = input->size[3];
     long nInputRows = input->size[2];
     long nbatch = input->size[0];
-    long nOutputCols = (nInputCols - kW) / dW + 1;
-    long nOutputRows = (nInputRows - kH) / dH + 1;
 
     float *gradWeight_data = THCudaTensor_data(gradWeight);
     float *gradBias_data = THCudaTensor_data(gradBias);
