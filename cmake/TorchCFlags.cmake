@@ -42,10 +42,3 @@ IF(MSVC)
   # we want to respect the standard, and we are bored of those **** .
   ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE=1)
 ENDIF(MSVC)
-
-# On Apple
-IF(APPLE AND CMAKE_COMPILER_IS_GNUCXX)
-  # avoid weird allocation errors [maybe obsolete since libs disctinct from modules]
-  SET(CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS} -Wl,-flat_namespace")
-  SET(CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS "${CMAKE_SHARED_LIBRARY_CREATE_CXX_FLAGS} -Wl,-flat_namespace")
-ENDIF(APPLE AND CMAKE_COMPILER_IS_GNUCXX)
