@@ -24,7 +24,6 @@ int main(int argc, char *argv[])
 {
   lua_State *L;
   int i;
-  int res;
 
   lua_executable_dir(argv[0]);
   L = luaL_newstate();

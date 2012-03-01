@@ -670,7 +670,6 @@ QLuaEditor::createToolBar()
 QMenuBar *
 QLuaEditor::createMenuBar()
 {
-  QMenu *menu;
   QMenuBar *menubar = new QMenuBar(this);
   menubar->addAction(stdAction("MenuFile"));
   menubar->addAction(stdAction("MenuEdit"));
@@ -1068,7 +1067,6 @@ QLuaEditor::updateActions()
   if (hasAction("ActionLineWrap"))
     stdAction("ActionLineWrap")->setChecked(wrap);
   QLuaTextEditMode *mode = d->e->editorMode();
-  QLuaTextEditModeFactory *f = (mode) ? mode->factory() : 0;
   d->updateMode(mode ? mode->factory() : 0);
   if (hasAction("ActionModeAutoHighlight"))
     {

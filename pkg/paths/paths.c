@@ -499,8 +499,6 @@ concat_fname(lua_State *L, const char *fname)
   }
              
 #else
-  
-  const char *s;
   SB sb;
   sbinit(&sb);
 

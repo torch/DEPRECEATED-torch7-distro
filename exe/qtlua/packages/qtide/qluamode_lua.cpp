@@ -200,7 +200,6 @@ QLuaModeLua::parseBlock(int pos, const QTextBlock &block,
                         const QLuaModeUserData *idata, 
                         QLuaModeUserData *&odata )
 {
-  int len = block.length();
   QString text = block.text();
   UserData *data = new UserData;
   // input state
@@ -505,7 +504,6 @@ QLuaModeLua::gotToken(UserData *d, int pos, int len,
     middleOne:
       {
         setMiddleMatch(pos, len, n.pos(), n.len());
-        int fpos = followMatch(n.pos(), n.len());
         setIndent(pos, n.next().indent());
         setIndent(pos+len, n.indent());
         n->type = ltype;

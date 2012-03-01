@@ -69,8 +69,8 @@
 #include "qtluautils.h"
 
 
-
-
+/* some compilers define getchar() which causes problems below */
+#undef getchar
 
 
 // ----------------------------------------
@@ -1003,7 +1003,6 @@ QLuaConsole::Private::readline()
 {
   // --- This runs from the console thread,
   //     mutex is locked.
-  int status = 0;
   QByteArray prompt = this->prompt;
   QByteArray ba;
   mutex.unlock();

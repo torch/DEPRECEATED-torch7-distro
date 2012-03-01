@@ -1005,7 +1005,6 @@ find_error_location(lua_State *L, QByteArray &message)
   QList<QByteArray> list;
   // parse locations in message
   const char *m = message.constData();
-  const char *s = m;
   for(const char *s = m; *s && *s != '\n'; s++)
     {
       // search ":[0-9]+: +"
@@ -2207,7 +2206,6 @@ luaQ_m__index(lua_State *L)
   // __index in metatable
   // Check arguments
   QObject *obj = luaQ_checkqobject<QObject>(L, 1);
-  const QMetaObject *mo = obj->metaObject();
   if (lua_getmetatable(L, 1)) 
     {
       lua_pushliteral(L, "__metatable");
@@ -2267,7 +2265,6 @@ luaQ_m__newindex(lua_State *L)
   // __newindex in metatables
   // ..stack: object key value
   QObject *obj = luaQ_checkqobject<QObject>(L, 1);
-  const QMetaObject *mo = obj->metaObject();
   if (lua_getmetatable(L, 1))
     {
       lua_pushliteral(L, "__metatable"); 
@@ -2390,7 +2387,6 @@ luaQ_buildmetaclass(lua_State *L, const QMetaObject *mo)
       luaL_register(L, 0, qtval_lib);
     }
   // Slots and invokable method
-  QtLuaEngine::Private *p = luaQ_private(L);
   QMap<QByteArray,QtLuaMethodInfo> overloads;
   int fm = mo->methodOffset();
   int lm = mo->methodCount();

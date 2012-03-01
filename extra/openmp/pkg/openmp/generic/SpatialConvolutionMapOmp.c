@@ -41,13 +41,10 @@ static int nnOmp_(SpatialConvolutionMap_updateOutputOmp)(lua_State *L)
   real *connTable_data = THTensor_(data)(connTable);
 
   // and dims
-  long input_n = input->size[0];
   long input_h = input->size[1];
   long input_w = input->size[2];
-  long output_n = output->size[0];
   long output_h = output->size[1];
   long output_w = output->size[2];
-  long weight_n = weight->size[0];
   long weight_h = weight->size[1];
   long weight_w = weight->size[2];
 
@@ -90,17 +87,12 @@ static int nnOmp_(SpatialConvolutionMap_updateGradInputOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
-  int kW = luaT_getfieldcheckint(L, 1, "kW");
-  int kH = luaT_getfieldcheckint(L, 1, "kH");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
-  int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
 
   THTensor *connTable = luaT_getfieldcheckudata(L, 1, "connTable", torch_(Tensor_id));
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
-  THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
-  THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
   THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
 
   // contiguous
@@ -115,17 +107,13 @@ static int nnOmp_(SpatialConvolutionMap_updateGradInputOmp)(lua_State *L)
   real *gradInput_data = THTensor_(data)(gradInput);
   real *gradOutput_data = THTensor_(data)(gradOutput);
   real *weight_data = THTensor_(data)(weight);
-  real *gradWeight_data = THTensor_(data)(gradWeight);
   real *connTable_data = THTensor_(data)(connTable);
 
   // and dims
-  long input_n = input->size[0];
   long input_h = input->size[1];
   long input_w = input->size[2];
-  long output_n = gradOutput->size[0];
   long output_h = gradOutput->size[1];
   long output_w = gradOutput->size[2];
-  long weight_n = weight->size[0];
   long weight_h = weight->size[1];
   long weight_w = weight->size[2];
 
@@ -163,11 +151,8 @@ static int nnOmp_(SpatialConvolutionMap_accGradParametersOmp)(lua_State *L)
 {
   THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
   THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
-  int kW = luaT_getfieldcheckint(L, 1, "kW");
-  int kH = luaT_getfieldcheckint(L, 1, "kH");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
-  int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
   real scale = luaL_optnumber(L, 4, 1);
 
@@ -175,7 +160,6 @@ static int nnOmp_(SpatialConvolutionMap_accGradParametersOmp)(lua_State *L)
   THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
   THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
-  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
 
   // contiguous
   input = THTensor_(newContiguous)(input);
@@ -184,18 +168,14 @@ static int nnOmp_(SpatialConvolutionMap_accGradParametersOmp)(lua_State *L)
   // get raw pointers
   real *input_data = THTensor_(data)(input);
   real *gradOutput_data = THTensor_(data)(gradOutput);
-  real *weight_data = THTensor_(data)(weight);
   real *gradWeight_data = THTensor_(data)(gradWeight);
   real *gradBias_data = THTensor_(data)(gradBias);
 
   // and dims
-  long input_n = input->size[0];
   long input_h = input->size[1];
   long input_w = input->size[2];
-  long output_n = gradOutput->size[0];
   long output_h = gradOutput->size[1];
   long output_w = gradOutput->size[2];
-  long weight_n = weight->size[0];
   long weight_h = weight->size[1];
   long weight_w = weight->size[2];
 

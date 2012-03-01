@@ -239,7 +239,6 @@ QLuaModeC::parseBlock(int pos, const QTextBlock &block,
                         const QLuaModeUserData *idata, 
                         QLuaModeUserData *&odata )
 {
-  int len = block.length();
   QString text = block.text();
   UserData *data = new UserData;
   // input state

@@ -181,7 +181,6 @@ static int nnOmp_(SpatialSubSampling_accGradParametersOmp)(lua_State *L)
   int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
   setompnthread(L,1,"nThread");
 
-  THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
   THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
 
@@ -199,11 +198,10 @@ static int nnOmp_(SpatialSubSampling_accGradParametersOmp)(lua_State *L)
   long outputWidth = (inputWidth - kW) / dW + 1;
   long outputHeight = (inputHeight - kH) / dH + 1;
 
-  real *weight_data = THTensor_(data)(weight);
   real *gradWeight_data = THTensor_(data)(gradWeight);
   real *gradBias_data = THTensor_(data)(gradBias);
   real *gradOutput_data = THTensor_(data)(gradOutput);
-  real *input_data, *gradInput_data;
+  real *input_data;
 
   input = THTensor_(newContiguous)(input);
   input_data = THTensor_(data)(input);

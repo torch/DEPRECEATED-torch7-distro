@@ -115,7 +115,7 @@ void THOmpTensor_(conv2DRevgerm)(THTensor *r_, real beta, real alpha, THTensor *
 {
   long nbatch, nInputPlane, nInputRows, nInputCols;
   long nKernelPlane, nKernelRows, nKernelCols;
-  long nOutputPlane, nOutputRows, nOutputCols;
+  long nOutputRows, nOutputCols;
   long istride0, kstride0, istride1, kstride1;
 
   THArgCheck(t_->nDimension == 4 , 3, "input: 4D Tensor expected");

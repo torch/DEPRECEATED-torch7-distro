@@ -579,7 +579,6 @@ QLuaMdiMain::Client::disown()
   QLuaIde *ide = QLuaIde::instance();
   if (widget && widget->parentWidget())
     {
-      bool visible = widget->isVisibleTo(widget->parentWidget());
       if (subWindow)
         ide->saveWindowGeometry(widget);
       widget->hide();
@@ -955,7 +954,6 @@ QLuaMdiMain::createStatusBar()
 bool
 QLuaMdiMain::activate(QWidget *w)
 {
-  Client *client = 0;
   QWidget *window = w->window();
   while (w && w->windowType() != Qt::Window 
          && !d->table.contains(w))

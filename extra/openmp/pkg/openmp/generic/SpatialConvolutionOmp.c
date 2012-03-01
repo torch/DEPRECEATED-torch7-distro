@@ -25,7 +25,6 @@ static int nnOmp_(SpatialConvolution_updateOutputOmp)(lua_State *L)
   }
 
   long nOutputPlane = weight->size[0];
-  long nInputPlane  = weight->size[1];
   long kW           = weight->size[3];
   long kH           = weight->size[2];
   long inputWidth   = input->size[dimw];
@@ -99,8 +98,6 @@ static int nnOmp_(SpatialConvolution_updateGradInputOmp)(lua_State *L)
 
   THArgCheck( nOutputPlane == gradOutput->size[input->nDimension == 4 ? 1 : 0], 1, "Number of output features is not equal to nOutputPlane" );
 
-  long k;
-
   /* gradient to input */
   THTensor *tweight = THTensor_(newTranspose)(weight,0,1);
 
@@ -126,7 +123,6 @@ static int nnOmp_(SpatialConvolution_accGradParametersOmp)(lua_State *L)
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
   setompnthread(L,1,"nThread");
 
-  THTensor *weight = luaT_getfieldcheckudata(L, 1, "weight", torch_(Tensor_id));
   THTensor *gradWeight = luaT_getfieldcheckudata(L, 1, "gradWeight", torch_(Tensor_id));
   THTensor *gradBias = luaT_getfieldcheckudata(L, 1, "gradBias", torch_(Tensor_id));
 

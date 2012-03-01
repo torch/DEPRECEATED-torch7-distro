@@ -87,7 +87,6 @@ QLuaModeHelp::parseBlock(int pos, const QTextBlock &block,
                          const QLuaModeUserData *idata, 
                          QLuaModeUserData *&odata )
 {
-  int len = block.length();
   QString text = block.text();
   UserData *data = new UserData;
   // input state
@@ -114,7 +113,6 @@ QLuaModeHelp::gotLine(UserData *d, int pos, int len, QString line)
         {
           if ((p = reEVerb.indexIn(line, i)) >= 0)
             {
-              int l = reEVerb.matchedLength();
               setFormat(pos, p, "string");
               setIndentOverlay(pos+p);
               d->verbatim = false;
