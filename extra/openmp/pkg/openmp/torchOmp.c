@@ -17,8 +17,6 @@ static const void* torch_DoubleTensor_id;
 
 static const void* torch_LongStorage_id;
 
-static const void* torch_default_tensor_id;
-
 #include "generic/torchOmp.c"
 #include "THGenerateAllTypes.h"
 
