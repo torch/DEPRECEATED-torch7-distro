@@ -114,7 +114,6 @@ static int cunn_LogSoftMax_updateOutput(lua_State *L)
 {
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
   THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
-  long size = THCudaTensor_nElement(input);
 
   input = THCudaTensor_newContiguous(input);
   THCudaTensor_resizeAs(output, input);
@@ -159,7 +158,6 @@ static int cunn_LogSoftMax_updateGradInput(lua_State *L)
   THCudaTensor *gradOutput = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
   THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
   THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
-  long size = THCudaTensor_nElement(output);
 
   output = THCudaTensor_newContiguous(output);
   gradOutput = THCudaTensor_newContiguous(gradOutput);
