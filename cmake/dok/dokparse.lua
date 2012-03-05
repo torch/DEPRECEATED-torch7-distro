@@ -127,12 +127,13 @@ end
 local templatehtml = io.open(doktemplate):read('*all')
 local txthtml = dok.dok2html(txt)
 
--- swap anchors and divs
-txthtml = txthtml:gsub('<div(.-)<a name(.-)<p>', function(c1,c2)
-                                                    return '<a name' .. c2 .. '\n<div' .. c1 .. '<p>'
-                                                 end)
---print(txthtml)
---print(templatehtml)
+-- swap anchors and divs for better links
+-- TODO: fix this, it doenst work anymore.
+txthtml = txthtml:gsub('<div(.-)<a name(.-)</a>', 
+                        function(c1,c2) 
+                           return '<a name' .. c2 .. '</a>\n<div' .. c1 
+                        end)
+
 templatehtml = templatehtml:gsub('%%CONTENTS%%', function () return txthtml end)
 templatehtml = templatehtml:gsub('%%TITLE%%', txttitle)
 templatehtml = templatehtml:gsub('%%NAVLINE%%', navhome)
