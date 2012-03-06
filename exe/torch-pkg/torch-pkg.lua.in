@@ -1,9 +1,9 @@
--- some paths
-tmp = '/tmp/torch-pkg'
-
 -- some dependencies
 require 'paths'
 require 'torch'
+
+-- some paths
+tmp = paths.concat(os.getenv('HOME'),'.torch','torch-pkg')
 
 -- torch cmake config
 cmake_conf = {
