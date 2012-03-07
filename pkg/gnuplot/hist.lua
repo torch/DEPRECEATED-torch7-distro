@@ -93,7 +93,7 @@ function gnuplot.histc(...)
    local raw = args[5] or false
 
    -- compute histogram
-   local hist = torch.histc(tensor,bins,min,max)
+   local hist = torch.histc(tensor:double(),bins,min,max)
 
    -- return raw histogram (no extra info)
    if raw then return hist end
