@@ -1145,10 +1145,10 @@ void THTensor_(histc)(THTensor *hist, THTensor *tensor, long nbins, real minvalu
     minval = THTensor_(minall)(tensor);
     maxval = THTensor_(maxall)(tensor);
   }
-  if (minval == maxval) 
+  if (minval == maxval)
   {
-    minval = minval - 0.5;
-    maxval = maxval + 0.5;
+    minval = minval - 1;
+    maxval = maxval + 1;
   }
   real bins = (real)(nbins)-1e-6;
 
