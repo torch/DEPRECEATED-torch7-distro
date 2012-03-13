@@ -16,6 +16,13 @@ INCLUDE(TorchLua2exe)
 INCLUDE(TorchPackage)
 INCLUDE(TorchWrap)
 
+FIND_PACKAGE(OpenMP)
+
+IF(OPENMP_FOUND)
+  MESSAGE(STATUS "OpenMP Found with compiler flag : ${OpenMP_C_FLAGS}")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+ENDIF(OPENMP_FOUND)
+
 # Torch executables
 ADD_SUBDIRECTORY(exe)
 
