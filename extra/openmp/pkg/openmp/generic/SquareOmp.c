@@ -10,7 +10,7 @@ static int nnOmp_(Square_updateOutputOmp)(lua_State *L)
 
   THTensor_(resizeAs)(output, input);
   
-  if (input->nDimension == 1 || !THTensor_(isContiguous)(input) || !THTensor_(isContiguous)(output))
+  if (input->stride[0] == 0 || input->nDimension == 1 || !THTensor_(isContiguous)(input) || !THTensor_(isContiguous)(output))
   {
     TH_TENSOR_APPLY2(real, output, real, input,		\
 		     *output_data = (*input_data) * (*input_data););

@@ -11,7 +11,7 @@ static int nnOmp_(Sqrt_updateOutputOmp)(lua_State *L)
 
   THTensor_(resizeAs)(output, input);
   
-  if (input->nDimension == 1 || !THTensor_(isContiguous)(input) || !THTensor_(isContiguous)(output))
+  if (input->stride[0] == 0 | input->nDimension == 1 || !THTensor_(isContiguous)(input) || !THTensor_(isContiguous)(output))
   {
     TH_TENSOR_APPLY2(real, output, real, input,		\
 		     *output_data = sqrt(*input_data + bias););
@@ -30,7 +30,7 @@ static int nnOmp_(Sqrt_updateOutputOmp)(lua_State *L)
       long i;
       for (i = 0; i < input->stride[0]; i++)
       {
-	ptr_output[i] = sqrt(ptr_input[i] + bias);
+        ptr_output[i] = sqrt(ptr_input[i] + bias);
       }
     }
   }
@@ -71,8 +71,7 @@ static int nnOmp_(Sqrt_updateGradInputOmp)(lua_State *L)
       long i;
       for (i = 0; i < output->stride[0]; i++)
       {
-	ptr_gradInput[i] = 0.5 * (ptr_gradOutput[i] / ptr_output[i]);
-	//printf("%g %g %g\n",ptr_gradInput[i], ptr_gradOutput[i], ptr_output[i]);
+        ptr_gradInput[i] = 0.5 * (ptr_gradOutput[i] / ptr_output[i]);
       }
     }
   }
