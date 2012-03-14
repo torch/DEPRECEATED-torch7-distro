@@ -123,9 +123,7 @@ static int nnOmp_(SpatialSubSampling_updateGradInputOmp)(lua_State *L)
 
   real *weight_data = THTensor_(data)(weight);
   real *gradOutput_data = THTensor_(data)(gradOutput);
-  real *input_data, *gradInput_data;
-
-  input_data = THTensor_(data)(input);
+  real *gradInput_data;
 
   THTensor_(resizeAs)(gradInput, input);
   gradInput_data = THTensor_(data)(gradInput);
