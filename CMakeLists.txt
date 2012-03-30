@@ -41,6 +41,20 @@ IF (OMP)
    ENDIF(OPENMP_FOUND)
 ENDIF (OMP)
 
+FIND_PACKAGE(ARM)
+IF (NEON_FOUND)
+  MESSAGE(STATUS "Neon found with compiler flag : -mfpu=neon -D__NEON__")
+  SET(CMAKE_C_FLAGS "-mfpu=neon -D__NEON__ ${CMAKE_C_FLAGS}")
+ENDIF (NEON_FOUND)
+IF (CORTEXA8_FOUND)
+  MESSAGE(STATUS "Cortex-A8 Found with compiler flag : -mcpu=cortex-a8")
+  SET(CMAKE_C_FLAGS "-mcpu=cortex-a8 -fprefetch-loop-arrays ${CMAKE_C_FLAGS}")
+ENDIF (CORTEXA8_FOUND)
+IF (CORTEXA9_FOUND)
+  MESSAGE(STATUS "Cortex-A9 Found with compiler flag : -mcpu=cortex-a9")
+  SET(CMAKE_C_FLAGS "-mcpu=cortex-a9 ${CMAKE_C_FLAGS}")
+ENDIF (CORTEXA9_FOUND)
+
 # Torch executables
 ADD_SUBDIRECTORY(exe)
 

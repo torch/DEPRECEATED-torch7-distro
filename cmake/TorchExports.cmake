@@ -12,6 +12,7 @@ INSTALL(
   "cmake/TorchWrap.cmake"
   "cmake/TorchDOK.cmake"
   "cmake/TorchLua2exe.cmake"
+  "cmake/FindARM.cmake"
   DESTINATION "${Torch_INSTALL_CMAKE_SUBDIR}")
 
 INSTALL(
