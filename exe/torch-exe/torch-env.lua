@@ -99,6 +99,7 @@ end
 -- a smarter print for Lua, the default Lua print is quite terse
 -- this new print is much more verbose, automatically recursing through
 -- lua tables, and objects.
+local print_new
 function print(obj,...)
    if obj == nil then
       _G.io.write('\n')
@@ -145,11 +146,12 @@ function print(obj,...)
    end
    if _G.select('#',...) > 0 then
       _G.io.write('    ')
-      print(...)
+      print_new(...)
    else
       _G.io.write('\n')
    end
 end
+print_new = print
 
 -- import:
 -- this function is a python-like loader, it requires a module,
