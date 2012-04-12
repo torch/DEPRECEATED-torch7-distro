@@ -121,7 +121,13 @@ The locations to search for are generally as follows.
 /usr/lib/gcc/x86_64-linux-gnu/
 /usr/lib/gcc/x86_64-redhat-linux/4.4.4/
 </file>
-These are a bit crytpic, but look around and find the path that contains libgfortran.so.
+These are a bit crytpic, but look around and find the path that contains libgfortran.so. And, use 
+
+<file>
+export CMAKE_LIBRARY_PATH=...
+</file>
+
+before calling cmake to build torch, this makes sure that OpenBLAS will be found.
 
 
 Note that CMake will try to detect various BLAS/LAPACK libraries. If you have several libraries
