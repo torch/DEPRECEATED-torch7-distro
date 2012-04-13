@@ -529,8 +529,16 @@ To install a new package, simply do:
 /usr/local/bin/torch-pkg install pkgname
 </file>
 
-If you need to look at the sources of a package, you can get
-it like this:
+The sources of the packages are downloaded and kept in a hidden
+directory in your home:
+
+<file>
+torch-pkg install image
+ls ~/.torch/torch-pkg/image/
+</file>
+
+If you just want to get the sources of a package, without
+installing it, you can get it like this:
 
 <file>
 /usr/local/bin/torch-pkg download pkgname
