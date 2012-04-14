@@ -7,6 +7,9 @@
 #ifdef USE_LAPACK
 #include "THLapack.h"
 #endif
+#ifdef USE_FFTW
+#include "THFftw.h"
+#endif
 
 #include "THVector.h"
 #include "THLogAdd.h"

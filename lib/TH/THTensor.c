@@ -2,6 +2,7 @@
 #include "THVector.h"
 #include "THBlas.h"
 #include "THLapack.h"
+#include "THFftw.h"
 #include "THRandom.h"
 #include "THTensorDimApply.h"
 
@@ -21,4 +22,7 @@
 #include "THGenerateAllTypes.h"
 
 #include "generic/THTensorLapack.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/THTensorFftw.c"
 #include "THGenerateFloatTypes.h"

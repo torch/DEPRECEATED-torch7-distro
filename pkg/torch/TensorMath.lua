@@ -1009,6 +1009,26 @@ static void THTensor_random1__(THTensor *self, long b)
                      {{name=Tensor, default=true, returned=true, invisible=true},
                       {name=Tensor}}
                   )
+      interface:wrap("fft",
+                     cname("fft"),
+                     {{name=Tensor, returned=true},
+                      {name=Tensor},
+                      {name=real, default=0}},
+                     cname("fft"),
+                     {{name=Tensor, default=true, returned=true, invisible=true},
+                      {name=Tensor},
+                      {name=real, default=0}}
+                  )
+      interface:wrap("ifft",
+                     cname("ifft"),
+                     {{name=Tensor, returned=true},
+                      {name=Tensor},
+                      {name=real, default=0}},
+                     cname("ifft"),
+                     {{name=Tensor, default=true, returned=true, invisible=true},
+                      {name=Tensor},
+                      {name=real, default=0}}
+                  )
       
    end
 

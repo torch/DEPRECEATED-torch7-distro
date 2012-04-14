@@ -12,6 +12,7 @@
 
 #cmakedefine USE_BLAS
 #cmakedefine USE_LAPACK
+#cmakedefine USE_FFTW
 
 #ifdef __cplusplus
 # define TH_EXTERNC extern "C"

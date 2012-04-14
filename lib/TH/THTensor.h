@@ -32,4 +32,8 @@
 #include "generic/THTensorLapack.h"
 #include "THGenerateFloatTypes.h"
 
+/* fftw support */
+#include "generic/THTensorFftw.h"
+#include "THGenerateFloatTypes.h"
+
 #endif

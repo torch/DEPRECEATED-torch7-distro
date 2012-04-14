@@ -4,9 +4,9 @@ SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 SET(hdr 
   THGeneral.h THStorage.h THTensor.h THTensorApply.h
-  THBlas.h THLapack.h THLogAdd.h THRandom.h THVector.h)
+  THBlas.h THLapack.h THFftw.h THLogAdd.h THRandom.h THVector.h)
 SET(src 
-  THGeneral.c THStorage.c THTensor.c THBlas.c THLapack.c
+  THGeneral.c THStorage.c THTensor.c THBlas.c THLapack.c THFftw.c
   THLogAdd.c THRandom.c
   THFile.c THDiskFile.c THMemoryFile.c)
 
@@ -48,6 +48,12 @@ IF(LAPACK_FOUND)
   SET(USE_LAPACK 1)
   TARGET_LINK_LIBRARIES(TH ${LAPACK_LIBRARIES})
 ENDIF(LAPACK_FOUND)
+
+FIND_PACKAGE(FFTW)
+IF(FFTW_FOUND)
+  SET(USE_FFTW 1)
+  TARGET_LINK_LIBRARIES(TH ${FFTW_LIBRARIES})
+ENDIF(FFTW_FOUND)
 
 SET(CMAKE_REQUIRED_FLAGS_SAVE ${CMAKE_REQUIRED_FLAGS})
 FOREACH(KEYWORD "inline" "__inline__" "__inline")
