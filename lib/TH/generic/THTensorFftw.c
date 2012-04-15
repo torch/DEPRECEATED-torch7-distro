@@ -5,6 +5,7 @@
 TH_API void THTensor_(fftdim)(THTensor *r_, THTensor *x_, long n, int recurs)
 {
   long ndim = THTensor_(nDimension)(x_);
+
   if (ndim == 1)
   {
     THTensor_(fft)(r_, x_, n);
@@ -13,18 +14,25 @@ TH_API void THTensor_(fftdim)(THTensor *r_, THTensor *x_, long n, int recurs)
   {
     long i;
     long nslice = THTensor_(size)(x_, 0);
-    THLongStorage *size = NULL;
 
     /* need to resize output only at top level */
     if (!recurs)
     {
+      long n0 = THTensor_(size)(x_,ndim-1);
+      if (n == 0 )
+      {
+        n = n0;
+      }
+      THLongStorage *size;
       size = THLongStorage_newWithSize(ndim+1);
-      for(i=0;i<ndim;i++)
+      for(i=0;i<ndim-1;i++)
       {
         size->data[i] = THTensor_(size)(x_,i);
       }
       size->data[ndim] = 2;
+      size->data[ndim-1] = n;
       THTensor_(resize)(r_, size, NULL);
+      THLongStorage_free(size);      
     }
     /* loop over first dim and make recursive call */
     for (i=0; i<nslice; i++)
@@ -35,10 +43,6 @@ TH_API void THTensor_(fftdim)(THTensor *r_, THTensor *x_, long n, int recurs)
       THTensor_(fftdim)(rslice, xslice, n, 1);
       THTensor_(free)(xslice);
       THTensor_(free)(rslice);
-    }
-    if (!recurs)
-    {
-      THLongStorage_free(size);      
     }
   }
 }
