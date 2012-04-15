@@ -1010,24 +1010,28 @@ static void THTensor_random1__(THTensor *self, long b)
                       {name=Tensor}}
                   )
       interface:wrap("fft",
-                     cname("fft"),
+                     cname("fftdim"),
                      {{name=Tensor, returned=true},
                       {name=Tensor},
-                      {name=real, default=0}},
-                     cname("fft"),
+                      {name=real, default=0},
+                      {name="boolean",default=0,invisible=true}},
+                     cname("fftdim"),
                      {{name=Tensor, default=true, returned=true, invisible=true},
                       {name=Tensor},
-                      {name=real, default=0}}
+                      {name=real, default=0},
+                      {name="boolean",default=0,invisible=true}}
                   )
       interface:wrap("ifft",
-                     cname("ifft"),
+                     cname("ifftdim"),
                      {{name=Tensor, returned=true},
                       {name=Tensor},
-                      {name=real, default=0}},
-                     cname("ifft"),
+                      {name=real, default=0},
+                      {name="boolean",default=0,invisible=true}},
+                     cname("ifftdim"),
                      {{name=Tensor, default=true, returned=true, invisible=true},
                       {name=Tensor},
-                      {name=real, default=0}}
+                      {name=real, default=0},
+                      {name="boolean",default=0,invisible=true}}
                   )
       
    end

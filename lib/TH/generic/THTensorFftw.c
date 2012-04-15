@@ -2,6 +2,47 @@
 #define TH_GENERIC_FILE "generic/THTensorFftw.c"
 #else
 
+TH_API void THTensor_(fftdim)(THTensor *r_, THTensor *x_, long n, int recurs)
+{
+  long ndim = THTensor_(nDimension)(x_);
+  if (ndim == 1)
+  {
+    THTensor_(fft)(r_, x_, n);
+  }
+  else
+  {
+    long i;
+    long nslice = THTensor_(size)(x_, 0);
+    THLongStorage *size = NULL;
+
+    /* need to resize output only at top level */
+    if (!recurs)
+    {
+      size = THLongStorage_newWithSize(ndim+1);
+      for(i=0;i<ndim;i++)
+      {
+        size->data[i] = THTensor_(size)(x_,i);
+      }
+      size->data[ndim] = 2;
+      THTensor_(resize)(r_, size, NULL);
+    }
+    /* loop over first dim and make recursive call */
+    for (i=0; i<nslice; i++)
+    {
+      THTensor *xslice, *rslice;
+      xslice = THTensor_(newSelect)(x_, 0, i);
+      rslice = THTensor_(newSelect)(r_, 0, i);
+      THTensor_(fftdim)(rslice, xslice, n, 1);
+      THTensor_(free)(xslice);
+      THTensor_(free)(rslice);
+    }
+    if (!recurs)
+    {
+      THLongStorage_free(size);      
+    }
+  }
+}
+
 TH_API void THTensor_(fft)(THTensor *r_, THTensor *x_, long n)
 {
   THTensor *x, *xn, *in;
@@ -53,6 +94,46 @@ TH_API void THTensor_(fft)(THTensor *r_, THTensor *x_, long n)
 
   /* clean up */
   THTensor_(free)(x);
+}
+
+TH_API void THTensor_(ifftdim)(THTensor *r_, THTensor *x_, long n, int recurs)
+{
+  long ndim = THTensor_(nDimension)(x_);
+  if (ndim == 2)
+  {
+    THTensor_(ifft)(r_, x_, n);
+  }
+  else
+  {
+    long i;
+    long nslice = THTensor_(size)(x_, 0);
+    THLongStorage *size = NULL;
+
+    /* need to resize output only at top level */
+    if (!recurs)
+    {
+      size = THLongStorage_newWithSize(ndim-1);
+      for(i=0;i<ndim-1;i++)
+      {
+        size->data[i] = THTensor_(size)(x_,i);
+      }
+      THTensor_(resize)(r_, size, NULL);
+    }
+    /* loop over first dim and make recursive call */
+    for (i=0; i<nslice; i++)
+    {
+      THTensor *xslice, *rslice;
+      xslice = THTensor_(newSelect)(x_, 0, i);
+      rslice = THTensor_(newSelect)(r_, 0, i);
+      THTensor_(ifftdim)(rslice, xslice, n, 1);
+      THTensor_(free)(xslice);
+      THTensor_(free)(rslice);
+    }
+    if (!recurs)
+    {
+      THLongStorage_free(size);      
+    }
+  }
 }
 
 TH_API void THTensor_(ifft)(THTensor *r_, THTensor *x_, long n)
