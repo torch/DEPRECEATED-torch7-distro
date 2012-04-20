@@ -89,6 +89,12 @@ function who()
    print('==')
 end
 
+-- exit:
+-- a simple function to exit Torch :-)
+function exit()
+   os.exit()
+end
+
 print_old=print
 _G._preloaded_ = {}
 for k,v in pairs(_G) do
