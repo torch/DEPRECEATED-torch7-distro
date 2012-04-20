@@ -8,10 +8,16 @@ void THTensor_(fill)(THTensor *r_, real value)
                   THVector_(fill)(r__data, value, r__size); break;);
 }
 
+static inline void THTensor_(func_zero)(real *d)
+{
+  *d = 0;
+}
+
 void THTensor_(zero)(THTensor *r_)
 {
-  TH_TENSOR_APPLY(real, r_, 
-                  THVector_(fill)(r__data, 0, r__size); break;);
+  THTensor_(apply)(r_, THTensor_(func_zero));
+//  TH_TENSOR_APPLY(real, r_, 
+//                  THVector_(fill)(r__data, 0, r__size); break;);
 }
 
 void THTensor_(maskedFill)(THTensor *tensor, THByteTensor *mask, real value)
