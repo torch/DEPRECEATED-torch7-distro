@@ -591,20 +591,30 @@ void THTensor_(cumprod)(THTensor *r_, THTensor *t, int dimension)
 }
 
 
+#if defined (TH_REAL_IS_BYTE)
+static inline void THTensor_(sign_func)(real *r, real *a, void *data)
+{
+  if(*a > 0)
+    *r = 1;
+  else
+    *r = 0;
+}
+#else
+static inline void THTensor_(sign_func)(real *r, real *a, void *data)
+{
+  if(*a > 0)
+    *r = 1;
+  else if (*a < 0)
+    *r = -1;
+  else
+    *r = 0;
+}
+#endif
+
 void THTensor_(sign)(THTensor *r_, THTensor *t)
 {
   THTensor_(resizeAs)(r_, t);
-
-#if defined (TH_REAL_IS_BYTE)
-  TH_TENSOR_APPLY2(real, r_, real, t, 
-		   if (*t_data > 0) *r__data = 1;
-		   else *r__data = 0;);
-#else
-  TH_TENSOR_APPLY2(real, r_, real, t, 
-		   if (*t_data > 0) *r__data = 1;
-		   else if (*t_data < 0) *r__data = -1;
-		   else *r__data = 0;);
-#endif
+  THTensor_(apply2)(r_, t, THTensor_(sign_func), NULL, NULL);
 }
 
 
