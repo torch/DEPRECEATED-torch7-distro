@@ -2,22 +2,36 @@
 #define TH_GENERIC_FILE "generic/THTensorMath.c"
 #else
 
-void THTensor_(fill)(THTensor *r_, real value)
+static inline void THTensor_(fill_func)(real *d, void *data)
 {
-  TH_TENSOR_APPLY(real, r_, 
-                  THVector_(fill)(r__data, value, r__size); break;);
+  real *value = data;
+  *d = *value;
 }
 
-static inline void THTensor_(func_zero)(real *d)
+static inline void THTensor_(fill_sz_func)(real *d, long sz, void *data)
+{
+  real *value = data;
+  THVector_(fill)(d, *value, sz);
+}
+
+void THTensor_(fill)(THTensor *r_, real value)
+{
+  THTensor_(apply)(r_, THTensor_(fill_func), THTensor_(fill_sz_func), &value);
+}
+
+static inline void THTensor_(zero_func)(real *d, void *data)
 {
   *d = 0;
 }
 
+static inline void THTensor_(zero_sz_func)(real *d, long sz, void *data)
+{
+  THVector_(fill)(d, 0, sz);
+}
+
 void THTensor_(zero)(THTensor *r_)
 {
-  THTensor_(apply)(r_, THTensor_(func_zero));
-//  TH_TENSOR_APPLY(real, r_, 
-//                  THVector_(fill)(r__data, 0, r__size); break;);
+  THTensor_(apply)(r_, THTensor_(zero_func), THTensor_(zero_sz_func), NULL);
 }
 
 void THTensor_(maskedFill)(THTensor *tensor, THByteTensor *mask, real value)
@@ -67,19 +81,29 @@ void THTensor_(maskedSelect)(THTensor *tensor, THTensor *src, THByteTensor *mask
 		   });
 }
 
+static inline void THTensor_(dot_func)(real *a, real *b, void *data)
+{
+  accreal *sum = data;
+  *sum += *a * *b;
+}
+
+static inline void THTensor_(dot_sz_func)(real *a, real *b, long sz, void *data)
+{
+  THBlas_(dot)(sz, a, 1, b, 1);
+}
+
 accreal THTensor_(dot)(THTensor *tensor, THTensor *src)
 {
   accreal sum = 0;
-  /* we use a trick here. careful with that. */
-  TH_TENSOR_APPLY2(real, tensor, real, src,
-                   long sz = (tensor_size-tensor_i < src_size-src_i ? tensor_size-tensor_i : src_size-src_i);
-                   sum += THBlas_(dot)(sz, src_data, src_stride, tensor_data, tensor_stride);
-                   tensor_i += sz;
-                   src_i += sz;
-                   tensor_data += sz*tensor_stride;
-                   src_data += sz*src_stride; 
-                   break;);
+  THTensor_(apply2)(tensor, src, THTensor_(dot_func), THTensor_(dot_sz_func), &sum);
   return sum; 
+}
+
+static inline void THTensor_(minAll_func)(real *a, void *data)
+{
+  real *themin = data;
+  if(*a < *themin)
+    *themin = *a;
 }
 
 real THTensor_(minall)(THTensor *tensor)
@@ -87,8 +111,15 @@ real THTensor_(minall)(THTensor *tensor)
   real theMin;
   THArgCheck(tensor->nDimension > 0, 1, "tensor must have one dimension");
   theMin = THTensor_(data)(tensor)[0];
-  TH_TENSOR_APPLY(real, tensor, if(*tensor_data < theMin) theMin = *tensor_data;);
+  THTensor_(apply)(tensor, THTensor_(minAll_func), NULL, &theMin);
   return theMin; 
+}
+
+static inline void THTensor_(maxAll_func)(real *a, void *data)
+{
+  real *themax = data;
+  if(*a > *themax)
+    *themax = *a;
 }
 
 real THTensor_(maxall)(THTensor *tensor)
@@ -96,51 +127,97 @@ real THTensor_(maxall)(THTensor *tensor)
   real theMax;
   THArgCheck(tensor->nDimension > 0, 1, "tensor must have one dimension");
   theMax = THTensor_(data)(tensor)[0];
-  TH_TENSOR_APPLY(real, tensor, if(*tensor_data > theMax) theMax = *tensor_data;);
+  THTensor_(apply)(tensor, THTensor_(maxAll_func), NULL, &theMax);
   return theMax; 
+}
+
+static inline void THTensor_(sumall_func)(real *a, void *data)
+{
+  accreal *sum = data;
+  *sum += *a;
 }
 
 accreal THTensor_(sumall)(THTensor *tensor)
 {
   accreal sum = 0;
-  TH_TENSOR_APPLY(real, tensor, sum += *tensor_data;);
+  THTensor_(apply)(tensor, THTensor_(sumall_func), NULL, &sum);
   return sum;
+}
+
+static inline void THTensor_(add_func)(real *a, real *b, void *data)
+{
+  real *value = data;
+  *a += *b + *value;
 }
 
 void THTensor_(add)(THTensor *r_, THTensor *t, real value)
 {
   THTensor_(resizeAs)(r_, t);
-  TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data + value;);
+  THTensor_(apply2)(r_, t, THTensor_(add_func), NULL, &value);
+}
+
+static inline void THTensor_(mul_func)(real *a, real *b, void *data)
+{
+  real *value = data;
+  *a += *b * *value;
 }
 
 void THTensor_(mul)(THTensor *r_, THTensor *t, real value)
 {
   THTensor_(resizeAs)(r_, t);
-  TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data * value;);
+  THTensor_(apply2)(r_, t, THTensor_(mul_func), NULL, &value);
+}
+
+static inline void THTensor_(div_func)(real *a, real *b, void *data)
+{
+  real *value = data;
+  *a += *b / *value;
 }
 
 void THTensor_(div)(THTensor *r_, THTensor *t, real value)
 {
   THTensor_(resizeAs)(r_, t);
-  TH_TENSOR_APPLY2(real, r_, real, t, *r__data = *t_data / value;);
+  THTensor_(apply2)(r_, t, THTensor_(div_func), NULL, &value);
+}
+
+static inline void THTensor_(cadd_func)(real *r, real *a, real *b, void *data)
+{
+  real *value = data;
+  *r = *a + *value * *b;
 }
 
 void THTensor_(cadd)(THTensor *r_, THTensor *t, real value, THTensor *src)
 {
   THTensor_(resizeAs)(r_, t);
-  TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data + value * *src_data;);
+  THTensor_(apply3)(r_, t, src, THTensor_(cadd_func), NULL, &value);
+}
+
+static inline void THTensor_(cmul_func)(real *r, real *a, real *b, void *data)
+{
+  *r = *a * *b;
 }
 
 void THTensor_(cmul)(THTensor *r_, THTensor *t, THTensor *src)
 {
   THTensor_(resizeAs)(r_, t);
-  TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data * *src_data;);
+  THTensor_(apply3)(r_, t, src, THTensor_(cmul_func), NULL, NULL);
+}
+
+static inline void THTensor_(cdiv_func)(real *r, real *a, real *b, void *data)
+{
+  *r = *a / *b;
 }
 
 void THTensor_(cdiv)(THTensor *r_, THTensor *t, THTensor *src)
 {
   THTensor_(resizeAs)(r_, t);
-  TH_TENSOR_APPLY3(real, r_, real, t, real, src, *r__data = *t_data / *src_data;);
+  THTensor_(apply3)(r_, t, src, THTensor_(cdiv_func), NULL, NULL);
+}
+
+static inline void THTensor_(addcmul_func)(real *r, real *a, real *b, void *data)
+{
+  real *value = data;
+  *r += *value * *a * *b;
 }
 
 void THTensor_(addcmul)(THTensor *r_, THTensor *t, real value, THTensor *src1, THTensor *src2)
@@ -150,10 +227,15 @@ void THTensor_(addcmul)(THTensor *r_, THTensor *t, real value, THTensor *src1, T
     THTensor_(resizeAs)(r_, t);
     THTensor_(copy)(r_, t);
   }
-
-  TH_TENSOR_APPLY3(real, r_, real, src1, real, src2, *r__data += value * *src1_data * *src2_data;);
+ 
+  THTensor_(apply3)(r_, src1, src2, THTensor_(addcmul_func), NULL, &value);
 }
 
+static inline void THTensor_(addcdiv_func)(real *r, real *a, real *b, void *data)
+{
+  real *value = data;
+  *r += *value * *a / *b;
+}
 
 void THTensor_(addcdiv)(THTensor *r_, THTensor *t, real value, THTensor *src1, THTensor *src2)
 {
@@ -163,7 +245,7 @@ void THTensor_(addcdiv)(THTensor *r_, THTensor *t, real value, THTensor *src1, T
     THTensor_(copy)(r_, t);
   }
 
-  TH_TENSOR_APPLY3(real, r_, real, src1, real, src2, *r__data += value * *src1_data / *src2_data;);
+  THTensor_(apply3)(r_, src1, src2, THTensor_(addcdiv_func), NULL, &value);
 }
 
 void THTensor_(addmv)(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *mat, THTensor *vec)
