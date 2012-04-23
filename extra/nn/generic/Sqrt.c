@@ -9,10 +9,21 @@ static int nn_(Sqrt_updateOutput)(lua_State *L)
   THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
 
   THTensor_(resizeAs)(output, input);
-
-  TH_TENSOR_APPLY2(real, output, real, input,		\
-		   *output_data = sqrt(*input_data + bias););
-
+  
+  if (input->nDimension == 1 || !THTensor_(isContiguous)(input) || !THTensor_(isContiguous)(output))
+  {
+    TH_TENSOR_APPLY2(real, output, real, input,   \
+         *output_data = sqrt(*input_data + bias););
+  }
+  else
+  {
+    real* output_data = THTensor_(data)(output);
+    real* input_data  = THTensor_(data)(input);
+    long i;
+#pragma omp parallel for private(i)
+    for(i = 0; i < THTensor_(nElement)(input); i++)
+      output_data[i] = sqrt(input_data[i] + bias);
+  }
   return 1;
 }
 
@@ -25,9 +36,24 @@ static int nn_(Sqrt_updateGradInput)(lua_State *L)
 
   THTensor_(resizeAs)(gradInput, input);
 
-  TH_TENSOR_APPLY3(real, gradInput, real, gradOutput, real, output,	\
-		   *gradInput_data  = 0.5 * (*gradOutput_data / *output_data););
-  
+  if (output->nDimension == 1 || 
+      !THTensor_(isContiguous)(output) || 
+      !THTensor_(isContiguous)(gradOutput) ||
+      !THTensor_(isContiguous)(gradInput))
+  {
+    TH_TENSOR_APPLY3(real, gradInput, real, gradOutput, real, output, \
+         *gradInput_data  = 0.5 * (*gradOutput_data / *output_data););
+  }
+  else
+  {
+    real* gradOutput_data = THTensor_(data)(gradOutput);
+    real* gradInput_data  = THTensor_(data)(gradInput);
+    real* output_data     = THTensor_(data)(output);
+    long i;
+#pragma omp parallel for private(i)
+    for(i = 0; i < THTensor_(nElement)(output); i++)
+      gradInput_data[i] = 0.5 * (gradOutput_data[i] / output_data[i]);
+  }
   return 1;
 }
 
