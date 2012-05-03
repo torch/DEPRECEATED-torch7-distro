@@ -448,7 +448,7 @@ end
 
 Super!
 
-===== Concluding remarks =====
+===== Concluding remarks / going further =====
 
 That's the end of this tutorial, but not the end of what you have left
 to discover of Torch! To explore more of Torch, you should take a look
@@ -457,5 +457,10 @@ throughout this tutorial every time we have mentioned one of the basic
 Torch object types.  The Torch library reference manual is available
 [[..:index|here]] and the external torch packages installed on your
 system can be viewed [[..:torch:index|here]].
+
+We've also compiled a couple of demonstrations and tutorial scripts
+that demonstrate how to train more complex models, and build gui-based
+demos, and so on... All of these can be found in 
+[[http://github.com/andresy/torch-demos|this repo]].
 
 Good luck and have fun!
