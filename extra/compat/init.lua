@@ -11,3 +11,10 @@ package.preload.random = function()
                          random = torch
                          return torch
                       end
+
+package.preload.openmp = function()
+                         require 'torch'
+                         print("***** WARNING: the 'openmp' package is deprecated. Now fully integrated in torch *****")
+                         openmp = torch
+                         return torch
+                      end
