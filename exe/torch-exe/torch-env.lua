@@ -169,8 +169,8 @@ print_new = print
 -- t:insert(2)
 -- print(t)
 -- > {1,2}
-local function newtable(t)
-   t = t or {}
+local function newtable()
+   local t = {}
    for k,v in pairs(table) do
       t[k] = v
    end
