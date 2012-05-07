@@ -325,8 +325,15 @@ elseif command == 'list' then
 
    packages = getpkglist()
 
+   local sorted = {}
+   for name in pairs(packages) do
+      table.insert(sorted,name)
+   end
+   table.sort(sorted, function(a,b) return a<b end)
+
    print()
-   for name,pkg in pairs(packages) do
+   for _,name in ipairs(sorted) do
+      local pkg = packages[name]
       info(name)
       infoarg(pkg.description)
       infoarg('hosted at: ' .. pkg.git)
