@@ -253,6 +253,17 @@ Set the location of legend key. ''hloc'' can be '''left', 'right' or
 'center'''. ''vloc'' can be '''top', 'bottom' or 'middle'''. Only
 supported for gnuplot version 4.4 and above.
 
+==== gnuplot.axis(axis) ====
+{{anchor:gnuplot.axis}}
+
+Sets the properties of axis for the current plot.
+
+  * ''auto'' : auto scales the axis to fit data and plot canvas
+  * ''image'' : scales the axis aspect ratio so that a circle is drawn as circle.
+  * ''equal'' : same as ''image''.
+  * ''fill'' : resets the aspect ratio of the plot to original values so that it fills up the canvas as good as possible.
+  * {xmin,xmax,ymin,ymax} : Sets the limits of x and y axes.
+
 ====  gnuplot.raw(command) ====
 {{anchor:gnuplot.raw}}
 

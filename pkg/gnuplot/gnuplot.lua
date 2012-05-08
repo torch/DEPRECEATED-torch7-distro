@@ -22,14 +22,14 @@ local function findos()
       local s = ff:read('*all')
       ff:close()
       if s:match('Darwin') then
-	 return 'mac'
+         return 'mac'
       elseif s:match('Linux') then
-	 return 'linux'
+         return 'linux'
       elseif s:match('FreeBSD') then
-	 return 'freebsd'
+         return 'freebsd'
       else
-	 --error('I don\'t know your operating system')
-	 return '?'
+         --error('I don\'t know your operating system')
+         return '?'
       end
    end
 end
@@ -65,7 +65,7 @@ local function gnuplothasterm(term)
    local s = tf:read('*l')
    while s do
       if s:match('^.*%s+  '.. term .. ' ') then
-	 return true
+         return true
       end
       s = tf:read('*l')
    end
@@ -92,25 +92,25 @@ local function findgnuplotexe()
       local s=ff:read('*l')
       ff:close()
       if s and s:len() > 0 and s:match('gnuplot') then
-	 local v,vv = findgnuplotversion(s)
-	 if  v < 4 then
-	    error('gnuplot version 4 is required')
-	 end
-	 if vv < 4 then
-	    -- try to find gnuplot44
-	    if os == 'linux' and paths.filep('/usr/bin/gnuplot44') then
-	       local ss = '/usr/bin/gnuplot44'
-	       v,vv = findgnuplotversion(ss)
-	       if v == 4 and vv == 4 then
-		  return ss
-	       end
-	    end
-	    _gptable.hasrefresh = false
-	    print('Some functionality like adding title, labels, ... will be disabled install gnuplot version 4.4')
-	 end
-	 return s
+         local v,vv = findgnuplotversion(s)
+         if  v < 4 then
+            error('gnuplot version 4 is required')
+         end
+         if vv < 4 then
+            -- try to find gnuplot44
+            if os == 'linux' and paths.filep('/usr/bin/gnuplot44') then
+               local ss = '/usr/bin/gnuplot44'
+               v,vv = findgnuplotversion(ss)
+               if v == 4 and vv == 4 then
+                  return ss
+               end
+            end
+            _gptable.hasrefresh = false
+            print('Some functionality like adding title, labels, ... will be disabled install gnuplot version 4.4')
+         end
+         return s
       else
-	 return nil
+         return nil
       end
    end
 end
@@ -228,40 +228,40 @@ local function getvars(t)
 
    if #t >= 1 then
       if isstring(t[1]) then
-	 legend = t[1]
+         legend = t[1]
       elseif istensor(t[1]) then
-	 x = t[1]
+         x = t[1]
       else
-	 error('expecting [string,] tensor [,tensor] [,string]')
+         error('expecting [string,] tensor [,tensor] [,string]')
       end
    end
    if #t >= 2 then
       if x and isstring(t[2]) then
-	 format = t[2]
+         format = t[2]
       elseif x and istensor(t[2]) then
-	 y = t[2]
+         y = t[2]
       elseif legend and istensor(t[2]) then
-	 x = t[2]
+         x = t[2]
       else
-	 error('expecting [string,] tensor [,tensor] [,string]')
+         error('expecting [string,] tensor [,tensor] [,string]')
       end
    end
    if #t >= 3 then
       if legend and x and istensor(t[3]) then
-	 y = t[3]
+         y = t[3]
       elseif legend and x and isstring(t[3]) then
-	 format = t[3]
+         format = t[3]
       elseif x and y and isstring(t[3]) then
-	 format = t[3]
+         format = t[3]
       else
-	 error('expecting [string,] tensor [,tensor] [,string]')
+         error('expecting [string,] tensor [,tensor] [,string]')
       end
    end
    if #t == 4 then
       if legend and x and y and isstring(t[4]) then
-	 format = t[4]
+         format = t[4]
       else
-	 error('expecting [string,] tensor [,tensor] [,string]')
+         error('expecting [string,] tensor [,tensor] [,string]')
       end
    end
    legend = legend or ''
@@ -270,8 +270,13 @@ local function getvars(t)
       error('expecting [string,] tensor [,tensor] [,string]')
    end
    if not y then
-      y = x
-      x = torch.range(1,y:size(1))
+      if x:dim() == 2 and x:size(2) == 2 then
+         y = x:select(2,2)
+         x = x:select(2,1)
+      else
+         y = x
+         x = torch.range(1,y:size(1))
+      end
    end
    if x:nDimension() ~= 1 or y:nDimension() ~= 1 then
       error('x and y are expected to be vectors x = ' .. x:nDimension() .. 'D y = ' .. y:nDimension() .. 'D')
@@ -300,25 +305,25 @@ local function getsplotvars(t)
 
    if #t >= 1 then
       if isstring(t[1]) then
-	 legend = t[1]
+         legend = t[1]
       elseif istensor(t[1]) then
-	 x = t[1]
+         x = t[1]
       else
-	 error('expecting [string,] tensor [,tensor] [,tensor]')
+         error('expecting [string,] tensor [,tensor] [,tensor]')
       end
    end
    if #t >= 2 and #t <= 4 then
       if x and istensor(t[2]) and istensor(t[3]) then
-	 y = t[2]
-	 z = t[3]
+         y = t[2]
+         z = t[3]
       elseif legend and istensor(t[2]) and istensor(t[3]) and istensor(t[4]) then
-	 x = t[2]
-	 y = t[3]
-	 z = t[4]
+         x = t[2]
+         y = t[3]
+         z = t[4]
       elseif legend and istensor(t[2]) then
-	 x = t[2]
+         x = t[2]
       else
-	 error('expecting [string,] tensor [,tensor] [,tensor]')
+         error('expecting [string,] tensor [,tensor] [,tensor]')
       end
    elseif #t > 4 then
       error('expecting [string,] tensor [,tensor] [,tensor]')
@@ -358,16 +363,16 @@ local function getimagescvars(t)
 
    if #t >= 1 then
       if istensor(t[1]) then
-	 x = t[1]
+         x = t[1]
       else
-	 error('expecting tensor [,string]')
+         error('expecting tensor [,string]')
       end
    end
    if #t == 2 then
       if x and isstring(t[2]) then
-	 palette = t[2]
+         palette = t[2]
       else
-	 error('expecting tensor [,string]' )
+         error('expecting tensor [,string]' )
       end
    elseif #t > 2 then
       error('expecting tensor [,string]')
@@ -448,10 +453,10 @@ local function gnu_splot_string(legend,x,y,z)
          local xij = xi[j]
          local yij = yi[j]
          local zij = zi[j]
-	 for k=1,xi:size(2) do
+         for k=1,xi:size(2) do
             table.insert(dstr, string.format('%g %g %g\n',xij[k],yij[k],zij[k]))
          end
-	 table.insert(dstr,'\n')
+         table.insert(dstr,'\n')
       end
       table.insert(dstr,'e\n')
    end
@@ -469,7 +474,7 @@ local function gnu_imagesc_string(x,palette)
    for i=1,x:size(1) do
       local xi = x[i];
       for j=1,x:size(2) do
-	 table.insert(dstr,string.format('%g ',xi[j]))
+         table.insert(dstr,string.format('%g ',xi[j]))
       end
       table.insert(dstr, string.format('\n'))
    end
@@ -636,6 +641,30 @@ function gnuplot.movelegend(hloc,vloc)
    writeToCurrent('set key ' .. hloc .. ' ' .. vloc)
    refreshCurrent()
 end
+
+function gnuplot.axis(axis)
+   if not _gptable.hasrefresh then
+      print('gnuplot.axis disabled')
+      return
+   end
+   if axis == 'auto' then
+      writeToCurrent('set size nosquare')
+      writeToCurrent('set autoscale')
+      refreshCurrent()
+   elseif axis == 'image' or axis == 'equal' then
+      writeToCurrent('set size ratio -1')
+      refreshCurrent()
+   elseif axis == 'fill' then
+      writeToCurrent('set size ratio 1,1')
+      refreshCurrent()
+   elseif type(axis) == 'table' then
+      if #axis ~= 4 then print('axis should have 4 componets {xmin,xmax,ymin,ymax}'); return end
+      writeToCurrent('set xrange [' .. axis[1] .. ':' .. axis[2] .. ']')
+      writeToCurrent('set yrange [' .. axis[3] .. ':' .. axis[4] .. ']')
+      refreshCurrent()
+   end
+end
+
 function gnuplot.raw(str)
    writeToCurrent(str)
 end
