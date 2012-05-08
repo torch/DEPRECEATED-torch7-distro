@@ -55,6 +55,7 @@ specified. The possible entries of format string can be
   * '+-' for points and lines
   * '~' for using smoothed lines with cubic interpolation
   * '|' for using boxes
+  * 'v' for drawing vector fiels. (In this case, x and y have to two column vectors (x,xdelta),(y,ydelta))
 
 <file lua>
 x=torch.linspace(-2*math.pi,2*math.pi)

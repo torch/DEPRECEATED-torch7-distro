@@ -273,14 +273,23 @@ local function getvars(t)
       if x:dim() == 2 and x:size(2) == 2 then
          y = x:select(2,2)
          x = x:select(2,1)
+      elseif x:dim() == 2 and x:size(2) == 4 then
+         y = torch.Tensor(x:size(1),2)
+         xx= torch.Tensor(x:size(1),2)
+         y:select(2,1):copy(x:select(2,2))
+         y:select(2,2):copy(x:select(2,4))
+         xx:select(2,1):copy(x:select(2,1))
+         xx:select(2,2):copy(x:select(2,3))
+         x = xx
       else
          y = x
          x = torch.range(1,y:size(1))
       end
    end
-   if x:nDimension() ~= 1 or y:nDimension() ~= 1 then
-      error('x and y are expected to be vectors x = ' .. x:nDimension() .. 'D y = ' .. y:nDimension() .. 'D')
+   if x:dim() ~= y:dim() or x:nDimension() > 2 or y:nDimension() > 2 then
+      error('x and y dims are wrong :  x = ' .. x:nDimension() .. 'D y = ' .. y:nDimension() .. 'D')
    end
+   --print(x:size(),y:size())
    return legend,x,y,format
 end
 
@@ -393,11 +402,12 @@ end
 local function gnuplot_string(legend,x,y,format)
    local hstr = 'plot '
    local dstr = {''}
-   local coef
-   local function gformat(f)
+   local coef = {}
+   local vecplot = {}
+   local function gformat(f,i)
       if f ~= '~' and f:find('~') or f:find('acsplines') then
-         coef = f:gsub('~',''):gsub('acsplines','')
-         coef = tonumber(coef)
+         coef[i] = f:gsub('~',''):gsub('acsplines','')
+         coef[i] = tonumber(coef[i])
          f = 'acsplines'
       end
       if f == ''  or f == '' then return ''
@@ -408,20 +418,25 @@ local function gnuplot_string(legend,x,y,format)
       elseif f == '|' or f == 'boxes' then return 'with boxes'
       elseif f == '~' or f == 'csplines' then return 'smooth csplines'
       elseif f == 'acsplines' then return 'smooth acsplines'
+      elseif f == 'V' or f == 'v' or f == 'vectors' then vecplot[i]=true;return 'with vectors'
       end
       error("format string accepted: '.' or '-' or '+' or '+-' or '~' or '~ COEF'")
    end
    for i=1,#legend do
       if i > 1 then hstr = hstr .. ' , ' end
-      hstr = hstr .. " '-' title '" .. legend[i] .. "' " .. gformat(format[i])
+      hstr = hstr .. " '-' title '" .. legend[i] .. "' " .. gformat(format[i],i)
    end
    hstr = hstr .. '\n'
    for i=1,#legend do
       local xi = x[i]
       local yi = y[i]
       for j=1,xi:size(1) do
-         if coef then
-            table.insert(dstr,string.format('%g %g %g\n',xi[j],yi[j],coef))
+         if coef[i] then
+            --print(i,coef)
+            table.insert(dstr,string.format('%g %g %g\n',xi[j],yi[j],coef[i]))
+         elseif vecplot[i] then
+            --print(xi,yi)
+            table.insert(dstr,string.format('%g %g %g %g\n',xi[j][1],yi[j][1],xi[j][2],yi[j][2]))
          else
             table.insert(dstr,string.format('%g %g\n',xi[j],yi[j]))
          end
