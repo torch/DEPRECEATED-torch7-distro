@@ -380,7 +380,7 @@ elseif command == 'add' then
    f:close()
 
    for _,arg in ipairs(arguments) do
-      for _,url in ipairs(config.urls) do
+      for _,url in ipairs(pkgconfig.urls) do
          if url == arg then
             bypass = true
          end
@@ -388,7 +388,7 @@ elseif command == 'add' then
       if bypass then
          infoarg('skipping ' .. arg .. ' (already exists)')
       else
-         conf = conf .. 'table.insert(config.urls, "' .. arg .. '")\n'
+         conf = conf .. 'table.insert(pkgconfig.urls, "' .. arg .. '")\n'
          infoarg(arg)
       end
    end
