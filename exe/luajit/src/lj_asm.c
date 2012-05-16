@@ -155,6 +155,8 @@ IRFLDEF(FLOFS)
 #include "lj_emit_arm.h"
 #elif LJ_TARGET_PPC
 #include "lj_emit_ppc.h"
+#elif LJ_TARGET_MIPS
+#include "lj_emit_mips.h"
 #else
 #error "Missing instruction emitter for target CPU"
 #endif
@@ -441,12 +443,22 @@ static Reg ra_scratch(ASMState *as, RegSet allow)
 /* Evict all registers from a set (if not free). */
 static void ra_evictset(ASMState *as, RegSet drop)
 {
+  RegSet work;
   as->modset |= drop;
-  drop &= ~as->freeset;
-  while (drop) {
-    Reg r = rset_pickbot(drop);
+#if !LJ_SOFTFP
+  work = (drop & ~as->freeset) & RSET_FPR;
+  while (work) {
+    Reg r = rset_pickbot(work);
     ra_restore(as, regcost_ref(as->cost[r]));
-    rset_clear(drop, r);
+    rset_clear(work, r);
+    checkmclim(as);
+  }
+#endif
+  work = (drop & ~as->freeset) & RSET_GPR;
+  while (work) {
+    Reg r = rset_pickbot(work);
+    ra_restore(as, regcost_ref(as->cost[r]));
+    rset_clear(work, r);
     checkmclim(as);
   }
 }
@@ -1153,6 +1165,8 @@ static void asm_loop(ASMState *as)
 #include "lj_asm_arm.h"
 #elif LJ_TARGET_PPC
 #include "lj_asm_ppc.h"
+#elif LJ_TARGET_MIPS
+#include "lj_asm_mips.h"
 #else
 #error "Missing assembler for target CPU"
 #endif
@@ -1211,8 +1225,10 @@ static void asm_head_side(ASMState *as)
     rs = asm_head_parentrs(as, ir);
     if (ra_hasreg(ir->r)) {
       rset_clear(allow, ir->r);
-      if (ra_hasspill(ir->s))
+      if (ra_hasspill(ir->s)) {
 	ra_save(as, ir, ir->r);
+	checkmclim(as);
+      }
     } else if (ra_hasspill(ir->s)) {
       irt_setmark(ir->t);
       pass2 = 1;
@@ -1528,9 +1544,7 @@ static void asm_setup_regsp(ASMState *as)
 #if LJ_SOFTFP
       case IR_MIN: case IR_MAX:
 #endif
-#if LJ_BE
 	(ir-1)->prev = REGSP_HINT(RID_RETLO);
-#endif
 	ir->prev = REGSP_HINT(RID_RETHI);
 	continue;
       default:

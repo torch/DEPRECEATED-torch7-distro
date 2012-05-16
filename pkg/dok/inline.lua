@@ -406,7 +406,7 @@ function dok.unpack(args, funcname, description, ...)
 
    -- get args
    local iargs = {}
-   if #args == 0 then 
+   if args.__printhelp then 
       print(usage)
       error('error')
    elseif #args == 1 and type(args[1]) == 'table' and #args[1] == 0 
@@ -450,15 +450,7 @@ function dok.unpack(args, funcname, description, ...)
    end
 
    -- return modified args
-   return dargs,
-   dargs[1], dargs[2], dargs[3], dargs[4], dargs[5], dargs[6], dargs[7], dargs[8], 
-   dargs[9], dargs[10], dargs[11], dargs[12], dargs[13], dargs[14], dargs[15], dargs[16],
-   dargs[17], dargs[18], dargs[19], dargs[20], dargs[21], dargs[22], dargs[23], dargs[24],
-   dargs[25], dargs[26], dargs[27], dargs[28], dargs[29], dargs[30], dargs[31], dargs[32],
-   dargs[33], dargs[34], dargs[35], dargs[36], dargs[37], dargs[38], dargs[39], dargs[40],
-   dargs[41], dargs[42], dargs[43], dargs[44], dargs[45], dargs[46], dargs[47], dargs[48],
-   dargs[49], dargs[50], dargs[51], dargs[52], dargs[53], dargs[54], dargs[55], dargs[56],
-   dargs[57], dargs[58], dargs[59], dargs[60], dargs[61], dargs[62], dargs[63], dargs[64]
+   return dargs,unpack(dargs)
 end
 
 --------------------------------------------------------------------------------

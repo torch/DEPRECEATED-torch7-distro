@@ -116,6 +116,20 @@ properly because it did not find the required gfortran library. Make sure
 that CMake can find all the required libraries through CMAKE_LIBRARY_PATH.
 If your libraries are present in LD_LIBRARY_PATH, it should be fine too.
 
+The locations to search for are generally as follows.
+<file>
+/usr/lib/gcc/x86_64-linux-gnu/
+/usr/lib/gcc/x86_64-redhat-linux/4.4.4/
+</file>
+These are a bit crytpic, but look around and find the path that contains libgfortran.so. And, use 
+
+<file>
+export CMAKE_LIBRARY_PATH=...
+</file>
+
+before calling cmake to build torch, this makes sure that OpenBLAS will be found.
+
+
 Note that CMake will try to detect various BLAS/LAPACK libraries. If you have several libraries
 installed on your computer (say Intel MKL and OpenBLAS), or if you want to avoid all these checks,
 you might want to select the one you want to use with:

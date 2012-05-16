@@ -325,8 +325,15 @@ elseif command == 'list' then
 
    packages = getpkglist()
 
+   local sorted = {}
+   for name in pairs(packages) do
+      table.insert(sorted,name)
+   end
+   table.sort(sorted, function(a,b) return a<b end)
+
    print()
-   for name,pkg in pairs(packages) do
+   for _,name in ipairs(sorted) do
+      local pkg = packages[name]
       info(name)
       infoarg(pkg.description)
       infoarg('hosted at: ' .. pkg.git)
@@ -373,7 +380,7 @@ elseif command == 'add' then
    f:close()
 
    for _,arg in ipairs(arguments) do
-      for _,url in ipairs(config.urls) do
+      for _,url in ipairs(pkgconfig.urls) do
          if url == arg then
             bypass = true
          end
@@ -381,7 +388,7 @@ elseif command == 'add' then
       if bypass then
          infoarg('skipping ' .. arg .. ' (already exists)')
       else
-         conf = conf .. 'table.insert(config.urls, "' .. arg .. '")\n'
+         conf = conf .. 'table.insert(pkgconfig.urls, "' .. arg .. '")\n'
          infoarg(arg)
       end
    end

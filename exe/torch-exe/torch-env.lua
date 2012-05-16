@@ -89,6 +89,12 @@ function who()
    print('==')
 end
 
+-- exit:
+-- a simple function to exit Torch :-)
+function exit()
+   os.exit()
+end
+
 print_old=print
 _G._preloaded_ = {}
 for k,v in pairs(_G) do
@@ -99,6 +105,7 @@ end
 -- a smarter print for Lua, the default Lua print is quite terse
 -- this new print is much more verbose, automatically recursing through
 -- lua tables, and objects.
+local print_new
 function print(obj,...)
    if obj == nil then
       _G.io.write('\n')
@@ -145,11 +152,31 @@ function print(obj,...)
    end
    if _G.select('#',...) > 0 then
       _G.io.write('    ')
-      print(...)
+      print_new(...)
    else
       _G.io.write('\n')
    end
 end
+print_new = print
+
+-- table():
+-- ok, this is slightly out of context, but that function
+-- should really exist in Lua. It creates a new table, and then
+-- imports all the table methods into it, so that you can do things
+-- like:
+-- t = table()
+-- t:insert(1)
+-- t:insert(2)
+-- print(t)
+-- > {1,2}
+local function newtable()
+   local t = {}
+   for k,v in pairs(table) do
+      t[k] = v
+   end
+   return t
+end
+setmetatable(table, {__call=newtable})
 
 -- import:
 -- this function is a python-like loader, it requires a module,
