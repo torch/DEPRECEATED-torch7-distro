@@ -44,8 +44,9 @@
 #include <QTransform>
 #include <QVariant>
 #include <QVector>
+#if HAVE_QTWEBKIT
 #include <QWebView>
-
+#endif
 
 Q_DECLARE_METATYPE(QGradient)
 Q_DECLARE_METATYPE(QPainterPath)
@@ -1961,6 +1962,7 @@ do_hook(qtransform)
 // ========================================
 // QWEBVIEW
 
+#if HAVE_QTWEBKIT
 
 static int 
 qwebview_new(lua_State *L)
@@ -1999,7 +2001,7 @@ static struct luaL_Reg qwebview_lib[] = {
 
 do_qhook(qwebview)
 
-
+#endif
 
 // ========================================
 // QWIDGET
@@ -2441,7 +2443,9 @@ luaopen_libqtgui(lua_State *L)
   HOOK_QVARIANT(QPen, qpen);
   HOOK_QOBJECT(QtLuaAction, qtluaaction);  
   HOOK_QVARIANT(QTransform, qtransform);
+#if HAVE_QTWEBKIT
   HOOK_QOBJECT(QWebView, qwebview);
+#endif
   HOOK_QOBJECT(QWidget, qwidget);  
 
   return 0;
