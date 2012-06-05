@@ -89,7 +89,8 @@ static inline void THVector_(dot_value_functor)(real *a, real *b, void *data)
 
 static inline void THVector_(dot_functor)(real *a, real *b, long sz, void *data)
 {
-  THBlas_(dot)(sz, a, 1, b, 1);
+  accreal *sum = data;
+  *sum = THBlas_(dot)(sz, a, 1, b, 1);
 }
 
 accreal THTensor_(dot)(THTensor *tensor, THTensor *src)
