@@ -159,6 +159,25 @@ function print(obj,...)
 end
 print_new = print
 
+-- table():
+-- ok, this is slightly out of context, but that function
+-- should really exist in Lua. It creates a new table, and then
+-- imports all the table methods into it, so that you can do things
+-- like:
+-- t = table()
+-- t:insert(1)
+-- t:insert(2)
+-- print(t)
+-- > {1,2}
+local function newtable()
+   local t = {}
+   for k,v in pairs(table) do
+      t[k] = v
+   end
+   return t
+end
+setmetatable(table, {__call=newtable})
+
 -- import:
 -- this function is a python-like loader, it requires a module,
 -- and then imports all its symbols globally
