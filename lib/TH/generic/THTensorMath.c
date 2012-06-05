@@ -148,7 +148,7 @@ accreal THTensor_(sumall)(THTensor *tensor)
 static inline void THVector_(add_value_functor)(real *a, real *b, void *data)
 {
   real *value = data;
-  *a += *b + *value;
+  *a = *b + *value;
 }
 
 void THTensor_(add)(THTensor *r_, THTensor *t, real value)
@@ -160,7 +160,7 @@ void THTensor_(add)(THTensor *r_, THTensor *t, real value)
 static inline void THVector_(mul_value_functor)(real *a, real *b, void *data)
 {
   real *value = data;
-  *a += *b * *value;
+  *a = *b * *value;
 }
 
 void THTensor_(mul)(THTensor *r_, THTensor *t, real value)
@@ -172,7 +172,7 @@ void THTensor_(mul)(THTensor *r_, THTensor *t, real value)
 static inline void THVector_(div_value_functor)(real *a, real *b, void *data)
 {
   real *value = data;
-  *a += *b / *value;
+  *a = *b / *value;
 }
 
 void THTensor_(div)(THTensor *r_, THTensor *t, real value)
@@ -617,7 +617,6 @@ void THTensor_(sign)(THTensor *r_, THTensor *t)
   THTensor_(resizeAs)(r_, t);
   THTensor_(apply2)(r_, t, THVector_(sign_value_functor), NULL, NULL);
 }
-
 
 accreal THTensor_(trace)(THTensor *t)
 {
