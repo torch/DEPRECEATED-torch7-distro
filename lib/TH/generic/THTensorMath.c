@@ -520,23 +520,29 @@ void THTensor_(min)(THTensor *values_, THLongTensor *indices_, THTensor *t, int 
 }
 
 
+void THTensor_(sum_functor)(real *r, long r_size, long r_stride, real *t, long t_size, long t_stride, void *stuff)
+{
+  long i;
+  accreal sum = 0;
+
+  for(i = 0; i < t_size; i++)
+    sum += (accreal)(t[i*t_stride]);
+
+  *r = (real)sum;
+}
+
 void THTensor_(sum)(THTensor *r_, THTensor *t, int dimension)
 {
   THLongStorage *dim;
 
   THArgCheck(dimension >= 0 && dimension < THTensor_(nDimension)(t), 2, "dimension out of range");
-  
+
   dim = THTensor_(newSizeOf)(t);
   THLongStorage_set(dim, dimension, 1);
   THTensor_(resize)(r_, dim, NULL);
   THLongStorage_free(dim);
 
-  TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                       accreal sum = 0;
-                       long i;
-                       for(i = 0; i < t_size; i++)
-                         sum += t_data[i*t_stride];
-                       *r__data = (real)sum;);
+  THTensor_(dimapply2)(r_, t, dimension, THTensor_(sum_functor), NULL);
 }
 
 void THTensor_(prod)(THTensor *r_, THTensor *t, int dimension)

@@ -41,4 +41,63 @@ static void THTensor_(apply3)(THTensor *a, THTensor *b, THTensor *c,
   }
 }
 
+static void THTensor_(dimapply2)(THTensor *a,
+                                 THTensor *b,
+                                 int dimension,
+                                 void (*func)(real *, long, long, /* tensor, size, stride */
+                                              real *, long, long, /* tensor, size, stride */
+                                              void *), /* closure */
+                                 void *data)
+{
+  if( a->nDimension != b->nDimension )
+    THError("inconsistent tensor sizes");
+
+  if( (dimension < 0) || (dimension >= a->nDimension) )
+    THError("invalid dimension");
+
+  real *a_data = THTensor_(data)(a);
+  real *b_data = THTensor_(data)(b);
+  int dim = a->nDimension;
+
+  long n = 1;
+  long i;
+  for(i = 0; i < dim; i++)
+  {
+    if(i != dimension)
+    {
+      if(a->size[i] != b->size[i])
+        THError("inconsistent tensor sizes");
+
+      n *= a->size[i];
+    }
+  }
+
+#pragma omp parallel for private(i)
+  for(i = 0; i < n; i++)
+  {
+    real *a_data_ = a_data;
+    real *b_data_ = b_data;
+    long modulo = n;
+    long rest = i;
+    int d;
+    for(d = 0; d < dim; d++)
+    {
+      if(d != dimension)
+      {
+        long idx;
+        modulo = modulo / a->size[d];
+        idx = rest / modulo;
+        rest = rest % modulo;
+
+        a_data_ += idx*a->stride[d];
+        b_data_ += idx*b->stride[d];
+      }
+    }
+
+    func(a_data_, a->size[dimension], a->stride[dimension],
+         b_data_, b->size[dimension], b->stride[dimension],
+         data);
+  }
+}
+
 #endif
