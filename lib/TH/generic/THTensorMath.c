@@ -520,7 +520,9 @@ void THTensor_(min)(THTensor *values_, THLongTensor *indices_, THTensor *t, int 
 }
 
 
-void THTensor_(sum_functor)(real *r, long r_size, long r_stride, real *t, long t_size, long t_stride, void *stuff)
+static inline void THTensor_(sum_functor)(real *r, long r_size, long r_stride,
+                                          real *t, long t_size, long t_stride,
+                                          void *stuff)
 {
   long i;
   accreal sum = 0;
@@ -545,6 +547,19 @@ void THTensor_(sum)(THTensor *r_, THTensor *t, int dimension)
   THTensor_(dimapply2)(r_, t, dimension, THTensor_(sum_functor), NULL);
 }
 
+static inline void THTensor_(prod_functor)(real *r, long r_size, long r_stride,
+                                           real *t, long t_size, long t_stride,
+                                           void *stuff)
+{
+  long i;
+  accreal prod = 1;
+
+  for(i = 0; i < t_size; i++)
+    prod *= (accreal)(t[i*t_stride]);
+
+  *r = (real)prod;
+}
+
 void THTensor_(prod)(THTensor *r_, THTensor *t, int dimension)
 {
   THLongStorage *dim;
@@ -555,14 +570,22 @@ void THTensor_(prod)(THTensor *r_, THTensor *t, int dimension)
   THLongStorage_set(dim, dimension, 1);
   THTensor_(resize)(r_, dim, NULL);
   THLongStorage_free(dim);
-  
-  TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                       accreal prod = 1;
-                       long i;
-                       for(i = 0; i < t_size; i++)
-                         prod *= t_data[i*t_stride];
-                       *r__data = (real)prod;);
 
+  THTensor_(dimapply2)(r_, t, dimension, THTensor_(prod_functor), NULL);
+}
+
+static inline void THTensor_(cumsum_functor)(real *r, long r_size, long r_stride,
+                                             real *t, long t_size, long t_stride,
+                                             void *stuff)
+{
+  long i;
+  accreal cumsum = 0;
+
+  for(i = 0; i < t_size; i++)
+  {
+    cumsum += (accreal)(t[i*t_stride]);
+    r[i*r_stride] = (real)cumsum;
+  }
 }
 
 void THTensor_(cumsum)(THTensor *r_, THTensor *t, int dimension)
@@ -571,14 +594,21 @@ void THTensor_(cumsum)(THTensor *r_, THTensor *t, int dimension)
   
   THTensor_(resizeAs)(r_, t);
 
-  TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                       accreal cumsum = 0;
-                       long i;
-                       for(i = 0; i < t_size; i++)
-                       {
-                         cumsum += t_data[i*t_stride];
-                         r__data[i*r__stride] = (real)cumsum;
-                       });
+  THTensor_(dimapply2)(r_, t, dimension, THTensor_(cumsum_functor), NULL);
+}
+
+static inline void THTensor_(cumprod_functor)(real *r, long r_size, long r_stride,
+                                              real *t, long t_size, long t_stride,
+                                              void *stuff)
+{
+  long i;
+  accreal cumprod = 1;
+
+  for(i = 0; i < t_size; i++)
+  {
+    cumprod *= (accreal)(t[i*t_stride]);
+    r[i*r_stride] = (real)cumprod;
+  }
 }
 
 void THTensor_(cumprod)(THTensor *r_, THTensor *t, int dimension)
@@ -587,14 +617,7 @@ void THTensor_(cumprod)(THTensor *r_, THTensor *t, int dimension)
   
   THTensor_(resizeAs)(r_, t);
 
-  TH_TENSOR_DIM_APPLY2(real, t, real, r_, dimension,
-                       accreal cumprod = 1;
-                       long i;
-                       for(i = 0; i < t_size; i++)
-                       {
-                         cumprod *= t_data[i*t_stride];
-                         r__data[i*r__stride] = (real)cumprod;
-                       });
+  THTensor_(dimapply2)(r_, t, dimension, THTensor_(cumprod_functor), NULL);
 }
 
 
