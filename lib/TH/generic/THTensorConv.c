@@ -577,7 +577,7 @@ void THTensor_(conv2DRevger)(THTensor *r_, real beta, real alpha, THTensor *t_, 
 {
   long nInputPlane, nInputRows, nInputCols;
   long nKernelPlane, nKernelRows, nKernelCols;
-  long nOutputPlane, nOutputRows, nOutputCols;
+  long nOutputRows, nOutputCols;
   long istride0, kstride0;
 
   THArgCheck(t_->nDimension == 3 , 3, "input: 3D Tensor expected");
@@ -597,7 +597,6 @@ void THTensor_(conv2DRevger)(THTensor *r_, real beta, real alpha, THTensor *t_, 
   nKernelPlane = kernel->size[0];
   nKernelRows = kernel->size[1];
   nKernelCols = kernel->size[2];
-  nOutputPlane = nInputPlane * kernel->size[0];
 
   THArgCheck(nInputRows >= nKernelRows && nInputCols >= nKernelCols , 2, "covn2DRevger : Input image is smaller than kernel");
 
@@ -787,7 +786,7 @@ void THTensor_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, THT
 {
   long nInputPlane, nInputRows, nInputCols;
   long nKernelPlane, nKernelRows, nKernelCols;
-  long nOutputPlane, nOutputRows, nOutputCols;
+  long nOutputRows, nOutputCols;
   long istride0, kstride0;
 
   THArgCheck(t_->nDimension == 3 , 3, "input: 3D Tensor expected");
@@ -809,7 +808,6 @@ void THTensor_(conv2Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, THT
   nKernelPlane = kernel->size[0];
   nKernelRows = kernel->size[1];
   nKernelCols = kernel->size[2];
-  nOutputPlane = nInputPlane * kernel->size[0];
 
   THArgCheck((nInputRows >= nKernelRows && nInputCols >= nKernelCols) || *vf == 'F', 2, "conv2Dger : Input image is smaller than kernel");
 
@@ -1398,7 +1396,7 @@ void THTensor_(conv3DRevger)(THTensor *r_, real beta, real alpha, THTensor *t_, 
 {
   long nInputPlane, nInputDepth, nInputRows, nInputCols;
   long nKernelPlane, nKernelDepth, nKernelRows, nKernelCols;
-  long nOutputPlane, nOutputDepth, nOutputRows, nOutputCols;
+  long nOutputDepth, nOutputRows, nOutputCols;
   long istride0, kstride0;
 
   THArgCheck(t_->nDimension == 4 , 3, "input: 4D Tensor expected");
@@ -1421,7 +1419,6 @@ void THTensor_(conv3DRevger)(THTensor *r_, real beta, real alpha, THTensor *t_, 
   nKernelDepth= kernel->size[1];
   nKernelRows = kernel->size[2];
   nKernelCols = kernel->size[3];
-  nOutputPlane = nInputPlane * kernel->size[0];
 
   THArgCheck(nInputDepth >= nKernelDepth && nInputRows >= nKernelRows && nInputCols >= nKernelCols , 2, "conv3DRevger : Input image is smaller than kernel");
 
@@ -1479,7 +1476,7 @@ void THTensor_(conv3Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, THT
 {
   long nInputPlane, nInputDepth, nInputRows, nInputCols;
   long nKernelPlane, nKernelDepth, nKernelRows, nKernelCols;
-  long nOutputPlane, nOutputDepth, nOutputRows, nOutputCols;
+  long nOutputDepth, nOutputRows, nOutputCols;
   long istride0, kstride0;
 
   THArgCheck(t_->nDimension == 4 , 3, "input: 4D Tensor expected");
@@ -1504,7 +1501,6 @@ void THTensor_(conv3Dger)(THTensor *r_, real beta, real alpha, THTensor *t_, THT
   nKernelDepth = kernel->size[1];
   nKernelRows  = kernel->size[2];
   nKernelCols  = kernel->size[3];
-  nOutputPlane = nInputPlane * kernel->size[0];
 
   THArgCheck((nInputDepth >= nKernelDepth
               && nInputRows >= nKernelRows
