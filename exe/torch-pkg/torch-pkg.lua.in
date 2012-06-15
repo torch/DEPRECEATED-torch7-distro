@@ -29,8 +29,8 @@ info = function(msg) print('--> ' .. msg) end
 infoarg = function(msg) print('    ' .. msg) end
 
 -- some binaries
-wget = '@WGET_EXECUTABLE@ ' if wget == '' then wget = nil end
-curl = '@CURL_EXECUTABLE@ ' if curl == '' then curl = nil end
+wget = '@WGET_EXECUTABLE@ ' if wget == '' or wget:find('NOTFOUND') then wget = nil end
+curl = '@CURL_EXECUTABLE@ ' if curl == '' or curl:find('NOTFOUND') then curl = nil end
 git = '@GIT_EXECUTABLE@ '   if git  == '' then git  = nil end
 if not wget and not curl or not git then
    error('torch-pkg cannot run without git and one of wget | curl')
