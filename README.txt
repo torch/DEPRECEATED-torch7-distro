@@ -19,7 +19,7 @@ git
 Optional
 ========
 readline
-QT (beware that QT4.8 is not supported at this time, so pick QT4.7)
+QT (QT4.8 is now supported)
 CBLAS
 LAPACK
 
