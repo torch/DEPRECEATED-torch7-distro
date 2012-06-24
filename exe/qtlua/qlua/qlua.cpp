@@ -106,7 +106,7 @@ main(int argc, char **argv)
     XCloseDisplay(display);
   else if (graphics)
     qWarning("Unable to connect X11 server (continuing with -nographics)");
-//  graphics &= !!display;
+  graphics &= !!display;
 #endif
   
   // Create application object
