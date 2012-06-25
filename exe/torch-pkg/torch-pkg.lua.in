@@ -64,6 +64,7 @@ Supported Commands:
   build           build a local package
   deploy          deploy a package (build it if necessary)
   list            list available packages
+  html            generate html page for packages found
   search          search for a package
   add             add a server address to local config ($HOME/.torchpkg/config)
 
@@ -92,7 +93,7 @@ end
 
 -- commands
 commands = {'help','install','download','build','deploy','show',
-            'list','search','add'}
+            'list','html','search','add'}
 
 -- parse arguments
 options = {}
@@ -339,6 +340,54 @@ elseif command == 'list' then
       infoarg('hosted at: ' .. pkg.git)
       print()
    end
+
+elseif command == 'html' then
+
+   packages = getpkglist()
+
+   local sorted = {}
+   for name in pairs(packages) do
+      table.insert(sorted,name)
+   end
+   table.sort(sorted, function(a,b) return a<b end)
+
+   local s = 
+[[
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head><title>Torch7 Packages</title></head>
+<body style="font-family:helvetica,arial; margin:auto; padding:0; width:600px;">
+<h2>Torch7 Packages</h2>
+<p>
+Torch7 has a built-in package management system that makes it very easy for 
+anyone to get extra (experimental) packages, and create and distribute yours.
+</p>
+<p>
+To install any of the following packages, simply do: <code>torch-pkg install package</code>.
+For more help on <code>torch-pkg</code>, check out 
+<a target="_blank" style="color:#AAA" href="http://www.torch.ch/manual/install/index#the_torch_package_management_system">this page</a>.
+</p>
+<p>
+(This page is automatically generated using: <code>torch-pkg html</code>).
+</p>
+]]
+   for _,name in ipairs(sorted) do
+      local pkg = packages[name]
+      s = s .. '<div style="border-top:1px solid #AAA;'
+                         ..'border-bottom:1px solid #AAA;'
+                         ..'background:#eee;'
+                         ..'padding:10px; margin:15px 0px;">\n'
+      s = s ..     '<h3 style="margin:0;padding:0">' .. name .. '</h3>\n'
+      s = s ..     '<p>' .. pkg.description .. '</p>\n'
+      s = s ..     '<a target="_blank" style="color:#AAA" href="' .. pkg.git .. '">Project Page</a>\n'
+      s = s .. '</div>\n'
+   end
+   s = s .. '</body></html>'
+   local file = 'torchpkg_autogen.html'
+   local f = io.open(file,'w')
+   f:write(s)
+   f:close()
+   info('generated html in: ' .. file)
 
 elseif command == 'search' then
 
