@@ -65,6 +65,7 @@ Supported Commands:
   deploy          deploy a package (build it if necessary)
   list            list available packages
   html            generate html page for packages found
+  dok             generate dok file for packages found
   search          search for a package
   add             add a server address to local config ($HOME/.torchpkg/config)
 
@@ -93,7 +94,7 @@ end
 
 -- commands
 commands = {'help','install','download','build','deploy','show',
-            'list','html','search','add'}
+            'list','html','dok','search','add'}
 
 -- parse arguments
 options = {}
@@ -388,6 +389,43 @@ For more help on <code>torch-pkg</code>, check out
    f:write(s)
    f:close()
    info('generated html in: ' .. file)
+
+elseif command == 'dok' then
+
+   packages = getpkglist()
+
+   local sorted = {}
+   for name in pairs(packages) do
+      table.insert(sorted,name)
+   end
+   table.sort(sorted, function(a,b) return a<b end)
+
+   local s = 
+[=[
+======= Torch7 Packages =======
+{{anchor:packages.dok}}
+
+Torch7 has a built-in package management system that makes it very easy for 
+anyone to get extra (experimental) packages, and create and distribute yours.
+
+To install any of the following packages, simply do: ''torch-pkg install package''.
+For more help on ''torch-pkg'', check out
+[[http://www.torch.ch/manual/install/index#the_torch_package_management_system|this page]].
+
+(This page is automatically generated using: ''torch-pkg dok'').
+]=]
+   for _,name in ipairs(sorted) do
+      local pkg = packages[name]
+      s = s .. '\n==== ' .. name .. ' ==== \n'
+      s = s .. '{{anchor:packages.' .. name .. '}}'
+      s = s .. '\n' .. pkg.description .. '\n'
+      s = s .. '\n[[' .. pkg.git .. '|Project Page]]\n'
+   end
+   local file = 'torchpkg_autogen.dok'
+   local f = io.open(file,'w')
+   f:write(s)
+   f:close()
+   info('generated dok in: ' .. file)
 
 elseif command == 'search' then
 
