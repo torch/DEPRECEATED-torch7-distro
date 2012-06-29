@@ -53,10 +53,6 @@ for i,a in ipairs(arg) do
       -- we don't pass this to qlua
       arg[i] = ' '
    end
-   -- protect -e
-   if a == '-e' and arg[i+1] then
-      arg[i+1] = '"' .. arg[i+1] .. '"'
-   end
    -- autostart interactive sessions if no user script:
    if a:find('%.lua$') and paths.filep(a) then
       interactive = false
@@ -71,6 +67,11 @@ if interactive then
 end
 
 -- re-pack arguments
+for i,a in ipairs(arg) do
+   if (a:find('[^-=+.%w]')) then
+      arg[i] = '"' .. string.gsub(arg[i],'[$`"\\]','\\%0') .. '"'
+   end
+end
 args = table.concat(arg, ' ')
 
 -- test qlua existence
@@ -86,4 +87,5 @@ end
 
 -- finally execute main thread, with proper options
 print('Type help() for more info')
+print(args);
 os.execute(paths.concat(paths.install_bin,lua) .. env .. args)
