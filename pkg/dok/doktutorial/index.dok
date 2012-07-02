@@ -405,7 +405,7 @@ Before we go any further, let's just review one basic thing: saving code to file
 As Torch relies on Lua, it's best to give all your files a .lua extension. Let's generate a lua file that contains some Lua code, and then execute it:
 
 <file lua>
-$ echo "print('Hello World!')" > helloworld.lua
+$ echo "print('Hello World\!')" > helloworld.lua
 ...
 
 $ torch helloworld.lua
