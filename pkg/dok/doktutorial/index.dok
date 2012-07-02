@@ -100,6 +100,160 @@ t7> torch.randn(
 
 </file>
 
+===== Lua Basics =====
+
+Torch is entirely built around [[http://www.lua.org/|Lua]], so the first thing you have to 
+know is get some basic knowledge about the language. The [[http://www.lua.org/docs.html|online book]]
+is great for that. 
+
+Here I'll just summarize a couple of very basic things to get you started.
+
+==== Variables ====
+
+Creating variables is straightforward, Lua is dynamically typed language. Printing variables from the prompt is a bit misleading, you have to add the = sign before it:
+
+<file lua>
+t7> a = 10
+t7> print(a)
+10
+t7> = a
+10
+t7> b = a + 1
+t7> = b
+11
+</file>
+
+==== Lua's universal data structure: the table ====
+
+The best thing about Lua is its consistency, and compactness. The whole language relies on a single data structure, the table, which will allow you to construct the most complex programs, with style!
+
+  * The Lua table can be used as:
+  * an array (with linearly stored values, of arbitrary types)
+  * a hash-table (with hashed key/value pairs)
+  * an object (which is just a hash-table)
+  * a namespace (any package in Lua is a simple table, in fact the global namespace, _G, is also a table)
+
+You already know enough about tables, let's hack around:
+
+<file lua>
+t7> t = {}
+t7> =t
+{}
+t7> t = {1,2,3,4}
+t7> =t
+{[1] = 1
+ [2] = 2
+ [3] = 3
+ [4] = 4}
+t7> = {1,2,3,'mixed types',true}
+{[1] = 1
+ [2] = 2
+ [3] = 3
+ [4] = string : "mixed types"
+ [5] = true}
+t7> t =  {4,3,2,1}
+</file>
+
+In the example above, we've shown how to use a table as a linear array. Lua is one-based, like Matlab, so if we try to get the length of this last array created, it'll be equal to the number of elements we've put in:
+
+<file lua>
+t7> =#t
+4
+</file>
+
+Ok, let's see about hash-tables now:
+
+<file lua>
+t7> h = {firstname='Paul', lastname='Eluard', age='117'}
+t7> =h
+{[firstname] = string : "Paul"
+ [lastname]  = string : "Eluard"
+ [age]       = string : "117"}
+</file>
+
+So now mixing arrays and hash-tables is easy:
+
+<file lua>
+t7> h = {firstname='Paul', lastname='Eluard', age='117', 1, 2, 3}
+t7> =h
+{[1]         = 1
+ [2]         = 2
+ [3]         = 3
+ [firstname] = string : "Paul"
+ [lastname]  = string : "Eluard"
+ [age]       = string : "117"}
+t7> 
+</file>
+
+Easy right?
+
+So we've seen a couple of basic types already: strings, numbers, tables, booleans (true/false). There's one last type in Lua: the function. Functions are first-order citizens in Lua, which means that they can be treated as regular variables. This is great, because it's the reason why we can construct very powerful data structures (such as objects) with tables:
+
+<file lua>
+t7> h = {firstname='Paul', lastname='Eluard', age='117',
+. >      print=function(self)
+. >               print(self.firstname .. ' ' .. self.lastname 
+. >                     .. ' (age: ' .. self.age .. ')')
+. >      end
+. >     }
+
+t7> =h
+{[firstname] = string : "Paul"
+ [print]     = function: 0x7f885d00c430
+ [lastname]  = string : "Eluard"
+ [age]       = string : "117"}
+</file>
+
+In this example above, we're basically storing a function at the key (hash) print. It's fairly straightforward, note that the function takes one argument, named self, which is assumed to be the object itself. The function simply concatenates the fields of the table self, and prints the whole string.
+
+One important note: accessing fields of a table is either done using square brackets [], or the . operator. The square brackets are more general: they allow the use of arbitrary strings. In the following, we now try to access the elements of h, that we just created:
+
+<file lua>
+t7> h. + TAB
+h.age        h.firstname  h.lastname   h.print(     
+
+t7> = h.print
+function: 0x7f885d00ec80
+
+t7> h.print(h)
+Paul Eluard (age: 117)
+
+t7> h:print()
+Paul Eluard (age: 117)
+</file>
+
+On the first line we type h. and then use TAB to complete and automatically explore the symbols present in h. We then print h.print, and confirm that it is indeed a function.
+
+At the next line, we call the function h.print, and pass h as the argument (which becomes self in the body of the function). This is fairly natural, but a bit heavy to manipulate objects. Lua provides a simple shortcut, :, the column, which passes the parent table as the first argument: h:print() is strictly equivalent to h.print(h).
+
+==== Functions ====
+
+A few more things about functions: functions in Lua are proper closures, so in combination with tables, you can use them to build complex and very flexible programs. An example of closure is given here:
+
+<file lua>
+myfuncs = {}
+for i = 1,4 do
+   local calls = 10
+   myfuncs[i] = function()
+      calls = calls + 1
+      print('this function has been called ' .. i .. 'times')
+   end
+end
+
+t7> myfuncs[1]()
+1
+t7> myfuncs[1]()
+2
+t7> myfuncs[4]()
+1
+t7> myfuncs[4]()
+2
+t7> myfuncs[1]()
+3
+</file>
+
+You can use such closures to create objects on the fly, that is, tables which combine functions and data to act upon. Thanks to closure, data can live in arbitrary locations (not necessarily the object's table), and simply be bound at runtime to the function's scope.
+
 =====  Torch Basics: Playing with Tensors =====
 
 Ok, now we are ready to actually do something in Torch.  Lets start by
@@ -243,6 +397,37 @@ t7> torch.setdefaulttensortype('torch.FloatTensor')
 t7> =torch.Tensor()
 [torch.FloatTensor with no dimension]
 </file>
+
+===== Saving code to files, running files =====
+
+Before we go any further, let's just review one basic thing: saving code to files, and executing them.
+
+As Torch relies on Lua, it's best to give all your files a .lua extension. Let's generate a lua file that contains some Lua code, and then execute it:
+
+<file lua>
+$ echo "print('Hello World!')" > helloworld.lua
+...
+
+$ torch helloworld.lua
+...
+Hello World!
+
+$ torch
+...
+t7> dofile 'helloworld.lua'
+Hello World!
+</file>
+
+That's it, you can either run programs form your shell, or from the Torch prompt. You can also run programs from the shell, and get an interactive prompt whenever an error occurs, or the program terminates (good for debugging):
+
+<file lua>
+$ torch -i helloworld.lua
+...
+Hello World!
+t7>
+</file>
+
+We're good with all the basic things: you now know how to run code, from files or from the prompt, and write basic Lua (which is almost all Lua is!).
 
 =====  Example: training a neural network =====
 
