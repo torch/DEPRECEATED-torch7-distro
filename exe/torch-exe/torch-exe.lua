@@ -75,17 +75,24 @@ end
 args = table.concat(arg, ' ')
 
 -- test qlua existence
-if lua == 'torch-qlua' and not paths.filep(paths.concat(paths.install_bin,lua)) then
-   print('Install Qt4 and rebuild Torch7 for graphics capability (graphics disabled)')
+if lua == 'torch-qlua' and not paths.filep(paths.concat(paths.install_bin,lua))
+then
+   print('Unable to find torch-qlua (disabling graphics)')
+   print('Fix this by installing Qt4 and rebuilding Torch7')
    lua = 'torch-lua'
 elseif os.getenv('DISPLAY') == '' or os.getenv('DISPLAY') == nil then
    print('Unable to connect X11 server (disabling graphics)')
    lua = 'torch-lua'
-else
-   print('Try the IDE: torch -ide')
+end
+
+-- messages
+
+if (interactive) then
+   if (lua == 'torch-qlua')
+       print('Try the IDE: torch -ide')
+   end
+   print('Type help() for more info'); 
 end
 
 -- finally execute main thread, with proper options
-print('Type help() for more info')
-print(args);
 os.execute(paths.concat(paths.install_bin,lua) .. env .. args)
