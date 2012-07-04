@@ -86,12 +86,11 @@ elseif os.getenv('DISPLAY') == '' or os.getenv('DISPLAY') == nil then
 end
 
 -- messages
-
-if (interactive) then
-   if (lua == 'torch-qlua')
+if interactive then
+   if lua == 'torch-qlua' then
        print('Try the IDE: torch -ide')
    end
-   print('Type help() for more info'); 
+   print('Type help() for more info')
 end
 
 -- finally execute main thread, with proper options
