@@ -23,7 +23,7 @@ pkg.image = {
 pkg.optim = {
    git = 'https://github.com/koraykv/optim',
    description = 'An optimization toolbox for Torch7',
-   dependencies = {},
+   dependencies = {'sys'},
    commit = 'master'
 }
 
@@ -143,6 +143,13 @@ pkg.debugger = {
 pkg.unsup = {
    git = 'https://github.com/koraykv/unsup',
    description = 'Toolbox for unsupervised learning',
+   dependencies = {'kex','optim'},
+   commit = 'master',
+}
+
+pkg.kex = {
+   git = 'https://github.com/koraykv/kex',
+   description = 'Koray\'s magic toolbox, be careful!',
    dependencies = {},
    commit = 'master',
 }
@@ -171,6 +178,34 @@ pkg.csv = {
 pkg.json = {
    git = 'https://github.com/clementfarabet/lua---json',
    description = 'A package to read/write JSON files', 
+   dependencies = {},
+   commit = 'master',
+}
+
+pkg.tutorials = {
+   git = 'https://github.com/clementfarabet/torch7-demos',
+   description = 'Tutorials for Torch7',
+   dependencies = {'image','imgraph','unsup','opencv','camera','nnx','ffmpeg'},
+   commit = 'master',
+}
+
+pkg.webterm = {
+   git = 'https://github.com/clementfarabet/thwebterm',
+   description = 'A web terminal for Torch7',
+   dependencies = {'image','fs'},
+   commit = 'master',
+}
+
+pkg.fs = {
+   git = 'https://github.com/clementfarabet/lua-fs-0.3',
+   description = 'File system toolbox',
+   dependencies = {},
+   commit = 'master',
+}
+
+pkg.live = {
+   git = 'https://github.com/andresy/lua---live',
+   description = 'Easy interactive presentations',
    dependencies = {},
    commit = 'master',
 }
