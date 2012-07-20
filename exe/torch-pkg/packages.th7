@@ -209,3 +209,10 @@ pkg.live = {
    dependencies = {},
    commit = 'master',
 }
+
+pkg.sndfile = {
+   git = 'https://github.com/andresy/lua---sndfile',
+   description = 'Interface to the libsndfile library',
+   dependencies = {},
+   commit = 'master',
+}
