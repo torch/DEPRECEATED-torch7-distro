@@ -51,6 +51,14 @@ if not paths.filep(configfile) then
 end
 dofile(configfile)
 
+-- check default config
+if not pkgconfig.urls[1]:find('http://www.torch.ch/resources/packages.th7') then
+   print('\n\27[0;31m')
+   print('warning: your torch-pkg config seems to be outdated')
+   print('please remove "' .. configfile .. '" and reinstall torch')
+   print('\n\27[0m')
+end
+
 -- help/args
 help = 
 [=[Torch7 Package Manager
