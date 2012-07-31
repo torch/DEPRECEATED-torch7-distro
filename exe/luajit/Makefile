@@ -16,10 +16,9 @@
 MAJVER=  2
 MINVER=  0
 RELVER=  0
-PREREL=  -beta9
+PREREL=  -beta10
 VERSION= $(MAJVER).$(MINVER).$(RELVER)$(PREREL)
 ABIVER=  5.1
-NODOTABIVER=  51
 
 ##############################################################################
 #
@@ -35,9 +34,12 @@ INSTALL_LIB=   $(DPREFIX)/lib
 INSTALL_SHARE= $(DPREFIX)/share
 INSTALL_INC=   $(DPREFIX)/include/luajit-$(MAJVER).$(MINVER)
 
-INSTALL_JITLIB= $(INSTALL_SHARE)/luajit-$(VERSION)/jit
-INSTALL_LMOD= $(INSTALL_SHARE)/lua/$(ABIVER)
-INSTALL_CMOD= $(INSTALL_LIB)/lua/$(ABIVER)
+INSTALL_LJLIBD= $(INSTALL_SHARE)/luajit-$(VERSION)
+INSTALL_JITLIB= $(INSTALL_LJLIBD)/jit
+INSTALL_LMODD= $(INSTALL_SHARE)/lua
+INSTALL_LMOD= $(INSTALL_LMODD)/$(ABIVER)
+INSTALL_CMODD= $(INSTALL_LIB)/lua
+INSTALL_CMOD= $(INSTALL_CMODD)/$(ABIVER)
 INSTALL_MAN= $(INSTALL_SHARE)/man/man1
 INSTALL_PKGCONFIG= $(INSTALL_LIB)/pkgconfig
 
@@ -46,9 +48,9 @@ INSTALL_TSYMNAME= luajit
 INSTALL_ANAME= libluajit-$(ABIVER).a
 INSTALL_SONAME= libluajit-$(ABIVER).so.$(MAJVER).$(MINVER).$(RELVER)
 INSTALL_SOSHORT= libluajit-$(ABIVER).so
-INSTALL_DYLIBNAME= libluajit-$(NODOTABIVER).$(MAJVER).$(MINVER).$(RELVER).dylib
-INSTALL_DYLIBSHORT1= libluajit-$(NODOTABIVER).dylib
-INSTALL_DYLIBSHORT2= libluajit-$(NODOTABIVER).$(MAJVER).dylib
+INSTALL_DYLIBNAME= libluajit-$(ABIVER).$(MAJVER).$(MINVER).$(RELVER).dylib
+INSTALL_DYLIBSHORT1= libluajit-$(ABIVER).dylib
+INSTALL_DYLIBSHORT2= libluajit-$(ABIVER).$(MAJVER).dylib
 INSTALL_PCNAME= luajit.pc
 
 INSTALL_STATIC= $(INSTALL_LIB)/$(INSTALL_ANAME)
@@ -61,12 +63,16 @@ INSTALL_PC= $(INSTALL_PKGCONFIG)/$(INSTALL_PCNAME)
 
 INSTALL_DIRS= $(INSTALL_BIN) $(INSTALL_LIB) $(INSTALL_INC) $(INSTALL_MAN) \
   $(INSTALL_PKGCONFIG) $(INSTALL_JITLIB) $(INSTALL_LMOD) $(INSTALL_CMOD)
+UNINSTALL_DIRS= $(INSTALL_JITLIB) $(INSTALL_LJLIBD) $(INSTALL_INC) \
+  $(INSTALL_LMOD) $(INSTALL_LMODD) $(INSTALL_CMOD) $(INSTALL_CMODD)
 
 RM= rm -f
 MKDIR= mkdir -p
+RMDIR= rmdir 2>/dev/null
 SYMLINK= ln -sf
 INSTALL_X= install -m 0755
 INSTALL_F= install -m 0644
+UNINSTALL= $(RM)
 LDCONFIG= ldconfig -n
 SED_PC= sed -e "s|^prefix=.*|prefix=$(PREFIX)|"
 
@@ -113,7 +119,7 @@ install: $(INSTALL_DEP)
 	  $(INSTALL_F) $(FILE_PC).tmp $(INSTALL_PC) && \
 	  $(RM) $(FILE_PC).tmp
 	cd src && $(INSTALL_F) $(FILES_INC) $(INSTALL_INC)
-	cd lib && $(INSTALL_F) $(FILES_JITLIB) $(INSTALL_JITLIB)
+	cd src/jit && $(INSTALL_F) $(FILES_JITLIB) $(INSTALL_JITLIB)
 	@echo "==== Successfully installed LuaJIT $(VERSION) to $(PREFIX) ===="
 	@echo ""
 	@echo "Note: the beta releases deliberately do NOT install a symlink for luajit"
@@ -121,6 +127,20 @@ install: $(INSTALL_DEP)
 	@echo ""
 	@echo "  $(SYMLINK) $(INSTALL_TNAME) $(INSTALL_TSYM)"
 	@echo ""
+
+uninstall:
+	@echo "==== Uninstalling LuaJIT $(VERSION) from $(PREFIX) ===="
+	$(UNINSTALL) $(INSTALL_T) $(INSTALL_STATIC) $(INSTALL_DYN) $(INSTALL_SHORT1) $(INSTALL_SHORT2) $(INSTALL_MAN)/$(FILE_MAN) $(INSTALL_PC)
+	for file in $(FILES_JITLIB); do \
+	  $(UNINSTALL) $(INSTALL_JITLIB)/$$file; \
+	  done
+	for file in $(FILES_INC); do \
+	  $(UNINSTALL) $(INSTALL_INC)/$$file; \
+	  done
+	$(LDCONFIG) $(INSTALL_LIB)
+	test -f $(INSTALL_TSYM) || $(UNINSTALL) $(INSTALL_TSYM)
+	$(RMDIR) $(UNINSTALL_DIRS) || :
+	@echo "==== Successfully uninstalled LuaJIT $(VERSION) from $(PREFIX) ===="
 
 ##############################################################################
 
@@ -134,9 +154,6 @@ clean:
 cleaner:
 	$(MAKE) -C src cleaner
 
-distclean:
-	$(MAKE) -C src distclean
-
-.PHONY: all install amalg clean cleaner distclean
+.PHONY: all install amalg clean cleaner
 
 ##############################################################################

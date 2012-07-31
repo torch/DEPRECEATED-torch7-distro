@@ -18,13 +18,21 @@
 #include "lj_ccallback.h"
 #include "lj_target.h"
 #include "lj_mcode.h"
+#include "lj_trace.h"
 #include "lj_vm.h"
 
 /* -- Target-specific handling of callback slots -------------------------- */
 
 #define CALLBACK_MCODE_SIZE	(LJ_PAGESIZE * LJ_NUM_CBPAGE)
 
-#if LJ_TARGET_X86ORX64
+#if LJ_OS_NOJIT
+
+/* Disabled callback support. */
+#define CALLBACK_SLOT2OFS(slot)	(0*(slot))
+#define CALLBACK_OFS2SLOT(ofs)	(0*(ofs))
+#define CALLBACK_MAX_SLOT	0
+
+#elif LJ_TARGET_X86ORX64
 
 #define CALLBACK_MCODE_HEAD	(LJ_64 ? 8 : 0)
 #define CALLBACK_MCODE_GROUP	(-2+1+2+5+(LJ_64 ? 6 : 5))
@@ -92,7 +100,10 @@ MSize lj_ccallback_ptr2slot(CTState *cts, void *p)
 }
 
 /* Initialize machine code for callback function pointers. */
-#if LJ_TARGET_X86ORX64
+#if LJ_OS_NOJIT
+/* Disabled callback support. */
+#define callback_mcode_init(g, p)	UNUSED(p)
+#elif LJ_TARGET_X86ORX64
 static void callback_mcode_init(global_State *g, uint8_t *page)
 {
   uint8_t *p = page;
@@ -415,7 +426,6 @@ static void callback_conv_args(CTState *cts, lua_State *L)
       MSize n;
       lua_assert(ctype_isfield(ctf->info));
       cta = ctype_rawchild(cts, ctf);
-      if (ctype_isenum(cta->info)) cta = ctype_child(cts, cta);
       isfp = ctype_isfp(cta->info);
       sz = (cta->size + CTSIZE_PTR-1) & ~(CTSIZE_PTR-1);
       n = sz / CTSIZE_PTR;  /* Number of GPRs or stack slots needed. */
@@ -486,6 +496,7 @@ lua_State * LJ_FASTCALL lj_ccallback_enter(CTState *cts, void *cf)
   lua_assert(L != NULL);
   if (gcref(cts->g->jit_L))
     lj_err_caller(gco2th(gcref(cts->g->jit_L)), LJ_ERR_FFI_BADCBACK);
+  lj_trace_abort(cts->g);  /* Never record across callback. */
   /* Setup C frame. */
   cframe_prev(cf) = L->cframe;
   setcframe_L(cf, L);
@@ -516,6 +527,7 @@ void LJ_FASTCALL lj_ccallback_leave(CTState *cts, TValue *o)
   L->cframe = cframe_prev(L->cframe);
   L->top -= 2;
   L->base = obase;
+  cts->cb.slot = 0;  /* Blacklist C function that called the callback. */
 }
 
 /* -- C callback management ----------------------------------------------- */

@@ -33,6 +33,8 @@
   /* Miscellaneous ops. */ \
   _(NOP,	N , ___, ___) \
   _(BASE,	N , lit, lit) \
+  _(PVAL,	N , lit, ___) \
+  _(GCSTEP,	S , ___, ___) \
   _(HIOP,	S , ref, ref) \
   _(LOOP,	S , ___, ___) \
   _(USE,	S , ref, ___) \
@@ -193,8 +195,9 @@ IRFPMDEF(FPMENUM)
   _(UDATA_META,	offsetof(GCudata, metatable)) \
   _(UDATA_UDTYPE, offsetof(GCudata, udtype)) \
   _(UDATA_FILE,	sizeof(GCudata)) \
-  _(CDATA_TYPEID, offsetof(GCcdata, typeid)) \
+  _(CDATA_CTYPEID, offsetof(GCcdata, ctypeid)) \
   _(CDATA_PTR,	sizeof(GCcdata)) \
+  _(CDATA_INT, sizeof(GCcdata)) \
   _(CDATA_INT64, sizeof(GCcdata)) \
   _(CDATA_INT64_4, sizeof(GCcdata) + 4)
 
@@ -329,6 +332,7 @@ typedef struct IRType1 { uint8_t irt; } IRType1;
 #define irt_islightud(t)	(irt_type(t) == IRT_LIGHTUD)
 #define irt_isstr(t)		(irt_type(t) == IRT_STR)
 #define irt_istab(t)		(irt_type(t) == IRT_TAB)
+#define irt_iscdata(t)		(irt_type(t) == IRT_CDATA)
 #define irt_isfloat(t)		(irt_type(t) == IRT_FLOAT)
 #define irt_isnum(t)		(irt_type(t) == IRT_NUM)
 #define irt_isint(t)		(irt_type(t) == IRT_INT)
