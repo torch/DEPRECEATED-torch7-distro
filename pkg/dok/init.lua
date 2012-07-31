@@ -1,8 +1,8 @@
 dok = {}
 
 if torch then
-   torch.include('dok', 'inline.lua')
-   torch.include('dok', 'search.lua')
+   include('inline.lua')
+   include('search.lua')
 end
 
 dok.options = {}
