@@ -167,6 +167,10 @@ IF(TARGET_LJARCH STREQUAL "ppc")
 ENDIF()
 
 add_executable(minilua src/host/minilua.c)
+CHECK_LIBRARY_EXISTS(m sin "" MINILUA_USE_LIBM)
+if(MINILUA_USE_LIBM)
+  TARGET_LINK_LIBRARIES(minilua m)
+endif()
 
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/buildvm_arch.h
   COMMAND minilua ${CMAKE_CURRENT_SOURCE_DIR}/dynasm/dynasm.lua ${DASM_FLAGS} -o ${CMAKE_CURRENT_BINARY_DIR}/buildvm_arch.h ${CMAKE_CURRENT_SOURCE_DIR}/src/vm_${DASM_ARCH}.dasc
