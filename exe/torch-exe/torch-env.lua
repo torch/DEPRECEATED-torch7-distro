@@ -107,7 +107,7 @@ end
 -- lua tables, and objects.
 local print_new
 function print(obj,...)
-   if obj == nil then
+   if obj == nil and select('#',...) == 0 then
       _G.io.write('\n')
       _G.io.flush()
       return
