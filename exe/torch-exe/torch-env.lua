@@ -112,12 +112,12 @@ function print(obj,...)
       _G.io.flush()
       return
    end
-   local m = getmaxlen(obj)
    if _G.type(obj) == 'table' then
       local mt = _G.getmetatable(obj)
       if mt and mt.__tostring__ then
          _G.io.write(mt.__tostring__(obj))
       else
+         local m = getmaxlen(obj)
          local tos = _G.tostring(obj)
          local obj_w_usage = false
          if tos and not _G.string.find(tos,'table: ') then
