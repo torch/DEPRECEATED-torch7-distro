@@ -663,14 +663,11 @@ QLuaSdiMain::HSWidget::HSWidget(Private *d)
   setFocusProxy(e);
   // appearance
   setLineWidth(2);
-  setFrameStyle(Box|Raised);
+  setFrameStyle(Box|Plain);
   setAutoFillBackground(true);
-  setBackgroundRole(QPalette::ToolTipBase);
-  setForegroundRole(QPalette::ToolTipText);
-  v->setBackgroundRole(QPalette::ToolTipBase);
-  v->setForegroundRole(QPalette::ToolTipText);
-  v->viewport()->setBackgroundRole(QPalette::ToolTipBase);
-  v->viewport()->setForegroundRole(QPalette::ToolTipText);
+  setBackgroundRole(QPalette::AlternateBase);
+  v->setBackgroundRole(QPalette::AlternateBase);
+  v->viewport()->setBackgroundRole(QPalette::AlternateBase);
   QFont font;
   const qreal fontFactor = 0.9;
   if (font.pixelSize() > 0)
