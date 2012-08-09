@@ -10,13 +10,13 @@
 #include "TH.h"
 #include "luaT.h"
 
-static const void* torch_ByteTensor_id;
-static const void* torch_CharTensor_id;
-static const void* torch_ShortTensor_id;
-static const void* torch_IntTensor_id;
-static const void* torch_LongTensor_id;
-static const void* torch_FloatTensor_id;
-static const void* torch_DoubleTensor_id;
+static const char* torch_ByteTensor_id;
+static const char* torch_CharTensor_id;
+static const char* torch_ShortTensor_id;
+static const char* torch_IntTensor_id;
+static const char* torch_LongTensor_id;
+static const char* torch_FloatTensor_id;
+static const char* torch_DoubleTensor_id;
 
 #define torch_(NAME) TH_CONCAT_3(torch_, Real, NAME)
 #define qttorch_(NAME) TH_CONCAT_3(qttorch_, Real, NAME)

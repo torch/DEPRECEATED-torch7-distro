@@ -7,7 +7,7 @@
 #include <thrust/transform_reduce.h>
 #include <thrust/functional.h>
 
-const void *torch_CudaTensor_id = NULL;
+const char *torch_CudaTensor_id = NULL;
 
 #include "HardTanh.cu"
 #include "Tanh.cu"
