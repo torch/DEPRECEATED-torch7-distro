@@ -17,8 +17,8 @@ struct mse_functor
 
 static int cunn_MSECriterion_updateOutput(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
-  THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, "torch.CudaTensor");
+  THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, "torch.CudaTensor");
   int sizeAverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
 
   float sum;
@@ -60,10 +60,10 @@ struct mse_updateGradInput_functor
 
 static int cunn_MSECriterion_updateGradInput(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
-  THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, "torch.CudaTensor");
+  THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, "torch.CudaTensor");
   int sizeAverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
-  THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
+  THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", "torch.CudaTensor");
 
   long size = THCudaTensor_nElement(input);
   float norm = (sizeAverage ? 2./size : 2.);
@@ -139,8 +139,8 @@ __global__ void cunn_MSECriterion_updateGradInput_kernel(float *gradInput, float
 
 static int cunn_MSECriterion_updateOutput2(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
-  THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, "torch.CudaTensor");
+  THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, "torch.CudaTensor");
   int sizeAverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
   long size = THCudaTensor_nElement(input);
 
@@ -177,10 +177,10 @@ static int cunn_MSECriterion_updateOutput2(lua_State *L)
 
 static int cunn_MSECriterion_updateGradInput2(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
-  THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, "torch.CudaTensor");
+  THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, "torch.CudaTensor");
   int sizeAverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
-  THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
+  THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", "torch.CudaTensor");
   long size = THCudaTensor_nElement(input);
   float norm = (sizeAverage ? 2./size : 2.);
   
@@ -218,7 +218,7 @@ static const struct luaL_Reg cunn_MSECriterion__ [] = {
 
 static void cunn_MSECriterion_init(lua_State *L)
 {
-  luaT_pushmetaclass(L, torch_CudaTensor_id);
+  luaT_pushmetatable(L, "torch.CudaTensor");
   luaT_registeratname(L, cunn_MSECriterion__, "nn");
   lua_pop(L,1);
 }

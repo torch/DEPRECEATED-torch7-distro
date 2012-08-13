@@ -1,13 +1,13 @@
 
 static int cunn_SpatialConvolution_updateOutput(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, "torch.CudaTensor");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
 
-  THCudaTensor *weight = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
-  THCudaTensor *bias = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "bias", torch_CudaTensor_id);
-  THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
+  THCudaTensor *weight = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "weight", "torch.CudaTensor");
+  THCudaTensor *bias = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "bias", "torch.CudaTensor");
+  THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", "torch.CudaTensor");
 
   luaL_argcheck(L, input->nDimension == 3 || input->nDimension == 4, 2, "3D or 4D (batch mode) tensor is expected");
 
@@ -69,8 +69,8 @@ static int cunn_SpatialConvolution_updateOutput(lua_State *L)
 
 static int cunn_SpatialConvolution_updateGradInput(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor *)luaT_checkudata(L, 2, torch_CudaTensor_id);
-  THCudaTensor *gradOutput = (THCudaTensor *)luaT_checkudata(L, 3, torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor *)luaT_checkudata(L, 2, "torch.CudaTensor");
+  THCudaTensor *gradOutput = (THCudaTensor *)luaT_checkudata(L, 3, "torch.CudaTensor");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
@@ -78,8 +78,8 @@ static int cunn_SpatialConvolution_updateGradInput(lua_State *L)
   luaL_argcheck(L, dW == 1, 1, "dW must be 1 (this is only a limit for CudaTensors)");
   luaL_argcheck(L, dH == 1, 1, "dH must be 1 (this is only a limit for CudaTensors)");
 
-  THCudaTensor *weight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
-  THCudaTensor *gradInput = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
+  THCudaTensor *weight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "weight", "torch.CudaTensor");
+  THCudaTensor *gradInput = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradInput", "torch.CudaTensor");
 
   if (input->nDimension == 3)
   {
@@ -137,8 +137,8 @@ __global__ void compute_gradBias(float *gradBias, float *gradOutput, float scale
 
 static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor *)luaT_checkudata(L, 2, torch_CudaTensor_id);
-  THCudaTensor *gradOutput = (THCudaTensor *)luaT_checkudata(L, 3, torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor *)luaT_checkudata(L, 2, "torch.CudaTensor");
+  THCudaTensor *gradOutput = (THCudaTensor *)luaT_checkudata(L, 3, "torch.CudaTensor");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
@@ -147,8 +147,8 @@ static int cunn_SpatialConvolution_accGradParameters(lua_State *L)
   luaL_argcheck(L, dW == 1, 1, "dW must be 1 (this will be fixed soon)");
   luaL_argcheck(L, dH == 1, 1, "dH must be 1 (this will be fixed soon)");
 
-  THCudaTensor *gradWeight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradWeight", torch_CudaTensor_id);
-  THCudaTensor *gradBias = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradBias", torch_CudaTensor_id);
+  THCudaTensor *gradWeight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradWeight", "torch.CudaTensor");
+  THCudaTensor *gradBias = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradBias", "torch.CudaTensor");
 
   float *gradBias_data = THCudaTensor_data(gradBias);
   float *gradOutput_data = THCudaTensor_data(gradOutput);
@@ -199,7 +199,7 @@ static const struct luaL_Reg cunn_SpatialConvolution__ [] = {
 
 static void cunn_SpatialConvolution_init(lua_State *L)
 {
-  luaT_pushmetaclass(L, torch_CudaTensor_id);
+  luaT_pushmetatable(L, "torch.CudaTensor");
   luaT_registeratname(L, cunn_SpatialConvolution__, "nn");
   lua_pop(L,1);
 }
