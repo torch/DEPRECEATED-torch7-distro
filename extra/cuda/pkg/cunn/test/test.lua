@@ -26,7 +26,7 @@ function cunntest.SpatialConvolution_forward()
    times[title] = tm
 
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(from,inj,ini)
+   local input = torch.randn(from,inj,ini)
    local sconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
    local groundtruth = sconv:forward(input)
    local a = torch.Timer()
@@ -72,7 +72,7 @@ function cunntest.SpatialConvolution_forward_batch()
    times[title] = tm
 
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(bs,from,inj,ini)
+   local input = torch.randn(bs,from,inj,ini)
    local sconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
    local groundtruth = sconv:forward(input)
    local a = torch.Timer()
@@ -117,8 +117,8 @@ function cunntest.SpatialConvolution_backward()
    times[title] = tm
 
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(from,inj,ini)
-   local gradOutput = lab.randn(to,outj,outi)
+   local input = torch.randn(from,inj,ini)
+   local gradOutput = torch.randn(to,outj,outi)
    local sconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
    sconv:forward(input)
    sconv:zeroGradParameters()
@@ -186,8 +186,8 @@ function cunntest.SpatialConvolution_backward_batch()
    times[title] = tm
 
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(bs,from,inj,ini)
-   local gradOutput = lab.randn(bs,to,outj,outi)
+   local input = torch.randn(bs,from,inj,ini)
+   local gradOutput = torch.randn(bs,to,outj,outi)
    local sconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
    sconv:forward(input)
    sconv:zeroGradParameters()
@@ -254,7 +254,7 @@ function cunntest.SpatialSubSampling_forward()
    times[title] = tm
 
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(from,inj,ini)
+   local input = torch.randn(from,inj,ini)
    local sconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
    local groundtruth = sconv:forward(input)
    local a = torch.Timer()
@@ -300,7 +300,7 @@ function cunntest.SpatialSubSampling_forward_batch()
    times[title] = tm
 
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(bs,from,inj,ini)
+   local input = torch.randn(bs,from,inj,ini)
    local sconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
    local groundtruth = sconv:forward(input)
    local a = torch.Timer()
@@ -345,8 +345,8 @@ function cunntest.SpatialSubSampling_backward()
    times[title] = tm
 
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(from,inj,ini)
-   local gradOutput = lab.randn(to,outj,outi)
+   local input = torch.randn(from,inj,ini)
+   local gradOutput = torch.randn(to,outj,outi)
    local sconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
    sconv:forward(input)
    sconv:zeroGradParameters()
@@ -414,8 +414,8 @@ function cunntest.SpatialSubSampling_backward_batch()
    times[title] = tm
 
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(bs,from,inj,ini)
-   local gradOutput = lab.randn(bs,to,outj,outi)
+   local input = torch.randn(bs,from,inj,ini)
+   local gradOutput = torch.randn(bs,to,outj,outi)
    local sconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
    sconv:forward(input)
    sconv:zeroGradParameters()
@@ -467,8 +467,8 @@ end
 function cunntest.mse()
    local size = math.random(3000,5000)
    torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(size,1,1)
-   local target = lab.randn(size)
+   local input = torch.randn(size,1,1)
+   local target = torch.randn(size)
    local mod = nn.MSECriterion()
 
    local tm = {}
