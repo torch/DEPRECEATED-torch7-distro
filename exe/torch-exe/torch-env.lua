@@ -159,6 +159,30 @@ function print(obj,...)
 end
 print_new = print
 
+-- printr:
+-- recursive print. This function prints tables recursively. It could 
+-- be merged into the regular print() above, but might be too dangerous
+-- when printing large tables?
+function printr(obj)
+   local function printrecursive(obj,tab)
+      local tab = tab or 0
+      local line = function(s) for i=1,tab do io.write(' ') end print(s) end
+      line('{')
+      tab = tab+2
+      for k,v in pairs(obj) do
+         if type(v) == 'table' then
+            line(k .. ' : ') printrecursive(v,tab+4)
+         else
+            line(k .. ' : ' .. tostring(v))
+         end
+      end
+      tab = tab-2
+      line('}')
+   end
+   if type(obj) ~= 'table' then print(obj)
+   else printrecursive(obj) end
+end
+
 -- table():
 -- ok, this is slightly out of context, but that function
 -- should really exist in Lua. It creates a new table, and then
