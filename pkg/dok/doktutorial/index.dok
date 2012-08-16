@@ -187,7 +187,8 @@ t7>
 
 Easy right?
 
-So we've seen a couple of basic types already: strings, numbers, tables, booleans (true/false). There's one last type in Lua: the function. Functions are first-order citizens in Lua, which means that they can be treated as regular variables. This is great, because it's the reason why we can construct very powerful data structures (such as objects) with tables:
+So we've seen a couple of basic types already: strings, numbers, tables, booleans (true/false). There's one last type in Lua: the function. 
+are first-order citizens in Lua, which means that they can be treated as regular variables. This is great, because it's the reason why we can construct very powerful data structures (such as objects) with tables:
 
 <file lua>
 t7> h = {firstname='Paul', lastname='Eluard', age='117',
@@ -233,11 +234,11 @@ A few more things about functions: functions in Lua are proper closures, so in c
 <file lua>
 myfuncs = {}
 for i = 1,4 do
-   local calls = 10
-   myfuncs[i] = function()
-      calls = calls + 1
-      print('this function has been called ' .. i .. 'times')
-   end
+    local calls = 0
+    myfuncs[i] = function()
+        calls = calls + 1
+        print('this function has been called ' .. calls .. ' times')
+    end
 end
 
 t7> myfuncs[1]()
