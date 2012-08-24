@@ -4,7 +4,6 @@ static int cunn_SpatialConvolutionMap_updateOutput(lua_State *L)
     luaT_checkudata(L, 2, torch_CudaTensor_id);
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
-
   THCudaTensor *weight = (THCudaTensor*)
     luaT_getfieldcheckudata(L, 1, "weight", torch_CudaTensor_id);
   THCudaTensor *bias = (THCudaTensor*)
@@ -20,17 +19,17 @@ static int cunn_SpatialConvolutionMap_updateOutput(lua_State *L)
   int dimw = 2;
   int dimh = 1;
 
-  long nOutputPlane = weight->size[0];
-  long kW           = weight->size[3];
-  long kH           = weight->size[2];
+  // long nOutputPlane = weight->size[0];
+  int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
+  int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
+  long kW           = weight->size[2];
+  long kH           = weight->size[1];
   long inputWidth   = input->size[dimw];
   long inputHeight  = input->size[dimh];
   long outputWidth  = (inputWidth - kW) / dW + 1;
   long outputHeight = (inputHeight - kH) / dH + 1;
-  long fanin        = connTableRev->size[1];
-
+  long fanin        = weight->size[0] / nOutputPlane;
   THCudaTensor_resize3d(output, nOutputPlane, outputHeight, outputWidth);
-
   /* add bias first */
   long k;
   THCudaTensor *outputPlane = THCudaTensor_new();
@@ -39,7 +38,6 @@ static int cunn_SpatialConvolutionMap_updateOutput(lua_State *L)
     THCudaTensor_fill(outputPlane, THCudaTensor_get1d(bias, k));
   }
   THCudaTensor_free(outputPlane);
-
   /* do convolutions */
   THCudaTensor_conv2Dmap(output, input, weight, dW, dH, 
                          connTableRev,fanin);
