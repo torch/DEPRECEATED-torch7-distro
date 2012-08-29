@@ -717,11 +717,9 @@ QLuaMode::CompView::CompView(QString s, QStringList c, QLuaTextEdit *p)
   setSpacing(0);
   setWindowFlags(Qt::Popup);
   setWindowModality(Qt::ApplicationModal);
-  setForegroundRole(QPalette::ToolTipText);
-  setBackgroundRole(QPalette::ToolTipBase);
-  viewport()->setForegroundRole(QPalette::ToolTipText);
-  viewport()->setBackgroundRole(QPalette::ToolTipBase);
-  setFrameStyle(Box|Raised);
+  setBackgroundRole(QPalette::AlternateBase);
+  viewport()->setBackgroundRole(QPalette::AlternateBase);
+  setFrameStyle(Box|Plain);
   setLineWidth(2);
   // smaller font
   QFont font;

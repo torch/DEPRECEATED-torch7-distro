@@ -21,6 +21,7 @@
 /* Some local macros to save typing. Undef'd at the end. */
 #define IR(ref)		(&J->cur.ir[(ref)])
 #define fins		(&J->fold.ins)
+#define fleft		(&J->fold.left)
 #define fright		(&J->fold.right)
 
 /*
@@ -181,7 +182,8 @@ static TRef fwd_ahload(jit_State *J, IRRef xref)
       lua_assert(ir->o != IR_TNEW || irt_isnil(fins->t));
       if (irt_ispri(fins->t)) {
 	return TREF_PRI(irt_type(fins->t));
-      } else if (irt_isnum(fins->t) || irt_isstr(fins->t)) {
+      } else if (irt_isnum(fins->t) || (LJ_DUALNUM && irt_isint(fins->t)) ||
+		 irt_isstr(fins->t)) {
 	TValue keyv;
 	cTValue *tv;
 	IRIns *key = IR(xr->op2);
@@ -191,6 +193,8 @@ static TRef fwd_ahload(jit_State *J, IRRef xref)
 	lua_assert(itype2irt(tv) == irt_type(fins->t));
 	if (irt_isnum(fins->t))
 	  return lj_ir_knum_u64(J, tv->u64);
+	else if (LJ_DUALNUM && irt_isint(fins->t))
+	  return lj_ir_kint(J, intV(tv));
 	else
 	  return lj_ir_kstr(J, strV(tv));
       }
@@ -250,6 +254,30 @@ TRef LJ_FASTCALL lj_opt_fwd_hload(jit_State *J)
   if (ref)
     return ref;
   return EMITFOLD;
+}
+
+/* HREFK forwarding. */
+TRef LJ_FASTCALL lj_opt_fwd_hrefk(jit_State *J)
+{
+  IRRef tab = fleft->op1;
+  IRRef ref = J->chain[IR_NEWREF];
+  while (ref > tab) {
+    IRIns *newref = IR(ref);
+    if (tab == newref->op1) {
+      if (fright->op1 == newref->op2)
+	return ref;  /* Forward from NEWREF. */
+      else
+	goto docse;
+    } else if (aa_table(J, tab, newref->op1) != ALIAS_NO) {
+      goto docse;
+    }
+    ref = newref->prev;
+  }
+  /* No conflicting NEWREF: key location unchanged for HREFK of TDUP. */
+  if (IR(tab)->o == IR_TDUP)
+    fins->t.irt &= ~IRT_GUARD;  /* Drop HREFK guard. */
+docse:
+  return CSEFOLD;
 }
 
 /* Check whether HREF of TNEW/TDUP can be folded to niltv. */
@@ -422,6 +450,19 @@ TRef LJ_FASTCALL lj_opt_dse_ustore(jit_State *J)
 	store->t.irt = IRT_NIL;
 	store->op1 = store->op2 = 0;
 	store->prev = 0;
+	if (ref+1 < J->cur.nins &&
+	    store[1].o == IR_OBAR && store[1].op1 == xref) {
+	  IRRef1 *bp = &J->chain[IR_OBAR];
+	  IRIns *obar;
+	  for (obar = IR(*bp); *bp > ref+1; obar = IR(*bp))
+	    bp = &obar->prev;
+	  /* Remove OBAR, too. */
+	  *bp = obar->prev;
+	  obar->o = IR_NOP;
+	  obar->t.irt = IRT_NIL;
+	  obar->op1 = obar->op2 = 0;
+	  obar->prev = 0;
+	}
 	/* Now emit the new store instead. */
       }
       goto doemit;
@@ -856,6 +897,7 @@ int lj_opt_fwd_wasnonnil(jit_State *J, IROpT loadop, IRRef xref)
 
 #undef IR
 #undef fins
+#undef fleft
 #undef fright
 
 #endif

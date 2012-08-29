@@ -461,7 +461,7 @@ CTypeID lj_ccall_ctid_vararg(CTState *cts, cTValue *o)
   if (tvisnumber(o)) {
     return CTID_DOUBLE;
   } else if (tviscdata(o)) {
-    CTypeID id = cdataV(o)->typeid;
+    CTypeID id = cdataV(o)->ctypeid;
     CType *s = ctype_get(cts, id);
     if (ctype_isrefarray(s->info)) {
       return lj_ctype_intern(cts,
@@ -684,7 +684,6 @@ static int ccall_get_results(lua_State *L, CTState *cts, CType *ct,
 #endif
   /* No reference types end up here, so there's no need for the CTypeID. */
   lua_assert(!(ctype_isrefarray(ctr->info) || ctype_isstruct(ctr->info)));
-  if (ctype_isenum(ctr->info)) ctr = ctype_child(cts, ctr);
   return lj_cconv_tv_ct(cts, ctr, 0, L->top-1, sp);
 }
 
@@ -692,7 +691,7 @@ static int ccall_get_results(lua_State *L, CTState *cts, CType *ct,
 int lj_ccall_func(lua_State *L, GCcdata *cd)
 {
   CTState *cts = ctype_cts(L);
-  CType *ct = ctype_raw(cts, cd->typeid);
+  CType *ct = ctype_raw(cts, cd->ctypeid);
   CTSize sz = CTSIZE_PTR;
   if (ctype_isptr(ct->info)) {
     sz = ct->size;
