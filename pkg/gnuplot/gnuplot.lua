@@ -52,6 +52,9 @@ local function getfigure(n)
 end
 
 local function gnuplothasterm(term)
+   -- if we ever end up requiring gnuplot >= 4.4 as a dependency, we could
+   -- instead do 'gnuplot -e "print GPVAL_TERMINALS"', which prints the terminals
+   -- on a single line without any pager annoyance
    if not _gptable.exe then
       return false--error('gnuplot exe is not found, can not chcek terminal')
    end
@@ -61,15 +64,20 @@ local function gnuplothasterm(term)
    fi:write('set terminal\n\n')
    fi:close()
    os.execute(getexec() .. ' < ' .. tfni .. ' > ' .. tfno .. ' 2>&1 ')
+   os.remove(tfni)
    local tf = io.open(tfno,'r')
+   local hasterm = false
    local s = tf:read('*l')
    while s do
       if s:match('^.*%s+  '.. term .. ' ') then
-         return true
+         hasterm = true
+         break
       end
       s = tf:read('*l')
    end
-   return false
+   tf:close()
+   os.remove(tfno)
+   return hasterm
 end
 
 local function findgnuplotversion(exe)
