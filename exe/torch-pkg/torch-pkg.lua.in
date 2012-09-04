@@ -167,7 +167,7 @@ function getpkglist()
    for _,url in ipairs(pkgconfig.urls) do
       infoarg('url: ' .. url)
       local file = paths.basename(url)
-      local scp_url = string.match(url, "ssh://(.*)")
+      local scp_url = string.match(url, "scp://(.*)")
       if scp_url then
          os.execute(rm .. paths.concat(tmp,file))
          os.execute(cd .. tmp .. '; ' .. scp .. scp_url .. ' .')
