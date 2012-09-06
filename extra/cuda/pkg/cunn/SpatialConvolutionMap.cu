@@ -20,7 +20,6 @@ static int cunn_SpatialConvolutionMap_updateOutput(lua_State *L)
   int dimh = 1;
 
   // long nOutputPlane = weight->size[0];
-  int nInputPlane = luaT_getfieldcheckint(L, 1, "nInputPlane");
   int nOutputPlane = luaT_getfieldcheckint(L, 1, "nOutputPlane");
   long kW           = weight->size[2];
   long kH           = weight->size[1];
