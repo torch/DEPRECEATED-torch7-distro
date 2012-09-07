@@ -32,6 +32,7 @@ infoarg = function(msg) print('    ' .. msg) end
 wget = '@WGET_EXECUTABLE@ ' if wget == '' or wget:find('NOTFOUND') then wget = nil end
 curl = '@CURL_EXECUTABLE@ ' if curl == '' or curl:find('NOTFOUND') then curl = nil end
 git = '@GIT_EXECUTABLE@ '   if git  == '' then git  = nil end
+scp = 'scp '
 if not wget and not curl or not git then
    error('torch-pkg cannot run without git and one of wget | curl')
    os.exit()
@@ -60,7 +61,7 @@ if not pkgconfig.urls[1]:find('http://www.torch.ch/resources/packages.th7') then
 end
 
 -- help/args
-help = 
+help =
 [=[Torch7 Package Manager
 
 Usage: torch-pkg [options] <command> [argument] [cmake flags]
@@ -116,7 +117,7 @@ for i,arg in ipairs(arg) do
          command = arg
          commandi = i
          break
-      end 
+      end
    end
 end
 for i = 1,#arg do
@@ -166,7 +167,11 @@ function getpkglist()
    for _,url in ipairs(pkgconfig.urls) do
       infoarg('url: ' .. url)
       local file = paths.basename(url)
-      if wget then
+      local scp_url = string.match(url, "scp://(.*)")
+      if scp_url then
+         os.execute(rm .. paths.concat(tmp,file))
+         os.execute(cd .. tmp .. '; ' .. scp .. scp_url .. ' .')
+      elseif wget then
          os.execute(rm .. paths.concat(tmp,file))
          os.execute(cd .. tmp .. '; ' .. wget .. ' -q ' .. url)
       else
@@ -360,7 +365,7 @@ elseif command == 'html' then
    end
    table.sort(sorted, function(a,b) return a<b end)
 
-   local s = 
+   local s =
 [[
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
@@ -368,12 +373,12 @@ elseif command == 'html' then
 <body style="font-family:helvetica,arial; margin:auto; padding:0; width:600px;">
 <h2>Torch7 Packages</h2>
 <p>
-Torch7 has a built-in package management system that makes it very easy for 
+Torch7 has a built-in package management system that makes it very easy for
 anyone to get extra (experimental) packages, and create and distribute yours.
 </p>
 <p>
 To install any of the following packages, simply do: <code>torch-pkg install package</code>.
-For more help on <code>torch-pkg</code>, check out 
+For more help on <code>torch-pkg</code>, check out
 <a target="_blank" style="color:#AAA" href="http://www.torch.ch/manual/install/index#the_torch_package_management_system">this page</a>.
 </p>
 <p>
@@ -408,12 +413,12 @@ elseif command == 'dok' then
    end
    table.sort(sorted, function(a,b) return a<b end)
 
-   local s = 
+   local s =
 [=[
 ======= Torch7 Packages =======
 {{anchor:packages.dok}}
 
-Torch7 has a built-in package management system that makes it very easy for 
+Torch7 has a built-in package management system that makes it very easy for
 anyone to get extra (experimental) packages, and create and distribute yours.
 
 To install any of the following packages, simply do: ''torch-pkg install package''.
@@ -445,7 +450,7 @@ elseif command == 'search' then
    end
 
    package = arguments[1]
-   
+
    packages = getpkglist()
 
    if not packages[package] then
@@ -490,6 +495,6 @@ elseif command == 'add' then
 
    f = io.open(configfile,'w')
    f:write(conf)
-   f:close()   
+   f:close()
 
 end

@@ -426,6 +426,50 @@ function cunntest.SpatialSubSampling_backward_batch()
    mytester:assertlt(berror:abs():max(), precision_backward, 'error on bias (backward) ')
 end
 
+function cunntest.SpatialConvolutionMap_forward()
+   local from = math.random(1,64)
+   local to = math.random(1,64)
+   local ki = math.random(3,15)
+   local kj = math.random(3,15)
+   local si = math.random(1,2)
+   local sj = math.random(1,2)
+   local outi = math.random(1,256)
+   local outj = math.random(1,256)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local fanin = math.random(1,from)
+
+   local tm = {}
+   local title = string.format('SpatialConvolutionMap.forward %dx%dx%d o %dx%d -> %dx%dx%d [s: %dx%d]', 
+                               from, inj, ini, kj, ki, to, outj, outi, sj, si)
+   times[title] = tm
+    local input = torch.randn(from,inj,ini)
+   local sconv = nn.SpatialConvolutionMap(nn.tables.random(from,to,fanin),ki,kj,si,sj)
+   groundtruth = sconv:forward(input)
+   local a = torch.Timer()
+   for i = 1,nloop do
+      groundtruth = sconv:forward(input)
+   end
+   tm.cpu = a:time().real
+   input = input:cuda()
+   local gconv = nn.SpatialConvolutionMap(nn.tables.random(from,to,fanin),ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
+   gconv.connTableRev=sconv.connTableRev:cuda()
+   gconv.connTable=sconv.connTable:cuda()
+   rescuda = gconv:forward(input)
+   a:reset()
+   for i = 1,nloop do
+      rescuda = gconv:forward(input)
+   end
+   tm.gpu = a:time().real
+   print(title)
+   local error = rescuda:float() - groundtruth
+      print('calculated error')
+   mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
+end
+
+
 function cunntest.mse()
    local size = math.random(3000,5000)
    local input = torch.randn(size,1,1)
