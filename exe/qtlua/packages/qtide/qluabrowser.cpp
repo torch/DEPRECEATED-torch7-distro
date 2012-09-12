@@ -932,21 +932,27 @@ QLuaBrowser::doReload()
 void 
 QLuaBrowser::doZoomIn()
 {
+#if HAVE_QTWEBKIT
   qreal z = d->w->zoomFactor() * 1.2;
   d->w->setZoomFactor(qMin(z, 4.0));
+#endif
 }
 
 void 
 QLuaBrowser::doZoomOut()
 {
+#if HAVE_QTWEBKIT
   qreal z = d->w->zoomFactor() / 1.2;
   d->w->setZoomFactor(qMax(z, 0.25));
+#endif
 }
 
 void 
 QLuaBrowser::doZoomReset()
 {
+#if HAVE_QTWEBKIT
   d->w->setZoomFactor(1.0);
+#endif
 }
 
 

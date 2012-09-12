@@ -8,6 +8,8 @@ local nloop = 1
 local times = {}
 local cunntestx = {}
 
+torch.setdefaulttensortype('torch.FloatTensor')
+
 function cunntest.SpatialConvolution_forward()
    local from = math.random(1,64)
    local to = math.random(1,64)
@@ -25,8 +27,7 @@ function cunntest.SpatialConvolution_forward()
                                from, inj, ini, kj, ki, to, outj, outi, sj, si)
    times[title] = tm
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(from,inj,ini)
+   local input = torch.randn(from,inj,ini)
    local sconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
    local groundtruth = sconv:forward(input)
    local a = torch.Timer()
@@ -35,11 +36,10 @@ function cunntest.SpatialConvolution_forward()
    end
    tm.cpu = a:time().real
 
-   torch.setdefaulttensortype('torch.CudaTensor')
-   input = torch.Tensor(from,inj,ini):copy(input)
-   local gconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
-   gconv.weight:copy(sconv.weight)
-   gconv.bias:copy(sconv.bias)
+   input = input:cuda()
+   local gconv = nn.SpatialConvolution(from,to,ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
    local rescuda = gconv:forward(input)
    a:reset()
    for i = 1,nloop do
@@ -47,9 +47,7 @@ function cunntest.SpatialConvolution_forward()
    end
    tm.gpu = a:time().real
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local error = torch.Tensor(to,outi,outj):copy(rescuda)
-   error = (error - groundtruth)
+   local error = rescuda:float() - groundtruth
    mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
 end
 
@@ -71,8 +69,7 @@ function cunntest.SpatialConvolution_forward_batch()
                                bs, from, inj, ini, kj, ki, bs, to, outj, outi, sj, si)
    times[title] = tm
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(bs,from,inj,ini)
+   local input = torch.randn(bs,from,inj,ini)
    local sconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
    local groundtruth = sconv:forward(input)
    local a = torch.Timer()
@@ -81,11 +78,10 @@ function cunntest.SpatialConvolution_forward_batch()
    end
    tm.cpu = a:time().real
 
-   torch.setdefaulttensortype('torch.CudaTensor')
-   input = torch.Tensor(bs,from,inj,ini):copy(input)
-   local gconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
-   gconv.weight:copy(sconv.weight)
-   gconv.bias:copy(sconv.bias)
+   input = input:cuda()
+   local gconv = nn.SpatialConvolution(from,to,ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
    local rescuda = gconv:forward(input)
    a:reset()
    for i = 1,nloop do
@@ -93,9 +89,7 @@ function cunntest.SpatialConvolution_forward_batch()
    end
    tm.gpu = a:time().real
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local error = torch.Tensor(bs,to,outi,outj):copy(rescuda)
-   error = (error - groundtruth)
+   local error = rescuda:float() - groundtruth
    mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
 end
 
@@ -116,9 +110,8 @@ function cunntest.SpatialConvolution_backward()
                                from, inj, ini, kj, ki, to, outj, outi)
    times[title] = tm
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(from,inj,ini)
-   local gradOutput = lab.randn(to,outj,outi)
+   local input = torch.randn(from,inj,ini)
+   local gradOutput = torch.randn(to,outj,outi)
    local sconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
    sconv:forward(input)
    sconv:zeroGradParameters()
@@ -134,12 +127,11 @@ function cunntest.SpatialConvolution_backward()
    local groundbias = sconv.gradBias
    tm.cpu = a:time().real
 
-   torch.setdefaulttensortype('torch.CudaTensor')
-   input = torch.Tensor(from,inj,ini):copy(input)
-   local gradOutput = torch.Tensor(to,outj,outi):copy(gradOutput)
-   local gconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
-   gconv.weight:copy(sconv.weight)
-   gconv.bias:copy(sconv.bias)
+   input = input:cuda()
+   gradOutput = gradOutput:cuda()
+   local gconv = nn.SpatialConvolution(from,to,ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
    gconv:forward(input)
    gconv:zeroGradParameters()
    local rescuda = gconv:backward(input, gradOutput)
@@ -154,13 +146,9 @@ function cunntest.SpatialConvolution_backward()
    local biascuda = gconv.gradBias
    tm.gpu = a:time().real
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local error = torch.Tensor(from,ini,inj):copy(rescuda)
-   error = (error - groundgrad)
-   local werror = torch.Tensor(to,from,ki,kj):copy(weightcuda)
-   werror = (werror - groundweight)
-   local berror = torch.Tensor(to):copy(biascuda)
-   berror = (berror - groundbias)
+   local error = rescuda:float() - groundgrad
+   local werror = weightcuda:float() - groundweight
+   local berror = biascuda:float() - groundbias
 
    mytester:assertlt(error:abs():max(), precision_backward, 'error on state (backward) ')
    mytester:assertlt(werror:abs():max(), precision_backward, 'error on weight (backward) ')
@@ -185,9 +173,8 @@ function cunntest.SpatialConvolution_backward_batch()
                                bs, from, inj, ini, kj, ki, bs, to, outj, outi)
    times[title] = tm
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(bs,from,inj,ini)
-   local gradOutput = lab.randn(bs,to,outj,outi)
+   local input = torch.randn(bs,from,inj,ini)
+   local gradOutput = torch.randn(bs,to,outj,outi)
    local sconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
    sconv:forward(input)
    sconv:zeroGradParameters()
@@ -203,12 +190,11 @@ function cunntest.SpatialConvolution_backward_batch()
    local groundbias = sconv.gradBias
    tm.cpu = a:time().real
 
-   torch.setdefaulttensortype('torch.CudaTensor')
-   input = torch.Tensor(bs,from,inj,ini):copy(input)
-   local gradOutput = torch.Tensor(bs,to,outj,outi):copy(gradOutput)
-   local gconv = nn.SpatialConvolution(from,to,ki,kj,si,sj)
-   gconv.weight:copy(sconv.weight)
-   gconv.bias:copy(sconv.bias)
+   input = input:cuda()
+   gradOutput = gradOutput:cuda()
+   local gconv = nn.SpatialConvolution(from,to,ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
    gconv:forward(input)
    gconv:zeroGradParameters()
    local rescuda = gconv:backward(input, gradOutput)
@@ -223,13 +209,9 @@ function cunntest.SpatialConvolution_backward_batch()
    local biascuda = gconv.gradBias
    tm.gpu = a:time().real
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local error = torch.Tensor(bs,from,ini,inj):copy(rescuda)
-   error = (error - groundgrad)
-   local werror = torch.Tensor(to,from,ki,kj):copy(weightcuda)
-   werror = (werror - groundweight)
-   local berror = torch.Tensor(to):copy(biascuda)
-   berror = (berror - groundbias)
+   error = rescuda:float() - groundgrad
+   werror = weightcuda:float() - groundweight
+   berror = biascuda:float() - groundbias
 
    mytester:assertlt(error:abs():max(), precision_backward, 'error on state (backward) ')
    mytester:assertlt(werror:abs():max(), precision_backward, 'error on weight (backward) ')
@@ -253,8 +235,7 @@ function cunntest.SpatialSubSampling_forward()
                                from, inj, ini, kj, ki, to, outj, outi)
    times[title] = tm
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(from,inj,ini)
+   local input = torch.randn(from,inj,ini)
    local sconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
    local groundtruth = sconv:forward(input)
    local a = torch.Timer()
@@ -263,11 +244,10 @@ function cunntest.SpatialSubSampling_forward()
    end
    tm.cpu = a:time().real
 
-   torch.setdefaulttensortype('torch.CudaTensor')
-   input = torch.Tensor(from,inj,ini):copy(input)
-   local gconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
-   gconv.weight:copy(sconv.weight)
-   gconv.bias:copy(sconv.bias)
+   input = input:cuda()
+   local gconv = nn.SpatialSubSampling(from,ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
    local rescuda = gconv:forward(input)
    a:reset()
    for i = 1,nloop do
@@ -275,9 +255,7 @@ function cunntest.SpatialSubSampling_forward()
    end
    tm.gpu = a:time().real
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local error = torch.Tensor(to,outi,outj):copy(rescuda)
-   error = (error - groundtruth)
+   local error = rescuda:float() - groundtruth
    mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
 end
 
@@ -299,8 +277,7 @@ function cunntest.SpatialSubSampling_forward_batch()
                                bs, from, inj, ini, kj, ki, bs, to, outj, outi)
    times[title] = tm
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(bs,from,inj,ini)
+   local input = torch.randn(bs,from,inj,ini)
    local sconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
    local groundtruth = sconv:forward(input)
    local a = torch.Timer()
@@ -309,11 +286,10 @@ function cunntest.SpatialSubSampling_forward_batch()
    end
    tm.cpu = a:time().real
 
-   torch.setdefaulttensortype('torch.CudaTensor')
-   input = torch.Tensor(bs,from,inj,ini):copy(input)
-   local gconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
-   gconv.weight:copy(sconv.weight)
-   gconv.bias:copy(sconv.bias)
+   input = input:cuda()
+   local gconv = nn.SpatialSubSampling(from,ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
    local rescuda = gconv:forward(input)
    a:reset()
    for i = 1,nloop do
@@ -321,9 +297,7 @@ function cunntest.SpatialSubSampling_forward_batch()
    end
    tm.gpu = a:time().real
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local error = torch.Tensor(bs,to,outi,outj):copy(rescuda)
-   error = (error - groundtruth)
+   local error = rescuda:float() - groundtruth
    mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
 end
 
@@ -344,9 +318,8 @@ function cunntest.SpatialSubSampling_backward()
                                from, inj, ini, kj, ki, to, outj, outi)
    times[title] = tm
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(from,inj,ini)
-   local gradOutput = lab.randn(to,outj,outi)
+   local input = torch.randn(from,inj,ini)
+   local gradOutput = torch.randn(to,outj,outi)
    local sconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
    sconv:forward(input)
    sconv:zeroGradParameters()
@@ -362,12 +335,11 @@ function cunntest.SpatialSubSampling_backward()
    local groundbias = sconv.gradBias
    tm.cpu = a:time().real
 
-   torch.setdefaulttensortype('torch.CudaTensor')
-   input = torch.Tensor(from,inj,ini):copy(input)
-   local gradOutput = torch.Tensor(to,outj,outi):copy(gradOutput)
-   local gconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
-   gconv.weight:copy(sconv.weight)
-   gconv.bias:copy(sconv.bias)
+   input = input:cuda()
+   gradOutput = gradOutput:cuda()
+   local gconv = nn.SpatialSubSampling(from,ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
    gconv:forward(input)
    gconv:zeroGradParameters()
    local rescuda = gconv:backward(input, gradOutput)
@@ -382,13 +354,9 @@ function cunntest.SpatialSubSampling_backward()
    local biascuda = gconv.gradBias
    tm.gpu = a:time().real
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local error = torch.Tensor(from,ini,inj):copy(rescuda)
-   error = (error - groundgrad)
-   local werror = torch.Tensor(to):copy(weightcuda)
-   werror = (werror - groundweight)
-   local berror = torch.Tensor(to):copy(biascuda)
-   berror = (berror - groundbias)
+   local error = rescuda:float() - groundgrad
+   local werror = weightcuda:float() - groundweight
+   local berror = biascuda:float() - groundbias
 
    mytester:assertlt(error:abs():max(), precision_backward, 'error on state (backward) ')
    mytester:assertlt(werror:abs():max(), precision_backward, 'error on weight (backward) ')
@@ -413,9 +381,8 @@ function cunntest.SpatialSubSampling_backward_batch()
                                bs, from, inj, ini, kj, ki, bs, to, outj, outi)
    times[title] = tm
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(bs,from,inj,ini)
-   local gradOutput = lab.randn(bs,to,outj,outi)
+   local input = torch.randn(bs,from,inj,ini)
+   local gradOutput = torch.randn(bs,to,outj,outi)
    local sconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
    sconv:forward(input)
    sconv:zeroGradParameters()
@@ -431,12 +398,11 @@ function cunntest.SpatialSubSampling_backward_batch()
    local groundbias = sconv.gradBias
    tm.cpu = a:time().real
 
-   torch.setdefaulttensortype('torch.CudaTensor')
-   input = torch.Tensor(bs,from,inj,ini):copy(input)
-   local gradOutput = torch.Tensor(bs,to,outj,outi):copy(gradOutput)
-   local gconv = nn.SpatialSubSampling(from,ki,kj,si,sj)
-   gconv.weight:copy(sconv.weight)
-   gconv.bias:copy(sconv.bias)
+   input = input:cuda()
+   gradOutput = gradOutput:cuda()
+   local gconv = nn.SpatialSubSampling(from,ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
    gconv:forward(input)
    gconv:zeroGradParameters()
    local rescuda = gconv:backward(input, gradOutput)
@@ -451,24 +417,63 @@ function cunntest.SpatialSubSampling_backward_batch()
    local biascuda = gconv.gradBias
    tm.gpu = a:time().real
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local error = torch.Tensor(bs,from,ini,inj):copy(rescuda)
-   error = (error - groundgrad)
-   local werror = torch.Tensor(to):copy(weightcuda)
-   werror = (werror - groundweight)
-   local berror = torch.Tensor(to):copy(biascuda)
-   berror = (berror - groundbias)
+   local error = rescuda:float() - groundgrad
+   local werror = weightcuda:float() - groundweight
+   local berror = biascuda:float() - groundbias
 
    mytester:assertlt(error:abs():max(), precision_backward, 'error on state (backward) ')
    mytester:assertlt(werror:abs():max(), precision_backward, 'error on weight (backward) ')
    mytester:assertlt(berror:abs():max(), precision_backward, 'error on bias (backward) ')
 end
 
+function cunntest.SpatialConvolutionMap_forward()
+   local from = math.random(1,64)
+   local to = math.random(1,64)
+   local ki = math.random(3,15)
+   local kj = math.random(3,15)
+   local si = math.random(1,2)
+   local sj = math.random(1,2)
+   local outi = math.random(1,256)
+   local outj = math.random(1,256)
+   local ini = (outi-1)*si+ki
+   local inj = (outj-1)*sj+kj
+   local fanin = math.random(1,from)
+
+   local tm = {}
+   local title = string.format('SpatialConvolutionMap.forward %dx%dx%d o %dx%d -> %dx%dx%d [s: %dx%d]', 
+                               from, inj, ini, kj, ki, to, outj, outi, sj, si)
+   times[title] = tm
+    local input = torch.randn(from,inj,ini)
+   local sconv = nn.SpatialConvolutionMap(nn.tables.random(from,to,fanin),ki,kj,si,sj)
+   groundtruth = sconv:forward(input)
+   local a = torch.Timer()
+   for i = 1,nloop do
+      groundtruth = sconv:forward(input)
+   end
+   tm.cpu = a:time().real
+   input = input:cuda()
+   local gconv = nn.SpatialConvolutionMap(nn.tables.random(from,to,fanin),ki,kj,si,sj):cuda()
+   gconv.weight = sconv.weight:cuda()
+   gconv.bias = sconv.bias:cuda()
+   gconv.connTableRev=sconv.connTableRev:cuda()
+   gconv.connTable=sconv.connTable:cuda()
+   rescuda = gconv:forward(input)
+   a:reset()
+   for i = 1,nloop do
+      rescuda = gconv:forward(input)
+   end
+   tm.gpu = a:time().real
+   print(title)
+   local error = rescuda:float() - groundtruth
+      print('calculated error')
+   mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
+end
+
+
 function cunntest.mse()
    local size = math.random(3000,5000)
-   torch.setdefaulttensortype('torch.FloatTensor')
-   local input = lab.randn(size,1,1)
-   local target = lab.randn(size)
+   local input = torch.randn(size,1,1)
+   local target = torch.randn(size)
    local mod = nn.MSECriterion()
 
    local tm = {}
@@ -480,10 +485,9 @@ function cunntest.mse()
    local fgin = mod:backward(input,target):clone()
    tm.cpu = a:time().real
 
-   torch.setdefaulttensortype('torch.CudaTensor')
-   local cinput = torch.Tensor(size):copy(input)
-   local ctarget = torch.Tensor(size):copy(target)
-   local cmod = nn.MSECriterion()
+   local cinput = input:cuda()
+   local ctarget = target:cuda()
+   local cmod = nn.MSECriterion():cuda()
    a:reset()
    local cout = cmod:forward(cinput,ctarget)
    local cgin = cmod:backward(cinput,ctarget)
@@ -493,25 +497,20 @@ function cunntest.mse()
    local title = string.format('MSECriterion2 %d ',size)
    times[title] = tm2
    tm2.cpu = tm.cpu
-   torch.setdefaulttensortype('torch.CudaTensor')
-   local cinput2 = torch.Tensor(size):copy(input)
-   local ctarget2 = torch.Tensor(size):copy(target)
-   local cmod2 = nn.MSECriterion()
+   local cinput2 = input:cuda()
+   local ctarget2 = target:cuda()
+   local cmod2 = nn.MSECriterion():cuda()
    a:reset()
    local cout2 = cinput2.nn.MSECriterion_updateOutput2(cmod,cinput2,ctarget2)
    local cgin2 = cinput2.nn.MSECriterion_updateGradInput2(cmod,cinput2,ctarget2)
    tm2.gpu = a:time().real
 
-   torch.setdefaulttensortype('torch.FloatTensor')
-
    mytester:assertlt(math.abs(fout-cout), precision_forward, 'error  on output')
-   local fcgin = torch.Tensor():resizeAs(fgin):copy(cgin)
-   local gerr = fcgin - fgin
+   local gerr = cgin:float() - fgin
    mytester:assertlt(gerr:abs():max(), precision_forward, 'error  on gradInput')
 
    mytester:assertlt(math.abs(fout-cout2), precision_forward, 'error  on output - 2')
-   local fcgin2 = torch.Tensor():resizeAs(fgin):copy(cgin2)
-   local gerr2 = fcgin2 - fgin
+   local gerr2 = cgin2:float() - fgin
    mytester:assertlt(gerr2:abs():max(), precision_forward, 'error  on gradInput -2')
 
 end
