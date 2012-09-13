@@ -225,10 +225,14 @@ elseif command == 'install' then
          return
       end
 
-      exec(rm .. paths.concat(tmp,package))
-
-      info('downloading package ' .. package .. ' from: ' .. pkg.git)
-      exec(git .. ' clone ' .. pkg.git .. ' ' .. paths.concat(tmp,package))
+      if paths.dirp(paths.concat(tmp,package)) then
+         exec(rm .. paths.concat(tmp,package,'build/CMakeCache.txt'))
+         info('upgrading package ' .. package .. ' from: ' .. pkg.git)
+         exec(cd .. paths.concat(tmp,package) .. '; ' ..  git .. ' pull')
+      else
+         info('downloading package ' .. package .. ' from: ' .. pkg.git)
+         exec(git .. ' clone ' .. pkg.git .. ' ' .. paths.concat(tmp,package))
+      end
 
       if pkg.commit then
          exec(cd .. paths.concat(tmp,package) .. '; ' .. git .. ' checkout ' .. pkg.commit)
