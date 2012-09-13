@@ -1,7 +1,7 @@
 
 require 'paths'
 
-_gptable = {}
+local _gptable = {}
 _gptable.current = nil
 _gptable.defaultterm = nil
 _gptable.exe = nil
