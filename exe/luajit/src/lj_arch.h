@@ -152,10 +152,10 @@
 #define LJ_ARCH_NAME		"arm"
 #define LJ_ARCH_BITS		32
 #define LJ_ARCH_ENDIAN		LUAJIT_LE
-#ifndef LJ_ARCH_HASFPU
+#if !defined(LJ_ARCH_HASFPU) && __SOFTFP__
 #define LJ_ARCH_HASFPU		0
 #endif
-#ifndef LJ_ABI_SOFTFP
+#if !defined(LJ_ABI_SOFTFP) && !__ARM_PCS_VFP
 #define LJ_ABI_SOFTFP		1
 #endif
 #define LJ_ABI_EABI		1
@@ -302,9 +302,6 @@
 #if defined(__ARMEB__)
 #error "No support for big-endian ARM"
 #endif
-#if defined(__ARM_PCS_VFP)
-#error "No support for ARM hard-float ABI (yet)"
-#endif
 #if __ARM_ARCH_6M__ || __ARM_ARCH_7M__ || __ARM_ARCH_7EM__
 #error "No support for Cortex-M CPUs"
 #endif
@@ -320,6 +317,10 @@
 #endif
 #if defined(_LP64)
 #error "No support for PowerPC 64 bit mode"
+#endif
+#elif LJ_TARGET_MIPS
+#if defined(__mips_soft_float)
+#error "No support for MIPS CPUs without FPU"
 #endif
 #endif
 #endif
@@ -362,6 +363,9 @@
 #ifndef LJ_ARCH_HASFPU
 #define LJ_ARCH_HASFPU		1
 #endif
+#ifndef LJ_ABI_SOFTFP
+#define LJ_ABI_SOFTFP		0
+#endif
 #define LJ_SOFTFP		(!LJ_ARCH_HASFPU)
 
 #if LJ_ARCH_ENDIAN == LUAJIT_BE
@@ -394,6 +398,13 @@
 
 #if defined(LUAJIT_NO_UNWIND) || defined(__symbian__) || LJ_TARGET_IOS || LJ_TARGET_PS3
 #define LJ_NO_UNWIND		1
+#endif
+
+/* Compatibility with Lua 5.1 vs. 5.2. */
+#ifdef LUAJIT_ENABLE_LUA52COMPAT
+#define LJ_52			1
+#else
+#define LJ_52			0
 #endif
 
 #endif

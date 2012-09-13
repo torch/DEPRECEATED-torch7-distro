@@ -446,8 +446,8 @@ LJLIB_C= $(LJLIB_O:.o=.c)
 
 LJCORE_O= lj_gc.o lj_err.o lj_char.o lj_bc.o lj_obj.o \
 	  lj_str.o lj_tab.o lj_func.o lj_udata.o lj_meta.o lj_debug.o \
-	  lj_state.o lj_dispatch.o lj_vmevent.o lj_vmmath.o lj_api.o \
-	  lj_lex.o lj_parse.o lj_bcread.o lj_bcwrite.o \
+	  lj_state.o lj_dispatch.o lj_vmevent.o lj_vmmath.o lj_strscan.o \
+	  lj_api.o lj_lex.o lj_parse.o lj_bcread.o lj_bcwrite.o \
 	  lj_ir.o lj_opt_mem.o lj_opt_fold.o lj_opt_narrow.o \
 	  lj_opt_dce.o lj_opt_loop.o lj_opt_split.o lj_opt_sink.o \
 	  lj_mcode.o lj_snap.o lj_record.o lj_crecord.o lj_ffrecord.o \
@@ -566,10 +566,6 @@ amalg:
 clean:
 	$(HOST_RM) $(ALL_RM)
 
-# Temporary rule for migration from old file layout.
-cleaner:	clean
-	$(HOST_RM) buildvm*
-
 depend:
 	@for file in $(ALL_HDRGEN); do \
 	  test -f $$file || touch $$file; \
@@ -584,7 +580,7 @@ depend:
 	  test -s $$file || $(HOST_RM) $$file; \
 	  done
 
-.PHONY: default all amalg clean cleaner depend
+.PHONY: default all amalg clean depend
 
 ##############################################################################
 # Rules for generated files.

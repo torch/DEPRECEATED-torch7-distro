@@ -112,10 +112,14 @@ static int ffi_index_meta(lua_State *L, CTState *cts, CType *ct, MMS mm)
     const char *s;
   err_index:
     s = strdata(lj_ctype_repr(L, id, NULL));
-    if (tvisstr(L->base+1))
+    if (tvisstr(L->base+1)) {
       lj_err_callerv(L, LJ_ERR_FFI_BADMEMBER, s, strVdata(L->base+1));
-    else
-      lj_err_callerv(L, LJ_ERR_FFI_BADIDX, s);
+    } else {
+      const char *key = tviscdata(L->base+1) ?
+	strdata(lj_ctype_repr(L, cdataV(L->base+1)->ctypeid, NULL)) :
+	lj_typename(L->base+1);
+      lj_err_callerv(L, LJ_ERR_FFI_BADIDXW, s, key);
+    }
   }
   if (!tvisfunc(tv)) {
     if (mm == MM_index) {
@@ -319,6 +323,30 @@ checkgc:
   return 1;
 }
 
+static int ffi_pairs(lua_State *L, MMS mm)
+{
+  CTState *cts = ctype_cts(L);
+  CTypeID id = ffi_checkcdata(L, 1)->ctypeid;
+  CType *ct = ctype_raw(cts, id);
+  cTValue *tv;
+  if (ctype_isptr(ct->info)) id = ctype_cid(ct->info);
+  tv = lj_ctype_meta(cts, id, mm);
+  if (!tv)
+    lj_err_callerv(L, LJ_ERR_FFI_BADMM, strdata(lj_ctype_repr(L, id, NULL)),
+		   strdata(mmname_str(G(L), mm)));
+  return lj_meta_tailcall(L, tv);
+}
+
+LJLIB_CF(ffi_meta___pairs)
+{
+  return ffi_pairs(L, MM_pairs);
+}
+
+LJLIB_CF(ffi_meta___ipairs)
+{
+  return ffi_pairs(L, MM_ipairs);
+}
+
 LJLIB_PUSH("ffi") LJLIB_SET(__metatable)
 
 #include "lj_libdef.h"
@@ -518,7 +546,7 @@ LJLIB_CF(ffi_cast)	LJLIB_REC(ffi_new)
   return 1;
 }
 
-LJLIB_CF(ffi_typeof)
+LJLIB_CF(ffi_typeof)	LJLIB_REC(.)
 {
   CTState *cts = ctype_cts(L);
   CTypeID id = ffi_checkctype(L, cts, L->base+1);
@@ -529,7 +557,7 @@ LJLIB_CF(ffi_typeof)
   return 1;
 }
 
-LJLIB_CF(ffi_istype)	LJLIB_REC(ffi_istype)
+LJLIB_CF(ffi_istype)	LJLIB_REC(.)
 {
   CTState *cts = ctype_cts(L);
   CTypeID id1 = ffi_checkctype(L, cts, NULL);

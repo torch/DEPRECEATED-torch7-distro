@@ -31,6 +31,7 @@
 #include "lj_ff.h"
 #include "lj_dispatch.h"
 #include "lj_char.h"
+#include "lj_strscan.h"
 #include "lj_lib.h"
 
 /* -- Base library: checks ------------------------------------------------ */
@@ -191,7 +192,7 @@ LJLIB_ASM(tonumber)		LJLIB_REC(.)
   int32_t base = lj_lib_optint(L, 2, 10);
   if (base == 10) {
     TValue *o = lj_lib_checkany(L, 1);
-    if (tvisnumber(o) || (tvisstr(o) && lj_str_tonumber(strV(o), o))) {
+    if (lj_strscan_numberobj(o)) {
       copyTV(L, L->base-1, o);
       return FFH_RES(1);
     }
@@ -277,12 +278,12 @@ LJLIB_ASM(next)
   return FFH_UNREACHABLE;
 }
 
-#ifdef LUAJIT_ENABLE_LUA52COMPAT
+#if LJ_52 || LJ_HASFFI
 static int ffh_pairs(lua_State *L, MMS mm)
 {
   TValue *o = lj_lib_checkany(L, 1);
   cTValue *mo = lj_meta_lookup(L, o, mm);
-  if (!tvisnil(mo)) {
+  if ((LJ_52 || tviscdata(o)) && !tvisnil(mo)) {
     L->top = o+1;  /* Only keep one argument. */
     copyTV(L, L->base-1, mo);  /* Replace callable. */
     return FFH_TAILCALL;
@@ -537,7 +538,7 @@ LJLIB_CF(coroutine_status)
 
 LJLIB_CF(coroutine_running)
 {
-#ifdef LUAJIT_ENABLE_LUA52COMPAT
+#if LJ_52
   int ismain = lua_pushthread(L);
   setboolV(L->top++, ismain);
   return 2;

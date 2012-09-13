@@ -25,6 +25,7 @@
 #endif
 #include "lj_carith.h"
 #include "lj_vm.h"
+#include "lj_strscan.h"
 
 /* Here's a short description how the FOLD engine processes instructions:
 **
@@ -430,14 +431,14 @@ LJFOLDF(kfold_bswap64)
 #endif
 }
 
-LJFOLD(LT KINT64 KINT)
-LJFOLD(GE KINT64 KINT)
-LJFOLD(LE KINT64 KINT)
-LJFOLD(GT KINT64 KINT)
-LJFOLD(ULT KINT64 KINT)
-LJFOLD(UGE KINT64 KINT)
-LJFOLD(ULE KINT64 KINT)
-LJFOLD(UGT KINT64 KINT)
+LJFOLD(LT KINT64 KINT64)
+LJFOLD(GE KINT64 KINT64)
+LJFOLD(LE KINT64 KINT64)
+LJFOLD(GT KINT64 KINT64)
+LJFOLD(ULT KINT64 KINT64)
+LJFOLD(UGE KINT64 KINT64)
+LJFOLD(ULE KINT64 KINT64)
+LJFOLD(UGT KINT64 KINT64)
 LJFOLDF(kfold_int64comp)
 {
 #if LJ_HASFFI
@@ -565,6 +566,18 @@ LJFOLDF(kfold_add_kptr)
   return lj_ir_kptr_(J, fleft->o, (char *)p + ofs);
 }
 
+LJFOLD(ADD any KGC)
+LJFOLD(ADD any KPTR)
+LJFOLD(ADD any KKPTR)
+LJFOLDF(kfold_add_kright)
+{
+  if (fleft->o == IR_KINT || fleft->o == IR_KINT64) {
+    IRRef1 tmp = fins->op1; fins->op1 = fins->op2; fins->op2 = tmp;
+    return RETRYFOLD;
+  }
+  return NEXTFOLD;
+}
+
 /* -- Constant folding of conversions ------------------------------------- */
 
 LJFOLD(TOBIT KNUM KNUM)
@@ -681,7 +694,7 @@ LJFOLD(STRTO KGC)
 LJFOLDF(kfold_strto)
 {
   TValue n;
-  if (lj_str_tonum(ir_kstr(fleft), &n))
+  if (lj_strscan_num(ir_kstr(fleft), &n))
     return lj_ir_knum(J, numV(&n));
   return FAILFOLD;
 }
@@ -816,6 +829,15 @@ LJFOLDF(simplify_nummuldiv_k)
     fins->o = IR_ADD;
     fins->op2 = fins->op1;
     return RETRYFOLD;
+  } else if (fins->o == IR_DIV) {  /* x / 2^k ==> x * 2^-k */
+    uint64_t u = ir_knum(fright)->u64;
+    uint32_t ex = ((uint32_t)(u >> 52) & 0x7ff);
+    if ((u & U64x(000fffff,ffffffff)) == 0 && ex - 1 < 0x7fd) {
+      u = (u & ((uint64_t)1 << 63)) | ((uint64_t)(0x7fe - ex) << 52);
+      fins->o = IR_MUL;  /* Multiply by exact reciprocal. */
+      fins->op2 = lj_ir_knum_u64(J, u);
+      return RETRYFOLD;
+    }
   }
   return NEXTFOLD;
 }

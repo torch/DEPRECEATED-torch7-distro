@@ -18,6 +18,7 @@
 #include "lj_frame.h"
 #include "lj_bc.h"
 #include "lj_vm.h"
+#include "lj_strscan.h"
 
 /* -- Metamethod handling ------------------------------------------------- */
 
@@ -193,7 +194,7 @@ static cTValue *str2num(cTValue *o, TValue *n)
     return o;
   else if (tvisint(o))
     return (setnumV(n, (lua_Number)intV(o)), n);
-  else if (tvisstr(o) && lj_str_tonum(strV(o), n))
+  else if (tvisstr(o) && lj_strscan_num(strV(o), n))
     return n;
   else
     return NULL;
@@ -314,19 +315,13 @@ TValue * LJ_FASTCALL lj_meta_len(lua_State *L, cTValue *o)
 {
   cTValue *mo = lj_meta_lookup(L, o, MM_len);
   if (tvisnil(mo)) {
-#ifdef LUAJIT_ENABLE_LUA52COMPAT
-    if (tvistab(o))
+    if (LJ_52 && tvistab(o))
       tabref(tabV(o)->metatable)->nomm |= (uint8_t)(1u<<MM_len);
     else
-#endif
       lj_err_optype(L, o, LJ_ERR_OPLEN);
     return NULL;
   }
-#ifdef LUAJIT_ENABLE_LUA52COMPAT
-  return mmcall(L, lj_cont_ra, mo, o, o);
-#else
-  return mmcall(L, lj_cont_ra, mo, o, niltv(L));
-#endif
+  return mmcall(L, lj_cont_ra, mo, o, LJ_52 ? o : niltv(L));
 }
 
 /* Helper for equality comparisons. __eq metamethod. */
@@ -436,12 +431,9 @@ void lj_meta_call(lua_State *L, TValue *func, TValue *top)
 /* Helper for FORI. Coercion. */
 void LJ_FASTCALL lj_meta_for(lua_State *L, TValue *o)
 {
-  if (!(tvisnumber(o) || (tvisstr(o) && lj_str_tonumber(strV(o), o))))
-    lj_err_msg(L, LJ_ERR_FORINIT);
-  if (!(tvisnumber(o+1) || (tvisstr(o+1) && lj_str_tonumber(strV(o+1), o+1))))
-    lj_err_msg(L, LJ_ERR_FORLIM);
-  if (!(tvisnumber(o+2) || (tvisstr(o+2) && lj_str_tonumber(strV(o+2), o+2))))
-    lj_err_msg(L, LJ_ERR_FORSTEP);
+  if (!lj_strscan_numberobj(o)) lj_err_msg(L, LJ_ERR_FORINIT);
+  if (!lj_strscan_numberobj(o+1)) lj_err_msg(L, LJ_ERR_FORLIM);
+  if (!lj_strscan_numberobj(o+2)) lj_err_msg(L, LJ_ERR_FORSTEP);
   if (LJ_DUALNUM) {
     /* Ensure all slots are integers or all slots are numbers. */
     int32_t k[3];

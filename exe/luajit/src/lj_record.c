@@ -15,6 +15,9 @@
 #include "lj_tab.h"
 #include "lj_meta.h"
 #include "lj_frame.h"
+#if LJ_HASFFI
+#include "lj_ctype.h"
+#endif
 #include "lj_bc.h"
 #include "lj_ff.h"
 #include "lj_ir.h"
@@ -903,17 +906,15 @@ static TRef rec_mm_len(jit_State *J, TRef tr, TValue *tv)
     TValue *basev = J->L->base + func;
     base[0] = ix.mobj; copyTV(J->L, basev+0, &ix.mobjv);
     base[1] = tr; copyTV(J->L, basev+1, tv);
-#ifdef LUAJIT_ENABLE_LUA52COMPAT
+#if LJ_52
     base[2] = tr; copyTV(J->L, basev+2, tv);
 #else
     base[2] = TREF_NIL; setnilV(basev+2);
 #endif
     lj_record_call(J, func, 2);
   } else {
-#ifdef LUAJIT_ENABLE_LUA52COMPAT
-    if (tref_istab(tr))
+    if (LJ_52 && tref_istab(tr))
       return lj_ir_call(J, IRCALL_lj_tab_len, tr);
-#endif
     lj_trace_err(J, LJ_TRERR_NOMM);
   }
   return 0;  /* No result yet. */
@@ -1275,6 +1276,29 @@ TRef lj_record_idx(jit_State *J, RecordIndex *ix)
 
 /* -- Upvalue access ------------------------------------------------------ */
 
+/* Check whether upvalue is immutable and ok to constify. */
+static int rec_upvalue_constify(jit_State *J, GCupval *uvp)
+{
+  if (uvp->immutable) {
+    cTValue *o = uvval(uvp);
+    /* Don't constify objects that may retain large amounts of memory. */
+#if LJ_HASFFI
+    if (tviscdata(o)) {
+      GCcdata *cd = cdataV(o);
+      if (!cdataisv(cd) && !(cd->marked & LJ_GC_CDATA_FIN)) {
+	CType *ct = ctype_raw(ctype_ctsG(J2G(J)), cd->ctypeid);
+	if (!ctype_hassize(ct->info) || ct->size <= 16)
+	  return 1;
+      }
+      return 0;
+    }
+#endif
+    if (!(tvistab(o) || tvisudata(o) || tvisthread(o)))
+      return 1;
+  }
+  return 0;
+}
+
 /* Record upvalue load/store. */
 static TRef rec_upvalue(jit_State *J, uint32_t uv, TRef val)
 {
@@ -1282,7 +1306,7 @@ static TRef rec_upvalue(jit_State *J, uint32_t uv, TRef val)
   TRef fn = getcurrf(J);
   IRRef uref;
   int needbarrier = 0;
-  if (uvp->immutable) {  /* Try to constify immutable upvalue. */
+  if (rec_upvalue_constify(J, uvp)) {  /* Try to constify immutable upvalue. */
     TRef tr, kfunc;
     lua_assert(val == 0);
     if (!tref_isk(fn)) {  /* Late specialization of current function. */
@@ -1789,10 +1813,8 @@ void lj_record_ins(jit_State *J)
   case BC_LEN:
     if (tref_isstr(rc))
       rc = emitir(IRTI(IR_FLOAD), rc, IRFL_STR_LEN);
-#ifndef LUAJIT_ENABLE_LUA52COMPAT
-    else if (tref_istab(rc))
+    else if (!LJ_52 && tref_istab(rc))
       rc = lj_ir_call(J, IRCALL_lj_tab_len, rc);
-#endif
     else
       rc = rec_mm_len(J, rc, rcv);
     break;

@@ -451,7 +451,7 @@ static void ra_evictset(ASMState *as, RegSet drop)
     checkmclim(as);
   }
 #endif
-  work = (drop & ~as->freeset) & RSET_GPR;
+  work = (drop & ~as->freeset);
   while (work) {
     Reg r = rset_pickbot(work);
     ra_restore(as, regcost_ref(as->cost[r]));
@@ -644,7 +644,8 @@ static void ra_destreg(ASMState *as, IRIns *ir, Reg r)
 {
   Reg dest = ra_dest(as, ir, RID2RSET(r));
   if (dest != r) {
-    ra_scratch(as, RID2RSET(r));
+    lua_assert(rset_test(as->freeset, r));
+    ra_modified(as, r);
     emit_movrr(as, ir, dest, r);
   }
 }
@@ -807,9 +808,9 @@ static void asm_snap_alloc1(ASMState *as, IRRef ref)
 	asm_snap_alloc1(as, ir->op2);
 	if (LJ_32 && (ir+1)->o == IR_HIOP)
 	  asm_snap_alloc1(as, (ir+1)->op2);
-      }
+      } else
 #endif
-      else {  /* Allocate stored values for TNEW, TDUP and CNEW. */
+      {  /* Allocate stored values for TNEW, TDUP and CNEW. */
 	IRIns *irs;
 	lua_assert(ir->o == IR_TNEW || ir->o == IR_TDUP || ir->o == IR_CNEW);
 	for (irs = IR(as->snapref-1); irs > ir; irs--)
@@ -1110,6 +1111,15 @@ static void asm_phi_shuffle(ASMState *as)
   }
 
   /* Restore/remat invariants whose registers are modified inside the loop. */
+#if !LJ_SOFTFP
+  work = as->modset & ~(as->freeset | as->phiset) & RSET_FPR;
+  while (work) {
+    Reg r = rset_pickbot(work);
+    ra_restore(as, regcost_ref(as->cost[r]));
+    rset_clear(work, r);
+    checkmclim(as);
+  }
+#endif
   work = as->modset & ~(as->freeset | as->phiset);
   while (work) {
     Reg r = rset_pickbot(work);
@@ -1610,6 +1620,7 @@ static void asm_setup_regsp(ASMState *as)
 	break;
       /* fallthrough */
     case IR_ALOAD: case IR_HLOAD: case IR_ULOAD: case IR_VLOAD:
+      if (!LJ_SOFTFP && irt_isnum(ir->t)) break;
       ir->prev = (uint16_t)REGSP_HINT((rload & 15));
       rload = lj_ror(rload, 4);
       continue;
@@ -1641,7 +1652,7 @@ static void asm_setup_regsp(ASMState *as)
 	}
 	break;
 #endif
-#if LJ_NEED_FP64
+#if !LJ_SOFTFP && LJ_NEED_FP64
       case IR_CONV:
 	if (irt_isfp((ir-1)->t)) {
 	  ir->prev = REGSP_HINT(RID_FPRET);
@@ -1738,8 +1749,12 @@ static void asm_setup_regsp(ASMState *as)
       }
       break;
 #endif
-    /* Do not propagate hints across type conversions. */
+    /* Do not propagate hints across type conversions or loads. */
     case IR_TOBIT:
+    case IR_XLOAD:
+#if !LJ_TARGET_ARM
+    case IR_ALOAD: case IR_HLOAD: case IR_ULOAD: case IR_VLOAD:
+#endif
       break;
     case IR_CONV:
       if (irt_isfp(ir->t) || (ir->op2 & IRCONV_SRCMASK) == IRT_NUM ||

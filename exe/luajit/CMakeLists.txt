@@ -182,7 +182,7 @@ SET(SRC_LJLIB src/lib_base.c src/lib_math.c src/lib_bit.c src/lib_string.c src/l
 
 SET(SRC_LJCORE src/lj_gc.c src/lj_err.c src/lj_char.c src/lj_bc.c src/lj_obj.c
   src/lj_str.c src/lj_tab.c src/lj_func.c src/lj_udata.c src/lj_meta.c src/lj_debug.c
-  src/lj_state.c src/lj_dispatch.c src/lj_vmevent.c src/lj_vmmath.c src/lj_api.c
+  src/lj_state.c src/lj_dispatch.c src/lj_vmevent.c src/lj_vmmath.c src/lj_strscan.c src/lj_api.c
   src/lj_lex.c src/lj_parse.c src/lj_bcread.c src/lj_bcwrite.c
   src/lj_ir.c src/lj_opt_mem.c src/lj_opt_fold.c src/lj_opt_narrow.c
   src/lj_opt_dce.c src/lj_opt_loop.c src/lj_opt_sink.c #only included src/lj_opt_split.c
