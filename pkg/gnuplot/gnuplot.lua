@@ -61,14 +61,19 @@ local function gnuplothasterm(term)
    fi:write('set terminal\n\n')
    fi:close()
    os.execute(getexec() .. ' < ' .. tfni .. ' > ' .. tfno .. ' 2>&1 ')
+   os.remove(tfni)
    local tf = io.open(tfno,'r')
    local s = tf:read('*l')
    while s do
       if s:match('^.*%s+  '.. term .. ' ') then
+	 tf:close()
+	 os.remove(tfno)
          return true
       end
       s = tf:read('*l')
    end
+   tf:close()
+   os.remove(tfno)
    return false
 end
 
@@ -499,16 +504,21 @@ local function gnu_imagesc_string(x,palette)
 end
 
 function gnuplot.close(n)
-   if not n then return end
+   if not n then
+      n = _gptable.current
+   end
    local gp = _gptable[n]
    if gp == nil then return end
-   if type(n) ==  number and torch.typename(gp.pipe) == 'torch.PipeFile' then
-      _gptable.current = n
-      gnuplot.plotflush(i)
-      writeToPLot(gp, 'quit')
-      gp.pipe:close()
+   if type(n) ==  'number' and torch.typename(gp.pipe) == 'torch.PipeFile' then
+      _gptable.current = nil
+      gnuplot.plotflush(n)
+      writeToPlot(gp, 'quit')
+      
+      -- pipefile:close is buggy in TH
+      --gp.pipe:close()
       gp.pipe=nil
       gp = nil
+      _gptable[n] = nil
    end
    collectgarbage()
 end
@@ -535,10 +545,17 @@ local function filefigure(fname,term,n)
 end
 function gnuplot.epsfigure(fname,n)
    filefigure(fname,'postscript eps enhanced color',n)
+   return _gptable.current
+end
+
+function gnuplot.svgfigure(fname,n)
+   filefigure(fname,'svg',n)
+   return _gptable.current
 end
 
 function gnuplot.pngfigure(fname,n)
    filefigure(fname,'png',n)
+   return _gptable.current
 end
 
 function gnuplot.figprint(fname)
@@ -575,11 +592,12 @@ function gnuplot.plotflush(n)
    end
    local gp = _gptable[n]
    --xprint(gp)
-   if gp.fname then
-      writeToPlot(gp,'set output "' .. gp.fname .. '"')
-      writeToPlot(gp,'refresh')
-      writeToPlot(gp,'unset output')
-   end
+   refreshPlot(gp)
+   -- if gp.fname then
+   --    writeToPlot(gp,'set output "' .. gp.fname .. '"')
+   --    writeToPlot(gp,'refresh')
+   --    writeToPlot(gp,'unset output')
+   -- end
 end
 
 local function gnulplot(legend,x,y,format)
