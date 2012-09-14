@@ -5,16 +5,6 @@ interface:print([[
 #include "TH.h"
 #include "luaT.h"
 #include "utils.h"
-
-static const void* torch_ByteTensor_id;
-static const void* torch_CharTensor_id;
-static const void* torch_ShortTensor_id;
-static const void* torch_IntTensor_id;
-static const void* torch_LongTensor_id;
-static const void* torch_FloatTensor_id;
-static const void* torch_DoubleTensor_id;
-
-static const void* torch_LongStorage_id;
                 ]])
 
 -- special argument specific to torch package
@@ -56,7 +46,7 @@ argtypes.LongArg = {
    precall = function(arg)
                 local txt = {}
                 if arg.returned then
-                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongStorage_id);', arg.i))
+                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, "torch.LongStorage");', arg.i))
                 end
                 return table.concat(txt, '\n')
              end,
@@ -66,7 +56,7 @@ argtypes.LongArg = {
                  if arg.creturned then
                     -- this next line is actually debatable
                     table.insert(txt, string.format('THLongStorage_retain(arg%d);', arg.i))
-                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, torch_LongStorage_id);', arg.i))
+                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, "torch.LongStorage");', arg.i))
                  end
                  if not arg.returned and not arg.creturned then
                     table.insert(txt, string.format('THLongStorage_free(arg%d);', arg.i))
@@ -133,17 +123,20 @@ end
    
 -- also specific to torch: we generate a 'dispatch' function
 -- first we create a helper function
+-- note that it let the "torch" table on the stack
 interface:print([[
-static const void* torch_istensorid(lua_State *L, const void *id)
+static const void* torch_istensortype(lua_State *L, const char *tname)
 {
-  if(!id)
+  if(!tname)
     return NULL;
 
-  luaT_pushmetaclass(L, id);
+  if(!luaT_pushmetatable(L, tname))
+    return NULL;
+
   lua_pushstring(L, "torch");
   lua_rawget(L, -2);
   if(lua_istable(L, -1))
-    return id;
+    return tname;
   else
   {
     lua_pop(L, 2);
@@ -168,20 +161,19 @@ function interface:wrap(name, ...)
 static int torch_NAME(lua_State *L)
 {
   int narg = lua_gettop(L);
-  const void *id;
-
-  if(narg >= 1 && (id = torch_istensorid(L, luaT_id(L, 1)))) /* first argument is tensor? */
+  const void *tname;
+  if(narg >= 1 && (tname = torch_istensortype(L, luaT_typename(L, 1)))) /* first argument is tensor? */
   {
   }
-  else if(narg >= 2 && (id = torch_istensorid(L, luaT_id(L, 2)))) /* second? */
+  else if(narg >= 2 && (tname = torch_istensortype(L, luaT_typename(L, 2)))) /* second? */
   {
   }
-  else if(narg >= 1 && lua_isstring(L, -1)
-	  && (id = torch_istensorid(L, luaT_typename2id(L, lua_tostring(L, -1))))) /* do we have a valid string then? */
+  else if(narg >= 1 && lua_isstring(L, narg)
+	  && (tname = torch_istensortype(L, lua_tostring(L, narg)))) /* do we have a valid tensor type string then? */
   {
     lua_remove(L, -2);
   }
-  else if(!(id = torch_istensorid(L, torch_getdefaulttensorid())))
+  else if(!(tname = torch_istensortype(L, torch_getdefaulttensortype(L))))
     luaL_error(L, "internal error: the default tensor type does not seem to be an actual tensor");
   
   lua_pushstring(L, "NAME");
@@ -193,7 +185,7 @@ static int torch_NAME(lua_State *L)
     lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
   }
   else
-    return luaL_error(L, "%s does not implement the torch.NAME() function", luaT_id2typename(L, id));
+    return luaL_error(L, "%s does not implement the torch.NAME() function", tname);
 
   return lua_gettop(L);
 }
@@ -620,14 +612,14 @@ static void THTensor_random1__(THTensor *self, long b)
         'THRandom_random',
         {{name='long', creturned=true}},
         cname("random2__"),
-        {{name=Tensor},
+        {{name=Tensor, returned=true},
          {name='long'},
          {name='long'}},
         cname("random1__"),
-        {{name=Tensor},
+        {{name=Tensor, returned=true},
          {name='long'}},
         cname("random"),
-        {{name=Tensor}})
+        {{name=Tensor, returned=true}})
 
    for _,f in ipairs({{name='geometric'},
                       {name='bernoulli', a=0.5}}) do
@@ -886,10 +878,10 @@ static void THTensor_random1__(THTensor *self, long b)
                             "sin", "asin", "sinh",
                             "tan", "atan", "tanh",
                             "sqrt",
-                            "ceil", "floor",
-                            "abs"}) do
+                            "ceil", "floor"}) do
+                            --"abs"}) do
 
-         wrap(name,
+         wrap(name, 
               cname(name),
               {{name=Tensor, default=true, returned=true, method={default='nil'}},
                {name=Tensor, method={default=1}}},
@@ -898,6 +890,13 @@ static void THTensor_random1__(THTensor *self, long b)
                {name=real, creturned=true}})
          
       end
+         wrap("abs",
+              cname("abs"),
+              {{name=Tensor, default=true, returned=true, method={default='nil'}},
+               {name=Tensor, method={default=1}}},
+              "fabs",
+              {{name=real},
+               {name=real, creturned=true}})
 
       wrap("atan2",
            cname("atan2"),
@@ -972,7 +971,7 @@ static void THTensor_random1__(THTensor *self, long b)
                      )
       end
 
-      interface:wrap("eig",
+      interface:wrap("symeig",
                      cname("syev"),
                      {{name=Tensor, returned=true},
                       {name=Tensor, returned=true},
@@ -985,6 +984,18 @@ static void THTensor_random1__(THTensor *self, long b)
                       {name=Tensor},
                       {name='charoption', values={'N', 'V'}, default='N'},
                       {name='charoption', values={'U', 'L'}, default='U'}}
+                  )
+      interface:wrap("eig",
+                     cname("geev"),
+                     {{name=Tensor, returned=true},
+                      {name=Tensor, returned=true},
+                      {name=Tensor},
+                      {name='charoption', values={'N', 'V'}, default='N'}},
+                     cname("geev"),
+                     {{name=Tensor, default=true, returned=true, invisible=true},
+                      {name=Tensor, default=true, returned=true, invisible=true},
+                      {name=Tensor},
+                      {name='charoption', values={'N', 'V'}, default='N'}}
                   )
 
       interface:wrap("svd",
@@ -1044,10 +1055,8 @@ static void THTensor_random1__(THTensor *self, long b)
    interface:print(string.gsub([[
 static void torch_TensorMath_init(lua_State *L)
 {
-  torch_Tensor_id = luaT_checktypename2id(L, "torch.Tensor");
-  torch_LongStorage_id = luaT_checktypename2id(L, "torch.LongStorage");
+  luaT_pushmetatable(L, "torch.Tensor");
 
-  luaT_pushmetaclass(L, torch_Tensor_id);
   /* register methods */
   luaL_register(L, NULL, m_torch_TensorMath__);
 

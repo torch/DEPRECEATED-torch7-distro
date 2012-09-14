@@ -57,6 +57,9 @@ public slots:
   virtual void doBackward();
   virtual void doStop();
   virtual void doReload();
+  virtual void doZoomIn();
+  virtual void doZoomOut();
+  virtual void doZoomReset();
   virtual void updateWindowTitle();
   virtual void updateWindowIcon();
   virtual void updateActions();

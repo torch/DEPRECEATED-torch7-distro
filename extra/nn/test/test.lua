@@ -4,6 +4,7 @@ local mytester = torch.Tester()
 local jac
 
 local precision = 1e-5
+local expprecision = 1e-4
 
 local nntest = {}
 local nntestx = {}
@@ -81,10 +82,10 @@ function nntest.Log()
    local input = torch.Tensor(ini,inj,ink):zero()
    local module = nn.Log()
 
-   local err = jac.testJacobian(module,input)
+   local err = jac.testJacobian(module,input, 0.1, 10)
    mytester:assertlt(err,precision, 'error on state ')
 
-   local ferr,berr = jac.testIO(module,input)
+   local ferr,berr = jac.testIO(module,input, 0.1, 10)
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
@@ -362,7 +363,7 @@ function nntest.LogSoftmax()
    local module = nn.LogSoftMax()
 
    local err = jac.testJacobian(module,input)
-   mytester:assertlt(err,precision, 'error on state ')
+   mytester:assertlt(err,expprecision, 'error on state ')
 
    local ferr,berr = jac.testIO(module,input)
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
@@ -474,7 +475,7 @@ function nntest.Softmax()
    local module = nn.SoftMax()
 
    local err = jac.testJacobian(module,input)
-   mytester:assertlt(err,precision, 'error on state ')
+   mytester:assertlt(err,expprecision, 'error on state ')
 
    local ferr,berr = jac.testIO(module,input)
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
@@ -488,7 +489,7 @@ function nntest.Softmin()
    local module = nn.SoftMin()
 
    local err = jac.testJacobian(module,input)
-   mytester:assertlt(err,precision, 'error on state ')
+   mytester:assertlt(err,expprecision, 'error on state ')
 
    local ferr,berr = jac.testIO(module,input)
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
@@ -1012,6 +1013,23 @@ function nntest.TemporalSubSampling()
    mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntestx.TemporalMaxPooling()
+   local from = math.random(1,10)
+   local ki = math.random(1,10)
+   local si = math.random(1,4)
+   local outi = math.random(10,20)
+   local ini = (outi-1)*si+ki
+   local module = nn.TemporalMaxPooling(ki, si)
+   local input = torch.Tensor(ini, from):zero()
+
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = jac.testIO(module, input)
+   mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
+end
+
 function nntest.VolumetricConvolution()
    local from = math.random(2,5)
    local to = math.random(2,5)
@@ -1060,10 +1078,105 @@ function nntest.VolumetricConvolution()
    mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.Module_getParameters_1()
+   local n = nn.Sequential()
+   n:add( nn.Linear(10,10) )
+   local p = n:getParameters()
+
+   mytester:asserteq((p[{ {1,100} }] - n.modules[1].weight):norm(), 0, 'getParameters(): weights wrong')
+   mytester:asserteq((p[{ {101,110} }] - n.modules[1].bias):norm(), 0, 'getParameters(): bias wrong')
+end
+
+function nntest.Module_getParameters_2()
+   local n = nn.Sequential()
+   n:add( nn.Linear(10,10) )
+   local p = n:getParameters()
+
+   n:add( nn.Linear(10,10) )
+   p = n:getParameters()
+
+   mytester:asserteq((p[{ {111,210} }] - n.modules[2].weight):norm(), 0, 'error when appending new module')
+   mytester:asserteq((p[{ {211,220} }] - n.modules[2].bias):norm(), 0, 'error when appending new module')
+end
+
+function nntest.Module_getParameters_3()
+   local n = nn.Sequential()
+   n:add( nn.Linear(10,10) )
+   n:add( n.modules[1]:clone() )
+   local p = n:getParameters()
+
+   mytester:asserteq((p[{ {1,100} }] - n.modules[1].weight):norm(), 0, 'error when using cloning')
+   mytester:asserteq((p[{ {101,110} }] - n.modules[1].bias):norm(), 0, 'error when using cloning')
+
+   mytester:asserteq((p[{ {111,210} }] - n.modules[2].weight):norm(), 0, 'error when using cloning')
+   mytester:asserteq((p[{ {211,220} }] - n.modules[2].bias):norm(), 0, 'error when using cloning')
+
+   mytester:asserteq((p[{ {111,210} }] - n.modules[1].weight):norm(), 0, 'error when using cloning')
+   mytester:asserteq((p[{ {211,220} }] - n.modules[1].bias):norm(), 0, 'error when using cloning')
+
+   n:reset()
+
+   mytester:assertgt((p[{ {111,210} }] - n.modules[1].weight):norm(), 0, 'error when using cloning')
+   mytester:assertgt((p[{ {211,220} }] - n.modules[1].bias):norm(), 0, 'error when using cloning')
+end
+
+function nntest.Module_getParameters_4()
+   local n = nn.Sequential()
+   n:add( nn.Linear(10,10) )
+   n:add( n.modules[1]:clone() )
+   local p = n:getParameters()
+
+   n:add(nn.Linear(10,10))
+   p = n:getParameters()
+
+   mytester:asserteq((p[{ {1,100} }] - n.modules[1].weight):norm(), 0, 'error when using cloning')
+   mytester:asserteq((p[{ {101,110} }] - n.modules[1].bias):norm(), 0, 'error when using cloning')
+
+   mytester:asserteq((p[{ {111,210} }] - n.modules[2].weight):norm(), 0, 'error when using cloning')
+   mytester:asserteq((p[{ {211,220} }] - n.modules[2].bias):norm(), 0, 'error when using cloning')
+
+   mytester:asserteq((p[{ {221,320} }] - n.modules[3].weight):norm(), 0, 'error when using cloning')
+   mytester:asserteq((p[{ {321,330} }] - n.modules[3].bias):norm(), 0, 'error when using cloning')
+end
+
+function nntest.Module_getParameters_5()
+   local n = nn.Sequential()
+   n:add( nn.Linear(10,10) )
+   n:add( n.modules[1]:clone('weight','bias') )
+   local p = n:getParameters()
+
+   mytester:asserteq((p[{ {1,100} }] - n.modules[1].weight):norm(), 0, 'error when using cloning+sharing')
+   mytester:asserteq((p[{ {101,110} }] - n.modules[1].bias):norm(), 0, 'error when using cloning+sharing')
+
+   mytester:asserteq((p[{ {1,100} }] - n.modules[2].weight):norm(), 0, 'error when using cloning+sharing')
+   mytester:asserteq((p[{ {101,110} }] - n.modules[2].bias):norm(), 0, 'error when using cloning+sharing')
+
+   n:reset()
+
+   mytester:asserteq((p[{ {1,100} }] - n.modules[2].weight):norm(), 0, 'error when using cloning+sharing')
+   mytester:asserteq((p[{ {101,110} }] - n.modules[2].bias):norm(), 0, 'error when using cloning+sharing')
+end
+
+function nntest.Module_getParameters_6()
+   local n = nn.Sequential()
+   n:add( nn.Linear(10,10) )
+   n:add( n.modules[1]:clone('weight','bias') )
+   local p = n:getParameters()
+
+   n:add(nn.Linear(10,10))
+   p = n:getParameters()
+
+   mytester:asserteq((p[{ {1,100} }] - n.modules[1].weight):norm(), 0, 'error when using cloning+sharing')
+   mytester:asserteq((p[{ {101,110} }] - n.modules[1].bias):norm(), 0, 'error when using cloning+sharing')
+
+   mytester:asserteq((p[{ {1,100} }] - n.modules[2].weight):norm(), 0, 'error when using cloning+sharing')
+   mytester:asserteq((p[{ {101,110} }] - n.modules[2].bias):norm(), 0, 'error when using cloning+sharing')
+
+   mytester:asserteq((p[{ {111,210} }] - n.modules[3].weight):norm(), 0, 'error when using cloning+sharing')
+   mytester:asserteq((p[{ {211,220} }] - n.modules[3].bias):norm(), 0, 'error when using cloning+sharing')
+end
 
 mytester:add(nntest)
---mytester:add(test_SpatialConvolution)
---mytester:add(test_AbsCriterion)
 
 if not nn then
    require 'nn'

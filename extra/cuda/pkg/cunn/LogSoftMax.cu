@@ -112,8 +112,8 @@ __global__ void cunn_LogSoftMax_updateGradInput_kernel(float *gradInput, float *
 
 static int cunn_LogSoftMax_updateOutput(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
-  THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, "torch.CudaTensor");
+  THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", "torch.CudaTensor");
 
   input = THCudaTensor_newContiguous(input);
   THCudaTensor_resizeAs(output, input);
@@ -155,9 +155,9 @@ struct logsoftmaxupdateGradInput_functor
 
 static int cunn_LogSoftMax_updateGradInput(lua_State *L)
 {
-  THCudaTensor *gradOutput = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
-  THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", torch_CudaTensor_id);
-  THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
+  THCudaTensor *gradOutput = (THCudaTensor*)luaT_checkudata(L, 3, "torch.CudaTensor");
+  THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", "torch.CudaTensor");
+  THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", "torch.CudaTensor");
 
   output = THCudaTensor_newContiguous(output);
   gradOutput = THCudaTensor_newContiguous(gradOutput);
@@ -204,7 +204,7 @@ static const struct luaL_Reg cunn_LogSoftMax__ [] = {
 
 static void cunn_LogSoftMax_init(lua_State *L)
 {
-  luaT_pushmetaclass(L, torch_CudaTensor_id);
+  luaT_pushmetatable(L, "torch.CudaTensor");
   luaT_registeratname(L, cunn_LogSoftMax__, "nn");
   lua_pop(L,1);
 }

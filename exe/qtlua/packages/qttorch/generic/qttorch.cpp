@@ -4,7 +4,7 @@
 
 static int qttorch_(qimage_fromtensor)(lua_State *L)
 {
-  THTensor *Tsrc = (THTensor*)luaT_checkudata(L,1,torch_(Tensor_id));
+  THTensor *Tsrc = (THTensor*)luaT_checkudata(L,1,torch_Tensor);
   double scale = 255.0 / luaL_optnumber(L, 2, 1);
   long depth = 1;
   int ddim, wdim = 1, hdim = 0;
@@ -31,7 +31,7 @@ static int qttorch_(qimage_fromtensor)(lua_State *L)
   long sh = Tsrc->stride[hdim];
   long sd = (depth > 1) ? Tsrc->stride[ddim] : 0;
   real *tdata = THTensor_(data)(Tsrc);
-  for(int j=0; j<height; j++) 
+  for(int j=0; j<height; j++)
   {
     QRgb *ip = (QRgb*)image.scanLine(j);
     real *tp = tdata + sh * j;
@@ -88,7 +88,7 @@ static int qttorch_(qimage_totensor)(lua_State *L)
   if (lua_type(L, 2) == LUA_TUSERDATA)
   {
     tpos = 2;
-    Tdst = (THTensor*)luaT_checkudata(L,2,torch_(Tensor_id));
+    Tdst = (THTensor*)luaT_checkudata(L,2,torch_Tensor);
     if (Tdst->nDimension == 3)
     {
       ddim = 0;
@@ -171,7 +171,7 @@ static int qttorch_(qimage_totensor)(lua_State *L)
   if (tpos > 0)
     lua_pushvalue(L, tpos);
   else
-    luaT_pushudata(L, (void*)Tdst, torch_(Tensor_id));
+    luaT_pushudata(L, (void*)Tdst, torch_Tensor);
   return 1;
 }
 
@@ -184,9 +184,9 @@ static struct luaL_Reg qttorch_(qimage_lib)[] = {
 
 static void qttorch_(Tensor_init)(lua_State *L)
 {
-  luaT_pushmetaclass(L, torch_(Tensor_id));
+  luaT_pushmetatable(L, torch_Tensor);
   luaT_registeratname(L, qttorch_(qimage_lib), "qttorch");
-  lua_pop(L,1);  
+  lua_pop(L,1);
 }
 
 #endif

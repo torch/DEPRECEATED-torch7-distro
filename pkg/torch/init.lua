@@ -26,6 +26,10 @@ function torch.packageLuaPath(name)
    end
 end
 
+function include(file, depth)
+   paths.dofile(file, 3 + (depth or 0))
+end
+
 function torch.include(package, file)
    dofile(torch.packageLuaPath(package) .. '/' .. file) 
 end
@@ -60,7 +64,6 @@ function torch.setdefaulttensortype(typename)
    if torch.getconstructortable(typename) then
       torch.Tensor = torch.getconstructortable(typename)
       torch.Storage = torch.getconstructortable(torch.typename(torch.Tensor(1):storage()))
-      torch.__setdefaulttensortype(typename)
    else
       error(string.format("<%s> is not a string describing a torch object", typename))
    end
@@ -68,9 +71,10 @@ end
 
 torch.setdefaulttensortype('torch.DoubleTensor')
 
-torch.include('torch', 'Tensor.lua')
-torch.include('torch', 'File.lua')
-torch.include('torch', 'CmdLine.lua')
-torch.include('torch', 'Tester.lua')
-torch.include('torch', 'test.lua')
+include('Tensor.lua')
+include('File.lua')
+include('CmdLine.lua')
+include('Tester.lua')
+include('test.lua')
+
 return torch

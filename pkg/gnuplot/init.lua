@@ -1,5 +1,5 @@
 require 'torch'
 
 gnuplot = {}
-torch.include('gnuplot','gnuplot.lua')
-torch.include('gnuplot','hist.lua')
+include('gnuplot.lua')
+include('hist.lua')

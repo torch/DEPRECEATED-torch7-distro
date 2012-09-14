@@ -1,47 +1,218 @@
 
--- this file is a simple list of repositories that can
--- be installed with torck-pkg
+-- This file acts as a package repository, to be used by
+-- torch-pkg.
+
+-- Files of that type can be created anywhere on the web,
+-- and then simply registered by torch-pkg using:
+-- $ torch-pkg add URL_TO_FILE
+
+-- Once a file of that type has been added, torch-pkg is
+-- able to find the new packages (torch-pkg list), search
+-- through them (torch-pkg search PKG_NAME), and install
+-- them (torch-pkg install PKG_NAME)
 
 pkg = pkg or {}
 
 pkg.image = {
-	git = 'https://github.com/clementfarabet/lua---image',
-	description = 'An image-processing toolbox for Torch7',
-	dependencies = {'sys', 'xlua'},
-	commit = 'master'
+   git = 'https://github.com/clementfarabet/lua---image',
+   description = 'An image-processing toolbox for Torch7',
+   dependencies = {'sys', 'xlua'},
+   commit = 'master'
+}
+
+pkg.optim = {
+   git = 'https://github.com/koraykv/optim',
+   description = 'An optimization toolbox for Torch7',
+   dependencies = {'sys'},
+   commit = 'master'
+}
+
+pkg.parallel = {
+   git = 'https://github.com/clementfarabet/lua---parallel',
+   description = 'A parallel computing framework for Torch7, with serialization facilities',
+   dependencies = {'sys'},
+   commit = 'master'
 }
 
 pkg.sys = {
-	git = 'https://github.com/clementfarabet/lua---sys',
-	description = 'A system toolbox for Torch7',
-	dependencies = {},
-	commit = 'master'
+   git = 'https://github.com/clementfarabet/lua---sys',
+   description = 'A system toolbox for Torch7',
+   dependencies = {},
+   commit = 'master'
+}
+
+pkg.inline = {
+   git = 'https://github.com/clementfarabet/lua---inline-C',
+   description = 'An inline C engine for torch',
+   dependencies = {},
+   commit = 'master'
 }
 
 pkg.xlua = {
-	git = 'https://github.com/clementfarabet/lua---xlua',
-	description = 'A toolbox of conveniency functions (mostly for argument parsing)',
-	dependencies = {'sys'},
-	commit = 'master'
+   git = 'https://github.com/clementfarabet/lua---xlua',
+   description = 'A toolbox of conveniency functions (mostly for argument parsing)',
+   dependencies = {'sys'},
+   commit = 'master'
 }
 
 pkg.camera = {
-	git = 'https://github.com/clementfarabet/lua---camera',
-	description = 'A camera interface (Mac OSX, Ubuntu and OpenCV)',
-	dependencies = {'image'},
-	commit = 'master'
+   git = 'https://github.com/clementfarabet/lua---camera',
+   description = 'A camera interface (Mac OSX, Ubuntu and OpenCV)',
+   dependencies = {'image'},
+   commit = 'master'
 }
 
 pkg.ffmpeg = {
-	git = 'https://github.com/clementfarabet/lua---ffmpeg',
-	description = 'A simple video object that relies on ffmpeg',
-	dependencies = {'image'},
-	commit = 'master'
+   git = 'https://github.com/clementfarabet/lua---ffmpeg',
+   description = 'A simple video object that relies on ffmpeg',
+   dependencies = {'image'},
+   commit = 'master'
 }
 
 pkg.imgraph = {
-	git = 'https://github.com/clementfarabet/lua---imgraph',
-	description = 'A package to construct and manupulate graphs/trees over images',
-	dependencies = {'image','xlua'},
-	commit = 'newpack'
+   git = 'https://github.com/clementfarabet/lua---imgraph',
+   description = 'A package to construct and manupulate graphs/trees over images',
+   dependencies = {'image','xlua'},
+   commit = 'master'
+}
+
+
+pkg.videograph = {
+   git = 'https://github.com/clementfarabet/videograph',
+   description = 'A package to construct and manupulate graphs/trees over videos',
+   dependencies = {'image','imgraph','xlua'},
+   commit = 'master'
+}
+
+pkg.nnx = {
+   git = 'https://github.com/clementfarabet/lua---nnx',
+   description = 'Completely unstable and experimental package to extend nn',
+   dependencies = {'xlua'},
+   commit = 'master'
+}
+
+pkg.opencv = {
+   git = 'https://github.com/marcoscoffier/lua---opencv',
+   description = 'A simple wrapper for the OpenCV (vision) library',
+   dependencies = {'xlua','image'},
+   commit = 'master'
+}
+
+pkg.mattorch = {
+   git = 'https://github.com/clementfarabet/lua---mattorch',
+   description = 'A two-way interface between Matlab and Torch7',
+   dependencies = {'xlua'},
+   commit = 'master'
+}
+
+pkg.torch = {
+   git = 'https://github.com/andresy/torch',
+   description = 'Torch7 itself. In case you screwed up your install.',
+   dependencies = {},
+   commit = 'master'
+}
+
+pkg.neuflow = {
+   git = 'https://github.com/clementfarabet/neuflow',
+   description = 'neuFlow software toolchain',
+   dependencies = {'bit'},
+   commit = 'master'
+}
+
+pkg.bit = {
+   git = 'https://github.com/clementfarabet/lua---bitop',
+   description = 'Lua BitOp (from Mike Pall)',
+   dependencies = {},
+   commit = 'master'
+}
+
+pkg.gm = {
+   git = 'https://github.com/clementfarabet/lua---gm',
+   description = 'A (simple) graphical model package for Torch7',
+   dependencies = {'xlua'},
+   commit = 'master'
+}
+
+pkg.debugger = {
+   git = 'https://github.com/clementfarabet/lua---debugger',
+   description = 'A Debugger for Torch/Lua',
+   dependencies = {'sys'},
+   commit = 'master',
+}
+
+pkg.unsup = {
+   git = 'https://github.com/koraykv/unsup',
+   description = 'Toolbox for unsupervised learning',
+   dependencies = {'kex','optim'},
+   commit = 'master',
+}
+
+pkg.kex = {
+   git = 'https://github.com/koraykv/kex',
+   description = 'Koray\'s magic toolbox, be careful!',
+   dependencies = {},
+   commit = 'master',
+}
+
+pkg.allreduce = {
+   git = 'https://github.com/clementfarabet/vowpal_wabbit',
+   description = 'A wrapper around the allreduce implementation from Vowpal Wabbit (Yahoo)',
+   dependencies = {},
+   commit = 'master',
+}
+
+pkg.liuflow = {
+   git = 'https://github.com/clementfarabet/lua---liuflow',
+   description = 'A wrapper around C. Liu\'s optical flow',
+   dependencies = {'image'},
+   commit = 'master',
+}
+
+pkg.csv = {
+   git = 'https://github.com/clementfarabet/lua---csv',
+   description = 'A package to read/write CSV files', 
+   dependencies = {},
+   commit = 'master',
+}
+
+pkg.json = {
+   git = 'https://github.com/clementfarabet/lua---json',
+   description = 'A package to read/write JSON files', 
+   dependencies = {},
+   commit = 'master',
+}
+
+pkg.tutorials = {
+   git = 'https://github.com/clementfarabet/torch7-demos',
+   description = 'Tutorials for Torch7',
+   dependencies = {'image','imgraph','unsup','opencv','camera','nnx','ffmpeg'},
+   commit = 'master',
+}
+
+pkg.webterm = {
+   git = 'https://github.com/clementfarabet/thwebterm',
+   description = 'A web terminal for Torch7',
+   dependencies = {'image','fs'},
+   commit = 'master',
+}
+
+pkg.fs = {
+   git = 'https://github.com/clementfarabet/lua-fs-0.3',
+   description = 'File system toolbox',
+   dependencies = {},
+   commit = 'master',
+}
+
+pkg.live = {
+   git = 'https://github.com/andresy/lua---live',
+   description = 'Easy interactive presentations',
+   dependencies = {},
+   commit = 'master',
+}
+
+pkg.sndfile = {
+   git = 'https://github.com/andresy/lua---sndfile',
+   description = 'Interface to the libsndfile library',
+   dependencies = {},
+   commit = 'master',
 }

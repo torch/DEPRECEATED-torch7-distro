@@ -44,8 +44,9 @@
 #include <QTransform>
 #include <QVariant>
 #include <QVector>
-
-
+#if HAVE_QTWEBKIT
+#include <QWebView>
+#endif
 
 Q_DECLARE_METATYPE(QGradient)
 Q_DECLARE_METATYPE(QPainterPath)
@@ -1958,8 +1959,49 @@ static luaL_Reg qtransform_lib[] = {
 do_hook(qtransform)
 
 
+// ========================================
+// QWEBVIEW
 
+#if HAVE_QTWEBKIT
 
+static int 
+qwebview_new(lua_State *L)
+{
+  QWidget *parent = luaQ_optqobject<QWidget>(L, 1);
+  luaQ_pushqt(L, new QWebView(parent), !parent);
+  return 1;
+}
+
+static int
+qwebview_load(lua_State *L)
+{
+  QWebView *view = luaQ_checkqobject<QWebView>(L, 1);
+  QUrl url = luaQ_checkqvariant<QUrl>(L, 2);
+  view->load(url);
+  return 0;
+}
+
+static int
+qwebview_setcontent(lua_State *L)
+{
+  QWebView *view = luaQ_checkqobject<QWebView>(L, 1);
+  QByteArray data = luaQ_checkqvariant<QByteArray>(L, 2);
+  QString type = luaQ_checkqvariant<QString>(L, 3);
+  QUrl url = luaQ_checkqvariant<QUrl>(L, 4);
+  view->setContent(data, type, url);
+  return 0;
+}
+
+static struct luaL_Reg qwebview_lib[] = {
+  {"new", qwebview_new},
+  {"load", qwebview_load},
+  {"setContent", qwebview_setcontent},
+  {0,0}
+};
+
+do_qhook(qwebview)
+
+#endif
 
 // ========================================
 // QWIDGET
@@ -2401,6 +2443,9 @@ luaopen_libqtgui(lua_State *L)
   HOOK_QVARIANT(QPen, qpen);
   HOOK_QOBJECT(QtLuaAction, qtluaaction);  
   HOOK_QVARIANT(QTransform, qtransform);
+#if HAVE_QTWEBKIT
+  HOOK_QOBJECT(QWebView, qwebview);
+#endif
   HOOK_QOBJECT(QWidget, qwidget);  
 
   return 0;

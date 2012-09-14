@@ -148,6 +148,7 @@ typedef struct MatchState {
   const char *src_end;  /* end (`\0') of source string */
   lua_State *L;
   int level;  /* total number of captures (finished or unfinished) */
+  int depth;
   struct {
     const char *init;
     ptrdiff_t len;
@@ -339,22 +340,26 @@ static const char *match_capture(MatchState *ms, const char *s, int l)
 
 static const char *match(MatchState *ms, const char *s, const char *p)
 {
+  if (++ms->depth > LJ_MAX_XLEVEL)
+    lj_err_caller(ms->L, LJ_ERR_STRPATX);
   init: /* using goto's to optimize tail recursion */
   switch (*p) {
   case '(':  /* start capture */
     if (*(p+1) == ')')  /* position capture? */
-      return start_capture(ms, s, p+2, CAP_POSITION);
+      s = start_capture(ms, s, p+2, CAP_POSITION);
     else
-      return start_capture(ms, s, p+1, CAP_UNFINISHED);
+      s = start_capture(ms, s, p+1, CAP_UNFINISHED);
+    break;
   case ')':  /* end capture */
-    return end_capture(ms, s, p+1);
+    s = end_capture(ms, s, p+1);
+    break;
   case L_ESC:
     switch (*(p+1)) {
     case 'b':  /* balanced string? */
       s = matchbalance(ms, s, p+2);
-      if (s == NULL) return NULL;
+      if (s == NULL) break;
       p+=4;
-      goto init;  /* else return match(ms, s, p+4); */
+      goto init;  /* else s = match(ms, s, p+4); */
     case 'f': {  /* frontier? */
       const char *ep; char previous;
       p += 2;
@@ -363,50 +368,59 @@ static const char *match(MatchState *ms, const char *s, const char *p)
       ep = classend(ms, p);  /* points to what is next */
       previous = (s == ms->src_init) ? '\0' : *(s-1);
       if (matchbracketclass(uchar(previous), p, ep-1) ||
-	 !matchbracketclass(uchar(*s), p, ep-1)) return NULL;
+	 !matchbracketclass(uchar(*s), p, ep-1)) { s = NULL; break; }
       p=ep;
-      goto init;  /* else return match(ms, s, ep); */
+      goto init;  /* else s = match(ms, s, ep); */
       }
     default:
       if (lj_char_isdigit(uchar(*(p+1)))) {  /* capture results (%0-%9)? */
 	s = match_capture(ms, s, uchar(*(p+1)));
-	if (s == NULL) return NULL;
+	if (s == NULL) break;
 	p+=2;
-	goto init;  /* else return match(ms, s, p+2) */
+	goto init;  /* else s = match(ms, s, p+2) */
       }
       goto dflt;  /* case default */
     }
+    break;
   case '\0':  /* end of pattern */
-    return s;  /* match succeeded */
+    break;  /* match succeeded */
   case '$':
-    if (*(p+1) == '\0')  /* is the `$' the last char in pattern? */
-      return (s == ms->src_end) ? s : NULL;  /* check end of string */
-    else
-      goto dflt;
+    /* is the `$' the last char in pattern? */
+    if (*(p+1) != '\0') goto dflt;
+    if (s != ms->src_end) s = NULL;  /* check end of string */
+    break;
   default: dflt: {  /* it is a pattern item */
     const char *ep = classend(ms, p);  /* points to what is next */
     int m = s<ms->src_end && singlematch(uchar(*s), p, ep);
     switch (*ep) {
     case '?': {  /* optional */
       const char *res;
-      if (m && ((res=match(ms, s+1, ep+1)) != NULL))
-	return res;
+      if (m && ((res=match(ms, s+1, ep+1)) != NULL)) {
+	s = res;
+	break;
+      }
       p=ep+1;
-      goto init;  /* else return match(ms, s, ep+1); */
+      goto init;  /* else s = match(ms, s, ep+1); */
       }
     case '*':  /* 0 or more repetitions */
-      return max_expand(ms, s, p, ep);
+      s = max_expand(ms, s, p, ep);
+      break;
     case '+':  /* 1 or more repetitions */
-      return (m ? max_expand(ms, s+1, p, ep) : NULL);
+      s = (m ? max_expand(ms, s+1, p, ep) : NULL);
+      break;
     case '-':  /* 0 or more repetitions (minimum) */
-      return min_expand(ms, s, p, ep);
+      s = min_expand(ms, s, p, ep);
+      break;
     default:
-      if (!m) return NULL;
-      s++; p=ep;
-      goto init;  /* else return match(ms, s+1, ep); */
+      if (m) { s++; p=ep; goto init; }  /* else s = match(ms, s+1, ep); */
+      s = NULL;
+      break;
     }
+    break;
     }
   }
+  ms->depth--;
+  return s;
 }
 
 static const char *lmemfind(const char *s1, size_t l1,
@@ -495,7 +509,7 @@ static int str_find_aux(lua_State *L, int find)
     ms.src_end = s+l1;
     do {
       const char *res;
-      ms.level = 0;
+      ms.level = ms.depth = 0;
       if ((res=match(&ms, s1, p)) != NULL) {
 	if (find) {
 	  lua_pushinteger(L, s1-s+1);  /* start */
@@ -534,7 +548,7 @@ LJLIB_NOREG LJLIB_CF(string_gmatch_aux)
   ms.src_end = s + str->len;
   for (; src <= ms.src_end; src++) {
     const char *e;
-    ms.level = 0;
+    ms.level = ms.depth = 0;
     if ((e = match(&ms, src, p)) != NULL) {
       int32_t pos = (int32_t)(e - s);
       if (e == src) pos++;  /* Ensure progress for empty match. */
@@ -628,7 +642,7 @@ LJLIB_CF(string_gsub)
   ms.src_end = src+srcl;
   while (n < max_s) {
     const char *e;
-    ms.level = 0;
+    ms.level = ms.depth = 0;
     e = match(&ms, src, p);
     if (e) {
       n++;
@@ -668,19 +682,22 @@ static void addquoted(lua_State *L, luaL_Buffer *b, int arg)
   const char *s = strdata(str);
   luaL_addchar(b, '"');
   while (len--) {
-    if (*s == '"' || *s == '\\' || *s == '\n') {
+    uint32_t c = uchar(*s);
+    if (c == '"' || c == '\\' || c == '\n') {
       luaL_addchar(b, '\\');
-      luaL_addchar(b, *s);
-    } else if (lj_char_iscntrl(uchar(*s))) {
-      uint32_t c1, c2, c3;
+    } else if (lj_char_iscntrl(c)) {  /* This can only be 0-31 or 127. */
+      uint32_t d;
       luaL_addchar(b, '\\');
-      c1 = uchar(*s); c3 = c1 % 10; c1 /= 10; c2 = c1 % 10; c1 /= 10;
-      if (c1 + lj_char_isdigit(uchar(s[1]))) luaL_addchar(b, '0' + c1);
-      if (c2 + (c1 + lj_char_isdigit(uchar(s[1])))) luaL_addchar(b, '0' + c2);
-      luaL_addchar(b, '0' + c3);
-    } else {
-      luaL_addchar(b, *s);
+      if (c >= 100 || lj_char_isdigit(uchar(s[1]))) {
+	luaL_addchar(b, '0'+(c >= 100)); if (c >= 100) c -= 100;
+	goto tens;
+      } else if (c >= 10) {
+      tens:
+	d = (c * 205) >> 11; c -= d * 10; luaL_addchar(b, '0'+d);
+      }
+      c += '0';
     }
+    luaL_addchar(b, c);
     s++;
   }
   luaL_addchar(b, '"');
@@ -780,20 +797,20 @@ LJLIB_CF(string_format)
 	addintlen(form);
 	sprintf(buff, form, num2uintfrm(L, arg));
 	break;
-      case 'e':  case 'E': case 'f': case 'g': case 'G': {
+      case 'e':  case 'E': case 'f': case 'g': case 'G': case 'a': case 'A': {
 	TValue tv;
 	tv.n = lj_lib_checknum(L, arg);
 	if (LJ_UNLIKELY((tv.u32.hi << 1) >= 0xffe00000)) {
 	  /* Canonicalize output of non-finite values. */
 	  char *p, nbuf[LJ_STR_NUMBUF];
 	  size_t len = lj_str_bufnum(nbuf, &tv);
-	  if (strfrmt[-1] == 'E' || strfrmt[-1] == 'G') {
+	  if (strfrmt[-1] < 'a') {
 	    nbuf[len-3] = nbuf[len-3] - 0x20;
 	    nbuf[len-2] = nbuf[len-2] - 0x20;
 	    nbuf[len-1] = nbuf[len-1] - 0x20;
 	  }
 	  nbuf[len] = '\0';
-	  for (p = form; *p < 'e' && *p != '.'; p++) ;
+	  for (p = form; *p < 'A' && *p != '.'; p++) ;
 	  *p++ = 's'; *p = '\0';
 	  sprintf(buff, form, nbuf);
 	  break;

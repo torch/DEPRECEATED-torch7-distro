@@ -2777,8 +2777,16 @@ QtLuaEngine::Receiver::connect(QObject *obj, const char *sig, bool d)
   sender = obj;
   types = make_argtypes(m->method(i));
   signature.prepend('0' + QSIGNAL_CODE);
-  if (QObject::connect(obj, signature.constData(), 
-                       this, SLOT(universal()), Qt::DirectConnection )) 
+#if QT_VERSION >= 0x040800
+  const int sigIndex = i;
+  const int memberOffset = QObject::staticMetaObject.methodCount();
+  bool okay = QMetaObject::connect(obj, sigIndex, this, memberOffset,
+                                   Qt::DirectConnection, 0);
+#else
+  bool okay = QObject::connect(obj, signature.constData(), this,
+                               SLOT(universal()), Qt::DirectConnection);
+#endif
+  if (okay)
     {
       QObject::connect(obj, SIGNAL(destroyed(QObject*)), 
                        this, SLOT(deleteLater()) );

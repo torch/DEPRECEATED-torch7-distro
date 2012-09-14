@@ -91,6 +91,7 @@ ERRDEF(STRPATC,	"invalid pattern capture")
 ERRDEF(STRPATE,	"malformed pattern (ends with " LUA_QL("%") ")")
 ERRDEF(STRPATM,	"malformed pattern (missing " LUA_QL("]") ")")
 ERRDEF(STRPATU,	"unbalanced pattern")
+ERRDEF(STRPATX,	"pattern too complex")
 ERRDEF(STRCAPI,	"invalid capture index")
 ERRDEF(STRCAPN,	"too many captures")
 ERRDEF(STRCAPU,	"unfinished capture")
@@ -139,6 +140,7 @@ ERRDEF(XFOR,	LUA_QL("=") " or " LUA_QL("in") " expected")
 /* Bytecode reader errors. */
 ERRDEF(BCFMT,	"cannot load incompatible bytecode")
 ERRDEF(BCBAD,	"cannot load malformed bytecode")
+ERRDEF(BCHEAD,	"attempt to load bytecode with extra header")
 
 #if LJ_HASFFI
 /* FFI errors. */
@@ -148,6 +150,7 @@ ERRDEF(FFI_BADSCL,	"bad storage class")
 ERRDEF(FFI_DECLSPEC,	"declaration specifier expected")
 ERRDEF(FFI_BADTAG,	"undeclared or implicit tag " LUA_QS)
 ERRDEF(FFI_REDEF,	"attempt to redefine " LUA_QS)
+ERRDEF(FFI_NUMPARAM,	"wrong number of type parameters")
 ERRDEF(FFI_INITOV,	"too many initializers for " LUA_QS)
 ERRDEF(FFI_BADCONV,	"cannot convert " LUA_QS " to " LUA_QS)
 ERRDEF(FFI_BADLEN,	"attempt to get length of " LUA_QS)
@@ -158,10 +161,16 @@ ERRDEF(FFI_BADCALL,	LUA_QS " is not callable")
 ERRDEF(FFI_NUMARG,	"wrong number of arguments for function call")
 ERRDEF(FFI_BADMEMBER,	LUA_QS " has no member named " LUA_QS)
 ERRDEF(FFI_BADIDX,	LUA_QS " cannot be indexed")
+ERRDEF(FFI_BADIDXW,	LUA_QS " cannot be indexed with " LUA_QS)
+ERRDEF(FFI_BADMM,	LUA_QS " has no " LUA_QS " metamethod")
 ERRDEF(FFI_WRCONST,	"attempt to write to constant location")
 ERRDEF(FFI_NODECL,	"missing declaration for symbol " LUA_QS)
 ERRDEF(FFI_BADCBACK,	"bad callback")
+#if LJ_OS_NOJIT
+ERRDEF(FFI_CBACKOV,	"no support for callbacks on this OS")
+#else
 ERRDEF(FFI_CBACKOV,	"too many callbacks")
+#endif
 ERRDEF(FFI_NYIPACKBIT,	"NYI: packed bit fields")
 ERRDEF(FFI_NYICALL,	"NYI: cannot call this C function (yet)")
 #endif

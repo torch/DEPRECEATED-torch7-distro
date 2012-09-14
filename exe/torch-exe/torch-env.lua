@@ -89,6 +89,12 @@ function who()
    print('==')
 end
 
+-- exit:
+-- a simple function to exit Torch :-)
+function exit()
+   os.exit()
+end
+
 print_old=print
 _G._preloaded_ = {}
 for k,v in pairs(_G) do
@@ -101,17 +107,17 @@ end
 -- lua tables, and objects.
 local print_new
 function print(obj,...)
-   if obj == nil then
+   if obj == nil and select('#',...) == 0 then
       _G.io.write('\n')
       _G.io.flush()
       return
    end
-   local m = getmaxlen(obj)
    if _G.type(obj) == 'table' then
       local mt = _G.getmetatable(obj)
       if mt and mt.__tostring__ then
          _G.io.write(mt.__tostring__(obj))
       else
+         local m = getmaxlen(obj)
          local tos = _G.tostring(obj)
          local obj_w_usage = false
          if tos and not _G.string.find(tos,'table: ') then
@@ -152,6 +158,49 @@ function print(obj,...)
    end
 end
 print_new = print
+
+-- printr:
+-- recursive print. This function prints tables recursively. It could 
+-- be merged into the regular print() above, but might be too dangerous
+-- when printing large tables?
+function printr(obj)
+   local function printrecursive(obj,tab)
+      local tab = tab or 0
+      local line = function(s) for i=1,tab do io.write(' ') end print(s) end
+      line('{')
+      tab = tab+2
+      for k,v in pairs(obj) do
+         if type(v) == 'table' then
+            line(k .. ' : ') printrecursive(v,tab+4)
+         else
+            line(k .. ' : ' .. tostring(v))
+         end
+      end
+      tab = tab-2
+      line('}')
+   end
+   if type(obj) ~= 'table' then print(obj)
+   else printrecursive(obj) end
+end
+
+-- table():
+-- ok, this is slightly out of context, but that function
+-- should really exist in Lua. It creates a new table, and then
+-- imports all the table methods into it, so that you can do things
+-- like:
+-- t = table()
+-- t:insert(1)
+-- t:insert(2)
+-- print(t)
+-- > {1,2}
+local function newtable()
+   local t = {}
+   for k,v in pairs(table) do
+      t[k] = v
+   end
+   return t
+end
+setmetatable(table, {__call=newtable})
 
 -- import:
 -- this function is a python-like loader, it requires a module,

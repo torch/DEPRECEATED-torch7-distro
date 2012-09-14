@@ -4,13 +4,13 @@
 
 static int nn_(SpatialMaxPooling_updateOutput)(lua_State *L)
 {
-  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
+  THTensor *input = luaT_checkudata(L, 2, torch_Tensor);
   int kW = luaT_getfieldcheckint(L, 1, "kW");
   int kH = luaT_getfieldcheckint(L, 1, "kH");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
-  THTensor *indices = luaT_getfieldcheckudata(L, 1, "indices", torch_(Tensor_id));
-  THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_(Tensor_id));
+  THTensor *indices = luaT_getfieldcheckudata(L, 1, "indices", torch_Tensor);
+  THTensor *output = luaT_getfieldcheckudata(L, 1, "output", torch_Tensor);
 
   luaL_argcheck(L, input->nDimension == 3, 2, "3D tensor expected");
   luaL_argcheck(L, input->size[2] >= kW && input->size[1] >= kH, 2, "input image smaller than kernel size");
@@ -38,6 +38,7 @@ static int nn_(SpatialMaxPooling_updateOutput)(lua_State *L)
 
   // compute max pooling for each input slice
   long k;
+#pragma omp parallel for private(k)
   for (k = 0; k < nslices; k++) {
     // pointers to slices
     real *input_p = input_data + k*iwidth*iheight;
@@ -56,9 +57,9 @@ static int nn_(SpatialMaxPooling_updateOutput)(lua_State *L)
         real *indxp = indx_p + i*owidth + j;
 
         // compute local max:
-	long maxindex = -1;
-	real maxval = -THInf;
-	long tcntr = 0;
+      	long maxindex = -1;
+      	real maxval = -THInf;
+      	long tcntr = 0;
         int x,y;
         for(y = 0; y < kH; y++) {
           for(x = 0; x < kW; x++) {
@@ -89,12 +90,12 @@ static int nn_(SpatialMaxPooling_updateOutput)(lua_State *L)
 
 static int nn_(SpatialMaxPooling_updateGradInput)(lua_State *L)
 {
-  THTensor *input = luaT_checkudata(L, 2, torch_(Tensor_id));
-  THTensor *gradOutput = luaT_checkudata(L, 3, torch_(Tensor_id));
+  THTensor *input = luaT_checkudata(L, 2, torch_Tensor);
+  THTensor *gradOutput = luaT_checkudata(L, 3, torch_Tensor);
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
-  THTensor *indices = luaT_getfieldcheckudata(L, 1, "indices", torch_(Tensor_id));
-  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_(Tensor_id));
+  THTensor *indices = luaT_getfieldcheckudata(L, 1, "indices", torch_Tensor);
+  THTensor *gradInput = luaT_getfieldcheckudata(L, 1, "gradInput", torch_Tensor);
 
   // get contiguous gradOutput
   gradOutput = THTensor_(newContiguous)(gradOutput);
@@ -130,8 +131,8 @@ static int nn_(SpatialMaxPooling_updateGradInput)(lua_State *L)
     for(i = 0; i < oheight; i++) {
       for(j = 0; j < owidth; j++) {
         // retrieve position of max
- 	long maxi = *(indy_p + i*owidth + j) - 1 + i*dH;
- 	long maxj = *(indx_p + i*owidth + j) - 1 + j*dW;
+       	long maxi = *(indy_p + i*owidth + j) - 1 + i*dH;
+       	long maxj = *(indx_p + i*owidth + j) - 1 + j*dW;
 
         // update gradient
         *(gradInput_p + maxi*iwidth + maxj) += *(gradOutput_p + i*owidth + j);
@@ -153,7 +154,7 @@ static const struct luaL_Reg nn_(SpatialMaxPooling__) [] = {
 
 static void nn_(SpatialMaxPooling_init)(lua_State *L)
 {
-  luaT_pushmetaclass(L, torch_(Tensor_id));
+  luaT_pushmetatable(L, torch_Tensor);
   luaT_registeratname(L, nn_(SpatialMaxPooling__), "nn");
   lua_pop(L,1);
 }

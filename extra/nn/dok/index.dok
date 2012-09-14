@@ -61,7 +61,7 @@ Some important remarks:
 Building a simple neural network can be achieved by constructing an available layer.
 A linear neural network (perceptron!) is built only in one line:
 <file lua>
-nn = nn.Linear(10,1) -- perceptron with 10 inputs
+mlp = nn.Linear(10,1) -- perceptron with 10 inputs
 </file>
 
 More complex neural networks are easily built using container classes
@@ -267,6 +267,9 @@ situations.
 
 Keep in mind that, this function uses a simple trick to achieve its
 goal and it might not be valid for a custom module.
+
+Also note that compared to accGradParameters(), the gradients are not retained 
+for future use. 
 
 <file lua>
 function Module:accUpdateGradParameters(input, gradOutput, lr)

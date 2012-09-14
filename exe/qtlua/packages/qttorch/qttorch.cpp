@@ -10,15 +10,7 @@
 #include "TH.h"
 #include "luaT.h"
 
-static const void* torch_ByteTensor_id;
-static const void* torch_CharTensor_id;
-static const void* torch_ShortTensor_id;
-static const void* torch_IntTensor_id;
-static const void* torch_LongTensor_id;
-static const void* torch_FloatTensor_id;
-static const void* torch_DoubleTensor_id;
-
-#define torch_(NAME) TH_CONCAT_3(torch_, Real, NAME)
+#define torch_Tensor TH_CONCAT_STRING_3(torch.,Real,Tensor)
 #define qttorch_(NAME) TH_CONCAT_3(qttorch_, Real, NAME)
 
 #include "generic/qttorch.cpp"
@@ -44,14 +36,6 @@ int luaopen_libqttorch(lua_State *L)
   if (luaL_dostring(L, "require 'torch'"))
     lua_error(L);
 
-  torch_ByteTensor_id = luaT_checktypename2id(L, "torch.ByteTensor");
-  torch_CharTensor_id = luaT_checktypename2id(L, "torch.CharTensor");
-  torch_ShortTensor_id = luaT_checktypename2id(L, "torch.ShortTensor");
-  torch_IntTensor_id = luaT_checktypename2id(L, "torch.IntTensor");
-  torch_LongTensor_id = luaT_checktypename2id(L, "torch.LongTensor");
-  torch_FloatTensor_id = luaT_checktypename2id(L, "torch.FloatTensor");
-  torch_DoubleTensor_id = luaT_checktypename2id(L, "torch.DoubleTensor");
-
   qttorch_ByteTensor_init(L);
   qttorch_CharTensor_init(L);
   qttorch_ShortTensor_init(L);
@@ -64,7 +48,7 @@ int luaopen_libqttorch(lua_State *L)
   luaQ_pushmeta(L, QMetaType::QImage);
   luaQ_getfield(L, -1, "__metatable");
   luaL_register(L, 0, qttorch_qimage_lib);
-  
+
   return 0;
 }
 

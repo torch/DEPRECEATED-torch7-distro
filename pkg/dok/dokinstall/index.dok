@@ -280,6 +280,20 @@ website]] and install it.
 An excellent BLAS/LAPACK implementation is also recommended for speed. See
 our [[blas|BLAS recommendations]].
 
+Last but not least, GCC >= 4.6 is *required* to enable OpenMP on MacOS X. This
+is a bit crazy, but compiling against OpenMP with previous versions of GCC
+will give you random segfaults and trap errors (a known issue on the web).
+We strongly recommend you to install GCC 4.6, to fully benefit from Torch's
+fast numeric routines. A very simple way of doing so is to install the 
+[[http://gcc.gnu.org/wiki/GFortranBinaries|GFortran]] libraries, which are
+packaged as a simple dmg, ready to install. That'll automatically install gcc
+and g++. Once this is done, set your CC and CXX before building Torch:
+
+<file>
+export CC=/usr/local/gfortran/bin/gcc
+export CXX=/usr/local/gfortran/bin/g++
+</file>
+
 ==== B. Getting Torch sources ====
 
 Same as [[#install.sources|getting sources]] for linux.

@@ -309,6 +309,10 @@ QLuaBrowser::QLuaBrowser(QWidget *parent)
   connect(d->w, SIGNAL(loadFinished(bool)),
           d, SLOT(loadFinished(bool)) );
 #endif
+  // shortcuts
+#if HAVE_QTWEBKIT
+  new QShortcut(QKeySequence("Ctrl+0"), this, SLOT(doZoomReset()));
+#endif
   // update actions
   updateActions();
 }
@@ -471,9 +475,12 @@ QLuaBrowser::createAction(QByteArray name)
       menu->addAction(stdAction("ActionEditFind"));
       return menu->menuAction();
      }
-  else if (name == "MenuNavigate")
+  else if (name == "MenuView")
     {
-      QMenu *menu = newMenu(tr("&Navigate","navigate|"));
+      QMenu *menu = newMenu(tr("&View","view|"));
+      menu->addAction(stdAction("ActionZoomIn"));
+      menu->addAction(stdAction("ActionZoomOut"));
+      menu->addSeparator();
       menu->addAction(stdAction("ActionBrowseBack"));
       menu->addAction(stdAction("ActionBrowseForward"));
       menu->addAction(stdAction("ActionBrowseHome"));
@@ -522,6 +529,20 @@ QLuaBrowser::createAction(QByteArray name)
     {
       return QLuaMainWindow::createAction(name)
         << Connection(this, SLOT(doFind()));
+    }
+  else if (name == "ActionZoomIn")
+    {
+      return newAction("Zoom In")
+        << QKeySequence("Ctrl++")
+        << Connection(this, SLOT(doZoomIn()))
+        << tr("Enlarge text and images");
+    }
+  else if (name == "ActionZoomOut")
+    {
+      return newAction("Zoom Out")
+        << QKeySequence("Ctrl+-")
+        << Connection(this, SLOT(doZoomOut()))
+        << tr("Shrink text and images");
     }
   else if (name == "ActionBrowseBack")
     {
@@ -593,7 +614,7 @@ QLuaBrowser::createMenuBar()
   QMenuBar *menubar = new QMenuBar(this);
   menubar->addAction(stdAction("MenuFile"));
   menubar->addAction(stdAction("MenuEdit"));
-  menubar->addAction(stdAction("MenuNavigate"));
+  menubar->addAction(stdAction("MenuView"));
   menubar->addAction(stdAction("MenuWindows"));
   menubar->addAction(stdAction("MenuHelp"));
   return menubar;
@@ -908,6 +929,31 @@ QLuaBrowser::doReload()
 #endif
 }
 
+void 
+QLuaBrowser::doZoomIn()
+{
+#if HAVE_QTWEBKIT
+  qreal z = d->w->zoomFactor() * 1.2;
+  d->w->setZoomFactor(qMin(z, 4.0));
+#endif
+}
+
+void 
+QLuaBrowser::doZoomOut()
+{
+#if HAVE_QTWEBKIT
+  qreal z = d->w->zoomFactor() / 1.2;
+  d->w->setZoomFactor(qMax(z, 0.25));
+#endif
+}
+
+void 
+QLuaBrowser::doZoomReset()
+{
+#if HAVE_QTWEBKIT
+  d->w->setZoomFactor(1.0);
+#endif
+}
 
 
 

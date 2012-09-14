@@ -53,10 +53,6 @@ for i,a in ipairs(arg) do
       -- we don't pass this to qlua
       arg[i] = ' '
    end
-   -- protect -e
-   if a == '-e' and arg[i+1] then
-      arg[i+1] = '"' .. arg[i+1] .. '"'
-   end
    -- autostart interactive sessions if no user script:
    if a:find('%.lua$') and paths.filep(a) then
       interactive = false
@@ -71,19 +67,31 @@ if interactive then
 end
 
 -- re-pack arguments
+for i,a in ipairs(arg) do
+   if (a:find('[^-=+.%w]')) then
+      arg[i] = '"' .. string.gsub(arg[i],'[$`"\\]','\\%0') .. '"'
+   end
+end
 args = table.concat(arg, ' ')
 
 -- test qlua existence
-if lua == 'torch-qlua' and not paths.filep(paths.concat(paths.install_bin,lua)) then
-   print('Install Qt4 and rebuild Torch7 for graphics capability (graphics disabled)')
+if lua == 'torch-qlua' and not paths.filep(paths.concat(paths.install_bin,lua))
+then
+   print('Unable to find torch-qlua (disabling graphics)')
+   print('Fix this by installing Qt4 and rebuilding Torch7')
    lua = 'torch-lua'
 elseif os.getenv('DISPLAY') == '' or os.getenv('DISPLAY') == nil then
    print('Unable to connect X11 server (disabling graphics)')
    lua = 'torch-lua'
-else
-   print('Try the IDE: torch -ide')
+end
+
+-- messages
+if interactive then
+   if lua == 'torch-qlua' then
+       print('Try the IDE: torch -ide')
+   end
+   print('Type help() for more info')
 end
 
 -- finally execute main thread, with proper options
-print('Type help() for more info')
 os.execute(paths.concat(paths.install_bin,lua) .. env .. args)

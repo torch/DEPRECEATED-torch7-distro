@@ -18,13 +18,21 @@
 #include "lj_ccallback.h"
 #include "lj_target.h"
 #include "lj_mcode.h"
+#include "lj_trace.h"
 #include "lj_vm.h"
 
 /* -- Target-specific handling of callback slots -------------------------- */
 
 #define CALLBACK_MCODE_SIZE	(LJ_PAGESIZE * LJ_NUM_CBPAGE)
 
-#if LJ_TARGET_X86ORX64
+#if LJ_OS_NOJIT
+
+/* Disabled callback support. */
+#define CALLBACK_SLOT2OFS(slot)	(0*(slot))
+#define CALLBACK_OFS2SLOT(ofs)	(0*(ofs))
+#define CALLBACK_MAX_SLOT	0
+
+#elif LJ_TARGET_X86ORX64
 
 #define CALLBACK_MCODE_HEAD	(LJ_64 ? 8 : 0)
 #define CALLBACK_MCODE_GROUP	(-2+1+2+5+(LJ_64 ? 6 : 5))
@@ -92,7 +100,10 @@ MSize lj_ccallback_ptr2slot(CTState *cts, void *p)
 }
 
 /* Initialize machine code for callback function pointers. */
-#if LJ_TARGET_X86ORX64
+#if LJ_OS_NOJIT
+/* Disabled callback support. */
+#define callback_mcode_init(g, p)	UNUSED(p)
+#elif LJ_TARGET_X86ORX64
 static void callback_mcode_init(global_State *g, uint8_t *page)
 {
   uint8_t *p = page;
@@ -299,22 +310,53 @@ void lj_ccallback_mcode_free(CTState *cts)
 
 #elif LJ_TARGET_ARM
 
+#if LJ_ABI_SOFTFP
+
+#define CALLBACK_HANDLE_REGARG_FP1	UNUSED(isfp);
+#define CALLBACK_HANDLE_REGARG_FP2
+
+#else
+
+#define CALLBACK_HANDLE_REGARG_FP1 \
+  if (isfp) { \
+    if (n == 1) { \
+      if (fprodd) { \
+	sp = &cts->cb.fpr[fprodd-1]; \
+	fprodd = 0; \
+	goto done; \
+      } else if (nfpr + 1 <= CCALL_NARG_FPR) { \
+	sp = &cts->cb.fpr[nfpr++]; \
+	fprodd = nfpr; \
+	goto done; \
+      } \
+    } else { \
+      if (nfpr + 1 <= CCALL_NARG_FPR) { \
+	sp = &cts->cb.fpr[nfpr++]; \
+	goto done; \
+      } \
+    } \
+    fprodd = 0;  /* No reordering after the first FP value is on stack. */ \
+  } else {
+
+#define CALLBACK_HANDLE_REGARG_FP2	}
+
+#endif
+
 #define CALLBACK_HANDLE_REGARG \
-  UNUSED(isfp); \
+  CALLBACK_HANDLE_REGARG_FP1 \
   if (n > 1) ngpr = (ngpr + 1u) & ~1u;  /* Align to regpair. */ \
   if (ngpr + n <= maxgpr) { \
     sp = &cts->cb.gpr[ngpr]; \
     ngpr += n; \
     goto done; \
-  }
+  } CALLBACK_HANDLE_REGARG_FP2
 
 #elif LJ_TARGET_PPC
 
 #define CALLBACK_HANDLE_REGARG \
   if (isfp) { \
     if (nfpr + 1 <= CCALL_NARG_FPR) { \
-      sp = &cts->cb.fpr[nfpr]; \
-      nfpr += 1; \
+      sp = &cts->cb.fpr[nfpr++]; \
       cta = ctype_get(cts, CTID_DOUBLE);  /* FPRs always hold doubles. */ \
       goto done; \
     } \
@@ -371,6 +413,9 @@ static void callback_conv_args(CTState *cts, lua_State *L)
   MSize ngpr = 0, nsp = 0, maxgpr = CCALL_NARG_GPR;
 #if CCALL_NARG_FPR
   MSize nfpr = 0;
+#if LJ_TARGET_ARM
+  MSize fprodd = 0;
+#endif
 #endif
 
   if (slot < cts->cb.sizeid && (id = cts->cb.cbid[slot]) != 0) {
@@ -415,7 +460,6 @@ static void callback_conv_args(CTState *cts, lua_State *L)
       MSize n;
       lua_assert(ctype_isfield(ctf->info));
       cta = ctype_rawchild(cts, ctf);
-      if (ctype_isenum(cta->info)) cta = ctype_child(cts, cta);
       isfp = ctype_isfp(cta->info);
       sz = (cta->size + CTSIZE_PTR-1) & ~(CTSIZE_PTR-1);
       n = sz / CTSIZE_PTR;  /* Number of GPRs or stack slots needed. */
@@ -486,6 +530,7 @@ lua_State * LJ_FASTCALL lj_ccallback_enter(CTState *cts, void *cf)
   lua_assert(L != NULL);
   if (gcref(cts->g->jit_L))
     lj_err_caller(gco2th(gcref(cts->g->jit_L)), LJ_ERR_FFI_BADCBACK);
+  lj_trace_abort(cts->g);  /* Never record across callback. */
   /* Setup C frame. */
   cframe_prev(cf) = L->cframe;
   setcframe_L(cf, L);
@@ -516,6 +561,7 @@ void LJ_FASTCALL lj_ccallback_leave(CTState *cts, TValue *o)
   L->cframe = cframe_prev(L->cframe);
   L->top -= 2;
   L->base = obase;
+  cts->cb.slot = 0;  /* Blacklist C function that called the callback. */
 }
 
 /* -- C callback management ----------------------------------------------- */

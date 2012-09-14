@@ -84,7 +84,7 @@ __global__ void cunn_MultiMarginCriterion_updateGradInput_kernel(float *gradInpu
 
 static int cunn_MultiMarginCriterion_updateOutput(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, "torch.CudaTensor");
   int sizeaverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
 
   input = THCudaTensor_newContiguous(input);
@@ -111,7 +111,7 @@ static int cunn_MultiMarginCriterion_updateOutput(lua_State *L)
   }
   else if(input->nDimension == 2)
   {
-    THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
+    THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, "torch.CudaTensor");
     THCudaTensor *output = THCudaTensor_newWithSize1d(input->size[0]);
     dim3 blocks(input->size[0]);
     dim3 threads(MULTIMARGIN_THREADS);
@@ -140,8 +140,8 @@ static int cunn_MultiMarginCriterion_updateOutput(lua_State *L)
 
 static int cunn_MultiMarginCriterion_updateGradInput(lua_State *L)
 {
-  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, torch_CudaTensor_id);
-  THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", torch_CudaTensor_id);
+  THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, "torch.CudaTensor");
+  THCudaTensor *gradInput = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "gradInput", "torch.CudaTensor");
   int sizeaverage = luaT_getfieldcheckboolean(L, 1, "sizeAverage");
 
   THCudaTensor_resizeAs(gradInput, input);
@@ -165,7 +165,7 @@ static int cunn_MultiMarginCriterion_updateGradInput(lua_State *L)
   }
   else if(gradInput->nDimension == 2)
   {
-    THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, torch_CudaTensor_id);
+    THCudaTensor *target = (THCudaTensor*)luaT_checkudata(L, 3, "torch.CudaTensor");
     dim3 blocks(gradInput->size[0]);
     dim3 threads(LOGSOFTMAX_THREADS);
 
@@ -193,7 +193,7 @@ static const struct luaL_Reg cunn_MultiMarginCriterion__ [] = {
 
 static void cunn_MultiMarginCriterion_init(lua_State *L)
 {
-  luaT_pushmetaclass(L, torch_CudaTensor_id);
+  luaT_pushmetatable(L, "torch.CudaTensor");
   luaT_registeratname(L, cunn_MultiMarginCriterion__, "nn");
   lua_pop(L,1);
 }
