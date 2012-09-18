@@ -1513,6 +1513,8 @@ Computes the FFT of X. Optionally the result tensor ''res'' can be
 provided as the first argument. An optional last argument ''dim'' can
 be provided to specify the size of the FFT.
 
+If ''x'' is a 2D matrix, FFT is applied on each row independently.
+
 <file lua>
 Fs = 1000;
 T = 1/Fs; 
@@ -1553,6 +1555,8 @@ gnuplot.title('FFT')
 
 Computes the inverse FFT of input vector x. Optional arguments ''res''
 and ''x'' have the same meanings as in [[#torch.fft|torch.fft]].
+
+If ''x'' is a 2D matrix, IFFT is applied on each row independently.
 
 <file lua>
 yy = torch.ifft( Y )
