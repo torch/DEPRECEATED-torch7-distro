@@ -1489,6 +1489,79 @@ Max nonzero =     2.3092638912203e-14
 
 </file>
 
+===== Fast Fourier Transform =====
+{{anchor:torch.fft.dok}}
+
+Functions in this section are implemented with an interface to FFTW
+library. If FFTW library is not found during compilation step, then
+these functions will not be available.
+
+The FFT of a real valued vector produces a complex valued tensor. In
+Torch7, there is no spcific type for imaginary numbers and
+tensors. Therefore, complex tensors are represented by adding a last
+additional dimension of size ''2''. For example, a tensor of size
+''100x2'' is used to represented a ''100'' dimensional complex tensor.
+Note that, none of the numerical or linear algebra operations in
+Torch7 accept complex tensors. As it is shown in the simple example
+below, even simple operations like ''torch.abs'' has to be coded
+explicitely for complex tensors at this moment.
+
+==== torch.fft([res, ] x, [dim]) ====
+{{anchor:torch.ftt}}
+
+Computes the FFT of X. Optionally the result tensor ''res'' can be
+provided as the first argument. An optional last argument ''dim'' can
+be provided to specify the size of the FFT.
+
+<file lua>
+Fs = 1000;
+T = 1/Fs; 
+L = 1000;
+t = torch.range(0,L-1)*T; 
+
+-- 0.7 at 50Hz and 1 and 120Hz
+x = torch.sin(t*2*math.pi*50)*0.7 + torch.sin(t*2*math.pi*120);
+
+-- add noise
+y = x + torch.randn(t:nElement())*2;
+gnuplot.figure()
+gnuplot.plot(t[{ {1,50} }]*Fs, y[{ {1,50} }],'-')
+gnuplot.title('Original Signal')
+</file>
+{{signal.png?400}}
+
+<file lua>
+-- do FFT
+NFFT=1024
+Y = torch.fft(y,NFFT)/L;
+f = torch.linspace(0,1,NFFT/2+1)*Fs/2;
+
+-- Torch7 do not have imaginary representation
+Yabs = torch.cmul(Y,Y)
+Yabs = torch.sum( Yabs,2)
+Yabs = torch.squeeze( Yabs:sqrt() )
+gnuplot.figure()
+gnuplot.plot(f,Yabs[{ {1,NFFT/2+1} }]*2,'-')
+gnuplot.title('FFT')
+
+</file>
+{{fft.png?400}}
+
+
+==== torch.ifft([res, ] x, [dim]) ====
+{{anchor:torch.iftt}}
+
+Computes the inverse FFT of input vector x. Optional arguments ''res''
+and ''x'' have the same meanings as in [[#torch.fft|torch.fft]].
+
+<file lua>
+yy = torch.ifft( Y )
+gnuplot.figure()
+gnuplot.plot({'Original Signal',y[{ {1,50} }],'+'},{'IFFT',yy[{ {1,50} }]*L,'-'})
+gnuplot.title('Inverse FFT and Original Signal')
+</file>
+{{ifft.png?400}}
+
 ===== Logical Operations on Tensors =====
 {{anchor:torch.logical.dok}}
 
