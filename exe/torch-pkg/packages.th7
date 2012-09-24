@@ -1,4 +1,3 @@
-
 -- This file acts as a package repository, to be used by
 -- torch-pkg.
 
@@ -213,6 +212,13 @@ pkg.live = {
 pkg.sndfile = {
    git = 'https://github.com/andresy/lua---sndfile',
    description = 'Interface to the libsndfile library',
+   dependencies = {},
+   commit = 'master',
+}
+
+pkg.fftw = {
+   git = 'https://github.com/koraykv/torch-fftw',
+   description = 'Interface for FFTW library',
    dependencies = {},
    commit = 'master',
 }
