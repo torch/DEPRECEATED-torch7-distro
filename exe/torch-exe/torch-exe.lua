@@ -43,7 +43,7 @@ for i,a in ipairs(arg) do
    end
    -- version?
    if a == '-v' or a == '-version' then
-      print('Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU')
+      print('Torch 7.0  Copyright (C) 2001-2012 Idiap, NEC Labs, NYU')
       os.execute(paths.concat(paths.install_bin,lua) .. ' -v')
       os.exit()
    end
