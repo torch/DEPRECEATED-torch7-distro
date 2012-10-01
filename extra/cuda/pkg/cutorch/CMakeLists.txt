@@ -5,5 +5,5 @@ ADD_TORCH_WRAP(cudatensormathwrap TensorMath.lua)
 
 INCLUDE_DIRECTORIES("${Torch_SOURCE_PKG}/torch")
   
-ADD_TORCH_PACKAGE(cutorch "${src}" "${luasrc}")
-TARGET_LINK_LIBRARIES(cutorch luaT THC torch)
+#ADD_TORCH_PACKAGE(cutorch "${src}" "${luasrc}")
+#TARGET_LINK_LIBRARIES(cutorch luaT THC)

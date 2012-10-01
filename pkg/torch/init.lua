@@ -1,37 +1,60 @@
-
--- We are using paths.require to appease mkl
+local ffi = require 'ffi'
 require "paths"
-paths.require "libtorch"
 
---- package stuff
-function torch.packageLuaPath(name)
-   if not name then
-      local ret = string.match(torch.packageLuaPath('torch'), '(.*)/')
-       if not ret then --windows?
-           ret = string.match(torch.packageLuaPath('torch'), '(.*)\\')
-       end
-       return ret 
+-- torch is global for now [due to getmetatable()]
+torch = {}
+
+-- load TH and setup error handlers
+local TH = ffi.load('/Users/ronan/usr7/lib/libTH.dylib')
+
+ffi.cdef([[
+void THSetErrorHandler( void (*torchErrorHandlerFunction)(const char *msg) );
+void THSetArgErrorHandler( void (*torchArgErrorHandlerFunction)(int argNumber, const char *msg) );
+]])
+
+TH.THSetErrorHandler(function(str)
+                        error(str)
+                     end)
+
+TH.THSetArgErrorHandler(function(argnumber, str)
+                           if str then
+                              error(string.format("invalid argument %d: %s", argnumber, ffi.string(str)))
+                           else
+                              error(string.format("invalid argument %d", argnumber))
+                           end
+                        end)
+
+-- adapt usual global functions to torch7 objects
+local luatostring = tostring
+function tostring(arg)
+   local flag, func = pcall(function(arg) return arg.__tostring end, arg)
+   if flag and func then
+      return func(arg)
    end
-   for path in string.gmatch(package.path, "(.-);") do
-      path = string.gsub(path, "%?", name)
-      local f = io.open(path)
-      if f then
-         f:close()
-         local ret = string.match(path, "(.*)/")
-         if not ret then --windows?
-             ret = string.match(path, "(.*)\\")
-         end
-         return ret
-      end
+   return luatostring(arg)
+end
+
+local luatype = type
+function type(arg)
+   local flag, type = pcall(function(arg) return arg.__typename end, arg)
+   if flag and type then
+      return type
+   end
+   return luatype(arg)
+end
+
+torch.typename = type -- backward compatibility... keep it or not?
+
+function torch.getmetatable(str)
+   local module, name = str:match('([^%.]+)%.(.+)')   
+   local rtbl = _G[module][name]
+   if rtbl then 
+      return getmetatable(rtbl)
    end
 end
 
 function include(file, depth)
    paths.dofile(file, 3 + (depth or 0))
-end
-
-function torch.include(package, file)
-   dofile(torch.packageLuaPath(package) .. '/' .. file) 
 end
 
 function torch.class(tname, parenttname)
@@ -69,12 +92,43 @@ function torch.setdefaulttensortype(typename)
    end
 end
 
-torch.setdefaulttensortype('torch.DoubleTensor')
+local function includetemplate(file, env)
+   env = env or _G
+   local filename = paths.thisfile(file, 3)
+   local f = io.open(filename)
+   local txt = f:read('*all')
+   f:close()
+   local types = {char='Char', short='Short', int='Int', long='Long', float='Float', double='Double'}
+   types['unsigned char'] = 'Byte'
+   for real,Real in pairs(types) do
+      local txt = txt:gsub('([%p%s])real([%p%s])', '%1' .. real .. '%2')
+      txt = txt:gsub('THStorage', 'TH' .. Real .. 'Storage')
+      txt = txt:gsub('THTensor', 'TH' .. Real .. 'Tensor')
+      txt = txt:gsub('([%p%s])Storage([%p%s])', '%1' .. Real .. 'Storage' .. '%2')
+      txt = txt:gsub('([%p%s])Tensor([%p%s])', '%1' .. Real .. 'Tensor' .. '%2')
+      local code, err = loadstring(txt, filename)
+      if not code then
+         error(err)
+      end
+      setfenv(code, env)
+      code()
+   end   
+end
 
-include('Tensor.lua')
-include('File.lua')
-include('CmdLine.lua')
-include('Tester.lua')
-include('test.lua')
+--torch.setdefaulttensortype('torch.DoubleTensor')
+
+local env = {ffi=ffi, torch=torch, TH=TH}
+setmetatable(env, {__index=_G})
+
+includetemplate('Storage.lua', env)
+includetemplate('StorageCopy.lua', env)
+includetemplate('Tensor.lua', env)
+
+include('print.lua')
+
+--include('File.lua')
+--include('CmdLine.lua')
+--include('Tester.lua')
+--include('test.lua')
 
 return torch
