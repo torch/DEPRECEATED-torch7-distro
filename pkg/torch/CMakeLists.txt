@@ -1,6 +1,9 @@
 SET(src)
 # DiskFile.c File.c MemoryFile.c PipeFile.c Timer.c utils.c init.c random.c)
-SET(luasrc init.lua File.lua Storage.lua StorageCopy.lua Tensor.lua print.lua CmdLine.lua Tester.lua test/test.lua ${CMAKE_CURRENT_BINARY_DIR}/TensorMath.lua)
+
+SET(luasrc init.lua File.lua Storage.lua StorageCopy.lua Tensor.lua
+TensorCopy.lua print.lua CmdLine.lua Tester.lua test/test.lua
+${CMAKE_CURRENT_BINARY_DIR}/TensorMath.lua)
   
 # Necessary do generate wrapper
 ADD_TORCH_WRAP(tensormathwrap TensorMath.lua)

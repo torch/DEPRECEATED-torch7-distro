@@ -25,8 +25,8 @@ void THStorage_free(THStorage *storage);
 local mt = {
    __typename = "torch.Storage",
 
-   fill = function(self)
-             TH.THStorage_fill(self)
+   fill = function(self, value)
+             TH.THStorage_fill(self, value)
              return self
           end,
 
@@ -69,14 +69,22 @@ local mt = {
 ffi.metatype("THStorage", {__index=function(self, k)
                                       if type(k) == 'number' then
                                          if k > 0 and k <= self.__size then
-                                            return self.__data[k-1]
+                                            return tonumber(self.__data[k-1])
                                          else
                                             error('index out of bounds')
                                          end
                                       else
                                          return mt[k]
                                       end
-                                   end})
+                                   end,
+
+                           __newindex=function(self, k, v)
+                                         if k > 0 and k <= self.__size then
+                                            self.__data[k-1] = v
+                                         else
+                                            error('index out of bounds')
+                                         end
+                                      end})
 
 torch.Storage = {}
 setmetatable(torch.Storage, {__index=mt,

@@ -42,7 +42,7 @@ end]])
           end,
    
    check = function(arg, idx)
-              return string.format("islongargs(arg%d, %d, arg, narg)", arg.i, idx)
+              return string.format("islongarg(arg%d, %d, arg, narg)", arg.i, idx)
            end,
    
    read = function(arg, idx)
@@ -289,6 +289,47 @@ void THTensor_geTensor(THByteTensor *r_, THTensor *ta, THTensor *tb);
 void THTensor_neTensor(THByteTensor *r_, THTensor *ta, THTensor *tb);
 void THTensor_eqTensor(THByteTensor *r_, THTensor *ta, THTensor *tb);
 ]])]=], 'THTensor', 'TH' .. Tensor), 'accreal', accreal), 'real', real))
+
+   if Tensor == 'FloatTensor' or Tensor == 'DoubleTensor' then
+   interface:print(string.gsub(string.gsub(string.gsub([=[
+ffi.cdef([[
+void THTensor_log(THTensor *r_, THTensor *t);
+void THTensor_log1p(THTensor *r_, THTensor *t);
+void THTensor_exp(THTensor *r_, THTensor *t);
+void THTensor_cos(THTensor *r_, THTensor *t);
+void THTensor_acos(THTensor *r_, THTensor *t);
+void THTensor_cosh(THTensor *r_, THTensor *t);
+void THTensor_sin(THTensor *r_, THTensor *t);
+void THTensor_asin(THTensor *r_, THTensor *t);
+void THTensor_sinh(THTensor *r_, THTensor *t);
+void THTensor_tan(THTensor *r_, THTensor *t);
+void THTensor_atan(THTensor *r_, THTensor *t);
+void THTensor_atan2(THTensor *r_, THTensor *tx, THTensor *ty);
+void THTensor_tanh(THTensor *r_, THTensor *t);
+void THTensor_pow(THTensor *r_, THTensor *t, real value);
+void THTensor_sqrt(THTensor *r_, THTensor *t);
+void THTensor_ceil(THTensor *r_, THTensor *t);
+void THTensor_floor(THTensor *r_, THTensor *t);
+void THTensor_abs(THTensor *r_, THTensor *t);
+
+void THTensor_mean(THTensor *r_, THTensor *t, int dimension);
+void THTensor_std(THTensor *r_, THTensor *t, int dimension, int flag);
+void THTensor_var(THTensor *r_, THTensor *t, int dimension, int flag);
+void THTensor_norm(THTensor *r_, THTensor *t, real value, int dimension);
+accreal THTensor_dist(THTensor *a, THTensor *b, real value);
+void THTensor_histc(THTensor *hist, THTensor *tensor, long nbins, real minvalue, real maxvalue);
+
+accreal THTensor_meanall(THTensor *self);
+accreal THTensor_varall(THTensor *self);
+accreal THTensor_stdall(THTensor *self);
+accreal THTensor_normall(THTensor *t, real value);
+
+void THTensor_linspace(THTensor *r_, real a, real b, long n);
+void THTensor_logspace(THTensor *r_, real a, real b, long n);
+void THTensor_rand(THTensor *r_, THLongStorage *size);
+void THTensor_randn(THTensor *r_, THLongStorage *size);
+]])]=], 'THTensor', 'TH' .. Tensor), 'accreal', accreal), 'real', real))
+   end
 
    interface:print(string.format('torch.%s.torch = {}', Tensor))
 

@@ -136,6 +136,7 @@ setmetatable(env, {__index=_G})
 includetemplate('Storage.lua', env)
 includetemplate('StorageCopy.lua', env)
 includetemplate('Tensor.lua', env)
+includetemplate('TensorCopy.lua', env)
 include('print.lua')
 include('TensorMath.lua', env)
 

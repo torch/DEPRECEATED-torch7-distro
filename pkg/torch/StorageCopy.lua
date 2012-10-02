@@ -15,7 +15,9 @@ local mt = torch.Storage
 mt.copy =
    function(self, s)
       local stype = type(s)
-      if stype == 'torch.ByteStorage' then
+      if stype == 'torch.Storage' then
+         TH.THStorage_copy(self, s)
+      elseif stype == 'torch.ByteStorage' then
          TH.THStorage_copyByte(self, s)
       elseif stype == 'torch.CharStorage' then
          TH.THStorage_copyChar(self, s)
@@ -30,5 +32,11 @@ mt.copy =
       elseif stype == 'torch.DoubleStorage' then
          TH.THStorage_copyDouble(self, s)
       end
+      return self
+   end
+
+mt.rawCopy =
+   function(self, ptr)
+      TH.THStorage_rawCopy(self, ptr)
       return self
    end

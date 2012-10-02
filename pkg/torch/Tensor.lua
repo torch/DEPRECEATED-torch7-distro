@@ -2,15 +2,15 @@ ffi.cdef([[
 
 typedef struct THTensor
 {
-    long *size;
-    long *stride;
-    int nDimension;
+    long *__size;
+    long *__stride;
+    int __nDimension;
     
-    THStorage *storage;
-    long storageOffset;
-    int refcount;
+    THStorage *__storage;
+    long __storageOffset;
+    int __refcount;
 
-    char flag;
+    char __flag;
 
 } THTensor;
 
@@ -34,6 +34,11 @@ int THTensor_isContiguous(const THTensor *self);
 long THTensor_nElement(const THTensor *self);
 
 void THTensor_free(THTensor *self);
+
+real THTensor_get1d(const THTensor *tensor, long x0);
+real THTensor_get2d(const THTensor *tensor, long x0, long x1);
+real THTensor_get3d(const THTensor *tensor, long x0, long x1, long x2);
+real THTensor_get4d(const THTensor *tensor, long x0, long x1, long x2, long x3);
 
 ]])
 
@@ -91,15 +96,64 @@ local function readtensorsizestride(arg)
    end
 end
 
+local function readsizestride(arg)
+   local size
+   local stride
+   local narg = #arg
+
+   if narg == 1 and type(arg[1]) == 'number' then
+      return torch.LongStorage{arg[1]}, nil
+   elseif narg == 1 and type(arg[1]) == 'table' then
+      return torch.LongStorage(arg[1]), nil
+   elseif narg == 1 and type(arg[1]) == 'torch.LongStorage' then
+      return arg[1], nil
+   elseif narg == 2 and type(arg[1]) == 'number' and type(arg[2]) == 'number' then
+      return torch.LongStorage{arg[1], arg[2]}, nil
+   elseif narg == 2 and type(arg[1]) == 'table' and type(arg[2]) == 'table' then
+      return torch.LongStorage(arg[1]), torch.LongStorage(arg[2])
+   elseif narg == 2 and type(arg[1]) == 'torch.LongStorage' and type(arg[2]) == 'torch.LongStorage' then
+      return arg[1], arg[2]
+   elseif narg == 3 and type(arg[1]) == 'number' and type(arg[2]) == 'number' and type(arg[3]) == 'number' then
+      return torch.LongStorage{arg[1], arg[2], arg[3]}, nil
+   elseif narg == 4 and type(arg[1]) == 'number' and type(arg[2]) == 'number' and type(arg[3]) == 'number' and type(arg[4]) == 'number' then
+      return torch.LongStorage{arg[1], arg[2], arg[3], arg[4]}, nil
+   else
+      error('invalid arguments')
+   end
+end
+
 local mt = {
    __typename = "torch.Tensor",
 
-   size = function(self)
-             return TH.THTensor_size(self.core)
+   nDimension = function(self)
+                   return self.__nDimension
+                end,
+
+   storage = function(self)
+                return self.__storage[0] -- DEBUG: what about retaining here?
+             end,
+
+   storageOffset = function(self)
+                      return tonumber(self.__storageOffset)
+                   end,
+
+   size = function(self, dim)
+             if dim then
+                if dim > 0 and dim <= self.__nDimension then
+                   return tonumber(self.__size[dim-1])
+                else
+                   error('out of bounds')
+                end
+             else
+                return torch.LongStorage(self.__nDimension):rawCopy(self.__size)
+             end
           end,
 
-   resize = function(self, size)
-               return TH.THTensor_resize(self.core, size)
+   resize = function(self, ...)
+               local arg = {...}
+               local size, stride = readsizestride(arg)
+               TH.THTensor_resize(self, size, stride)
+               return self
             end,
 
    new = function(...)
@@ -114,10 +168,12 @@ local mt = {
 
 ffi.metatype("THTensor", {__index=function(self, k)
                                      if type(k) == 'number' then
-                                        if k > 0 and k <= self.size then
-                                           return self.data[k-1]
+                                        if self.__nDimension == 1 then
+                                           return tonumber(TH.THTensor_get1d(self, k-1))
+                                        elseif self.__nDimension > 1 then
+                                           return TH.THTensor_newSelect(self, 0, k-1)
                                         else
-                                           error('bound')
+                                           error('empty tensor')
                                         end
                                      else
                                         return mt[k]
