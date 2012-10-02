@@ -53,8 +53,21 @@ function torch.getmetatable(str)
    end
 end
 
-function include(file, depth)
-   paths.dofile(file, 3 + (depth or 0))
+function include(file, env)
+   if env then
+      local filename = paths.thisfile(file, 3)
+      local f = io.open(filename)
+      local txt = f:read('*all')
+      f:close()
+      local code, err = loadstring(txt, filename)
+      if not code then
+         error(err)
+      end
+      setfenv(code, env)
+      code()      
+   else
+      paths.dofile(file, 3)
+   end
 end
 
 function torch.class(tname, parenttname)
@@ -123,8 +136,8 @@ setmetatable(env, {__index=_G})
 includetemplate('Storage.lua', env)
 includetemplate('StorageCopy.lua', env)
 includetemplate('Tensor.lua', env)
-
 include('print.lua')
+include('TensorMath.lua', env)
 
 --include('File.lua')
 --include('CmdLine.lua')

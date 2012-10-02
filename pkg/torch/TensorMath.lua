@@ -1,26 +1,40 @@
 local interface = wrap.CInterface.new()
 local method = wrap.CInterface.new()
 
-interface:print([[
-#include "TH.h"
-#include "luaT.h"
-#include "utils.h"
-                ]])
-
 -- special argument specific to torch package
 local argtypes = {}
 argtypes.LongArg = {
 
    vararg = true,
-
+   
    helpname = function(arg)
-               return "(LongStorage | dim1 [dim2...])"
-            end,
-
+                 return "(LongStorage | dim1 [dim2...])"
+              end,
+   
    declare = function(arg)
-              return string.format("THLongStorage *arg%d = NULL;", arg.i)
-           end,
-
+                local txt = {}
+                table.insert(txt, string.format("local arg%d = torch.LongStorage()", arg.i))
+                table.insert(txt,
+[[
+local function islongarg(s, idx, arg, narg)
+   if type(arg[idx]) == 'torch.LongStorage' then
+      s:resizeAs(arg[idx])
+      s:copy(arg[idx])
+   else
+      s:resize(narg-idx+1)
+      for i=idx,narg do
+         if type(arg[idx]) == 'number' then
+            s[i-idx+1] = arg[idx]
+         else
+            return false
+         end
+      end
+   end
+   return true
+end]])
+                return table.concat(txt, '\n')
+             end,
+   
    init = function(arg)
              if arg.default then
                 error('LongArg cannot have a default value')
@@ -28,11 +42,10 @@ argtypes.LongArg = {
           end,
    
    check = function(arg, idx)
-            return string.format("torch_islongargs(L, %d)", idx)
-         end,
-
+              return string.format("islongargs(arg%d, %d, arg, narg)", arg.i, idx)
+           end,
+   
    read = function(arg, idx)
-             return string.format("arg%d = torch_checklongargs(L, %d);", arg.i, idx)
           end,
    
    carg = function(arg, idx)
@@ -44,24 +57,9 @@ argtypes.LongArg = {
              end,
    
    precall = function(arg)
-                local txt = {}
-                if arg.returned then
-                   table.insert(txt, string.format('luaT_pushudata(L, arg%d, "torch.LongStorage");', arg.i))
-                end
-                return table.concat(txt, '\n')
              end,
 
    postcall = function(arg)
-                 local txt = {}
-                 if arg.creturned then
-                    -- this next line is actually debatable
-                    table.insert(txt, string.format('THLongStorage_retain(arg%d);', arg.i))
-                    table.insert(txt, string.format('luaT_pushudata(L, arg%d, "torch.LongStorage");', arg.i))
-                 end
-                 if not arg.returned and not arg.creturned then
-                    table.insert(txt, string.format('THLongStorage_free(arg%d);', arg.i))
-                 end
-                 return table.concat(txt, '\n')
               end   
 }
 
@@ -74,31 +72,27 @@ argtypes.charoption = {
               end,
 
    declare = function(arg)
-                local txt = {}
-                table.insert(txt, string.format("const char *arg%d = NULL;", arg.i))
-                if arg.default then
-                   table.insert(txt, string.format("char arg%d_default = '%s';", arg.i, arg.default))
-                end
-                return table.concat(txt, '\n')
+                return string.format('local arg%d', arg.i)
            end,
 
    init = function(arg)
-             return string.format("arg%d = &arg%d_default;", arg.i, arg.i)
+             return string.format("arg%d = '%s'", arg.i, arg.default)
           end,
    
    check = function(arg, idx)
               local txt = {}
               local txtv = {}
-              table.insert(txt, string.format('(arg%d = lua_tostring(L, %d)) && (', arg.i, idx))
+              table.insert(txt, string.format('type(arg[%d]) == "string" and (', idx))
               for _,value in ipairs(arg.values) do
-                 table.insert(txtv, string.format("*arg%d == '%s'", arg.i, value))
+                 table.insert(txtv, string.format("arg[%d] == '%s'", idx, value))
               end
-              table.insert(txt, table.concat(txtv, ' || '))
-              table.insert(txt, ')')              
+              table.insert(txt, table.concat(txtv, ' or '))
+              table.insert(txt, ')')
               return table.concat(txt, '')
          end,
 
    read = function(arg, idx)
+             return string.format('arg%d = arg[%d]', arg.i, idx)
           end,
    
    carg = function(arg, idx)
@@ -120,92 +114,45 @@ for k,v in pairs(argtypes) do
    interface.argtypes[k] = v
    method.argtypes[k] = v
 end
-   
--- also specific to torch: we generate a 'dispatch' function
--- first we create a helper function
--- note that it let the "torch" table on the stack
-interface:print([[
-static const void* torch_istensortype(lua_State *L, const char *tname)
-{
-  if(!tname)
-    return NULL;
-
-  if(!luaT_pushmetatable(L, tname))
-    return NULL;
-
-  lua_pushstring(L, "torch");
-  lua_rawget(L, -2);
-  if(lua_istable(L, -1))
-    return tname;
-  else
-  {
-    lua_pop(L, 2);
-    return NULL;
-  }
-
-  return NULL;
-}
-]])
 
 interface.dispatchregistry = {}
 function interface:wrap(name, ...)
+
    -- usual stuff
    wrap.CInterface.wrap(self, name, ...)
 
    -- dispatch function
    if not interface.dispatchregistry[name] then
       interface.dispatchregistry[name] = true
-      table.insert(interface.dispatchregistry, {name=name, wrapname=string.format("torch_%s", name)})
 
       interface:print(string.gsub([[
-static int torch_NAME(lua_State *L)
-{
-  int narg = lua_gettop(L);
-  const void *tname;
-  if(narg >= 1 && (tname = torch_istensortype(L, luaT_typename(L, 1)))) /* first argument is tensor? */
-  {
-  }
-  else if(narg >= 2 && (tname = torch_istensortype(L, luaT_typename(L, 2)))) /* second? */
-  {
-  }
-  else if(narg >= 1 && lua_isstring(L, narg)
-	  && (tname = torch_istensortype(L, lua_tostring(L, narg)))) /* do we have a valid tensor type string then? */
-  {
-    lua_remove(L, -2);
-  }
-  else if(!(tname = torch_istensortype(L, torch_getdefaulttensortype(L))))
-    luaL_error(L, "internal error: the default tensor type does not seem to be an actual tensor");
-  
-  lua_pushstring(L, "NAME");
-  lua_rawget(L, -2);
-  if(lua_isfunction(L, -1))
-  {
-    lua_insert(L, 1);
-    lua_pop(L, 2); /* the two tables we put on the stack above */
-    lua_call(L, lua_gettop(L)-1, LUA_MULTRET);
-  }
-  else
-    return luaL_error(L, "%s does not implement the torch.NAME() function", tname);
-
-  return lua_gettop(L);
-}
-]], 'NAME', name))
-  end
-end
-
-function interface:dispatchregister(name)
-   local txt = self.txt
-   table.insert(txt, string.format('static const struct luaL_Reg %s [] = {', name))
-   for _,reg in ipairs(self.dispatchregistry) do
-      table.insert(txt, string.format('{"%s", %s},', reg.name, reg.wrapname))
+function torch.NAME(...)
+   local arg = {...}
+   local narg = #arg
+   local flag, func
+   flag, func = pcall(function(arg) return arg.torch.NAME end, arg[1])
+   if not flag or not func then
+      flag, func = pcall(function(arg) return arg.torch.NAME end, arg[1])
    end
-   table.insert(txt, '{NULL, NULL}')
-   table.insert(txt, '};')
-   table.insert(txt, '')   
-   self.dispatchregistry = {}
+   if not flag or not func then
+      flag, func = pcall(function(arg) return torch[arg].torch.NAME end, arg[argn])
+      if flag and func then
+         table.remove(arg)
+      end
+   end
+   if not flag or not func then
+      flag, func = pcall(function() return torch.Tensor.torch.NAME end)
+   end
+   if not flag or not func then
+      error('NAME is not implemented for the given tensor type')
+   end
+   return func(unpack(arg))
+end
+]], 'NAME', name))
+   end
 end
 
-interface:print('/* WARNING: autogenerated file */')
+interface:print('--- WARNING: autogenerated file')
 interface:print('')
 
 local function wrap(...)
@@ -257,23 +204,94 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    local accreal = accreals[Tensor]
 
    function interface.luaname2wrapname(self, name)
-      return string.format('torch_%s_%s', Tensor, name)
+      return string.format('torch.%s.torch.%s', Tensor, name)
    end
 
    function method.luaname2wrapname(self, name)
-      return string.format('m_torch_%s_%s', Tensor, name)
+      return string.format('torch.%s.%s', Tensor, name)
    end
 
    local function cname(name)
-      return string.format('TH%s_%s', Tensor, name)
+      return string.format('TH.TH%s_%s', Tensor, name)
    end
 
    local function lastdim(argn)
       return function(arg)
-                return string.format("TH%s_nDimension(%s)", Tensor, arg.args[argn]:carg())
+                return string.format("%s.__nDimension", arg.args[argn]:carg())
              end
    end
-   
+
+   interface:print(string.gsub(string.gsub(string.gsub([=[
+ffi.cdef([[
+void THTensor_fill(THTensor *r_, real value);
+void THTensor_zero(THTensor *r_);
+
+void THTensor_maskedFill(THTensor *tensor, THByteTensor *mask, real value);
+void THTensor_maskedCopy(THTensor *tensor, THByteTensor *mask, THTensor* src);
+void THTensor_maskedSelect(THTensor *tensor, THTensor* src, THByteTensor *mask);
+
+accreal THTensor_dot(THTensor *t, THTensor *src);
+  
+real THTensor_minall(THTensor *t);
+real THTensor_maxall(THTensor *t);
+accreal THTensor_sumall(THTensor *t);
+
+void THTensor_add(THTensor *r_, THTensor *t, real value);
+void THTensor_mul(THTensor *r_, THTensor *t, real value);
+void THTensor_div(THTensor *r_, THTensor *t, real value);
+
+void THTensor_cadd(THTensor *r_, THTensor *t, real value, THTensor *src);  
+void THTensor_cmul(THTensor *r_, THTensor *t, THTensor *src);
+void THTensor_cdiv(THTensor *r_, THTensor *t, THTensor *src);
+
+void THTensor_addcmul(THTensor *r_, THTensor *t, real value, THTensor *src1, THTensor *src2);
+void THTensor_addcdiv(THTensor *r_, THTensor *t, real value, THTensor *src1, THTensor *src2);
+
+void THTensor_addmv(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *mat,  THTensor *vec);
+void THTensor_addmm(THTensor *r_, real beta, THTensor *t, real alpha, THTensor *mat1, THTensor *mat2);
+void THTensor_addr(THTensor *r_,  real beta, THTensor *t, real alpha, THTensor *vec1, THTensor *vec2);
+
+long THTensor_numel(THTensor *t);
+void THTensor_max(THTensor *values_, THLongTensor *indices_, THTensor *t, int dimension);
+void THTensor_min(THTensor *values_, THLongTensor *indices_, THTensor *t, int dimension);
+void THTensor_sum(THTensor *r_, THTensor *t, int dimension);
+void THTensor_prod(THTensor *r_, THTensor *t, int dimension);
+void THTensor_cumsum(THTensor *r_, THTensor *t, int dimension);
+void THTensor_cumprod(THTensor *r_, THTensor *t, int dimension);
+void THTensor_sign(THTensor *r_, THTensor *t);
+accreal THTensor_trace(THTensor *t);
+void THTensor_cross(THTensor *r_, THTensor *a, THTensor *b, int dimension);
+
+void THTensor_zeros(THTensor *r_, THLongStorage *size);
+void THTensor_ones(THTensor *r_, THLongStorage *size);
+void THTensor_diag(THTensor *r_, THTensor *t, int k);
+void THTensor_eye(THTensor *r_, long n, long m);
+void THTensor_range(THTensor *r_, real xmin, real xmax, real step);
+void THTensor_randperm(THTensor *r_, long n);
+
+void THTensor_reshape(THTensor *r_, THTensor *t, THLongStorage *size);
+void THTensor_sort(THTensor *rt_, THLongTensor *ri_, THTensor *t, int dimension, int descendingOrder);
+void THTensor_tril(THTensor *r_, THTensor *t, long k);
+void THTensor_triu(THTensor *r_, THTensor *t, long k);
+void THTensor_cat(THTensor *r_, THTensor *ta, THTensor *tb, int dimension);
+
+void THTensor_ltValue(THByteTensor *r_, THTensor* t, real value);
+void THTensor_leValue(THByteTensor *r_, THTensor* t, real value);
+void THTensor_gtValue(THByteTensor *r_, THTensor* t, real value);
+void THTensor_geValue(THByteTensor *r_, THTensor* t, real value);
+void THTensor_neValue(THByteTensor *r_, THTensor* t, real value);
+void THTensor_eqValue(THByteTensor *r_, THTensor* t, real value);
+
+void THTensor_ltTensor(THByteTensor *r_, THTensor *ta, THTensor *tb);
+void THTensor_leTensor(THByteTensor *r_, THTensor *ta, THTensor *tb);
+void THTensor_gtTensor(THByteTensor *r_, THTensor *ta, THTensor *tb);
+void THTensor_geTensor(THByteTensor *r_, THTensor *ta, THTensor *tb);
+void THTensor_neTensor(THByteTensor *r_, THTensor *ta, THTensor *tb);
+void THTensor_eqTensor(THByteTensor *r_, THTensor *ta, THTensor *tb);
+]])]=], 'THTensor', 'TH' .. Tensor), 'accreal', accreal), 'real', real))
+
+   interface:print(string.format('torch.%s.torch = {}', Tensor))
+
    wrap("zero",
         cname("zero"),
         {{name=Tensor, returned=true}})
@@ -281,7 +299,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    wrap("fill",
         cname("fill"),
         {{name=Tensor, returned=true},
-         {name=real}})
+         {name='number'}})
 
    wrap("zeros",
         cname("zeros"),
@@ -303,30 +321,30 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
         cname("dot"),
         {{name=Tensor},
          {name=Tensor},
-         {name=accreal, creturned=true}})
+         {name='number', creturned=true}})
    
    wrap("add",
         cname("add"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
          {name=Tensor, method={default=1}},
-         {name=real}},
+         {name='number'}},
         cname("cadd"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
          {name=Tensor, method={default=1}},
-         {name=real, default=1},
+         {name='number', default=1},
          {name=Tensor}})
    
    wrap("mul",
         cname("mul"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
          {name=Tensor, method={default=1}},
-         {name=real}})
+         {name='number'}})
 
    wrap("div",
         cname("div"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
          {name=Tensor, method={default=1}},
-         {name=real}})
+         {name='number'}})
 
    wrap("cmul",
         cname("cmul"),
@@ -344,7 +362,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
         cname("addcmul"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
          {name=Tensor, method={default=1}},
-         {name=real, default=1},
+         {name='number', default=1},
          {name=Tensor},
          {name=Tensor}})
 
@@ -352,7 +370,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
         cname("addcdiv"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
          {name=Tensor, method={default=1}},
-         {name=real, default=1},
+         {name='number', default=1},
          {name=Tensor},
          {name=Tensor}})
 
@@ -363,20 +381,20 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
                   return table.concat(
                      {
                         arg.__metatable.init(arg),
-                        string.format("TH%s_resize1d(%s, %s->size[0]);", Tensor, arg:carg(), arg.args[5]:carg())
+                        string.format("TH.TH%s_resize1d(%s, %s.__size[0])", Tensor, arg:carg(), arg.args[5]:carg())
                      }, '\n')
                end,
           precall=function(arg)
                      return table.concat(
                         {
-                           string.format("TH%s_zero(%s);", Tensor, arg:carg()),
+                           string.format("TH.TH%s_zero(%s)", Tensor, arg:carg()),
                            arg.__metatable.precall(arg)
                         }, '\n')
                   end
        },
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=2},
          {name=Tensor, dim=1}}
      )
@@ -388,20 +406,20 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
                   return table.concat(
                      {
                         arg.__metatable.init(arg),
-                        string.format("TH%s_resize2d(%s, %s->size[0], %s->size[1]);", Tensor, arg:carg(), arg.args[5]:carg(), arg.args[6]:carg())
+                        string.format("TH.TH%s_resize2d(%s, %s.__size[0], %s.__size[1])", Tensor, arg:carg(), arg.args[5]:carg(), arg.args[6]:carg())
                      }, '\n')
                end,
           precall=function(arg)
                      return table.concat(
                         {
-                           string.format("TH%s_zero(%s);", Tensor, arg:carg()),
+                           string.format("TH.TH%s_zero(%s)", Tensor, arg:carg()),
                            arg.__metatable.precall(arg)
                         }, '\n')
                   end
        },
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=2},
          {name=Tensor, dim=2}}
      )
@@ -413,20 +431,20 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
                   return table.concat(
                      {
                         arg.__metatable.init(arg),
-                        string.format("TH%s_resize2d(%s, %s->size[0], %s->size[0]);", Tensor, arg:carg(), arg.args[5]:carg(), arg.args[6]:carg())
+                        string.format("TH.TH%s_resize2d(%s, %s.__size[0], %s.__size[0])", Tensor, arg:carg(), arg.args[5]:carg(), arg.args[6]:carg())
                      }, '\n')
                end,
           precall=function(arg)
                      return table.concat(
                         {
-                           string.format("TH%s_zero(%s);", Tensor, arg:carg()),
+                           string.format("TH.TH%s_zero(%s)", Tensor, arg:carg()),
                            arg.__metatable.precall(arg)
                         }, '\n')
                   end
        },
-        {name=real, default=1, invisible=true},
+        {name='number', default=1, invisible=true},
         {name=Tensor, default=1, invisible=true},
-        {name=real, default=1, invisible=true},
+        {name='number', default=1, invisible=true},
         {name=Tensor, dim=1},
         {name=Tensor, dim=1}}
      )
@@ -441,9 +459,9 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
       interface:wrap(f.name,
                      cname(f.name),
                      {{name=Tensor, default=true, returned=true},
-                      {name=real, default=1},
+                      {name='number', default=1},
                       {name=Tensor, dim=f.dim1},
-                      {name=real, default=1},
+                      {name='number', default=1},
                       {name=Tensor, dim=f.dim2},
                       {name=Tensor, dim=f.dim3}})
 
@@ -451,16 +469,16 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
       method:wrap(f.name,
                   cname(f.name),
                   {{name=Tensor, returned=true, dim=f.dim1},
-                   {name=real, default=1, invisible=true},
+                   {name='number', default=1, invisible=true},
                    {name=Tensor, default=1, dim=f.dim1},
-                   {name=real, default=1},
+                   {name='number', default=1},
                    {name=Tensor, dim=f.dim2},
                    {name=Tensor, dim=f.dim3}},
                   cname(f.name),
                   {{name=Tensor, returned=true, dim=f.dim1},
-                   {name=real},
+                   {name='number'},
                    {name=Tensor, default=1, dim=f.dim1},
-                   {name=real},
+                   {name='number'},
                    {name=Tensor, dim=f.dim2},
                    {name=Tensor, dim=f.dim3}})
    end
@@ -468,7 +486,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    wrap("numel",
         cname("numel"),
         {{name=Tensor},
-         {name=real, creturned=true}})
+         {name='number', creturned=true}})
 
    for _,name in ipairs({"prod", "cumsum", "cumprod"}) do
       wrap(name,
@@ -481,7 +499,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    wrap("sum",
         cname("sumall"),
         {{name=Tensor},
-         {name=accreal, creturned=true}},
+         {name='number', creturned=true}},
         cname("sum"),
         {{name=Tensor, default=true, returned=true},
          {name=Tensor},
@@ -491,7 +509,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
       wrap(name,
            cname(name .. "all"),
            {{name=Tensor},
-            {name=real, creturned=true}},
+            {name='number', creturned=true}},
            cname(name),
            {{name=Tensor, default=true, returned=true},
             {name="IndexTensor", default=true, returned=true},
@@ -502,7 +520,7 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
    wrap("trace",
         cname("trace"),
         {{name=Tensor},
-         {name=accreal, creturned=true}})
+         {name='number', creturned=true}})
    
    wrap("cross",
         cname("cross"),
@@ -515,20 +533,20 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
         cname("diag"),
         {{name=Tensor, default=true, returned=true},
          {name=Tensor},
-         {name="long", default=0}})
+         {name='number', default=0}})
    
    wrap("eye",
         cname("eye"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
-         {name="long"},
-         {name="long", default=0}})
+         {name='number'},
+         {name='number', default=0}})
    
    wrap("range",
         cname("range"),
         {{name=Tensor, default=true, returned=true, method={default='nil'}},
-         {name=real},
-         {name=real},
-         {name=real, default=1}})
+         {name='number'},
+         {name='number'},
+         {name='number', default=1}})
 
    wrap("randperm",
         cname("randperm"),
@@ -536,11 +554,11 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
           postcall=function(arg)
                       return table.concat(
                          {
-                            arg.__metatable.postcall(arg),
-                            string.format("TH%s_add(%s, %s, 1);", Tensor, arg:carg(), arg:carg())
+                            arg.__metatable.postcall(arg) or '',
+                            string.format("TH.TH%s_add(%s, %s, 1)", Tensor, arg:carg(), arg:carg())
                          }, '\n')
                    end},
-         {name="long"}})
+         {name='number'}})
 
    wrap("sort",
         cname("sort"),
@@ -554,13 +572,13 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
         cname("tril"),
         {{name=Tensor, default=true, returned=true},
          {name=Tensor},
-         {name="int", default=0}})
+         {name="number", default=0}})
 
    wrap("triu",
         cname("triu"),
         {{name=Tensor, default=true, returned=true},
          {name=Tensor},
-         {name="int", default=0}})
+         {name="number", default=0}})
 
    wrap("cat",
         cname("cat"),
@@ -569,55 +587,23 @@ for _,Tensor in ipairs({"ByteTensor", "CharTensor",
          {name=Tensor},
          {name="index", default=lastdim(2)}})
    
-   if Tensor == 'ByteTensor' then -- we declare this only once
-      interface:print(
-         [[
-static int THRandom_random2__(long a, long b)
-{
-  THArgCheck(b >= a, 2, "upper bound must be larger than lower bound");
-  return((THRandom_random() % (b+1-a)) + a);
-}
-         
-static int THRandom_random1__(long b)
-{
-  THArgCheck(b > 0, 1, "upper bound must be strictly positive");
-  return(THRandom_random() % b + 1);
-}
-         ]])
-   end
-
-   interface:print(string.gsub(
-                      [[
-static void THTensor_random2__(THTensor *self, long a, long b)
-{
-  THArgCheck(b >= a, 2, "upper bound must be larger than lower bound");
-  TH_TENSOR_APPLY(real, self, *self_data = ((THRandom_random() % (b+1-a)) + a);)
-}
-
-static void THTensor_random1__(THTensor *self, long b)
-{
-  THArgCheck(b > 0, 1, "upper bound must be strictly positive");
-  TH_TENSOR_APPLY(real, self, *self_data = (THRandom_random() % b + 1);)
-}
-]], 'Tensor', Tensor):gsub('real', real))
-
    wrap('random',
         'THRandom_random2__',
-        {{name='long'},
-         {name='long'},
-         {name='long', creturned=true}},
+        {{name='number'},
+         {name='number'},
+         {name='number', creturned=true}},
         'THRandom_random1__',
-        {{name='long'},
-         {name='long', creturned=true}},
+        {{name='number'},
+         {name='number', creturned=true}},
         'THRandom_random',
-        {{name='long', creturned=true}},
+        {{name='number', creturned=true}},
         cname("random2__"),
         {{name=Tensor, returned=true},
-         {name='long'},
-         {name='long'}},
+         {name='number'},
+         {name='number'}},
         cname("random1__"),
         {{name=Tensor, returned=true},
-         {name='long'}},
+         {name='number'}},
         cname("random"),
         {{name=Tensor, returned=true}})
 
@@ -626,11 +612,11 @@ static void THTensor_random1__(THTensor *self, long b)
       
       wrap(f.name,
            string.format("THRandom_%s", f.name),
-           {{name="double", default=f.a},
-            {name="double", creturned=true}},
+           {{name="number", default=f.a},
+            {name="number", creturned=true}},
            cname(f.name),
            {{name=Tensor, returned=true},
-            {name=real, default=f.a}})
+            {name='number', default=f.a}})
    end
 
    wrap("squeeze",
@@ -638,8 +624,9 @@ static void THTensor_random1__(THTensor *self, long b)
         {{name=Tensor, default=true, returned=true, postcall=function(arg)
                                                                 local txt = {}
                                                                 if arg.returned then
-                                                                   table.insert(txt, string.format('if(arg%d->nDimension == 1 && arg%d->size[0] == 1)', arg.i, arg.i)) -- number
-                                                                   table.insert(txt, string.format('lua_pushnumber(L, (lua_Number)(*TH%s_data(arg%d)));', Tensor, arg.i))
+                                                                   table.insert(txt, string.format('if arg%d.__nDimension == 1 and arg%d.__size[0] == 1 then', arg.i, arg.i)) -- number
+                                                                   table.insert(txt, string.format('arg%d = arg%d.__data[arg%d.__storageOffset]', arg.i, arg.i, arg.i))
+                                                                   table.insert(txt, 'end')
                                                                 end
                                                                 return table.concat(txt, '\n')
                                                              end},
@@ -648,8 +635,9 @@ static void THTensor_random1__(THTensor *self, long b)
         {{name=Tensor, default=true, returned=true, postcall=function(arg)
                                                                 local txt = {}
                                                                 if arg.returned then
-                                                                   table.insert(txt, string.format('if(arg%d->nDimension == 1 && arg%d->size[0] == 1)', arg.i, arg.i)) -- number
-                                                                   table.insert(txt, string.format('lua_pushnumber(L, (lua_Number)(*TH%s_data(arg%d)));', Tensor, arg.i))
+                                                                   table.insert(txt, string.format('if arg%d.__nDimension == 1 and arg%d.__size[0] == 1 then', arg.i, arg.i)) -- number
+                                                                   table.insert(txt, string.format('arg%d = arg%d.__data[arg%d.__storageOffset]', arg.i, arg.i, arg.i))
+                                                                   table.insert(txt, 'end')
                                                                 end
                                                                 return table.concat(txt, '\n')
                                                              end},
@@ -664,32 +652,32 @@ static void THTensor_random1__(THTensor *self, long b)
    wrap("conv2",
         cname("conv2Dmul"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=2},
          {name=Tensor, dim=2},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="C", invisible=true}},
         cname("conv2Dcmul"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=3},
          {name=Tensor, dim=3},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="C", invisible=true}},
         cname("conv2Dmv"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=3},
          {name=Tensor, dim=4},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="C", invisible=true}}
      )
@@ -697,32 +685,32 @@ static void THTensor_random1__(THTensor *self, long b)
    wrap("xcorr2",
         cname("conv2Dmul"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=2},
          {name=Tensor, dim=2},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="X", invisible=true}},
         cname("conv2Dcmul"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=3},
          {name=Tensor, dim=3},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="X", invisible=true}},
         cname("conv2Dmv"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=3},
          {name=Tensor, dim=4},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="X", invisible=true}}
      )
@@ -730,35 +718,35 @@ static void THTensor_random1__(THTensor *self, long b)
    wrap("conv3",
         cname("conv3Dmul"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=3},
          {name=Tensor, dim=3},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="C", invisible=true}},
         cname("conv3Dcmul"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=4},
          {name=Tensor, dim=4},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="C", invisible=true}},
         cname("conv3Dmv"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=4},
          {name=Tensor, dim=5},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="C", invisible=true}}
      )
@@ -766,35 +754,35 @@ static void THTensor_random1__(THTensor *self, long b)
    wrap("xcorr3",
         cname("conv3Dmul"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=3},
          {name=Tensor, dim=3},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="X", invisible=true}},
         cname("conv3Dcmul"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=4},
          {name=Tensor, dim=4},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="X", invisible=true}},
         cname("conv3Dmv"),
         {{name=Tensor, default=true, returned=true},
-         {name=real, default=0, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=0, invisible=true},
+         {name='number', default=1, invisible=true},
          {name=Tensor, dim=4},
          {name=Tensor, dim=5},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
-         {name=real, default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
+         {name='number', default=1, invisible=true},
          {name='charoption', values={'V', 'F'}, default='V'},
          {name='charoption', default="X", invisible=true}}
      )
@@ -804,7 +792,7 @@ static void THTensor_random1__(THTensor *self, long b)
            cname(name .. 'Value'),
            {{name='ByteTensor',default=true, returned=true},
             {name=Tensor},
-            {name=real}},
+            {name='number'}},
            cname(name .. 'Tensor'),
            {{name='ByteTensor',default=true, returned=true},
             {name=Tensor},
@@ -816,7 +804,7 @@ static void THTensor_random1__(THTensor *self, long b)
       wrap("mean",
            cname("meanall"),
            {{name=Tensor},
-            {name=accreal, creturned=true}},
+            {name='number', creturned=true}},
            cname("mean"),
            {{name=Tensor, default=true, returned=true},
             {name=Tensor},
@@ -826,7 +814,7 @@ static void THTensor_random1__(THTensor *self, long b)
          wrap(name,
               cname(name .. "all"),
               {{name=Tensor},
-               {name=accreal, creturned=true}},
+               {name='number', creturned=true}},
               cname(name),
               {{name=Tensor, default=true, returned=true},
                {name=Tensor},
@@ -837,41 +825,41 @@ static void THTensor_random1__(THTensor *self, long b)
            cname("histc"),
            {{name=Tensor, default=true, returned=true},
             {name=Tensor},
-            {name="long",default=100},
-            {name="double",default=0},
-            {name="double",default=0}})
+            {name='number',default=100},
+            {name="number",default=0},
+            {name="number",default=0}})
 
       wrap("norm",
            cname("normall"),
            {{name=Tensor},
-            {name=real, default=2},
-            {name=accreal, creturned=true}},
+            {name='number', default=2},
+            {name='number', creturned=true}},
            cname("norm"),
            {{name=Tensor, default=true, returned=true},
             {name=Tensor},
-            {name=real},
+            {name='number'},
             {name="index"}})
       
       wrap("dist",
            cname("dist"),
            {{name=Tensor},
             {name=Tensor},
-            {name=real, default=2},
-            {name=accreal, creturned=true}})
+            {name='number', default=2},
+            {name='number', creturned=true}})
       
       wrap("linspace",
            cname("linspace"),
            {{name=Tensor, default=true, returned=true, method={default='nil'}},
-            {name=real},
-            {name=real},
-            {name="long", default=100}})
+            {name='number'},
+            {name='number'},
+            {name='number', default=100}})
 
       wrap("logspace",
            cname("logspace"),
            {{name=Tensor, default=true, returned=true, method={default='nil'}},
-            {name=real},
-            {name=real},
-            {name="long", default=100}})
+            {name='number'},
+            {name='number'},
+            {name='number', default=100}})
       
       for _,name in ipairs({"log", "log1p", "exp",
                             "cos", "acos", "cosh",
@@ -886,8 +874,8 @@ static void THTensor_random1__(THTensor *self, long b)
               {{name=Tensor, default=true, returned=true, method={default='nil'}},
                {name=Tensor, method={default=1}}},
               name,
-              {{name=real},
-               {name=real, creturned=true}})
+              {{name='number'},
+               {name='number', creturned=true}})
          
       end
          wrap("abs",
@@ -895,8 +883,8 @@ static void THTensor_random1__(THTensor *self, long b)
               {{name=Tensor, default=true, returned=true, method={default='nil'}},
                {name=Tensor, method={default=1}}},
               "fabs",
-              {{name=real},
-               {name=real, creturned=true}})
+              {{name='number'},
+               {name='number', creturned=true}})
 
       wrap("atan2",
            cname("atan2"),
@@ -904,20 +892,20 @@ static void THTensor_random1__(THTensor *self, long b)
             {name=Tensor, method={default=1}},
             {name=Tensor}},
            "atan2",
-           {{name=real},
-            {name=real},
-            {name=real, creturned=true}}
+           {{name='number'},
+            {name='number'},
+            {name='number', creturned=true}}
             )
 
       wrap("pow",
            cname("pow"),
            {{name=Tensor, default=true, returned=true, method={default='nil'}},
             {name=Tensor, method={default=1}},
-            {name=real}},
+            {name='number'}},
            "pow",
-           {{name=real},
-            {name=real},
-            {name=real, creturned=true}})
+           {{name='number'},
+            {name='number'},
+            {name='number', creturned=true}})
 
       wrap("rand",
            cname("rand"),
@@ -936,24 +924,24 @@ static void THTensor_random1__(THTensor *self, long b)
          
          wrap(f.name,
               string.format("THRandom_%s", f.name),
-              {{name="double", default=f.a},
-               {name="double", default=f.b},
-               {name="double", creturned=true}},
+              {{name="number", default=f.a},
+               {name="number", default=f.b},
+               {name="number", creturned=true}},
               cname(f.name),
               {{name=Tensor, returned=true},
-               {name=real, default=f.a},
-               {name=real, default=f.b}})
+               {name='number', default=f.a},
+               {name='number', default=f.b}})
       end
 
       for _,f in ipairs({{name='exponential'}}) do
          
          wrap(f.name,
               string.format("THRandom_%s", f.name),
-              {{name="double", default=f.a},
-               {name="double", creturned=true}},
+              {{name="number", default=f.a},
+               {name="number", creturned=true}},
               cname(f.name),
               {{name=Tensor, returned=true},
-               {name=real, default=f.a}})
+               {name='number', default=f.a}})
       end
       
       for _,name in ipairs({"gesv","gels"}) do
@@ -1023,44 +1011,10 @@ static void THTensor_random1__(THTensor *self, long b)
       
    end
 
-   method:register(string.format("m_torch_%sMath__", Tensor))
    interface:print(method:tostring())
    method:clearhistory()
-   interface:register(string.format("torch_%sMath__", Tensor))
 
-   interface:print(string.gsub([[
-static void torch_TensorMath_init(lua_State *L)
-{
-  luaT_pushmetatable(L, "torch.Tensor");
-
-  /* register methods */
-  luaL_register(L, NULL, m_torch_TensorMath__);
-
-  /* register functions into the "torch" field of the tensor metaclass */
-  lua_pushstring(L, "torch");
-  lua_newtable(L);
-  luaL_register(L, NULL, torch_TensorMath__);
-  lua_rawset(L, -3);
-  lua_pop(L, 1);
-}
-]], 'Tensor', Tensor))
 end
-
-interface:dispatchregister("torch_TensorMath__")
-
-interface:print([[
-void torch_TensorMath_init(lua_State *L)
-{
-  torch_ByteTensorMath_init(L);
-  torch_CharTensorMath_init(L);
-  torch_ShortTensorMath_init(L);
-  torch_IntTensorMath_init(L);
-  torch_LongTensorMath_init(L);
-  torch_FloatTensorMath_init(L);
-  torch_DoubleTensorMath_init(L);
-  luaL_register(L, NULL, torch_TensorMath__);
-}
-]])
 
 if arg[1] then
    interface:tofile(arg[1])

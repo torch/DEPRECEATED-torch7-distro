@@ -18,8 +18,12 @@ MACRO(ADD_TORCH_PACKAGE package src luasrc)
     INSTALL(TARGETS ${package} 
       RUNTIME DESTINATION ${Torch_INSTALL_LUA_CPATH_SUBDIR}
       LIBRARY DESTINATION ${Torch_INSTALL_LUA_CPATH_SUBDIR})
-    
-  ENDIF(src)
+
+  ELSE()
+    IF(NOT TARGET ${package})
+      ADD_CUSTOM_TARGET(${package} DEPENDS ${luasrc})
+    ENDIF()
+  ENDIF()
   
   ### lua sources
   IF(luasrc)

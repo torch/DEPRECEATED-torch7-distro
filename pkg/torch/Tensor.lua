@@ -92,6 +92,7 @@ local function readtensorsizestride(arg)
 end
 
 local mt = {
+   __typename = "torch.Tensor",
 
    size = function(self)
              return TH.THTensor_size(self.core)
