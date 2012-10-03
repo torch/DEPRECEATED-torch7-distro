@@ -33,7 +33,9 @@ void THTensor_squeeze1d(THTensor *self, THTensor *src, int dimension_);
 int THTensor_isContiguous(const THTensor *self);
 long THTensor_nElement(const THTensor *self);
 
+void THTensor_retain(THTensor *self);
 void THTensor_free(THTensor *self);
+void THTensor_freeCopyTo(THTensor *self, THTensor *dst);
 
 real THTensor_get1d(const THTensor *tensor, long x0);
 real THTensor_get2d(const THTensor *tensor, long x0, long x1);
@@ -130,7 +132,13 @@ local mt = {
                 end,
 
    storage = function(self)
-                return self.__storage[0] -- DEBUG: what about retaining here?
+                local storage = self.__storage[0]
+                TH.THStorage_retain(storage)
+                ffi.gc(storage, function(self)
+                             print('freeing storage -- in tensor')
+                             TH.THStorage_free(self)
+                          end)
+                return storage
              end,
 
    storageOffset = function(self)
@@ -161,7 +169,10 @@ local mt = {
             local arg = {...}
             local storage, offset, size, stride = readtensorsizestride(arg)
             self = TH.THTensor_newWithStorage(storage, offset, size, stride)[0]
-            ffi.gc(self, TH.THTensor_free)
+            ffi.gc(self, function(self)
+                            print('freeing tensor')
+                            TH.THTensor_free(self)
+                         end)
             return self
          end
 }

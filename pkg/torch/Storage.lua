@@ -18,6 +18,7 @@ real THStorage_get(const THStorage* storage, long idx);
 void THStorage_set(const THStorage* storage, long idx, real value);
 void THStorage_resize(THStorage* storage, long size);
 void THStorage_free(THStorage *storage);
+void THStorage_retain(THStorage *storage);
 
 ]])
 
@@ -61,7 +62,10 @@ local mt = {
             else
                error('invalid arguments')
             end
-            ffi.gc(self, TH.THStorage_free)
+            ffi.gc(self, function(self)
+                            print('freeing storage')
+                            TH.THStorage_free(self)
+                         end)
             return self
          end
 }
@@ -84,7 +88,8 @@ ffi.metatype("THStorage", {__index=function(self, k)
                                          else
                                             error('index out of bounds')
                                          end
-                                      end})
+                                      end,
+                        })
 
 torch.Storage = {}
 setmetatable(torch.Storage, {__index=mt,
