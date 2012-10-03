@@ -173,6 +173,16 @@ local mt = {
                return t
             end,
 
+   t = function(self)
+          assert(tonumber(self.__nDimension) == 2, 'tensor must be a 2d matrix')
+          local t = TH.THTensor_newTranspose(self, 0, 1)
+          ffi.gc(t, function(self)
+                       print('freeing tensor -- transpose')
+                       TH.THTensor_free(self)
+                    end)
+          return t
+       end,
+
    new = function(...)
             local self
             local arg = {...}

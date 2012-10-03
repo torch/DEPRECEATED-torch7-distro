@@ -6,6 +6,7 @@ torch = {}
 
 -- load TH and setup error handlers
 local TH = ffi.load('/Users/ronan/usr7/lib/libTH.dylib')
+torch.TH = TH
 
 ffi.cdef([[
 void THSetErrorHandler( void (*torchErrorHandlerFunction)(const char *msg) );
