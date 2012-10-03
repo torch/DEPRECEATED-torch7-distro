@@ -463,7 +463,6 @@ QLuaApplication::Private::processArguments(int argc, char **argv)
 {
   bool has_e = false;
   bool has_v = false;
-  bool has_i = false;
   bool stdinmode = false;
 
   // Obtain and lock lua
@@ -499,7 +498,7 @@ QLuaApplication::Private::processArguments(int argc, char **argv)
             break;
           else if (s[2]) 
             return printBadOption(s);
-          has_i = interactive = ttyConsole = true;
+          interactive = ttyConsole = true;
           theConsole->setCtrlCHandler(QLuaConsole::ctrlCBreak);
           theConsole->setPrintCapturedOutput(true);
           break;

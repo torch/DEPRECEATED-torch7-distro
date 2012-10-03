@@ -769,7 +769,7 @@ void
 QLuaConsole::Private::command(Command c)
 {
   char command = (char)c;
-  ::write(commandPipe[1], &command, 1);
+  (void) ::write(commandPipe[1], &command, 1);
 }
 
 

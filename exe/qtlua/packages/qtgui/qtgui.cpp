@@ -1731,7 +1731,6 @@ qpen_fromtable(lua_State *L)
       QMetaEnum m_penstyle = f_enumerator("PenStyle");
       QMetaEnum m_capstyle = f_enumerator("PenCapStyle");
       QMetaEnum m_joinstyle = f_enumerator("PenJoinStyle");
-      QMetaEnum m_style = f_enumerator("BrushStyle");
       const int t_color = QMetaType::QColor;
       const int t_brush = QMetaType::QBrush;
       if (f_optflag(L, 1, "style", m_penstyle))
