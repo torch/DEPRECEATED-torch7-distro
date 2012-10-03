@@ -164,6 +164,15 @@ local mt = {
                return self
             end,
 
+   select = function(self, dim, slice)
+               local t = TH.THTensor_newSelect(self, dim-1, slice-1)[0]
+               ffi.gc(t, function(self)
+                            print('freeing tensor -- select')
+                            TH.THTensor_free(self)
+                         end)
+               return t
+            end,
+
    new = function(...)
             local self
             local arg = {...}
@@ -182,7 +191,12 @@ ffi.metatype("THTensor", {__index=function(self, k)
                                         if self.__nDimension == 1 then
                                            return tonumber(TH.THTensor_get1d(self, k-1))
                                         elseif self.__nDimension > 1 then
-                                           return TH.THTensor_newSelect(self, 0, k-1)
+                                           local t = TH.THTensor_newSelect(self, 0, k-1)
+                                           ffi.gc(t, function(self)
+                                                        print('freeing tensor -- []')
+                                                        TH.THTensor_free(self)
+                                                     end)
+                                           return t
                                         else
                                            error('empty tensor')
                                         end
