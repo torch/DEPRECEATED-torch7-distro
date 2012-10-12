@@ -106,12 +106,13 @@ end
 -- this new print is much more verbose, automatically recursing through
 -- lua tables, and objects.
 local print_new
-function print(obj,...)
-   if obj == nil and select('#',...) == 0 then
+function print(...)
+   if select('#',...) == 0 then
       _G.io.write('\n')
       _G.io.flush()
       return
    end
+   local obj = ...
    if _G.type(obj) == 'table' then
       local mt = _G.getmetatable(obj)
       if mt and mt.__tostring__ then
@@ -150,9 +151,9 @@ function print(obj,...)
    else
       _G.io.write(_G.tostring(obj))
    end
-   if _G.select('#',...) > 0 then
+   if _G.select('#',...) > 1 then
       _G.io.write('    ')
-      print_new(...)
+      print_new(select(2,...))
    else
       _G.io.write('\n')
    end
