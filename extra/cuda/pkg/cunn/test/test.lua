@@ -10,6 +10,36 @@ local cunntestx = {}
 
 torch.setdefaulttensortype('torch.FloatTensor')
 
+function cunntest.copies()
+   -- test vector   
+   local t = torch.CudaTensor(100,10)
+
+   -- simple copy
+   t:normal()
+   t2 = t:clone()
+   mytester:asserteq( t:add(-1,t2):abs():max(), 0, 'simple copy')
+
+   -- transpose copy
+   t:normal()
+   t3 = t:transpose(1,2)
+   t4 = t3:clone()
+   mytester:asserteq( t3:add(-1,t4):abs():max(), 0, 'transpose copy')
+   
+   -- unfold copy
+   t:normal()
+   t5 = t:unfold(2,5,1)
+   t6 = t5:clone()
+   mytester:asserteq( t5:add(-1,t6):abs():max(), 0, 'transpose copy')
+   
+   -- host copy
+   t = torch.FloatTensor(100,10)
+   t:normal()
+   local tc = t:cuda()
+   tc = tc:transpose(1,2)
+   local t2 = tc:float()
+   mytester:asserteq(t:transpose(1,2):add(-1,t2):abs():max(), 0, 'host copy, plus transpoe')
+end
+
 function cunntest.SpatialConvolution_forward()
    local from = math.random(1,64)
    local to = math.random(1,64)
