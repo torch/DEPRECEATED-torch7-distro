@@ -228,9 +228,6 @@ static int cunn_SpatialSubSampling_updateOutput(lua_State *L)
     dim3 blocks(nInputPlane,yblocks);
     dim3 threads(32,8);
 
-    // sync
-    cudaDeviceSynchronize();
-
     // run subsample kernel
     subsample <<<blocks, threads>>> (input_data, output_data, weight_data, bias_data,
                                      nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
@@ -256,16 +253,12 @@ static int cunn_SpatialSubSampling_updateOutput(lua_State *L)
     dim3 blocks(nInputPlane*nbatch,yblocks);
     dim3 threads(32,8);
 
-    // sync
-    cudaDeviceSynchronize();
-
     // run subsample kernel
     subsample <<<blocks, threads>>> (input_data, output_data, weight_data, bias_data,
                                      nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
   }
 
-  // sync & clean
-  cudaDeviceSynchronize();
+  // clean
   THCudaTensor_free(input);
 
   // check for errors
@@ -311,9 +304,6 @@ static int cunn_SpatialSubSampling_updateGradInput(lua_State *L)
     dim3 blocks(nInputPlane,yblocks);
     dim3 threads(32,8);
 
-    // sync
-    cudaDeviceSynchronize();
-
     // run updateGradInput kernel
     subgradinput <<<blocks, threads>>> (gradInput_data, gradOutput_data, weight_data,
                                         nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
@@ -336,16 +326,10 @@ static int cunn_SpatialSubSampling_updateGradInput(lua_State *L)
     dim3 blocks(nInputPlane*nbatch,yblocks);
     dim3 threads(32,8);
 
-    // sync
-    cudaDeviceSynchronize();
-
     // run updateGradInput kernel
     subgradinput <<<blocks, threads>>> (gradInput_data, gradOutput_data, weight_data,
                                         nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW);
   }
-
-  // sync & clean
-  cudaDeviceSynchronize();
 
   // check for errors
   cudaError_t err = cudaGetLastError();
@@ -389,9 +373,6 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
     dim3 blocks(nInputPlane);
     dim3 threads(32,8);
 
-    // sync
-    cudaDeviceSynchronize();
-
     // run gradweight kernel
     subgradweight <<<blocks, threads>>> (input_data, gradOutput_data, gradWeight_data, gradBias_data,
                                          nInputPlane, nInputRows, nInputCols, kH, kW, dH, dW, scale);
@@ -412,9 +393,6 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
     dim3 blocks(nInputPlane);
     dim3 threads(32,8);
 
-    // sync
-    cudaDeviceSynchronize();
-
     // run gradweight kernel
     long sl;
     for (sl=0; sl<nbatch; sl++) {
@@ -425,8 +403,7 @@ static int cunn_SpatialSubSampling_accGradParameters(lua_State *L)
     }
   }
 
-  // sync & clean
-  cudaDeviceSynchronize();
+  // clean
   THCudaTensor_free(input);
 
   // check for errors

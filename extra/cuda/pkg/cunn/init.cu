@@ -14,6 +14,7 @@
 #include "SpatialConvolution.cu"
 #include "SpatialConvolutionMap.cu"
 #include "SpatialSubSampling.cu"
+#include "SpatialMaxPooling.cu"
 #include "Square.cu"
 #include "Sqrt.cu"
 #include "MultiMarginCriterion.cu"
@@ -29,6 +30,7 @@ DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
   cunn_TemporalConvolution_init(L);
   cunn_SpatialConvolution_init(L);
   cunn_SpatialConvolutionMap_init(L);
+  cunn_SpatialMaxPooling_init(L);
   cunn_SpatialSubSampling_init(L);
   cunn_MultiMarginCriterion_init(L);
   cunn_Square_init(L);
