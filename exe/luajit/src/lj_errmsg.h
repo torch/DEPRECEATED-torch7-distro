@@ -102,7 +102,11 @@ ERRDEF(STRFMTW,	"invalid format (width or precision too long)")
 ERRDEF(STRGSRV,	"invalid replacement value (a %s)")
 ERRDEF(BADMODN,	"name conflict for module " LUA_QS)
 #if LJ_HASJIT
+#if LJ_TARGET_X86ORX64
 ERRDEF(NOJIT,	"JIT compiler disabled, CPU does not support SSE2")
+#else
+ERRDEF(NOJIT,	"JIT compiler disabled")
+#endif
 #elif defined(LJ_ARCH_NOJIT)
 ERRDEF(NOJIT,	"no JIT compiler for this architecture (yet)")
 #else
@@ -111,6 +115,7 @@ ERRDEF(NOJIT,	"JIT compiler permanently disabled by build option")
 ERRDEF(JITOPT,	"unknown or malformed optimization flag " LUA_QS)
 
 /* Lexer/parser errors. */
+ERRDEF(XMODE,	"attempt to load chunk with wrong mode")
 ERRDEF(XNEAR,	"%s near " LUA_QS)
 ERRDEF(XELEM,	"lexical element too long")
 ERRDEF(XLINES,	"chunk has too many lines")
@@ -130,7 +135,9 @@ ERRDEF(XLIMF,	"function at line %d has more than %d %s")
 ERRDEF(XMATCH,	LUA_QS " expected (to close " LUA_QS " at line %d)")
 ERRDEF(XFIXUP,	"function too long for return fixup")
 ERRDEF(XPARAM,	"<name> or " LUA_QL("...") " expected")
+#if !LJ_52
 ERRDEF(XAMBIG,	"ambiguous syntax (function call x new statement)")
+#endif
 ERRDEF(XFUNARG,	"function arguments expected")
 ERRDEF(XSYMBOL,	"unexpected symbol")
 ERRDEF(XDOTS,	"cannot use " LUA_QL("...") " outside a vararg function")
@@ -144,7 +151,6 @@ ERRDEF(XGSCOPE,	"<goto %s> jumps into the scope of local " LUA_QS)
 /* Bytecode reader errors. */
 ERRDEF(BCFMT,	"cannot load incompatible bytecode")
 ERRDEF(BCBAD,	"cannot load malformed bytecode")
-ERRDEF(BCHEAD,	"attempt to load bytecode with extra header")
 
 #if LJ_HASFFI
 /* FFI errors. */

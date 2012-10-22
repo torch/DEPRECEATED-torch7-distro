@@ -23,9 +23,6 @@
 #include "lj_frame.h"
 #include "lj_trace.h"
 #include "lj_vm.h"
-#include "lj_lex.h"
-#include "lj_bcdump.h"
-#include "lj_parse.h"
 #include "lj_strscan.h"
 
 /* -- Common helper functions --------------------------------------------- */
@@ -1106,6 +1103,9 @@ LUA_API int lua_yield(lua_State *L, int nresults)
 	while (--nresults >= 0) copyTV(L, t++, f++);
 	L->top = t;
       }
+      L->cframe = NULL;
+      L->status = LUA_YIELD;
+      return -1;
     } else {  /* Yield from hook: add a pseudo-frame. */
       TValue *top = L->top;
       hook_leave(g);
@@ -1115,14 +1115,14 @@ LUA_API int lua_yield(lua_State *L, int nresults)
       setframe_gc(top+2, obj2gco(L));
       setframe_ftsz(top+2, (int)((char *)(top+3)-(char *)L->base)+FRAME_CONT);
       L->top = L->base = top+3;
-    }
 #if LJ_TARGET_X64
-    lj_err_throw(L, LUA_YIELD);
+      lj_err_throw(L, LUA_YIELD);
 #else
-    L->cframe = NULL;
-    L->status = LUA_YIELD;
-    lj_vm_unwind_c(cf, LUA_YIELD);
+      L->cframe = NULL;
+      L->status = LUA_YIELD;
+      lj_vm_unwind_c(cf, LUA_YIELD);
 #endif
+    }
   }
   lj_err_msg(L, LJ_ERR_CYIELD);
   return 0;  /* unreachable */
@@ -1136,47 +1136,6 @@ LUA_API int lua_resume(lua_State *L, int nargs)
   setstrV(L, L->top, lj_err_str(L, LJ_ERR_COSUSP));
   incr_top(L);
   return LUA_ERRRUN;
-}
-
-/* -- Load and dump Lua code ---------------------------------------------- */
-
-static TValue *cpparser(lua_State *L, lua_CFunction dummy, void *ud)
-{
-  LexState *ls = (LexState *)ud;
-  GCproto *pt;
-  GCfunc *fn;
-  UNUSED(dummy);
-  cframe_errfunc(L->cframe) = -1;  /* Inherit error function. */
-  pt = lj_lex_setup(L, ls) ? lj_bcread(ls) : lj_parse(ls);
-  fn = lj_func_newL_empty(L, pt, tabref(L->env));
-  /* Don't combine above/below into one statement. */
-  setfuncV(L, L->top++, fn);
-  return NULL;
-}
-
-LUA_API int lua_load(lua_State *L, lua_Reader reader, void *data,
-		     const char *chunkname)
-{
-  LexState ls;
-  int status;
-  ls.rfunc = reader;
-  ls.rdata = data;
-  ls.chunkarg = chunkname ? chunkname : "?";
-  lj_str_initbuf(&ls.sb);
-  status = lj_vm_cpcall(L, NULL, &ls, cpparser);
-  lj_lex_cleanup(L, &ls);
-  lj_gc_check(L);
-  return status;
-}
-
-LUA_API int lua_dump(lua_State *L, lua_Writer writer, void *data)
-{
-  cTValue *o = L->top-1;
-  api_checknelems(L, 1);
-  if (tvisfunc(o) && isluafunc(funcV(o)))
-    return lj_bcwrite(L, funcproto(funcV(o)), writer, data, 0);
-  else
-    return 1;
 }
 
 /* -- GC and memory management -------------------------------------------- */

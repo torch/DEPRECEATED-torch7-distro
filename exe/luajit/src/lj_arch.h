@@ -131,6 +131,7 @@
 #define LJ_TARGET_EHRETREG	0
 #define LJ_TARGET_MASKSHIFT	1
 #define LJ_TARGET_MASKROT	1
+#define LJ_TARGET_UNALIGNED	1
 #define LJ_ARCH_NUMMODE		LJ_NUMMODE_SINGLE_DUAL
 
 #elif LUAJIT_TARGET == LUAJIT_ARCH_X64
@@ -145,6 +146,7 @@
 #define LJ_TARGET_JUMPRANGE	31	/* +-2^31 = +-2GB */
 #define LJ_TARGET_MASKSHIFT	1
 #define LJ_TARGET_MASKROT	1
+#define LJ_TARGET_UNALIGNED	1
 #define LJ_ARCH_NUMMODE		LJ_NUMMODE_SINGLE_DUAL
 
 #elif LUAJIT_TARGET == LUAJIT_ARCH_ARM
@@ -388,8 +390,12 @@
 #define LJ_64			1
 #endif
 
+#ifndef LJ_TARGET_UNALIGNED
+#define LJ_TARGET_UNALIGNED	0
+#endif
+
 /* Various workarounds for embedded operating systems. */
-#if defined(__ANDROID__) || defined(__symbian__)
+#if (defined(__ANDROID__) && !defined(LJ_TARGET_X86ORX64)) || defined(__symbian__)
 #define LUAJIT_NO_LOG2
 #endif
 #if defined(__symbian__)

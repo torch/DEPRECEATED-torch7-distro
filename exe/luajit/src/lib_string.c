@@ -20,6 +20,7 @@
 #include "lj_err.h"
 #include "lj_str.h"
 #include "lj_tab.h"
+#include "lj_meta.h"
 #include "lj_state.h"
 #include "lj_ff.h"
 #include "lj_bcdump.h"
@@ -85,22 +86,48 @@ LJLIB_ASM(string_sub)		LJLIB_REC(string_range 1)
 LJLIB_ASM(string_rep)
 {
   GCstr *s = lj_lib_checkstr(L, 1);
-  int32_t len = (int32_t)s->len;
   int32_t k = lj_lib_checkint(L, 2);
-  int64_t tlen = (int64_t)k * len;
+  GCstr *sep = lj_lib_optstr(L, 3);
+  int32_t len = (int32_t)s->len;
+  global_State *g = G(L);
+  int64_t tlen;
   const char *src;
   char *buf;
-  if (k <= 0) return FFH_RETRY;
-  if (tlen > LJ_MAX_STR)
-    lj_err_caller(L, LJ_ERR_STROV);
-  buf = lj_str_needbuf(L, &G(L)->tmpbuf, (MSize)tlen);
-  if (len <= 1) return FFH_RETRY;  /* ASM code only needed buffer resize. */
+  if (k <= 0) {
+  empty:
+    setstrV(L, L->base-1, &g->strempty);
+    return FFH_RES(1);
+  }
+  if (sep) {
+    tlen = (int64_t)len + sep->len;
+    if (tlen > LJ_MAX_STR)
+      lj_err_caller(L, LJ_ERR_STROV);
+    tlen *= k;
+    if (tlen > LJ_MAX_STR)
+      lj_err_caller(L, LJ_ERR_STROV);
+  } else {
+    tlen = (int64_t)k * len;
+    if (tlen > LJ_MAX_STR)
+      lj_err_caller(L, LJ_ERR_STROV);
+  }
+  if (tlen == 0) goto empty;
+  buf = lj_str_needbuf(L, &g->tmpbuf, (MSize)tlen);
   src = strdata(s);
+  if (sep) {
+    tlen -= sep->len;  /* Ignore trailing separator. */
+    if (k > 1) {  /* Paste one string and one separator. */
+      int32_t i;
+      i = 0; while (i < len) *buf++ = src[i++];
+      src = strdata(sep); len = sep->len;
+      i = 0; while (i < len) *buf++ = src[i++];
+      src = g->tmpbuf.buf; len += s->len; k--;  /* Now copy that k-1 times. */
+    }
+  }
   do {
     int32_t i = 0;
     do { *buf++ = src[i++]; } while (i < len);
   } while (--k > 0);
-  setstrV(L, L->base-1, lj_str_new(L, G(L)->tmpbuf.buf, (size_t)tlen));
+  setstrV(L, L->base-1, lj_str_new(L, g->tmpbuf.buf, (size_t)tlen));
   return FFH_RES(1);
 }
 
@@ -487,10 +514,16 @@ static int str_find_aux(lua_State *L, int find)
   const char *s = luaL_checklstring(L, 1, &l1);
   const char *p = luaL_checklstring(L, 2, &l2);
   ptrdiff_t init = posrelat(luaL_optinteger(L, 3, 1), l1) - 1;
-  if (init < 0)
+  if (init < 0) {
     init = 0;
-  else if ((size_t)(init) > l1)
+  } else if ((size_t)(init) > l1) {
+#if LJ_52
+    setnilV(L->top-1);
+    return 1;
+#else
     init = (ptrdiff_t)l1;
+#endif
+  }
   if (find && (lua_toboolean(L, 4) ||  /* explicit request? */
       strpbrk(p, SPECIALS) == NULL)) {  /* or no special characters? */
     /* do a plain search */
@@ -766,6 +799,41 @@ static unsigned LUA_INTFRM_T num2uintfrm(lua_State *L, int arg)
   }
 }
 
+static GCstr *meta_tostring(lua_State *L, int arg)
+{
+  TValue *o = L->base+arg-1;
+  cTValue *mo;
+  lua_assert(o < L->top);  /* Caller already checks for existence. */
+  if (LJ_LIKELY(tvisstr(o)))
+    return strV(o);
+  if (!tvisnil(mo = lj_meta_lookup(L, o, MM_tostring))) {
+    copyTV(L, L->top++, mo);
+    copyTV(L, L->top++, o);
+    lua_call(L, 1, 1);
+    L->top--;
+    if (tvisstr(L->top))
+      return strV(L->top);
+    o = L->base+arg-1;
+    copyTV(L, o, L->top);
+  }
+  if (tvisnumber(o)) {
+    return lj_str_fromnumber(L, o);
+  } else if (tvisnil(o)) {
+    return lj_str_newlit(L, "nil");
+  } else if (tvisfalse(o)) {
+    return lj_str_newlit(L, "false");
+  } else if (tvistrue(o)) {
+    return lj_str_newlit(L, "true");
+  } else {
+    if (tvisfunc(o) && isffunc(funcV(o)))
+      lj_str_pushf(L, "function: builtin#%d", funcV(o)->c.ffid);
+    else
+      lj_str_pushf(L, "%s: %p", lj_typename(o), lua_topointer(L, arg));
+    L->top--;
+    return strV(L->top);
+  }
+}
+
 LJLIB_CF(string_format)
 {
   int arg = 1, top = (int)(L->top - L->base);
@@ -826,7 +894,7 @@ LJLIB_CF(string_format)
 	luaL_addvalue(&b);
 	continue;
       case 's': {
-	GCstr *str = lj_lib_checkstr(L, arg);
+	GCstr *str = meta_tostring(L, arg);
 	if (!strchr(form, '.') && str->len >= 100) {
 	  /* no precision and string is too long to be formatted;
 	     keep original string */

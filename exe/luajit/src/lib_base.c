@@ -68,6 +68,56 @@ LJLIB_PUSH("number")
 LJLIB_ASM_(type)		LJLIB_REC(.)
 /* Recycle the lj_lib_checkany(L, 1) from assert. */
 
+/* -- Base library: iterators --------------------------------------------- */
+
+/* This solves a circular dependency problem -- change FF_next_N as needed. */
+LJ_STATIC_ASSERT((int)FF_next == FF_next_N);
+
+LJLIB_ASM(next)
+{
+  lj_lib_checktab(L, 1);
+  return FFH_UNREACHABLE;
+}
+
+#if LJ_52 || LJ_HASFFI
+static int ffh_pairs(lua_State *L, MMS mm)
+{
+  TValue *o = lj_lib_checkany(L, 1);
+  cTValue *mo = lj_meta_lookup(L, o, mm);
+  if ((LJ_52 || tviscdata(o)) && !tvisnil(mo)) {
+    L->top = o+1;  /* Only keep one argument. */
+    copyTV(L, L->base-1, mo);  /* Replace callable. */
+    return FFH_TAILCALL;
+  } else {
+    if (!tvistab(o)) lj_err_argt(L, 1, LUA_TTABLE);
+    setfuncV(L, o-1, funcV(lj_lib_upvalue(L, 1)));
+    if (mm == MM_pairs) setnilV(o+1); else setintV(o+1, 0);
+    return FFH_RES(3);
+  }
+}
+#else
+#define ffh_pairs(L, mm)	(lj_lib_checktab(L, 1), FFH_UNREACHABLE)
+#endif
+
+LJLIB_PUSH(lastcl)
+LJLIB_ASM(pairs)
+{
+  return ffh_pairs(L, MM_pairs);
+}
+
+LJLIB_NOREGUV LJLIB_ASM(ipairs_aux)	LJLIB_REC(.)
+{
+  lj_lib_checktab(L, 1);
+  lj_lib_checkint(L, 2);
+  return FFH_UNREACHABLE;
+}
+
+LJLIB_PUSH(lastcl)
+LJLIB_ASM(ipairs)		LJLIB_REC(.)
+{
+  return ffh_pairs(L, MM_ipairs);
+}
+
 /* -- Base library: getters and setters ----------------------------------- */
 
 LJLIB_ASM_(getmetatable)	LJLIB_REC(.)
@@ -148,6 +198,20 @@ LJLIB_CF(rawequal)		LJLIB_REC(.)
   setboolV(L->top-1, lj_obj_equal(o1, o2));
   return 1;
 }
+
+#if LJ_52
+LJLIB_CF(rawlen)		LJLIB_REC(.)
+{
+  cTValue *o = L->base;
+  int32_t len;
+  if (L->top > o && tvisstr(o))
+    len = (int32_t)strV(o)->len;
+  else
+    len = (int32_t)lj_tab_len(lj_lib_checktab(L, 1));
+  setintV(L->top-1, len);
+  return 1;
+}
+#endif
 
 LJLIB_CF(unpack)
 {
@@ -256,7 +320,7 @@ LJLIB_ASM(tostring)		LJLIB_REC(.)
       s = strV(lj_lib_upvalue(L, -(int32_t)itype(o)));
     } else {
       if (tvisfunc(o) && isffunc(funcV(o)))
-	lua_pushfstring(L, "function: fast#%d", funcV(o)->c.ffid);
+	lua_pushfstring(L, "function: builtin#%d", funcV(o)->c.ffid);
       else
 	lua_pushfstring(L, "%s: %p", lj_typename(o), lua_topointer(L, 1));
       /* Note: lua_pushfstring calls the GC which may invalidate o. */
@@ -265,56 +329,6 @@ LJLIB_ASM(tostring)		LJLIB_REC(.)
     setstrV(L, L->base-1, s);
     return FFH_RES(1);
   }
-}
-
-/* -- Base library: iterators --------------------------------------------- */
-
-/* This solves a circular dependency problem -- change FF_next_N as needed. */
-LJ_STATIC_ASSERT((int)FF_next == FF_next_N);
-
-LJLIB_ASM(next)
-{
-  lj_lib_checktab(L, 1);
-  return FFH_UNREACHABLE;
-}
-
-#if LJ_52 || LJ_HASFFI
-static int ffh_pairs(lua_State *L, MMS mm)
-{
-  TValue *o = lj_lib_checkany(L, 1);
-  cTValue *mo = lj_meta_lookup(L, o, mm);
-  if ((LJ_52 || tviscdata(o)) && !tvisnil(mo)) {
-    L->top = o+1;  /* Only keep one argument. */
-    copyTV(L, L->base-1, mo);  /* Replace callable. */
-    return FFH_TAILCALL;
-  } else {
-    if (!tvistab(o)) lj_err_argt(L, 1, LUA_TTABLE);
-    setfuncV(L, o-1, funcV(lj_lib_upvalue(L, 1)));
-    if (mm == MM_pairs) setnilV(o+1); else setintV(o+1, 0);
-    return FFH_RES(3);
-  }
-}
-#else
-#define ffh_pairs(L, mm)	(lj_lib_checktab(L, 1), FFH_UNREACHABLE)
-#endif
-
-LJLIB_PUSH(lastcl)
-LJLIB_ASM(pairs)
-{
-  return ffh_pairs(L, MM_pairs);
-}
-
-LJLIB_NOREGUV LJLIB_ASM(ipairs_aux)	LJLIB_REC(.)
-{
-  lj_lib_checktab(L, 1);
-  lj_lib_checkint(L, 2);
-  return FFH_UNREACHABLE;
-}
-
-LJLIB_PUSH(lastcl)
-LJLIB_ASM(ipairs)		LJLIB_REC(.)
-{
-  return ffh_pairs(L, MM_ipairs);
 }
 
 /* -- Base library: throw and catch errors -------------------------------- */
@@ -341,28 +355,31 @@ LJLIB_ASM_(xpcall)		LJLIB_REC(.)
 
 /* -- Base library: load Lua code ----------------------------------------- */
 
-static int load_aux(lua_State *L, int status)
+static int load_aux(lua_State *L, int status, int envarg)
 {
-  if (status == 0)
+  if (status == 0) {
+    if (tvistab(L->base+envarg-1)) {
+      GCfunc *fn = funcV(L->top-1);
+      GCtab *t = tabV(L->base+envarg-1);
+      setgcref(fn->c.env, obj2gco(t));
+      lj_gc_objbarrier(L, fn, t);
+    }
     return 1;
-  copyTV(L, L->top, L->top-1);
-  setnilV(L->top-1);
-  L->top++;
-  return 2;
-}
-
-LJLIB_CF(loadstring)
-{
-  GCstr *s = lj_lib_checkstr(L, 1);
-  GCstr *name = lj_lib_optstr(L, 2);
-  return load_aux(L,
-	   luaL_loadbuffer(L, strdata(s), s->len, strdata(name ? name : s)));
+  } else {
+    setnilV(L->top-2);
+    return 2;
+  }
 }
 
 LJLIB_CF(loadfile)
 {
   GCstr *fname = lj_lib_optstr(L, 1);
-  return load_aux(L, luaL_loadfile(L, fname ? strdata(fname) : NULL));
+  GCstr *mode = lj_lib_optstr(L, 2);
+  int status;
+  lua_settop(L, 3);  /* Ensure env arg exists. */
+  status = luaL_loadfilex(L, fname ? strdata(fname) : NULL,
+			  mode ? strdata(mode) : NULL);
+  return load_aux(L, status, 3);
 }
 
 static const char *reader_func(lua_State *L, void *ud, size_t *size)
@@ -376,8 +393,8 @@ static const char *reader_func(lua_State *L, void *ud, size_t *size)
     *size = 0;
     return NULL;
   } else if (tvisstr(L->top) || tvisnumber(L->top)) {
-    copyTV(L, L->base+2, L->top);  /* Anchor string in reserved stack slot. */
-    return lua_tolstring(L, 3, size);
+    copyTV(L, L->base+4, L->top);  /* Anchor string in reserved stack slot. */
+    return lua_tolstring(L, 5, size);
   } else {
     lj_err_caller(L, LJ_ERR_RDRSTR);
     return NULL;
@@ -386,14 +403,26 @@ static const char *reader_func(lua_State *L, void *ud, size_t *size)
 
 LJLIB_CF(load)
 {
-  GCstr *name;
-  if (L->base < L->top && (tvisstr(L->base) || tvisnumber(L->base)))
-    return lj_cf_loadstring(L);
-  lj_lib_checkfunc(L, 1);
-  name = lj_lib_optstr(L, 2);
-  lua_settop(L, 3);  /* Reserve a slot for the string from the reader. */
-  return load_aux(L,
-	   lua_load(L, reader_func, NULL, name ? strdata(name) : "=(load)"));
+  GCstr *name = lj_lib_optstr(L, 2);
+  GCstr *mode = lj_lib_optstr(L, 3);
+  int status;
+  if (L->base < L->top && (tvisstr(L->base) || tvisnumber(L->base))) {
+    GCstr *s = lj_lib_checkstr(L, 1);
+    lua_settop(L, 4);  /* Ensure env arg exists. */
+    status = luaL_loadbufferx(L, strdata(s), s->len, strdata(name ? name : s),
+			      mode ? strdata(mode) : NULL);
+  } else {
+    lj_lib_checkfunc(L, 1);
+    lua_settop(L, 5);  /* Reserve a slot for the string from the reader. */
+    status = lua_loadx(L, reader_func, NULL, name ? strdata(name) : "=(load)",
+		       mode ? strdata(mode) : NULL);
+  }
+  return load_aux(L, status, 4);
+}
+
+LJLIB_CF(loadstring)
+{
+  return lj_cf_load(L);
 }
 
 LJLIB_CF(dofile)
