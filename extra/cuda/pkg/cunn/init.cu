@@ -19,6 +19,7 @@
 #include "Sqrt.cu"
 #include "MultiMarginCriterion.cu"
 #include "MSECriterion.cu"
+#include "Threshold.cu"
 
 DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
 {
@@ -35,6 +36,7 @@ DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
   cunn_MultiMarginCriterion_init(L);
   cunn_Square_init(L);
   cunn_Sqrt_init(L);
+  cunn_Threshold_init(L);
   cunn_MSECriterion_init(L);
 
   return 1;
