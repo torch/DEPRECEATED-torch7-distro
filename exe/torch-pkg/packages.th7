@@ -222,3 +222,10 @@ pkg.fftw = {
    dependencies = {},
    commit = 'master',
 }
+
+pkg.torchffi = {
+   git = 'https://github.com/clementfarabet/torchffi',
+   description = 'Enables FFI bindings for Torch (requires LuaJIT)',
+   dependencies = {},
+   commit = 'master'
+}
