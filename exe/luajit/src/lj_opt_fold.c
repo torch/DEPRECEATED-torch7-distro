@@ -492,7 +492,7 @@ LJFOLD(STRREF KGC KINT)
 LJFOLDF(kfold_strref)
 {
   GCstr *str = ir_kstr(fleft);
-  lua_assert((MSize)fright->i < str->len);
+  lua_assert((MSize)fright->i <= str->len);
   return lj_ir_kkptr(J, (char *)strdata(str) + fright->i);
 }
 
@@ -596,6 +596,20 @@ LJFOLD(CONV KINT IRCONV_NUM_U32)
 LJFOLDF(kfold_conv_kintu32_num)
 {
   return lj_ir_knum(J, (lua_Number)(uint32_t)fleft->i);
+}
+
+LJFOLD(CONV KINT IRCONV_INT_I8)
+LJFOLD(CONV KINT IRCONV_INT_U8)
+LJFOLD(CONV KINT IRCONV_INT_I16)
+LJFOLD(CONV KINT IRCONV_INT_U16)
+LJFOLDF(kfold_conv_kint_ext)
+{
+  int32_t k = fleft->i;
+  if ((fins->op2 & IRCONV_SRCMASK) == IRT_I8) k = (int8_t)k;
+  else if ((fins->op2 & IRCONV_SRCMASK) == IRT_U8) k = (uint8_t)k;
+  else if ((fins->op2 & IRCONV_SRCMASK) == IRT_I16) k = (int16_t)k;
+  else k = (uint16_t)k;
+  return INTFOLD(k);
 }
 
 LJFOLD(CONV KINT IRCONV_I64_INT)
@@ -1786,7 +1800,7 @@ LJFOLDF(merge_eqne_snew_kgc)
   int32_t len = (int32_t)kstr->len;
   lua_assert(irt_isstr(fins->t));
 
-#if LJ_TARGET_X86ORX64
+#if LJ_TARGET_UNALIGNED
 #define FOLD_SNEW_MAX_LEN	4  /* Handle string lengths 0, 1, 2, 3, 4. */
 #define FOLD_SNEW_TYPE8		IRT_I8	/* Creates shorter immediates. */
 #else
@@ -1992,6 +2006,7 @@ LJFOLDF(fload_cdata_typeid_kgc)
 
 /* Get the contents of immutable cdata objects. */
 LJFOLD(FLOAD KGC IRFL_CDATA_PTR)
+LJFOLD(FLOAD KGC IRFL_CDATA_INT)
 LJFOLD(FLOAD KGC IRFL_CDATA_INT64)
 LJFOLDF(fload_cdata_int64_kgc)
 {

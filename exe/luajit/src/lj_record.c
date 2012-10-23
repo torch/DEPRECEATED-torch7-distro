@@ -969,6 +969,16 @@ static void rec_mm_comp(jit_State *J, RecordIndex *ix, int op)
   copyTV(J->L, &ix->tabv, &ix->valv);
   while (1) {
     MMS mm = (op & 2) ? MM_le : MM_lt;  /* Try __le + __lt or only __lt. */
+#if LJ_52
+    if (!lj_record_mm_lookup(J, ix, mm)) {  /* Lookup mm on 1st operand. */
+      ix->tab = ix->key;
+      copyTV(J->L, &ix->tabv, &ix->keyv);
+      if (!lj_record_mm_lookup(J, ix, mm))  /* Lookup mm on 2nd operand. */
+	goto nomatch;
+    }
+    rec_mm_callcomp(J, ix, op);
+    return;
+#else
     if (lj_record_mm_lookup(J, ix, mm)) {  /* Lookup mm on 1st operand. */
       cTValue *bv;
       TRef mo1 = ix->mobj;
@@ -992,8 +1002,9 @@ static void rec_mm_comp(jit_State *J, RecordIndex *ix, int op)
       rec_mm_callcomp(J, ix, op);
       return;
     }
+#endif
   nomatch:
-    /* First lookup failed. Retry with  __lt and swapped operands. */
+    /* Lookup failed. Retry with  __lt and swapped operands. */
     if (!(op & 2)) break;  /* Already at __lt. Interpreter will throw. */
     ix->tab = ix->key; ix->key = ix->val; ix->val = ix->tab;
     copyTV(J->L, &ix->tabv, &ix->keyv);
@@ -1292,6 +1303,8 @@ static int rec_upvalue_constify(jit_State *J, GCupval *uvp)
       }
       return 0;
     }
+#else
+    UNUSED(J);
 #endif
     if (!(tvistab(o) || tvisudata(o) || tvisthread(o)))
       return 1;
@@ -1641,11 +1654,21 @@ void lj_record_ins(jit_State *J)
     case LJ_POST_FIXBOOL:
       if (!tvistruecond(&J2G(J)->tmptv2)) {
 	BCReg s;
+	TValue *tv = J->L->base;
 	for (s = 0; s < J->maxslot; s++)  /* Fixup stack slot (if any). */
-	  if (J->base[s] == TREF_TRUE && tvisfalse(&J->L->base[s])) {
+	  if (J->base[s] == TREF_TRUE && tvisfalse(&tv[s])) {
 	    J->base[s] = TREF_FALSE;
 	    break;
 	  }
+      }
+      break;
+    case LJ_POST_FIXCONST:
+      {
+	BCReg s;
+	TValue *tv = J->L->base;
+	for (s = 0; s < J->maxslot; s++)  /* Constify stack slots (if any). */
+	  if (J->base[s] == TREF_NIL && !tvisnil(&tv[s]))
+	    J->base[s] = lj_record_constify(J, &tv[s]);
       }
       break;
     case LJ_POST_FFRETRY:  /* Suppress recording of retried fast function. */
@@ -1740,6 +1763,8 @@ void lj_record_ins(jit_State *J)
 	  ta = IRT_NUM;
 	} else if (ta == IRT_NUM && tc == IRT_INT) {
 	  rc = emitir(IRTN(IR_CONV), rc, IRCONV_NUM_INT);
+	} else if (LJ_52) {
+	  ta = IRT_NIL;  /* Force metamethod for different types. */
 	} else if (!((ta == IRT_FALSE || ta == IRT_TRUE) &&
 		     (tc == IRT_FALSE || tc == IRT_TRUE))) {
 	  break;  /* Interpreter will throw for two different types. */
@@ -1783,12 +1808,10 @@ void lj_record_ins(jit_State *J)
       int diff;
       rec_comp_prep(J);
       diff = lj_record_objcmp(J, ra, rc, rav, rcv);
-      if (diff == 1 && (tref_istab(ra) || tref_isudata(ra))) {
-	/* Only check __eq if different, but the same type (table or udata). */
+      if (diff == 2 || !(tref_istab(ra) || tref_isudata(ra)))
+	rec_comp_fixup(J, J->pc, ((int)op & 1) == !diff);
+      else if (diff == 1)  /* Only check __eq if different, but same type. */
 	rec_mm_equal(J, &ix, (int)op);
-	break;
-      }
-      rec_comp_fixup(J, J->pc, ((int)op & 1) == !diff);
     }
     break;
 

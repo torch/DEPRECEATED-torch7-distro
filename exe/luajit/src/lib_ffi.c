@@ -587,7 +587,7 @@ LJLIB_CF(ffi_istype)	LJLIB_REC(.)
   return 1;
 }
 
-LJLIB_CF(ffi_sizeof)
+LJLIB_CF(ffi_sizeof)	LJLIB_REC(ffi_xof FF_ffi_sizeof)
 {
   CTState *cts = ctype_cts(L);
   CTypeID id = ffi_checkctype(L, cts, NULL);
@@ -609,7 +609,7 @@ LJLIB_CF(ffi_sizeof)
   return 1;
 }
 
-LJLIB_CF(ffi_alignof)
+LJLIB_CF(ffi_alignof)	LJLIB_REC(ffi_xof FF_ffi_alignof)
 {
   CTState *cts = ctype_cts(L);
   CTypeID id = ffi_checkctype(L, cts, NULL);
@@ -619,7 +619,7 @@ LJLIB_CF(ffi_alignof)
   return 1;
 }
 
-LJLIB_CF(ffi_offsetof)
+LJLIB_CF(ffi_offsetof)	LJLIB_REC(ffi_xof FF_ffi_offsetof)
 {
   CTState *cts = ctype_cts(L);
   CTypeID id = ffi_checkctype(L, cts, NULL);
@@ -762,7 +762,7 @@ LJLIB_CF(ffi_metatype)
 
 LJLIB_PUSH(top-7) LJLIB_SET(!)  /* Store reference to finalizer table. */
 
-LJLIB_CF(ffi_gc)
+LJLIB_CF(ffi_gc)	LJLIB_REC(.)
 {
   GCcdata *cd = ffi_checkcdata(L, 1);
   TValue *fin = lj_lib_checkany(L, 2);

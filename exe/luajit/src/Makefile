@@ -96,9 +96,10 @@ XCFLAGS=
 # make use of it.
 #XCFLAGS+= -DLUAJIT_DISABLE_FFI
 #
-# Enable some upwards-compatible features from Lua 5.2 that are unlikely
-# to break existing code (e.g. __pairs). Note that this does not provide
-# full compatibility with Lua 5.2 at this time.
+# Features from Lua 5.2 that are unlikely to break existing code are
+# enabled by default. Some other features that *might* break some existing
+# code (e.g. __pairs or os.execute() return values) can be enabled here.
+# Note: this does not provide full compatibility with Lua 5.2 at this time.
 #XCFLAGS+= -DLUAJIT_ENABLE_LUA52COMPAT
 #
 # Disable the JIT compiler, i.e. turn LuaJIT into a pure interpreter.
@@ -447,7 +448,7 @@ LJLIB_C= $(LJLIB_O:.o=.c)
 LJCORE_O= lj_gc.o lj_err.o lj_char.o lj_bc.o lj_obj.o \
 	  lj_str.o lj_tab.o lj_func.o lj_udata.o lj_meta.o lj_debug.o \
 	  lj_state.o lj_dispatch.o lj_vmevent.o lj_vmmath.o lj_strscan.o \
-	  lj_api.o lj_lex.o lj_parse.o lj_bcread.o lj_bcwrite.o \
+	  lj_api.o lj_lex.o lj_parse.o lj_bcread.o lj_bcwrite.o lj_load.o \
 	  lj_ir.o lj_opt_mem.o lj_opt_fold.o lj_opt_narrow.o \
 	  lj_opt_dce.o lj_opt_loop.o lj_opt_split.o lj_opt_sink.o \
 	  lj_mcode.o lj_snap.o lj_record.o lj_crecord.o lj_ffrecord.o \

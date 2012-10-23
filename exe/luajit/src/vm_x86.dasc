@@ -443,6 +443,7 @@ static void build_subroutines(BuildCtx *ctx)
   |
   |->vm_returnc:
   |  add RD, 1				// RD = nresults+1
+  |  jz ->vm_unwind_yield
   |  mov MULTRES, RD
   |  test PC, FRAME_TYPE
   |  jz ->BC_RET_Z			// Handle regular return to Lua.
@@ -525,6 +526,10 @@ static void build_subroutines(BuildCtx *ctx)
   |  call extern lj_state_growstack@8	// (lua_State *L, int n)
   |  mov BASE, L:RB->top		// Need the (realloced) L->top in BASE.
   |  jmp <3
+  |
+  |->vm_unwind_yield:
+  |  mov al, LUA_YIELD
+  |  jmp ->vm_unwind_c_eh
   |
   |->vm_unwind_c@8:			// Unwind C stack, return from vm_pcall.
   |  // (void *cframe, int errcode)
@@ -2045,7 +2050,12 @@ static void build_subroutines(BuildCtx *ctx)
   |.else
   |.ffunc_n math_sqrt; fsqrt; jmp ->fff_resn
   |.endif
-  |.ffunc_n math_log, fldln2;	fyl2x;		jmp ->fff_resn
+  |
+  |.ffunc math_log
+  |  cmp NARGS:RD, 1+1; jne ->fff_fallback	// Exactly one argument.
+  |  cmp dword [BASE+4], LJ_TISNUM; jae ->fff_fallback
+  |  fldln2; fld qword [BASE]; fyl2x; jmp ->fff_resn
+  |
   |.ffunc_n math_log10, fldlg2;	fyl2x;		jmp ->fff_resn
   |.ffunc_n math_exp;	call ->vm_exp_x87;	jmp ->fff_resn
   |
@@ -2432,8 +2442,9 @@ static void build_subroutines(BuildCtx *ctx)
   |  xor RC, RC				// Zero length. Any ptr in RB is ok.
   |  jmp <4
   |
-  |.ffunc_2 string_rep			// Only handle the 1-char case inline.
+  |.ffunc string_rep			// Only handle the 1-char case inline.
   |  ffgccheck
+  |  cmp NARGS:RD, 2+1; jne ->fff_fallback	// Exactly 2 arguments.
   |  cmp dword [BASE+4], LJ_TSTR;  jne ->fff_fallback
   |  cmp dword [BASE+12], LJ_TISNUM
   |  mov STR:RB, [BASE]
@@ -3156,6 +3167,29 @@ static void build_subroutines(BuildCtx *ctx)
   |  fsubp st1
   |  ret
   |.endif
+  |
+  |// FP log2(x). Called by math.log(x, base).
+  |->vm_log2:
+  |.if X64WIN
+  |  movsd qword [rsp+8], xmm0		// Use scratch area.
+  |  fld1
+  |  fld qword [rsp+8]
+  |  fyl2x
+  |  fstp qword [rsp+8]
+  |  movsd xmm0, qword [rsp+8]
+  |.elif X64
+  |  movsd qword [rsp-8], xmm0		// Use red zone.
+  |  fld1
+  |  fld qword [rsp-8]
+  |  fyl2x
+  |  fstp qword [rsp-8]
+  |  movsd xmm0, qword [rsp-8]
+  |.else
+  |  fld1
+  |  fld qword [esp+4]
+  |  fyl2x
+  |.endif
+  |  ret
   |
   |// FP exponentiation e^x and 2^x. Called by math.exp fast function and
   |// from JIT code. Arg/ret on x87 stack. No int/xmm regs modified.

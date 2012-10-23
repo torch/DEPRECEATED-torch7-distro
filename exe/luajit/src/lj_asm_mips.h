@@ -231,7 +231,7 @@ static void asm_gencall(ASMState *as, const CCallInfo *ci, IRRef *args)
   if ((void *)ci->func)
     emit_call(as, (void *)ci->func);
   for (gpr = REGARG_FIRSTGPR; gpr <= REGARG_LASTGPR; gpr++)
-    as->cost[gpr] = REGCOST(~0u, 0u);
+    as->cost[gpr] = REGCOST(~0u, ASMREF_L);
   gpr = REGARG_FIRSTGPR;
   for (n = 0; n < nargs; n++) {  /* Setup args. */
     IRRef ref = args[n];
@@ -1827,6 +1827,8 @@ static void asm_ir(ASMState *as, IRIns *ir)
       break;
     if (ir->op2 <= IRFPM_TRUNC)
       asm_callround(as, ir, IRCALL_lj_vm_floor + ir->op2);
+    else if (ir->op2 == IRFPM_SQRT)
+      asm_fpunary(as, ir, MIPSI_SQRT_D);
     else
       asm_callid(as, ir, IRCALL_lj_vm_floor + ir->op2);
     break;

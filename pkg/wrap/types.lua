@@ -109,9 +109,11 @@ wrap.argtypes.IndexTensor = {
 
    read = function(arg, idx)
              local txt = {}
-             table.insert(txt, string.format("THLongTensor_add(arg%d, arg%d, -1);", arg.i, arg.i));
+             if not arg.noreadadd then
+                table.insert(txt, string.format("THLongTensor_add(arg%d, arg%d, -1);", arg.i, arg.i));
+             end
              if arg.returned then
-                return table.insert(txt, string.format("arg%d_idx = %d;", arg.i, idx))
+                table.insert(txt, string.format("arg%d_idx = %d;", arg.i, idx))
              end
              return table.concat(txt, '\n')
           end,
