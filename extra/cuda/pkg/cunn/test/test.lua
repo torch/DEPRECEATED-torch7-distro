@@ -40,6 +40,66 @@ function cunntest.copies()
    mytester:asserteq(t:transpose(1,2):add(-1,t2):abs():max(), 0, 'host copy, plus transpoe')
 end
 
+function cunntest.Tanh_forward()
+   local size = math.random(1,100)
+
+   local tm = {}
+   local title = string.format('Sigmoid forward %d -> %d', size, size)
+   times[title] = tm
+
+   local input = torch.randn(size)
+   local sconv = nn.Tanh(size)
+   local groundtruth = sconv:forward(input)
+   local a = torch.Timer()
+   for i = 1,nloop do
+      groundtruth = sconv:forward(input)
+   end
+   tm.cpu = a:time().real
+
+   input = input:cuda()
+   local gconv = nn.Tanh(size):cuda()
+   local rescuda = gconv:forward(input)
+   a:reset()
+   for i = 1,nloop do
+      rescuda = gconv:forward(input)
+   end
+   cutorch.synchronize()
+   tm.gpu = a:time().real
+
+   local error = rescuda:float() - groundtruth
+   mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
+end
+
+function cunntest.Sigmoid_forward()
+   local size = math.random(1,100)
+
+   local tm = {}
+   local title = string.format('Sigmoid forward %d -> %d', size, size)
+   times[title] = tm
+
+   local input = torch.randn(size)
+   local sconv = nn.Sigmoid(size)
+   local groundtruth = sconv:forward(input)
+   local a = torch.Timer()
+   for i = 1,nloop do
+      groundtruth = sconv:forward(input)
+   end
+   tm.cpu = a:time().real
+
+   input = input:cuda()
+   local gconv = nn.Sigmoid(size):cuda()
+   local rescuda = gconv:forward(input)
+   a:reset()
+   for i = 1,nloop do
+      rescuda = gconv:forward(input)
+   end
+   cutorch.synchronize()
+   tm.gpu = a:time().real
+
+   local error = rescuda:float() - groundtruth
+   mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
+end
+
 function cunntest.SpatialConvolution_forward()
    local from = math.random(1,64)
    local to = math.random(1,64)

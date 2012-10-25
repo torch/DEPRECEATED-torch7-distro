@@ -20,12 +20,14 @@
 #include "MultiMarginCriterion.cu"
 #include "MSECriterion.cu"
 #include "Threshold.cu"
+#include "Sigmoid.cu"
 
 DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
 {
   lua_newtable(L);
 
   cunn_Tanh_init(L);
+  cunn_Sigmoid_init(L);
   cunn_HardTanh_init(L);
   cunn_LogSoftMax_init(L);
   cunn_TemporalConvolution_init(L);
