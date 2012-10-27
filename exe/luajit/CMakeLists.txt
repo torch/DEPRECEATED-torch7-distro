@@ -236,6 +236,7 @@ add_buildvm_target ( lj_bcdef.h  bcdef  ${SRC_LJLIB} )
 add_buildvm_target ( lj_folddef.h folddef src/lj_opt_fold.c )
 add_buildvm_target ( lj_recdef.h  recdef  ${SRC_LJLIB} )
 add_buildvm_target ( lj_libdef.h  libdef  ${SRC_LJLIB} )
+add_buildvm_target ( vmdef.lua  vmdef  ${SRC_LJLIB} )
 
 SET(DEPS 
   ${LJ_VM_SRC}
@@ -244,6 +245,7 @@ SET(DEPS
   ${CMAKE_CURRENT_BINARY_DIR}/lj_libdef.h
   ${CMAKE_CURRENT_BINARY_DIR}/lj_recdef.h
   ${CMAKE_CURRENT_BINARY_DIR}/lj_folddef.h 
+  ${CMAKE_CURRENT_BINARY_DIR}/vmdef.lua
   )
                   
 ## COMPILE
@@ -281,3 +283,8 @@ SET(LUA_INCLUDE_DIR
   ${CMAKE_CURRENT_BINARY_DIR}
   ${READLINE_INCLUDE_DIR})
 CONFIGURE_FILE(cmake/LuaConfig.cmake.in "${Lua_INSTALL_FINDLUA_DIR}/FindLua.cmake")
+
+INSTALL(FILES
+  src/jit/bc.lua src/jit/v.lua src/jit/dump.lua src/jit/dis_x86.lua src/jit/dis_x64.lua src/jit/dis_arm.lua
+  src/jit/dis_ppc.lua src/jit/dis_mips.lua src/jit/dis_mipsel.lua src/jit/bcsave.lua ${CMAKE_CURRENT_BINARY_DIR}/vmdef.lua
+  DESTINATION "${Lua_INSTALL_LUA_PATH_SUBDIR}/jit")
