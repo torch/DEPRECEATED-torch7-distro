@@ -216,9 +216,18 @@ elseif command == 'install' then
 
    function doit(package)
       local pkg = packages[package]
+
       if not pkg then
-         error('could not find package ' .. package .. ' in any of the registered repos')
-         os.exit()
+         if package:find('http') then
+            pkg = {
+               git = package,
+               commit = 'master',
+               dependencies = {}
+            }
+         else
+            error('could not find package ' .. package .. ' in any of the registered repos')
+            os.exit()
+         end
       end
       if pkg.done then
          info('skipping package: ' .. package .. ', already installed')
