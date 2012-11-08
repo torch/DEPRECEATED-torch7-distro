@@ -415,11 +415,18 @@ elseif command == 'deploy' then
       end
       info('deploying package in ' .. found)
       exec(cd .. paths.concat(found,'build') .. '; ' .. make .. '; ' .. install)
-   elseif luapack.isvalid(nil, found) then
-      luapack.install(nil, found)
    else
-      error('not a valid package, please specify a path to a valid package')
-      os.exit()
+      local pkgname = arguments[2]
+      if not pkgname then
+         infoarg('warning: for cmake-free lua packages you might want to pass a package name as second argument')
+         infoarg('warning: [usage: torch-pkg deploy [package source path] [package name]]')
+      end
+      if luapack.isvalid(pkgname, found) then
+         luapack.install(pkgname, found)
+      else
+         error('not a valid package, please specify a path to a valid package')
+         os.exit()
+      end
    end
 
 elseif command == 'list' then
