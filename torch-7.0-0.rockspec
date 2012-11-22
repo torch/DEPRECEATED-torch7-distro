@@ -6,20 +6,24 @@ source = {
 }
 
 description = {
-  summary = "Torch 7",
+  summary = "Torch",
   detailed = [[
-Torch 7: a Matlab-like numeric framework for Lua.  
-]],
+Torch7 provides a Matlab-like environment for state-of-the-art machine
+learning algorithms. 
+It is easy to use and provides a very efficient implementation, thanks 
+to an easy and fast scripting language (Lua) and a underlying C 
+implementation.
+  ]],
   homepage = "http://www.torch.ch",
   license = "MIT/X11"
 }
 
 dependencies = {
-  "lua == 5.1"
+  "lua >= 5.1"
 }
 
 build = {
   type = "cmake",
-  variables = {LUA_DIR="$(LUADIR)", LIB_DIR="$(LIBDIR)"}
+  variables = {LUAROCKS_PREFIX="$(PREFIX)"}
 }
 
