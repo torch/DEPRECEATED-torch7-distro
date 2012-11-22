@@ -15,7 +15,7 @@ to an easy and fast scripting language (Lua) and a underlying C
 implementation.
   ]],
   homepage = "http://www.torch.ch",
-  license = "MIT/X11"
+  license = "BSD"
 }
 
 dependencies = {
