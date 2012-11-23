@@ -2,7 +2,8 @@ package = "torch"
 version = "7.0-0"
 
 source = {
-  url = "https://github.com/andresy/torch.git"
+  url = "https://github.com/andresy/torch.git",
+  tag = '7.0-0'
 }
 
 description = {
