@@ -25,6 +25,9 @@ dependencies = {
 
 build = {
   type = "cmake",
-  variables = {LUAROCKS_PREFIX="$(PREFIX)"}
+  variables = {
+    LUAROCKS_PREFIX="$(PREFIX)",
+    WITH_LUA_JIT="$(WITH_LUA_JIT)"
+  }
 }
 
