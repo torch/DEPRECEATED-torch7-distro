@@ -170,6 +170,17 @@ positive infinity results in <tt>"inf"</tt> and negative infinity results
 in <tt>"-inf"</tt>.
 </p>
 
+<h3 id="tonumber"><tt>tonumber()</tt> etc. use builtin string to number conversion</h3>
+<p>
+All string-to-number conversions consistently convert integer and
+floating-point inputs in decimal and hexadecimal on all platforms.
+<tt>strtod()</tt> is <em>not</em> used anymore, which avoids numerous
+problems with poor C library implementations. The builtin conversion
+function provides full precision according to the IEEE-754 standard, it
+works independently of the current locale and it supports hex floating-point
+numbers (e.g. <tt>0x1.5p-3</tt>).
+</p>
+
 <h3 id="string_dump"><tt>string.dump(f [,strip])</tt> generates portable bytecode</h3>
 <p>
 An extra argument has been added to <tt>string.dump()</tt>. If set to
@@ -198,7 +209,7 @@ implementation which uses the platform-specific ANSI rand().
 The PRNG generates the same sequences from the same seeds on all
 platforms and makes use of all bits in the seed argument.
 <tt>math.random()</tt> without arguments generates 52 pseudo-random bits
-for every call. The result is uniformly distributed between 0 and 1.
+for every call. The result is uniformly distributed between 0.0 and 1.0.
 It's correctly scaled up and rounded for <tt>math.random(n&nbsp;[,m])</tt> to
 preserve uniformity.
 </p>
@@ -222,18 +233,10 @@ the corresponding metamethod (e.g. <tt>"__index"</tt>).
 
 <h2 id="resumable">Fully Resumable VM</h2>
 <p>
-The LuaJIT 2.x VM is fully resumable. This means you can yield from a
+The LuaJIT VM is fully resumable. This means you can yield from a
 coroutine even across contexts, where this would not possible with
 the standard Lua&nbsp;5.1 VM: e.g. you can yield across <tt>pcall()</tt>
 and <tt>xpcall()</tt>, across iterators and across metamethods.
-</p>
-<p>
-Note however that LuaJIT 2.x doesn't use
-<a href="http://coco.luajit.org/"><span class="ext">&raquo;</span>&nbsp;Coco</a> anymore. This means the
-overhead for creating coroutines is much smaller and no extra
-C&nbsp;stacks need to be allocated. OTOH you can no longer yield
-across arbitrary C&nbsp;functions. Keep this in mind when
-upgrading from LuaJIT 1.x.
 </p>
 
 <h2 id="lua52">Extensions from Lua 5.2</h2>
