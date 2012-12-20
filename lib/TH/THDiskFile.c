@@ -25,7 +25,63 @@ const char *THDiskFile_name(THFile *self)
 }
 
 
-#define READ_WRITE_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM) \
+#ifdef __APPLE__
+#define READ_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)    \
+  static long THDiskFile_read##TYPEC(THFile *self, TYPE *data, long n)  \
+  {                                                                     \
+    THDiskFile *dfself = (THDiskFile*)(self);                           \
+    long nread = 0L;                                                    \
+                                                                        \
+    THArgCheck(dfself->handle != NULL, 1, "attempt to use a closed file"); \
+    THArgCheck(dfself->file.isReadable, 1, "attempt to read in a write-only file"); \
+                                                                        \
+    if(dfself->file.isBinary)                                           \
+    {                                                                   \
+      while(nread < n && !dfself->file.hasError && !feof(dfself->handle))\
+      {                                                                 \
+        long nn = (INT_MAX)/sizeof(TYPE);                               \
+        if (n-nread <= nn)                                              \
+        {                                                               \
+          nn = n-nread;                                                 \
+          long sread = fread(data, sizeof(TYPE), nn, dfself->handle);   \
+          nread += sread;                                               \
+          if(!dfself->isNativeEncoding && (sizeof(TYPE) > 1) && (sread > 0))  \
+            THDiskFile_reverseMemory(data, data, sizeof(TYPE), sread);  \
+        }                                                               \
+        else                                                            \
+        {                                                               \
+          long sread = THDiskFile_read##TYPEC(self,data,nn);            \
+          nread += sread;                                               \
+          data += nn;                                                   \
+        }                                                               \
+      }                                                                 \
+    }                                                                   \
+    else                                                                \
+    {                                                                   \
+      long i;                                                           \
+      for(i = 0; i < n; i++)                                            \
+      {                                                                 \
+        ASCII_READ_ELEM; /* increment here result and break if wrong */ \
+      }                                                                 \
+      if(dfself->file.isAutoSpacing && (n > 0))                         \
+      {                                                                 \
+        int c = fgetc(dfself->handle);                                  \
+        if( (c != '\n') && (c != EOF) )                                 \
+          ungetc(c, dfself->handle);                                    \
+      }                                                                 \
+    }                                                                   \
+                                                                        \
+    if(nread != n)                                                      \
+    {                                                                   \
+      dfself->file.hasError = 1; /* shouldn't we put hasError to 0 all the time ? */ \
+      if(!dfself->file.isQuiet)                                         \
+        THError("read error: read %d blocks instead of %d", nread, n);  \
+    }                                                                   \
+                                                                        \
+    return nread;                                                       \
+  }                                                                     
+#else
+#define READ_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)    \
   static long THDiskFile_read##TYPEC(THFile *self, TYPE *data, long n)  \
   {                                                                     \
     THDiskFile *dfself = (THDiskFile*)(self);                           \
@@ -63,7 +119,10 @@ const char *THDiskFile_name(THFile *self)
     }                                                                   \
                                                                         \
     return nread;                                                       \
-  }                                                                     \
+  }                                                                     
+#endif
+
+#define WRITE_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)   \
                                                                         \
   static long THDiskFile_write##TYPEC(THFile *self, TYPE *data, long n) \
   {                                                                     \
@@ -113,7 +172,11 @@ const char *THDiskFile_name(THFile *self)
     }                                                                   \
                                                                         \
     return nwrite;                                                      \
-}
+  }                                                                     
+
+#define READ_WRITE_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)  \
+  READ_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)              \
+  WRITE_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)             
 
 static int THDiskFile_mode(const char *mode, int *isReadable, int *isWritable)
 {
