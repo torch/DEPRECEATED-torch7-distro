@@ -26,7 +26,7 @@ const char *THDiskFile_name(THFile *self)
 
 
 #ifdef __APPLE__
-#define READ_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)    \
+#define READ_METHODS(TYPE, TYPEC, ASCII_READ_ELEM)                      \
   static long THDiskFile_read##TYPEC(THFile *self, TYPE *data, long n)  \
   {                                                                     \
     THDiskFile *dfself = (THDiskFile*)(self);                           \
@@ -81,7 +81,7 @@ const char *THDiskFile_name(THFile *self)
     return nread;                                                       \
   }                                                                     
 #else
-#define READ_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)    \
+#define READ_METHODS(TYPE, TYPEC, ASCII_READ_ELEM)                      \
   static long THDiskFile_read##TYPEC(THFile *self, TYPE *data, long n)  \
   {                                                                     \
     THDiskFile *dfself = (THDiskFile*)(self);                           \
@@ -122,7 +122,7 @@ const char *THDiskFile_name(THFile *self)
   }                                                                     
 #endif
 
-#define WRITE_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)   \
+#define WRITE_METHODS(TYPE, TYPEC, ASCII_WRITE_ELEM)                    \
                                                                         \
   static long THDiskFile_write##TYPEC(THFile *self, TYPE *data, long n) \
   {                                                                     \
@@ -175,8 +175,8 @@ const char *THDiskFile_name(THFile *self)
   }                                                                     
 
 #define READ_WRITE_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)  \
-  READ_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)              \
-  WRITE_METHODS(TYPE, TYPEC, ASCII_READ_ELEM, ASCII_WRITE_ELEM)             
+  READ_METHODS(TYPE, TYPEC, ASCII_READ_ELEM)                                \
+  WRITE_METHODS(TYPE, TYPEC, ASCII_WRITE_ELEM)             
 
 static int THDiskFile_mode(const char *mode, int *isReadable, int *isWritable)
 {
