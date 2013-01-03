@@ -142,7 +142,7 @@ pkg.debugger = {
 pkg.unsup = {
    git = 'https://github.com/koraykv/unsup',
    description = 'Toolbox for unsupervised learning',
-   dependencies = {'kex','optim'},
+   dependencies = {'optim'},
    commit = 'master',
 }
 
