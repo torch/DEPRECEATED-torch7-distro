@@ -658,8 +658,8 @@ void THTensor_(range)(THTensor *r_, real xmin, real xmax, real step)
   long size;
   real i = 0;
 
-  THArgCheck(step > 0, 3, "step must be a positive number");
-  THArgCheck(xmax > xmin, 2, "upper bound must be larger than lower bound");
+  THArgCheck(step > 0 || step < 0, 3, "step must be a non-null number");
+  THArgCheck((step > 0) && (xmax >= xmin) || (step < 0) && (xmax <= xmin), 2, "upper bound and larger bound incoherent with step sign");
 
   size = (long)((xmax-xmin)/step+1);
   
@@ -1107,30 +1107,43 @@ void THTensor_(linspace)(THTensor *r_, real a, real b, long n)
 {
   real i = 0;
 
-  THArgCheck(n > 0, 3, "invalid number of points");
+  THArgCheck(n > 1 || (n == 1 && (a == b)), 3, "invalid number of points");
   THArgCheck(a <= b, 2, "end range should be greater than start range");
   
   THTensor_(resize1d)(r_, n);
 
-  TH_TENSOR_APPLY(real, r_,
-                  *r__data = a + i*(b-a)/((real)(n-1));
-                  i++;
-    );
+  if(n == 1) {
+     TH_TENSOR_APPLY(real, r_,
+             *r__data = a;
+             i++;
+           );
+  } else {
+     TH_TENSOR_APPLY(real, r_,
+             *r__data = a + i*(b-a)/((real)(n-1));
+             i++;
+           );
+  }
 }
 
 void THTensor_(logspace)(THTensor *r_, real a, real b, long n)
 {
   real i = 0;
 
-  THArgCheck(n > 0, 3, "invalid number of points");
+  THArgCheck(n > 1 || (n == 1 && (a == b)), 3, "invalid number of points");
   THArgCheck(a <= b, 2, "end range should be greater than start range");
   
   THTensor_(resize1d)(r_, n);
-
-  TH_TENSOR_APPLY(real, r_,
-                  *r__data = pow(10.0, a + i*(b-a)/((real)(n-1)));
-                  i++;
-    );
+  if(n == 1) {
+    TH_TENSOR_APPLY(real, r_,
+        *r__data = pow(10.0, a);
+        i++;
+        );
+  } else {
+    TH_TENSOR_APPLY(real, r_,
+        *r__data = pow(10.0, a + i*(b-a)/((real)(n-1)));
+        i++;
+        );
+  }
 }
 
 void THTensor_(rand)(THTensor *r_, THLongStorage *size)

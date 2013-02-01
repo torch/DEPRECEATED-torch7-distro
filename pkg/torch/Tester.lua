@@ -49,22 +49,51 @@ end
 function Tester:assertTensorEq(ta, tb, condition, message)
    local diff = ta-tb
    local err = diff:abs():max()
-   self:assert_sub(err<condition,string.format('%s\n%s  val=%s, condition=%s',message,' TensorEQ(~=) violation ', tostring(err), tostring(condition)))
+   self:assert_sub(err<condition,string.format('%s\n%s  val=%s, condition=%s',message,' TensorEQ(==) violation ', tostring(err), tostring(condition)))
 end
 
-function Tester:assertTableEq(ta, condition, message)
-   self:assert_sub(unpack(ta) == unpack(condition), string.format('%s\n%s val=%s, condition=%s',message,' TableEQ(~=) violation ', tostring(err), tostring(condition)))
+function Tester:assertTensorNe(ta, tb, condition, message)
+   local diff = ta-tb
+   local err = diff:abs():max()
+   self:assert_sub(err>=condition,string.format('%s\n%s  val=%s, condition=%s',message,' TensorNE(~=) violation ', tostring(err), tostring(condition)))
+end
+
+local function areTablesEqual(ta, tb)
+   local function isIncludedIn(ta, tb)
+      if type(ta) ~= 'table' or type(tb) ~= 'table' then 
+         return ta == tb 
+      end
+      for k, v in pairs(tb) do
+         if not areTablesEqual(ta[k], v) then return false end
+      end
+      return true
+   end
+
+   return isIncludedIn(ta, tb) and isIncludedIn(tb, ta)
+end
+
+function Tester:assertTableEq(ta, tb, message)
+  self:assert_sub(areTablesEqual(ta, tb), string.format('%s\n%s val=%s, condition=%s',message,' TableEQ(==) violation ', tostring(err), tostring(condition)))
+end
+
+function Tester:assertTableNe(ta, tb, message)
+   self:assert_sub(not areTablesEqual(ta, tb), string.format('%s\n%s val=%s, condition=%s',message,' TableEQ(==) violation ', tostring(err), tostring(condition)))
+end
+
+function Tester:assertError(f, message)
+   status, err = pcall(f)
+   self:assert_sub(status == false, string.format('%s\n%s  condition=%s',message,' ERROR violation ', 'should have errored'))
 end
 
 function Tester:pcall(f)
    local nerr = #self.errors
-   local res = f()
---    local stat, result = pcall(f)
---    if not stat then
---       result = result .. debug.traceback()
---    end
---    return stat, result, stat and (nerr == #self.errors)
-   return true, res, nerr == #self.errors
+   -- local res = f()
+   local stat, result = xpcall(f, debug.traceback)
+   if not stat then
+      self.errors[#self.errors+1] = self.curtestname .. '\n Function call failed \n' .. result .. '\n'
+   end
+   return stat, result, stat and (nerr == #self.errors)
+   -- return true, res, nerr == #self.errors
 end
 
 function Tester:report(tests)
@@ -127,9 +156,9 @@ function Tester:run(run_tests)
       end
       
       if not stat then
-         print()
-         print('Function call failed: Test No ' .. i .. ' ' .. testnames[i])
-         print(message)
+         -- print()
+         -- print('Function call failed: Test No ' .. i .. ' ' .. testnames[i])
+         -- print(message)
       end
       collectgarbage()
    end
