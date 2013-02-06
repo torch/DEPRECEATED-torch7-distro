@@ -69,8 +69,7 @@
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || \
       defined(__NetBSD__) || defined(__OpenBSD__)
 #define LUAJIT_OS	LUAJIT_OS_BSD
-#elif (defined(__sun__) && defined(__svr4__)) || defined(__solaris__) || \
-      defined(__CYGWIN__)
+#elif (defined(__sun__) && defined(__svr4__)) || defined(__CYGWIN__)
 #define LUAJIT_OS	LUAJIT_OS_POSIX
 #else
 #define LUAJIT_OS	LUAJIT_OS_OTHER
@@ -169,7 +168,7 @@
 #define LJ_TARGET_UNIFYROT	2	/* Want only IR_BROR. */
 #define LJ_ARCH_NUMMODE		LJ_NUMMODE_DUAL
 
-#if __ARM_ARCH_7__ || __ARM_ARCH_7A__ || __ARM_ARCH_7R__
+#if __ARM_ARCH_7__ || __ARM_ARCH_7A__ || __ARM_ARCH_7R__ || __ARM_ARCH_7S__
 #define LJ_ARCH_VERSION		70
 #elif __ARM_ARCH_6T2__
 #define LJ_ARCH_VERSION		61
@@ -209,7 +208,7 @@
 #else
 #define LJ_ARCH_VERSION		0
 #endif
-#if __PPC64__ || __powerpc64__ || LJ_TARGET_XBOX360
+#if __PPC64__ || __powerpc64__ || LJ_TARGET_CONSOLE
 #define LJ_ARCH_PPC64		1
 #define LJ_ARCH_NOFFI		1
 #endif
@@ -399,7 +398,7 @@
 #endif
 
 /* Various workarounds for embedded operating systems. */
-#if (defined(__ANDROID__) && !defined(LJ_TARGET_X86ORX64)) || defined(__symbian__)
+#if (defined(__ANDROID__) && !defined(LJ_TARGET_X86ORX64)) || defined(__symbian__) || LJ_TARGET_XBOX360
 #define LUAJIT_NO_LOG2
 #endif
 #if defined(__symbian__)
