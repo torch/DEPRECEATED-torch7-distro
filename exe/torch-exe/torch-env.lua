@@ -143,7 +143,7 @@ local function colorize(object)
    elseif type(object) == 'boolean' then
       return apply('blue', tostring(object))
    elseif type(object) == 'string' then
-      return apply('yellow', '"' .. object .. '"')
+      return apply('yellow', object)
    elseif type(object) == 'function' then
       return apply('magenta', tostring(object))
    elseif type(object) == 'userdata' or type(object) == 'cdata' then
@@ -168,7 +168,8 @@ local function colorize(object)
 end
 
 -- This is a new recursive, colored print.
-function print(obj)
+function print(...)
+   local objs = {...}
    local function printrecursive(obj,tab)
       local tab = tab or 0
       local line = function(s) for i=1,tab do io.write(' ') end print_old(s) end
@@ -188,14 +189,20 @@ function print(obj)
       tab = tab-2
       line('}')
    end
-   if type(obj) ~= 'table' then
-      if type(obj) == 'userdata' or type(obj) == 'cdata' then
-         print_old(obj)
-      else
-         print_old(colorize(obj))
+   for i = 1,select('#',...) do
+      local obj = select(i,...)
+      if type(obj) ~= 'table' then
+         if type(obj) == 'userdata' or type(obj) == 'cdata' then
+            print_old(obj)
+         else
+            io.write(colorize(obj) .. '\t')
+            if i == select('#',...) then
+               print_old()
+            end
+         end
+      else 
+         printrecursive(obj) 
       end
-   else 
-      printrecursive(obj) 
    end
 end
 
