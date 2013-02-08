@@ -173,21 +173,26 @@ function print(...)
    local function printrecursive(obj,tab)
       local tab = tab or 0
       local line = function(s) for i=1,tab do io.write(' ') end print_old(s) end
-      line('{')
-      tab = tab+2
-      for k,v in pairs(obj) do
-         if type(v) == 'table' then
-            if tab > 16 or next(v) == nil then
-               line(k .. ' : ' .. colorize(v))
+      local mt = getmetatable(obj)
+      if mt and mt.__tostring then
+         print_old(tostring(obj))
+      else
+         line('{')
+         tab = tab+2
+         for k,v in pairs(obj) do
+            if type(v) == 'table' then
+               if tab > 16 or next(v) == nil then
+                  line(k .. ' : ' .. colorize(v))
+               else
+                  line(k .. ' : ') printrecursive(v,tab+4)
+               end
             else
-               line(k .. ' : ') printrecursive(v,tab+4)
+               line(k .. ' : ' .. colorize(v))
             end
-         else
-            line(k .. ' : ' .. colorize(v))
          end
+         tab = tab-2
+         line('}')
       end
-      tab = tab-2
-      line('}')
    end
    for i = 1,select('#',...) do
       local obj = select(i,...)
