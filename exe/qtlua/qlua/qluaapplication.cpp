@@ -11,6 +11,9 @@
 #if HAVE_UNISTD_H
 # include <unistd.h>
 #endif
+#if HAVE_SIGNAL_H
+# include <signal.h>
+#endif
 
 #include <QApplication>
 #include <QDateTime>
@@ -42,7 +45,27 @@
 #include "qluaconsole.h"
 
 
+static lua_State *globalL = NULL;
 
+#ifdef HAVE_SIGNAL_H
+// Handling SIGINT the same way as in luajit.c.
+static void lstop(lua_State *L, lua_Debug *ar)
+{
+  (void)ar;  /* unused arg. */
+  lua_sethook(L, NULL, 0, 0);
+  /* Avoid luaL_error -- a C hook doesn't add an extra frame. */
+  luaL_where(L, 0);
+  lua_pushfstring(L, "%sinterrupted!", lua_tostring(L, -1));
+  lua_error(L);
+}
+
+static void laction(int i)
+{
+  signal(i, SIG_DFL); /* if another SIGINT happens before lstop,
+                         terminate process (default action) */
+  lua_sethook(globalL, lstop, LUA_MASKCALL | LUA_MASKRET | LUA_MASKCOUNT, 1);
+}
+#endif // HAVE_SIGNAL_H
 
 
 // ------- private class
@@ -359,7 +382,6 @@ QLuaApplication::Private::printBadOption(const char *option)
 }
 
 
-
 int 
 QLuaApplication::Private::doCall(struct lua_State *L, int nargs)
 {
@@ -367,7 +389,13 @@ QLuaApplication::Private::doCall(struct lua_State *L, int nargs)
   int base = lua_gettop(L) - nargs;
   lua_pushcfunction(L, luaQ_traceback);
   lua_insert(L, base);
+#if HAVE_SIGNAL_H
+  signal(SIGINT, laction);
+#endif
   status = luaQ_pcall(L, nargs, 0, base, theEngine);
+#if HAVE_SIGNAL_H
+  signal(SIGINT, SIG_DFL);
+#endif
   lua_remove(L, base);
   if (status)
     lua_gc(L, LUA_GCCOLLECT, 0);
@@ -467,6 +495,7 @@ QLuaApplication::Private::processArguments(int argc, char **argv)
 
   // Obtain and lock lua
   QtLuaLocker lua(theEngine);
+  globalL = lua;
   
   // Good time to limit access to QtLuaConsole
   lua_pushcfunction(lua, hook_qluaconsole);
