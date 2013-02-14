@@ -131,8 +131,15 @@ local function colorize(object)
              _white = '\27[47m'}
 
    -- Apply:
-   local function apply(color, txt)
-      return c[color] .. txt .. c.none
+   local apply
+   if torch.isatty(io.stdout) then
+      apply = function(color, txt)
+         return c[color] .. txt .. c.none
+      end
+   else
+      apply = function(color, txt)
+         return txt
+      end
    end
 
    -- Type?
