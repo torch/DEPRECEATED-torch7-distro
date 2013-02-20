@@ -21,11 +21,11 @@ local function findos()
       local ff = io.popen('uname -a','r')
       local s = ff:read('*all')
       ff:close()
-      if s:match('Darwin') then
+      if s and s:match('Darwin') then
          return 'mac'
-      elseif s:match('Linux') then
+      elseif s and s:match('Linux') then
          return 'linux'
-      elseif s:match('FreeBSD') then
+      elseif s and s:match('FreeBSD') then
          return 'freebsd'
       else
          --error('I don\'t know your operating system')
