@@ -99,6 +99,20 @@ function torchtest.range()
    torch.range(mxx,0,1)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.range value')
 end
+function torchtest.rangenegative()
+   local mx = torch.Tensor({1,0})
+   local mxx = torch.Tensor()
+   torch.range(mxx,1,0,-1)
+   mytester:asserteq(maxdiff(mx,mxx),0,'torch.range value for negative step')
+end
+function torchtest.rangeequalbounds()
+   local mx = torch.Tensor({1})
+   local mxx = torch.Tensor()
+   torch.range(mxx,1,1,-1)
+   mytester:asserteq(maxdiff(mx,mxx),0,'torch.range value for equal bounds step')
+   torch.range(mxx,1,1,1)
+   mytester:asserteq(maxdiff(mx,mxx),0,'torch.range value for equal bounds step')
+end
 function torchtest.randperm()
    local t=os.time()
    torch.manualSeed(t)
@@ -160,6 +174,8 @@ function torchtest.linspace()
    local mxx = torch.Tensor()
    torch.linspace(mxx,from,to,137)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.linspace value')
+   mytester:assertError(function() torch.linspace(0,1,1) end, 'accepted 1 point between 2 distinct endpoints')
+   mytester:assertTensorEq(torch.linspace(0,0,1),torch.zeros(1),1e-16, 'failed to generate for torch.linspace(0,0,1)')
 end
 function torchtest.logspace()
    local from = math.random()
@@ -168,6 +184,8 @@ function torchtest.logspace()
    local mxx = torch.Tensor()
    torch.logspace(mxx,from,to,137)
    mytester:asserteq(maxdiff(mx,mxx),0,'torch.logspace value')
+   mytester:assertError(function() torch.logspace(0,1,1) end, 'accepted 1 point between 2 distinct endpoints')
+   mytester:assertTensorEq(torch.logspace(0,0,1),torch.ones(1),1e-16, 'failed to generate for torch.linspace(0,0,1)')
 end
 function torchtest.rand()
    torch.manualSeed(123456)
@@ -358,6 +376,30 @@ function torchtest.logical()
    local all = neqs + xeq
    mytester:asserteq(neqs:sum(), xne:sum(), 'torch.logical')
    mytester:asserteq(x:nElement(),all:double():sum() , 'torch.logical')
+end
+
+function torchtest.TestAsserts()
+   mytester:assertError(function() error('hello') end, 'assertError: Error not caught')
+
+   local x = torch.rand(100,100)*2-1;
+   local xx = x:clone();
+   mytester:assertTensorEq(x, xx, 1e-16, 'assertTensorEq: not deemed equal')
+   mytester:assertTensorNe(x, xx+1, 1e-16, 'assertTensorNe: not deemed different')
+end
+
+
+function torchtest.BugInAssertTableEq()
+   local t = {1,2,3}
+   local tt = {1,2,3}
+   mytester:assertTableEq(t, tt, 'assertTableEq: not deemed equal')
+   mytester:assertTableNe(t, {3,2,1}, 'assertTableNe: not deemed different')
+   mytester:assertTableEq({1,2,{4,5}}, {1,2,{4,5}}, 'assertTableEq: fails on recursive lists')
+   -- TODO: once a mechanism for testing that assert fails exist, test that the two asserts below do not pass
+   -- should not pass: mytester:assertTableEq(t, {1,2}, 'assertTableNe: different size should not be equal') 
+   -- should not pass: mytester:assertTableEq(t, {1,2,3,4}, 'assertTableNe: different size should not be equal')
+
+   mytester:assertTableNe(t, {1,2}, 'assertTableNe: different size not deemed different')
+   mytester:assertTableNe(t, {1,2,3,4}, 'assertTableNe: different size not deemed different')
 end
 
 function torch.test()

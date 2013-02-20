@@ -14,6 +14,7 @@ cmake_conf = {
 mkdir = 'mkdir -p '
 rm = 'rm -rf '
 cd = 'cd '
+cp = 'cp '
 cmake = 'CMAKE_PREFIX_PATH=' .. paths.install_prefix .. ' cmake .. '
 for var,val in pairs(cmake_conf) do
    cmake = cmake .. '-D' .. var .. '=' .. val .. ' '
@@ -188,6 +189,70 @@ function getpkglist()
    return pkg
 end
 
+-- pure lua package helpers
+luapack = {}
+function luapack.isvalid(name, path)
+   if name and (name:match('^http%:') or name:match('^https%:')) then
+      name = nil
+   end
+   local luafiles = {}
+   local hasinit
+   for f in paths.files(path) do
+      if not f:match('^%.') then
+         if not f:match('%.lua$') and not f:match('%.txt$') and not f:match('%.md$') then
+            return false
+         end
+         if f:match('%.lua$') then
+            table.insert(luafiles, f)
+            if f == 'init.lua' then
+               hasinit = true
+            end
+         end
+      end
+   end
+   if hasinit then
+      if not name then
+         return false -- cannot guess the name
+      end
+   else
+      if #luafiles > 1 then
+         return false
+      end
+      if name then
+         if luafiles[1] ~= name .. '.lua' then
+            return false
+         end
+      else
+         if luafiles[1] == 'init.lua' then
+            return false
+         end
+      end
+   end
+   return true, luafiles, hasinit
+end
+
+function luapack.install(name, path)
+   local success, luafiles, hasinit = luapack.isvalid(name, path)
+   if not success then
+      error('bizarre internal error (the package now appears invalid)')
+   end
+   if hasinit then
+      exec(mkdir .. paths.concat(paths.install_lua_path, name))
+      for _,f in ipairs(luafiles) do
+         exec(string.format('%s "%s" "%s"',
+                            cp,
+                            paths.concat(path, f),
+                            paths.concat(paths.install_lua_path, name, f)))
+      end
+   else
+      exec(string.format('%s "%s" "%s"',
+                         cp,
+                         paths.concat(path, luafiles[1]),
+                         paths.concat(paths.install_lua_path, luafiles[1])))
+   end
+   info('luapack: installation successful')
+end
+
 -- now execute command
 if command == 'help' then
 
@@ -216,9 +281,18 @@ elseif command == 'install' then
 
    function doit(package)
       local pkg = packages[package]
+
       if not pkg then
-         error('could not find package ' .. package .. ' in any of the registered repos')
-         os.exit()
+         if package:find('http') then
+            pkg = {
+               git = package,
+               commit = 'master',
+               dependencies = {}
+            }
+         else
+            error('could not find package ' .. package .. ' in any of the registered repos')
+            os.exit()
+         end
       end
       if pkg.done then
          info('skipping package: ' .. package .. ', already installed')
@@ -245,11 +319,17 @@ elseif command == 'install' then
          end
       end
 
-      info('building & deploying')
-      exec(cd .. paths.concat(tmp,package) .. '; ' .. configure .. '; ' .. make .. '; ' .. install)
+      if paths.filep(paths.concat(paths.concat(tmp, package), 'CMakeLists.txt')) then
+         info('building & deploying')
+         exec(cd .. paths.concat(tmp,package) .. '; ' .. configure .. '; ' .. make .. '; ' .. install)
 
-      info('successfully deployed ' .. package)
-      pkg.done = true
+         info('successfully deployed ' .. package)
+         pkg.done = true
+      elseif luapack.isvalid(package, paths.concat(tmp, package)) then
+         luapack.install(package, paths.concat(tmp, package))
+      else
+         error('invalid torch package')
+      end
    end
 
    for _,package in ipairs(to_build) do
@@ -322,23 +402,32 @@ elseif command == 'deploy' then
       found = arguments[1]
    end
 
-   if not paths.filep(paths.concat(found, 'CMakeLists.txt')) then
-      error('not a valid package, please specify a path to a valid package')
-      os.exit()
-   end
+   if paths.filep(paths.concat(found, 'CMakeLists.txt')) then
+      for i = 1,#arguments do
+         if arguments[i]:find('=') then -- cmake flag
+            configure = configure .. '-D' .. arguments[i] .. ' '
+         end
+      end
 
-   for i = 1,#arguments do
-      if arguments[i]:find('=') then -- cmake flag
-         configure = configure .. '-D' .. arguments[i] .. ' '
+      if not paths.filep(paths.concat(found, 'build', 'CMakeCache.txt')) then
+         info('configuring package in ' .. found)
+         exec(cd .. found .. '; ' .. configure)
+      end
+      info('deploying package in ' .. found)
+      exec(cd .. paths.concat(found,'build') .. '; ' .. make .. '; ' .. install)
+   else
+      local pkgname = arguments[2]
+      if not pkgname then
+         infoarg('warning: for cmake-free lua packages you might want to pass a package name as second argument')
+         infoarg('warning: [usage: torch-pkg deploy [package source path] [package name]]')
+      end
+      if luapack.isvalid(pkgname, found) then
+         luapack.install(pkgname, found)
+      else
+         error('not a valid package, please specify a path to a valid package')
+         os.exit()
       end
    end
-
-   if not paths.filep(paths.concat(found, 'build', 'CMakeCache.txt')) then
-      info('configuring package in ' .. found)
-      exec(cd .. found .. '; ' .. configure)
-   end
-   info('deploying package in ' .. found)
-   exec(cd .. paths.concat(found,'build') .. '; ' .. make .. '; ' .. install)
 
 elseif command == 'list' then
 

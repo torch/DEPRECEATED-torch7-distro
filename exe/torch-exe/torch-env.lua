@@ -101,87 +101,121 @@ for k,v in pairs(_G) do
    _G._preloaded_[k] = true
 end
 
--- print:
--- a smarter print for Lua, the default Lua print is quite terse
--- this new print is much more verbose, automatically recursing through
--- lua tables, and objects.
-local print_new
-function print(...)
-   if select('#',...) == 0 then
-      _G.io.write('\n')
-      _G.io.flush()
-      return
-   end
-   local obj = ...
-   if _G.type(obj) == 'table' then
-      local mt = _G.getmetatable(obj)
-      if mt and mt.__tostring__ then
-         _G.io.write(mt.__tostring__(obj))
-      else
-         local m = getmaxlen(obj)
-         local tos = _G.tostring(obj)
-         local obj_w_usage = false
-         if tos and not _G.string.find(tos,'table: ') then
-            if obj.usage and _G.type(obj.usage) == 'string' then
-               _G.io.write(obj.usage)
-               _G.io.write('\n\nFIELDS:\n')
-               obj_w_usage = true
-            else
-               _G.io.write(tos .. ':\n')
-            end
-         end
-         _G.io.write('{')
-         local idx = 1
-    local tab = ''
-    local newline = ''
-         for k,v in pairs(obj) do
-       local line = printvar(k,v,m)
-       _G.io.write(newline .. tab .. line)
-       if idx == 1 then
-          tab = ' '
-          newline = '\n'
-       end
-       idx = idx + 1
-         end
-         _G.io.write('}')
-         if obj_w_usage then
-            _G.io.write('')
-         end
+-- a function to colorize output:
+local function colorize(object)
+   -- Colors:
+   local c = {none = '\27[0m',
+             black = '\27[0;30m',
+             red = '\27[0;31m',
+             green = '\27[0;32m',
+             yellow = '\27[0;33m',
+             blue = '\27[0;34m',
+             magenta = '\27[0;35m',
+             cyan = '\27[0;36m',
+             white = '\27[0;37m',
+             Black = '\27[1;30m',
+             Red = '\27[1;31m',
+             Green = '\27[1;32m',
+             Yellow = '\27[1;33m',
+             Blue = '\27[1;34m',
+             Magenta = '\27[1;35m',
+             Cyan = '\27[1;36m',
+             White = '\27[1;37m',
+             _black = '\27[40m',
+             _red = '\27[41m',
+             _green = '\27[42m',
+             _yellow = '\27[43m',
+             _blue = '\27[44m',
+             _magenta = '\27[45m',
+             _cyan = '\27[46m',
+             _white = '\27[47m'}
+
+   -- Apply:
+   local apply
+   if torch.isatty(io.stdout) then
+      apply = function(color, txt)
+         return c[color] .. txt .. c.none
       end
    else
-      _G.io.write(_G.tostring(obj))
+      apply = function(color, txt)
+         return txt
+      end
    end
-   if _G.select('#',...) > 1 then
-      _G.io.write('    ')
-      print_new(select(2,...))
+
+   -- Type?
+   if object == nil then
+      return apply('Black', 'nil')
+   elseif type(object) == 'number' then
+      return apply('cyan', tostring(object))
+   elseif type(object) == 'boolean' then
+      return apply('blue', tostring(object))
+   elseif type(object) == 'string' then
+      return apply('yellow', object)
+   elseif type(object) == 'function' then
+      return apply('magenta', tostring(object))
+   elseif type(object) == 'userdata' or type(object) == 'cdata' then
+      local tp = torch.typename(object) or ''
+      if tp:find('torch.*Tensor') then
+         tp = sizestr(object)
+      elseif tp:find('torch.*Storage') then
+         tp = sizestr(object)
+      else
+         tp = tostring(object)
+      end
+      if tp ~= '' then
+         return apply('red', tp)
+      else
+         return apply('red', tostring(object))
+      end
+   elseif type(object) == 'table' then
+      return apply('green', tostring(object))
    else
-      _G.io.write('\n')
+      return apply('black', tostring(object))
    end
 end
-print_new = print
 
--- printr:
--- recursive print. This function prints tables recursively. It could 
--- be merged into the regular print() above, but might be too dangerous
--- when printing large tables?
-function printr(obj)
+-- This is a new recursive, colored print.
+function print(...)
+   local objs = {...}
    local function printrecursive(obj,tab)
       local tab = tab or 0
-      local line = function(s) for i=1,tab do io.write(' ') end print(s) end
-      line('{')
-      tab = tab+2
-      for k,v in pairs(obj) do
-         if type(v) == 'table' then
-            line(k .. ' : ') printrecursive(v,tab+4)
-         else
-            line(k .. ' : ' .. tostring(v))
+      local line = function(s) for i=1,tab do io.write(' ') end print_old(s) end
+      local mt = getmetatable(obj)
+      if mt and mt.__tostring then
+         print_old(tostring(obj))
+      else
+         line('{')
+         tab = tab+2
+         for k,v in pairs(obj) do
+            if type(v) == 'table' then
+               if tab > 16 or next(v) == nil then
+                  line(k .. ' : ' .. colorize(v))
+               else
+                  line(k .. ' : ') printrecursive(v,tab+4)
+               end
+            else
+               line(k .. ' : ' .. colorize(v))
+            end
          end
+         tab = tab-2
+         line('}')
       end
-      tab = tab-2
-      line('}')
    end
-   if type(obj) ~= 'table' then print(obj)
-   else printrecursive(obj) end
+   for i = 1,select('#',...) do
+      local obj = select(i,...)
+      if type(obj) ~= 'table' then
+         if type(obj) == 'userdata' or type(obj) == 'cdata' then
+            print_old(obj)
+         else
+            io.write(colorize(obj) .. '\t')
+            if i == select('#',...) then
+               print_old()
+            end
+         end
+      else 
+         printrecursive(obj) 
+      end
+   end
 end
 
 -- table():
@@ -247,7 +281,7 @@ end
 
 loaddefaultlibs(loadwithimport)
 
--- setup local paths
+-- setup local paths (for LuarRocks and Torch-pkg)
 local localinstalldir = paths.concat(os.getenv('HOME'),'.torch','usr')
 if paths.dirp(localinstalldir) then
    package.path = paths.concat(localinstalldir,'share','torch','lua','?','init.lua') .. ';' .. package.path
@@ -255,3 +289,11 @@ if paths.dirp(localinstalldir) then
    package.cpath = paths.concat(localinstalldir,'lib','torch','?.so') .. ';' .. package.cpath
    package.cpath = paths.concat(localinstalldir,'lib','torch','?.dylib') .. ';' .. package.cpath
 end
+local localinstalldir = paths.concat(os.getenv('HOME'),'.luarocks')
+if paths.dirp(localinstalldir) then
+   package.path = paths.concat(localinstalldir,'share','lua','5.1','?','init.lua') .. ';' .. package.path
+   package.path = paths.concat(localinstalldir,'share','lua','5.1','?.lua') .. ';' ..  package.path
+   package.cpath = paths.concat(localinstalldir,'lib','lua','5.1','?.so') .. ';' .. package.cpath
+   package.cpath = paths.concat(localinstalldir,'lib','lua','5.1','?.dylib') .. ';' .. package.cpath
+end
+

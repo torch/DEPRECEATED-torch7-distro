@@ -481,8 +481,8 @@ static void bcemit_nil(FuncState *fs, BCReg from, BCReg n)
       } else {
 	break;
       }
-      fs->pc--;  /* Drop KPRI. */
-      break;
+      *ip = BCINS_AD(BC_KNIL, from, from+n-1);  /* Replace KPRI. */
+      return;
     case BC_KNIL:
       pto = bc_d(*ip);
       if (pfrom <= from && from <= pto+1) {  /* Can we connect both ranges? */
@@ -848,6 +848,7 @@ static void bcemit_comp(FuncState *fs, BinOpr opr, ExpDesc *e1, ExpDesc *e2)
     if ((op-BC_ISLT) & 1) {  /* GT -> LT, GE -> LE */
       e1 = e2; e2 = eret;  /* Swap operands. */
       op = ((op-BC_ISLT)^3)+BC_ISLT;
+      expr_toval(fs, e1);
     }
     rd = expr_toanyreg(fs, e2);
     ra = expr_toanyreg(fs, e1);
@@ -1761,7 +1762,7 @@ static void expr_table(LexState *ls, ExpDesc *e)
       TValue k, *v;
       if (!t) {  /* Create template table on demand. */
 	BCReg kidx;
-	t = lj_tab_new(fs->L, narr, hsize2hbits(nhash));
+	t = lj_tab_new(fs->L, needarr ? narr : 0, hsize2hbits(nhash));
 	kidx = const_gc(fs, obj2gco(t), LJ_TTAB);
 	fs->bcbase[pc].ins = BCINS_AD(BC_TDUP, freg-1, kidx);
       }
@@ -1825,6 +1826,7 @@ static void expr_table(LexState *ls, ExpDesc *e)
 	}
       }
     }
+    lj_gc_check(fs->L);
   }
 }
 
