@@ -40,8 +40,8 @@ install_cmake = concat(install_prefix, install_cmake_subdir)
 install_lua_path = concat(install_prefix, install_lua_path_subdir)
 install_lua_cpath = concat(install_prefix, install_lua_cpath_subdir)
 
-assert(concat(install_bin,install_bin_ridbus) == install_prefix)
-assert(concat(install_cmake,install_cmake_ridbus) == install_prefix)
+assert(concat(install_bin,install_bin_ridbus) == install_prefix:gsub('/$',''))
+assert(concat(install_cmake,install_cmake_ridbus) == install_prefix:gsub('/$',''))
 
 
 function files(s)
