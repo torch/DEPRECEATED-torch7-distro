@@ -181,9 +181,12 @@ function print(...)
       local tab = tab or 0
       local line = function(s) for i=1,tab do io.write(' ') end print_old(s) end
       local mt = getmetatable(obj)
-      if mt and mt.__tostring then
+      if mt and mt.__tostring and torch.typename(obj) == nil then
          print_old(tostring(obj))
       else
+         if torch.typename(obj) then
+            print_old(obj)
+         end
          line('{')
          tab = tab+2
          for k,v in pairs(obj) do
