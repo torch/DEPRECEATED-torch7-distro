@@ -1,3 +1,8 @@
+/* 
+ * This code has been adapted from Alex Krizhevsky's GPU library
+ * (http://code.google.com/p/cuda-convnet/), and was originally
+ * licensed under a BSD license.
+ */
 
 /*
  * Block size B_YxB_X. Each block applies B_Y * filtersPerThread filters to B_X * imgsPerThread images.

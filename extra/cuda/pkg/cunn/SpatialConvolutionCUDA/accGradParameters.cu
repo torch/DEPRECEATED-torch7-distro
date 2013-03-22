@@ -1,3 +1,8 @@
+/* 
+ * This code has been adapted from Alex Krizhevsky's GPU library
+ * (http://code.google.com/p/cuda-convnet/), and was originally
+ * licensed under a BSD license.
+ */
 
 #define LO16(x)     ((x) & 0x0000FFFF)
 #define HI16(x)     ((x) >> 16)
