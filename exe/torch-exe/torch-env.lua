@@ -185,7 +185,7 @@ function print(...)
          print_old(tostring(obj))
       else
          if torch.typename(obj) then
-            print_old(obj)
+            line(tostring(obj):gsub('\n','\n' .. string.rep(' ',tab)))
          end
          line('{')
          tab = tab+2
