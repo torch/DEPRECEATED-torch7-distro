@@ -36,6 +36,7 @@ IF(SIZEOF_VOID_P EQUAL 8)
 ENDIF()
 
 if ( WIN32 AND NOT CYGWIN )
+  set(LUA_BUILD_AS_DLL 1)
   add_definitions ( -DLUA_BUILD_AS_DLL -DLUAJIT_OS=LUAJIT_OS_WINDOWS)
   set ( LJVM_MODE coffasm )
 elseif ( APPLE )

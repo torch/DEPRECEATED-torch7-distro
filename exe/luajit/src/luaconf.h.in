@@ -14,6 +14,8 @@
 
 #cmakedefine LUA_USE_MODULE_AND_LIBRARY 1
 #cmakedefine LUA_USE_DLOPEN 1
+#cmakedefine LUA_USE_READLINE 1
+#cmakedefine LUA_BUILD_AS_DLL 1
 
 #cmakedefine LUAJIT_USE_READLINE
 #cmakedefine LUAJIT_DISABLE_FFI
