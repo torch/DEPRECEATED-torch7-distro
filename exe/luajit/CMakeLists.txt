@@ -100,7 +100,7 @@ MACRO(LJ_TEST_ARCH_VALUE stuff value)
   CHECK_C_SOURCE_COMPILES("
 #undef ${stuff}
 #include \"lj_arch.h\"
-#if ${stuff} != ${value}
+#if ${stuff} == ${value}
 int main() { return 0; }
 #else
 #error \"not defined\"
