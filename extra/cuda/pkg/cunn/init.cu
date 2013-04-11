@@ -25,7 +25,9 @@
 #include "Threshold.cu"
 #include "Sigmoid.cu"
 
-DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
+LUA_EXTERNC DLL_EXPORT int luaopen_libcunn(lua_State *L);
+
+int luaopen_libcunn(lua_State *L)
 {
   lua_newtable(L);
 
