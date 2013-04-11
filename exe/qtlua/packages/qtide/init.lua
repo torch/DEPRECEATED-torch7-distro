@@ -149,9 +149,9 @@ local function locate_help_files()
    local index1 = paths.concat(paths.install_html, appname:lower(), "index.html")
    local index2 = paths.concat(paths.install_html,"index.html")
    if index1 and paths.filep(index1) then
-      return qt.QUrl(index1)
+      return qt.QUrl.fromlocalfile(index1)
    elseif index2 and paths.filep(index2) then
-      return qt.QUrl(index2)
+      return qt.QUrl.fromlocalfile(index2)
    else
       return qt.QUrl("http://torch5.sourceforge.net/manual/index.html")
    end

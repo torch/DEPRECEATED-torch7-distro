@@ -346,6 +346,18 @@ QUrl object from string ''string''.
 Expression ''qurl:tostring()'' returns a string 
 describing the QUrl object ''qurl''.
 
+====  qurl.fromlocalfile(s) === 
+
+Returns a file url associated with the file named s.
+
+====  qurl:tolocalfile() === 
+{{anchor:qurl.tolocalfile}}
+
+If the url describes a local file, 
+expression ''qurl:tolocalfile()'' returns a string 
+describing the local filename associated with the url.
+Otherwise it returns nil.
+
 
 =====  qt.QVariantList =====
 {{anchor:qvariantlist}}
