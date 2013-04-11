@@ -282,7 +282,7 @@ void spatialMaxPooling_updateOutput
   MaxPooler pooler;
 
   int imgPixels = imgSizeY * imgSizeX;
-  int imgSize = int(sqrt(imgPixels)); 
+  int imgSize = int(sqrt((float)imgPixels)); 
   assert(imgSize * imgSize == imgPixels); /// TODO SQUARE !
 
   int subsX = filterSizeX;
