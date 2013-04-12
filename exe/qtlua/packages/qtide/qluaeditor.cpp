@@ -849,6 +849,7 @@ QLuaEditor::doFind()
   dialog->raise();
   dialog->show();
   dialog->setAttribute(Qt::WA_Moved);
+  dialog->activateWindow();
 }
 
 
@@ -862,6 +863,7 @@ QLuaEditor::doReplace()
   dialog->raise();
   dialog->show();
   dialog->setAttribute(Qt::WA_Moved);
+  dialog->activateWindow();
 }
 
 
