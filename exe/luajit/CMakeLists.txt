@@ -86,35 +86,34 @@ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/luaconf.h src/lua.h src/lauxlib.h src/
 
 MACRO(LJ_TEST_ARCH stuff)
   CHECK_C_SOURCE_COMPILES("
+#undef ${stuff}
 #include \"lj_arch.h\"
-#ifndef ${stuff}
+#if ${stuff}
+int main() { return 0; }
+#else
 #error \"not defined\"
 #endif
-int main()
-{
-  return 0;
-}
 " ${stuff})
 ENDMACRO()
 
 MACRO(LJ_TEST_ARCH_VALUE stuff value)
   CHECK_C_SOURCE_COMPILES("
+#undef ${stuff}
 #include \"lj_arch.h\"
-#if !(${stuff} == ${value})
+#if ${stuff} == ${value}
+int main() { return 0; }
+#else
 #error \"not defined\"
 #endif
-int main()
-{
-  return 0;
-}
 " ${stuff}_${value})
 ENDMACRO()
 
 SET(CMAKE_REQUIRED_INCLUDES ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 FOREACH(arch X64 X86 ARM PPC PPCSPE MIPS)
-  LJ_TEST_ARCH(TARGET_${arch})
-  if(TARGET_${arch})
+  LJ_TEST_ARCH(LJ_TARGET_${arch})
+  if(LJ_TARGET_${arch})
     STRING(TOLOWER ${arch} TARGET_LJARCH)
+    MESSAGE(INFO "LuaJIT Target ${ARCH_LJARCH}")
     BREAK()
   ENDIF()
 ENDFOREACH()
