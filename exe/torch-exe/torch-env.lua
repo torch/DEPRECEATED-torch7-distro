@@ -192,12 +192,12 @@ function print(...)
          for k,v in pairs(obj) do
             if type(v) == 'table' then
                if tab > 16 or next(v) == nil then
-                  line(k .. ' : ' .. colorize(v))
+                  line(tostring(k) .. ' : ' .. colorize(v))
                else
-                  line(k .. ' : ') printrecursive(v,tab+4)
+                  line(tostring(k) .. ' : ') printrecursive(v,tab+4)
                end
             else
-               line(k .. ' : ' .. colorize(v))
+               line(tostring(k) .. ' : ' .. colorize(v))
             end
          end
          tab = tab-2
