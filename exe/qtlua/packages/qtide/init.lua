@@ -29,13 +29,10 @@ module('qtide')
 
 local qluaide = qt.QLuaIde()
 
-local function realmode(mode)
-   mode = mode or qt.qApp:readSettings("ide/mode")
-   if qluaide.mdiDefault then
-      return mode or 'mdi'
-   else
-      return mode or 'sdi'
-   end
+local function realmode(mode)  
+   local defaultmode = 'sdi'
+   -- if qluaide.mdiDefault then defaultmode = 'mdi' end
+   return mode or qt.qApp:readSettings("ide/mode") or defaultmode
 end
 
 function setup(mode)
