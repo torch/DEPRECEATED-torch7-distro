@@ -289,6 +289,8 @@ local localinstalldir = paths.concat(os.getenv('HOME'),'.torch','usr')
 if paths.dirp(localinstalldir) then
    package.path = paths.concat(localinstalldir,'share','torch','lua','?','init.lua') .. ';' .. package.path
    package.path = paths.concat(localinstalldir,'share','torch','lua','?.lua') .. ';' ..  package.path
+   package.cpath = paths.concat(localinstalldir,'lib','torch','lua','?.so') .. ';' .. package.cpath
+   package.cpath = paths.concat(localinstalldir,'lib','torch','lua','?.dylib') .. ';' .. package.cpath
    package.cpath = paths.concat(localinstalldir,'lib','torch','?.so') .. ';' .. package.cpath
    package.cpath = paths.concat(localinstalldir,'lib','torch','?.dylib') .. ';' .. package.cpath
 end
