@@ -108,20 +108,24 @@ void THCudaTensor_cadd_tst(THCudaTensor *self_, THCudaTensor* src1, float value,
   }
 }
 
-void THCudaTensor_cmul(THCudaTensor *self_, THCudaTensor *src)
+void THCudaTensor_cmul(THCudaTensor *self_, THCudaTensor *src1, THCudaTensor *src2)
 {
-  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src), 2, "size do not match");
+  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src1), 2, "size do not match");
+  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src2), 3, "size do not match");
 
   {
     THCudaTensor *self = THCudaTensor_newContiguous(self_);
     long size = THCudaTensor_nElement(self);
-    src = THCudaTensor_newContiguous(src);
+    src1 = THCudaTensor_newContiguous(src1);
+    src2 = THCudaTensor_newContiguous(src2);
     thrust::device_ptr<float> self_data(THCudaTensor_data(self));
-    thrust::device_ptr<float> src_data(THCudaTensor_data(src));
+    thrust::device_ptr<float> src1_data(THCudaTensor_data(src1));
+    thrust::device_ptr<float> src2_data(THCudaTensor_data(src2));
 
-    thrust::transform(src_data, src_data+size, self_data, self_data, thrust::multiplies<float>());
+    thrust::transform(src2_data, src2_data+size, src1_data, self_data, thrust::multiplies<float>());
 
-    THCudaTensor_free(src);
+    THCudaTensor_free(src1);
+    THCudaTensor_free(src2);
     THCudaTensor_freeCopyTo(self, self_);
   }
 }
@@ -271,6 +275,222 @@ float THCudaTensor_sumall(THCudaTensor *self)
   THCudaTensor_free(self);
   return result;
 }
+
+
+
+struct dim4 {
+    unsigned arr[4];
+
+    __host__ dim4(unsigned init=0) {
+        for(unsigned i=0; i<4; i++) { arr[i] = init; }
+    }
+
+    __host__ __device__ unsigned& operator[](const unsigned& idx) { return arr[idx]; }
+};
+
+
+
+/* Reduce one of the outer dimensions of a tensor
+ *
+ * For an n-d tensor (n <= 4) where the reduction is *not* along the innermost
+ * dimension:
+ *
+ * - block.x and grid.x make up the innermost dimension;
+ * - The reduced dimension is looped over inside a block; and
+ * - grid.y and grid.z are the remaining two dimensions (if any).
+ * - block.y and block.z are not used as we're limited to 512 or 1024 threads
+ *   in the block.
+ *
+ * For sizes/strides, index 3 is the reduced dimension, while the remaining
+ * indices are for the remaining dimensions with index 0 the innermost dimension.
+ *
+ * Reduction along the innermost dimension is handled in a separate kernel.
+ */
+template<class Op>
+__global__ void THCudaTensor_kernel_reduceOuterDim(float *tgt, float *src_,
+        dim4 src_stride, dim4 tgt_stride, dim4 size, Op op, float init)
+{
+  const size_t reduce = 3;
+
+  for(unsigned z = blockIdx.z; z < size[2] ; z += gridDim.z)
+  for(unsigned y = blockIdx.y; y < size[1] ; y += gridDim.y)
+  for(unsigned col = blockIdx.x * blockDim.x + threadIdx.x; col < size[0]; col += blockDim.x * gridDim.x) {
+    float *src = src_ + z * src_stride[2] + y * src_stride[1] + col;
+    float acc = init;
+    for(unsigned i=0; i < size[reduce]; i++) {
+      acc = op(acc, *src);
+      src += src_stride[reduce];
+    }
+    tgt[z * tgt_stride[2] + y * tgt_stride[1] + col] = float(acc);
+  }
+}
+
+
+
+template<class Op>
+__host__ void THCudaTensor_reduceOuterDim(THCudaTensor *tgt, THCudaTensor *src, long rdim, Op op, float init)
+{
+  const size_t reduce = 3;
+  dim4 src_stride(0);
+  dim4 tgt_stride(0);
+  dim4 size(1);
+
+  unsigned ndim = THCudaTensor_nDimension(src);
+  for(unsigned idim=0, o=ndim-2; idim < ndim; idim++) {
+    unsigned odim = idim == rdim ? reduce : o--;
+    src_stride[odim] = THCudaTensor_stride(src, idim);
+    tgt_stride[odim] = THCudaTensor_stride(tgt, idim);
+    size[odim]       = THCudaTensor_size(src, idim);
+  }
+
+  const unsigned nThreadPerBlock = 256;
+  unsigned nBlockPerColumn = (size[0] + nThreadPerBlock - 1) / nThreadPerBlock;
+  dim3 threads(nThreadPerBlock);
+  unsigned maxGridDim = 1024; // anything < 64k is fine. The choice has no impact on performance.
+  dim3 grid(min(maxGridDim, nBlockPerColumn), min(maxGridDim, size[1]), min(maxGridDim, size[2]));
+
+  THCudaTensor_kernel_reduceOuterDim<<<grid, threads>>>(THCudaTensor_data(tgt),
+          THCudaTensor_data(src), src_stride, tgt_stride, size, op, init);
+  cudaError errcode = cudaGetLastError();
+  if(errcode != cudaSuccess) {
+    THError(cudaGetErrorString(errcode));
+  }
+}
+
+
+
+/* Reduce the innermost dimension of a tensor
+ *
+ * For an n-d tensor (n <= 4) where the reduction is along the innermost dimension:
+ *
+ * - block.x is the innermost dimension, i.e. dimension 0;
+ * - block.y and grid.y make up dimension 1; and
+ * - grid.x and grid z are the remaining two outer dimensions (if any)
+ *
+ * Reduction along other dimensions is handled in a separate kernel.
+ */
+template<class Op>
+__global__ void THCudaTensor_kernel_reduceInnermostDim(float *tgt, float *src_,
+        dim4 src_stride, dim4 tgt_stride, dim4 size, Op op, float init)
+{
+  __shared__ float sbuf[16][32]; // 8kB
+
+  for(unsigned z = blockIdx.z; z < size[3] ; z += gridDim.z)
+  for(unsigned x = blockIdx.x; x < size[2] ; x += gridDim.x)
+  for(unsigned bRow = blockIdx.y * blockDim.y; bRow < size[1]; bRow += blockDim.y * gridDim.y) {
+
+    float acc = init;
+    unsigned row = bRow + threadIdx.y;
+    float *src = src_ + z * src_stride[3] + x * src_stride[2] + row * src_stride[1];
+    bool reducing = threadIdx.x < blockDim.y && bRow + threadIdx.x < size[1] && threadIdx.y == 0;
+
+    for(unsigned bCol=0; bCol < size[0]; bCol += blockDim.x) {
+
+      sbuf[threadIdx.y][threadIdx.x] = init;
+      unsigned col = bCol + threadIdx.x;
+      if(row < size[1] && col < size[0]) {
+        sbuf[threadIdx.y][threadIdx.x] = src[col];
+      }
+      __syncthreads();
+
+      float* line = &sbuf[threadIdx.y][0];
+      for(unsigned s = 16; s > 1; s >>= 1) {
+        if(row < size[1] && threadIdx.x < s) {
+          line[threadIdx.x] = op(line[threadIdx.x], line[threadIdx.x + s]);
+        }
+        __syncthreads();
+      }
+      if(reducing) {
+        sbuf[threadIdx.x][0] = op(sbuf[threadIdx.x][0], sbuf[threadIdx.x][1]);
+        acc = op(acc, sbuf[threadIdx.x][0]);
+      }
+      __syncthreads();
+    }
+
+    if(reducing) {
+      unsigned row = bRow + threadIdx.x;
+      unsigned tgt_offset = z * tgt_stride[3] + x * tgt_stride[2];
+      tgt[tgt_offset + row] = acc;
+    }
+  }
+}
+
+
+
+template<class Op>
+__host__ void THCudaTensor_reduceInnermostDim(THCudaTensor *tgt, THCudaTensor *src, Op op, float init)
+{
+  dim4 src_stride(0);
+  dim4 tgt_stride(0);
+  dim4 size(1);
+
+  unsigned ndim = THCudaTensor_nDimension(src);
+  for(unsigned dim=0; dim < ndim; dim++) {
+    unsigned odim = ndim - 1 - dim;
+    src_stride[odim] = THCudaTensor_stride(src, dim);
+    tgt_stride[odim] = THCudaTensor_stride(tgt, dim);
+    size[odim]       = THCudaTensor_size(src, dim);
+  }
+
+  dim3 threads(32, 16);
+  unsigned nBlockPerRow = (size[1] + threads.y - 1) / threads.y;
+  unsigned maxGridDim = 1024; // anything < 64k is fine. The choice has no impact on performance.
+  dim3 grid(min(maxGridDim, size[2]), min(maxGridDim, nBlockPerRow), min(maxGridDim, size[3]));
+
+  THCudaTensor_kernel_reduceInnermostDim<<<grid, threads>>>(THCudaTensor_data(tgt),
+          THCudaTensor_data(src), src_stride, tgt_stride, size, op, init);
+  cudaError errcode = cudaGetLastError();
+  if(errcode != cudaSuccess) {
+    THError(cudaGetErrorString(errcode));
+  }
+}
+
+
+template<class Op>
+void THCudaTensor_reduceDim(THCudaTensor *self_, THCudaTensor *src, long dimension, Op op, float init)
+{
+  THArgCheck(dimension >= 0 && dimension < THCudaTensor_nDimension(src), 3, "dimension out of range");
+  THArgCheck(THCudaTensor_nDimension(src) <= 4, 2, "too many dimensions (>4)");
+
+  THLongStorage *dim = THCudaTensor_newSizeOf(src);
+  THLongStorage_set(dim, dimension, 1);
+  THCudaTensor_resize(self_, dim, NULL);
+  THLongStorage_free(dim);
+
+  THCudaTensor *self = THCudaTensor_newContiguous(self_);
+  src = THCudaTensor_newContiguous(src);
+
+  if(dimension == THCudaTensor_nDimension(src)-1) {
+    THCudaTensor_reduceInnermostDim(self, src, op, init);
+  } else {
+    THCudaTensor_reduceOuterDim(self, src, dimension, op, init);
+  }
+
+  THCudaTensor_free(src);
+  THCudaTensor_freeCopyTo(self, self_);
+}
+
+
+
+void THCudaTensor_sum(THCudaTensor *self, THCudaTensor *src, long dimension)
+{
+  return THCudaTensor_reduceDim(self, src, dimension, thrust::plus<float>(), 0.0f);
+}
+
+
+void THCudaTensor_max(THCudaTensor *self, THCudaTensor *src, long dimension)
+{
+  const float minfloat32 = 1.175494351e-38f;
+  return THCudaTensor_reduceDim(self, src, dimension, thrust::maximum<float>(), minfloat32);
+}
+
+
+void THCudaTensor_min(THCudaTensor *self, THCudaTensor *src, long dimension)
+{
+  const float maxfloat32 = 3.402823466e+38f;
+  return THCudaTensor_reduceDim(self, src, dimension, thrust::minimum<float>(), maxfloat32);
+}
+
 
 void THCudaTensor_addmv(THCudaTensor *self, float beta, float alpha, THCudaTensor *mat, THCudaTensor *vec)
 {
@@ -513,15 +733,45 @@ struct pow_functor
   }
 };
 
-void THCudaTensor_pow(THCudaTensor *self_, float value)
+void THCudaTensor_pow(THCudaTensor *self_, THCudaTensor *src, float value)
 {
+  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src), 2, "sizes do not match");
   THCudaTensor *self = THCudaTensor_newContiguous(self_);
+  src = THCudaTensor_newContiguous(src);
   long size = THCudaTensor_nElement(self);
   thrust::device_ptr<float> self_data(THCudaTensor_data(self));
+  thrust::device_ptr<float> src_data(THCudaTensor_data(src));
   
-  thrust::transform(self_data, self_data+size, self_data, pow_functor(value));
+  thrust::transform(src_data, src_data+size, self_data, pow_functor(value));
 
   THCudaTensor_freeCopyTo(self, self_);
+}
+
+
+struct sign_functor
+{
+  __device__ float operator()(const float &v) const {
+    return (v > 0) - (v < 0);
+  }
+};
+
+
+void THCudaTensor_sign(THCudaTensor *self_, THCudaTensor *src)
+{
+  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src), 2, "size do not match");
+
+  {
+    THCudaTensor *self = THCudaTensor_newContiguous(self_);
+    long size = THCudaTensor_nElement(self);
+    src = THCudaTensor_newContiguous(src);
+    thrust::device_ptr<float> self_data(THCudaTensor_data(self));
+    thrust::device_ptr<float> src_data(THCudaTensor_data(src));
+
+    thrust::transform(src_data, src_data+size, self_data, sign_functor());
+
+    THCudaTensor_free(src);
+    THCudaTensor_freeCopyTo(self, self_);
+  }
 }
 
 float THCudaTensor_meanall(THCudaTensor *self)
@@ -561,6 +811,168 @@ float THCudaTensor_stdall(THCudaTensor *self)
 {
   return sqrt(THCudaTensor_varall(self));
 }
+
+
+
+template<class Op>
+void THCudaTensor_logicalValue(THCudaTensor *self_, THCudaTensor *src, Op op)
+{
+  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src), 2, "size do not match");
+
+  THCudaTensor *self = THCudaTensor_newContiguous(self_);
+  long size = THCudaTensor_nElement(self);
+  src = THCudaTensor_newContiguous(src);
+  thrust::device_ptr<float> self_data(THCudaTensor_data(self));
+  thrust::device_ptr<float> src_data(THCudaTensor_data(src));
+
+  thrust::transform(src_data, src_data+size, self_data, op);
+
+  THCudaTensor_free(src);
+  THCudaTensor_freeCopyTo(self, self_);
+}
+
+
+struct partial_less_functor
+{
+  const float rhs;
+  partial_less_functor(float rhs) : rhs(rhs) {}
+  __host__ __device__ bool operator()(const float &lhs) const {return lhs < rhs;}
+};
+
+
+void THCudaTensor_ltValue(THCudaTensor *self_, THCudaTensor *src, float value)
+{
+  THCudaTensor_logicalValue(self_, src, partial_less_functor(value));
+}
+
+
+struct partial_greater_functor
+{
+  const float rhs;
+  partial_greater_functor(float rhs) : rhs(rhs) {}
+  __host__ __device__ bool operator()(const float &lhs) const {return lhs > rhs;}
+};
+
+
+void THCudaTensor_gtValue(THCudaTensor *self_, THCudaTensor *src, float value)
+{
+  THCudaTensor_logicalValue(self_, src, partial_greater_functor(value));
+}
+
+
+struct partial_less_equal_functor
+{
+  const float rhs;
+  partial_less_equal_functor(float rhs) : rhs(rhs) {}
+  __host__ __device__ bool operator()(const float &lhs) const {return lhs <= rhs;}
+};
+
+
+void THCudaTensor_leValue(THCudaTensor *self_, THCudaTensor *src, float value)
+{
+  THCudaTensor_logicalValue(self_, src, partial_less_equal_functor(value));
+}
+
+
+struct partial_greater_equal_functor
+{
+  const float rhs;
+  partial_greater_equal_functor(float rhs) : rhs(rhs) {}
+  __host__ __device__ bool operator()(const float &lhs) const {return lhs >= rhs;}
+};
+
+
+void THCudaTensor_geValue(THCudaTensor *self_, THCudaTensor *src, float value)
+{
+  THCudaTensor_logicalValue(self_, src, partial_greater_equal_functor(value));
+}
+
+
+struct partial_equal_functor
+{
+  const float rhs;
+  partial_equal_functor(float rhs) : rhs(rhs) {}
+  __host__ __device__ bool operator()(const float &lhs) const {return lhs == rhs;}
+};
+
+
+void THCudaTensor_eqValue(THCudaTensor *self_, THCudaTensor *src, float value)
+{
+  THCudaTensor_logicalValue(self_, src, partial_equal_functor(value));
+}
+
+
+struct partial_not_equal_functor
+{
+  const float rhs;
+  partial_not_equal_functor(float rhs) : rhs(rhs) {}
+  __host__ __device__ bool operator()(const float &lhs) const {return lhs != rhs;}
+};
+
+
+void THCudaTensor_neValue(THCudaTensor *self_, THCudaTensor *src, float value)
+{
+  THCudaTensor_logicalValue(self_, src, partial_not_equal_functor(value));
+}
+
+
+template<class Op>
+void THCudaTensor_logicalTensor(THCudaTensor *self_, THCudaTensor *src1, THCudaTensor *src2, Op op)
+{
+  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src1), 2, "size does not match");
+  THArgCheck(THCudaTensor_nElement(self_) == THCudaTensor_nElement(src2), 3, "size does not match");
+
+  THCudaTensor *self = THCudaTensor_newContiguous(self_);
+  long size = THCudaTensor_nElement(self);
+  src1 = THCudaTensor_newContiguous(src1);
+  src2 = THCudaTensor_newContiguous(src2);
+  thrust::device_ptr<float> self_data(THCudaTensor_data(self));
+  thrust::device_ptr<float> src1_data(THCudaTensor_data(src1));
+  thrust::device_ptr<float> src2_data(THCudaTensor_data(src2));
+
+  thrust::transform(src1_data, src1_data+size, src2_data, self_data, op);
+
+  THCudaTensor_free(src1);
+  THCudaTensor_free(src2);
+  THCudaTensor_freeCopyTo(self, self_);
+}
+
+
+void THCudaTensor_ltTensor(THCudaTensor *self_, THCudaTensor *src1, THCudaTensor *src2)
+{
+  THCudaTensor_logicalTensor(self_, src1, src2, thrust::less<float>());
+}
+
+
+void THCudaTensor_gtTensor(THCudaTensor *self_, THCudaTensor *src1, THCudaTensor *src2)
+{
+  THCudaTensor_logicalTensor(self_, src1, src2, thrust::greater<float>());
+}
+
+
+void THCudaTensor_leTensor(THCudaTensor *self_, THCudaTensor *src1, THCudaTensor *src2)
+{
+  THCudaTensor_logicalTensor(self_, src1, src2, thrust::less_equal<float>());
+}
+
+
+void THCudaTensor_geTensor(THCudaTensor *self_, THCudaTensor *src1, THCudaTensor *src2)
+{
+  THCudaTensor_logicalTensor(self_, src1, src2, thrust::greater_equal<float>());
+}
+
+
+void THCudaTensor_eqTensor(THCudaTensor *self_, THCudaTensor *src1, THCudaTensor *src2)
+{
+  THCudaTensor_logicalTensor(self_, src1, src2, thrust::equal_to<float>());
+}
+
+
+void THCudaTensor_neTensor(THCudaTensor *self_, THCudaTensor *src1, THCudaTensor *src2)
+{
+  THCudaTensor_logicalTensor(self_, src1, src2, thrust::not_equal_to<float>());
+}
+
 
 struct norm_functor
 {

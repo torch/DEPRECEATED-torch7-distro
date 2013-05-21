@@ -206,6 +206,7 @@ interface:wrap("div",
 interface:wrap("cmul",
                cname("cmul"),
                {{name="CudaTensor", returned=true},
+                {name="CudaTensor", default=1},
                 {name="CudaTensor"}})
 
 interface:wrap("cdiv",
@@ -236,9 +237,15 @@ interface:wrap("dot",
 for _,name in ipairs({"min", "max", "sum"}) do
    interface:wrap(name,
                   cname(name .. "all"),
-                  {{name="CudaTensor"},            
-                   {name="float", creturned=true}})
+                  {{name="CudaTensor"},
+                   {name="float", creturned=true}},
+                  cname(name),
+                  {{name="CudaTensor", returned=true},
+                   {name="CudaTensor"},
+                   {name="index"}})
 end
+
+
 
 for _,name in ipairs({"addmv", "addmm"}) do
    interface:wrap(name,
@@ -280,7 +287,22 @@ end
 interface:wrap("pow",
                cname("pow"),
                {{name="CudaTensor", returned=true},
+                {name="CudaTensor", default=1},
                 {name="float"}})
+
+
+for _,name in pairs({'lt','gt','le','ge','eq','ne'}) do
+   interface:wrap(name,
+                  cname(name .. 'Value'),
+                  {{name="CudaTensor", returned=true},
+                   {name="CudaTensor"},
+                   {name="float"}},
+                  cname(name .. 'Tensor'),
+                  {{name="CudaTensor", returned=true},
+                   {name="CudaTensor"},
+                   {name="CudaTensor"}})
+end
+
 
 interface:wrap('random',
                'THCRandom_random2',
@@ -370,6 +392,11 @@ interface:wrap("dist",
                 {name="CudaTensor"},
                 {name="float", default=2},
                 {name="float", creturned=true}})
+
+interface:wrap("sign",
+                cname("sign"),
+                {{name="CudaTensor", returned=true},
+                 {name="CudaTensor", default=1}})
 
 interface:register("cutorch_CudaTensorMath__")
 
