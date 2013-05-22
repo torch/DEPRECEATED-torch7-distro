@@ -95,7 +95,6 @@ function exit()
    os.exit()
 end
 
-print_old=print
 _G._preloaded_ = {}
 for k,v in pairs(_G) do
    _G._preloaded_[k] = true
@@ -175,7 +174,9 @@ local function colorize(object)
 end
 
 -- This is a new recursive, colored print.
-function print(...)
+local ndepth = 4
+local print_old=print
+local function print_new(...)
    local objs = {...}
    local function printrecursive(obj,tab)
       local tab = tab or 0
@@ -191,7 +192,7 @@ function print(...)
          tab = tab+2
          for k,v in pairs(obj) do
             if type(v) == 'table' then
-               if tab > 16 or next(v) == nil then
+               if tab > ndepth*4 or next(v) == nil then
                   line(tostring(k) .. ' : ' .. colorize(v))
                else
                   line(tostring(k) .. ' : ') printrecursive(v,tab+4)
@@ -219,6 +220,19 @@ function print(...)
          printrecursive(obj) 
       end
    end
+end
+
+function torch.setprintlevel(n)
+  if n == nil or n < 0 then
+    error('expected number [0,+)')
+  end
+  n = math.floor(n)
+  ndepth = n
+  if ndepth == 0 then
+    print = print_old
+  else
+    print = print_new
+  end
 end
 
 -- table():
@@ -255,6 +269,8 @@ function import(package, forced)
       end
    end
 end
+
+torch.setprintlevel(4)
 
 -- install module:
 -- this function builds and install a specified module
