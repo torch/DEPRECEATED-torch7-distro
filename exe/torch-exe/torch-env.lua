@@ -178,8 +178,9 @@ local ndepth = 4
 local print_old=print
 local function print_new(...)
    local objs = {...}
-   local function printrecursive(obj,tab)
-      local tab = tab or 0
+   local function printrecursive(obj,depth)
+      local depth = depth or 0
+      local tab = depth*4
       local line = function(s) for i=1,tab do io.write(' ') end print_old(s) end
       local mt = getmetatable(obj)
       if mt and mt.__tostring and torch.typename(obj) == nil then
@@ -192,10 +193,10 @@ local function print_new(...)
          tab = tab+2
          for k,v in pairs(obj) do
             if type(v) == 'table' then
-               if tab > ndepth*4 or next(v) == nil then
+               if depth >= (ndepth-1) or next(v) == nil then
                   line(tostring(k) .. ' : ' .. colorize(v))
                else
-                  line(tostring(k) .. ' : ') printrecursive(v,tab+4)
+                  line(tostring(k) .. ' : ') printrecursive(v,depth+1)
                end
             else
                line(tostring(k) .. ' : ' .. colorize(v))
@@ -222,7 +223,7 @@ local function print_new(...)
    end
 end
 
-function torch.setprintlevel(n)
+function setprintlevel(n)
   if n == nil or n < 0 then
     error('expected number [0,+)')
   end
@@ -234,6 +235,7 @@ function torch.setprintlevel(n)
     print = print_new
   end
 end
+setprintlevel(5)
 
 -- table():
 -- ok, this is slightly out of context, but that function
@@ -270,7 +272,6 @@ function import(package, forced)
    end
 end
 
-torch.setprintlevel(4)
 
 -- install module:
 -- this function builds and install a specified module
