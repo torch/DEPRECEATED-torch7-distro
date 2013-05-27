@@ -1,6 +1,6 @@
 /*
 ** LuaJIT common internal definitions.
-** Copyright (C) 2005-2012 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2013 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #ifndef _LJ_DEF_H
@@ -101,8 +101,8 @@ typedef unsigned int uintptr_t;
 #define checkptr32(x)	((uintptr_t)(x) == (uint32_t)(uintptr_t)(x))
 
 /* Every half-decent C compiler transforms this into a rotate instruction. */
-#define lj_rol(x, n)	(((x)<<(n)) | ((x)>>(8*sizeof(x)-(n))))
-#define lj_ror(x, n)	(((x)<<(8*sizeof(x)-(n))) | ((x)>>(n)))
+#define lj_rol(x, n)	(((x)<<(n)) | ((x)>>(-(int)(n)&(8*sizeof(x)-1))))
+#define lj_ror(x, n)	(((x)<<(-(int)(n)&(8*sizeof(x)-1))) | ((x)>>(n)))
 
 /* A really naive Bloom filter. But sufficient for our needs. */
 typedef uintptr_t BloomFilter;
@@ -243,17 +243,17 @@ static LJ_AINLINE uint32_t lj_getu32(const void *p)
 #endif
 
 #ifdef _M_PPC
-#pragma intrinsic(_CountLeadingZeros)
 unsigned int _CountLeadingZeros(long);
+#pragma intrinsic(_CountLeadingZeros)
 static LJ_AINLINE uint32_t lj_fls(uint32_t x)
 {
   return _CountLeadingZeros(x) ^ 31;
 }
 #else
-#pragma intrinsic(_BitScanForward)
-#pragma intrinsic(_BitScanReverse)
 unsigned char _BitScanForward(uint32_t *, unsigned long);
 unsigned char _BitScanReverse(uint32_t *, unsigned long);
+#pragma intrinsic(_BitScanForward)
+#pragma intrinsic(_BitScanReverse)
 
 static LJ_AINLINE uint32_t lj_ffs(uint32_t x)
 {
@@ -273,7 +273,7 @@ uint64_t _byteswap_uint64(uint64_t);
 
 #if defined(_M_PPC) && defined(LUAJIT_NO_UNALIGNED)
 /*
-** Replacement for unaligned loads on XBox 360. Disabled by default since it's
+** Replacement for unaligned loads on Xbox 360. Disabled by default since it's
 ** usually more costly than the occasional stall when crossing a cache-line.
 */
 static LJ_AINLINE uint16_t lj_getu16(const void *v)

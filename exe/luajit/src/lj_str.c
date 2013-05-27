@@ -1,6 +1,6 @@
 /*
 ** String handling.
-** Copyright (C) 2005-2012 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2013 Mike Pall. See Copyright Notice in luajit.h
 **
 ** Portions taken verbatim or adapted from the Lua interpreter.
 ** Copyright (C) 1994-2008 Lua.org, PUC-Rio. See Copyright Notice in lua.h
@@ -48,7 +48,7 @@ static LJ_AINLINE int str_fastcmp(const char *a, const char *b, MSize len)
 {
   MSize i = 0;
   lua_assert(len > 0);
-  lua_assert((((uintptr_t)a + len) & (LJ_PAGESIZE-1)) <= LJ_PAGESIZE-4);
+  lua_assert((((uintptr_t)a+len-1) & (LJ_PAGESIZE-1)) <= LJ_PAGESIZE-4);
   do {  /* Note: innocuous access up to end of string + 3. */
     uint32_t v = lj_getu32(a+i) ^ *(const uint32_t *)(b+i);
     if (v) {
@@ -121,7 +121,7 @@ GCstr *lj_str_new(lua_State *L, const char *str, size_t lenx)
   h ^= b; h -= lj_rol(b, 16);
   /* Check if the string has already been interned. */
   o = gcref(g->strhash[h & g->strmask]);
-  if (LJ_LIKELY((((uintptr_t)str + len) & (LJ_PAGESIZE-1)) <= LJ_PAGESIZE-4)) {
+  if (LJ_LIKELY((((uintptr_t)str+len-1) & (LJ_PAGESIZE-1)) <= LJ_PAGESIZE-4)) {
     while (o != NULL) {
       GCstr *sx = gco2str(o);
       if (sx->len == len && str_fastcmp(str, strdata(sx), len) == 0) {

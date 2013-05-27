@@ -1,6 +1,6 @@
 /*
 ** FFI C callback handling.
-** Copyright (C) 2005-2012 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2013 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #include "lj_obj.h"
@@ -286,9 +286,9 @@ void lj_ccallback_mcode_free(CTState *cts)
 /* Windows/x64 argument registers are strictly positional (use ngpr). */
 #define CALLBACK_HANDLE_REGARG \
   if (isfp) { \
-    if (ngpr < 4) { sp = &cts->cb.fpr[ngpr++]; nfpr = ngpr; goto done; } \
+    if (ngpr < maxgpr) { sp = &cts->cb.fpr[ngpr++]; UNUSED(nfpr); goto done; } \
   } else { \
-    if (ngpr < 4) { sp = &cts->cb.gpr[ngpr++]; goto done; } \
+    if (ngpr < maxgpr) { sp = &cts->cb.gpr[ngpr++]; goto done; } \
   }
 
 #elif LJ_TARGET_X64

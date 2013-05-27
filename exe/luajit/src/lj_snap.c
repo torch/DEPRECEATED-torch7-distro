@@ -1,6 +1,6 @@
 /*
 ** Snapshot handling.
-** Copyright (C) 2005-2012 Mike Pall. See Copyright Notice in luajit.h
+** Copyright (C) 2005-2013 Mike Pall. See Copyright Notice in luajit.h
 */
 
 #define lj_snap_c
@@ -564,6 +564,8 @@ void lj_snap_replay(jit_State *J, GCtrace *T)
 		continue;
 	      }
 	      tmp = emitir(irs->ot, tmp, val);
+	    } else if (LJ_HASFFI && irs->o == IR_XBAR && ir->o == IR_CNEW) {
+	      emitir(IRT(IR_XBAR, IRT_NIL), 0, 0);
 	    }
 	}
       }
