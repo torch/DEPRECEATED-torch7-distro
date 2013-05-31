@@ -2,22 +2,22 @@
 #include "THRandom.h"
 
 /* The initial seed. */
-static unsigned long the_initial_seed;
+static __thread unsigned long the_initial_seed;
 
 /* Code for the Mersenne Twister random generator.... */
 #define n 624
 #define m 397
-static int left = 1;
-static int initf = 0;
-static unsigned long *next;
-static unsigned long state[n]; /* the array for the state vector  */
+static __thread int left = 1;
+static __thread int initf = 0;
+static __thread unsigned long *next;
+static __thread unsigned long state[n]; /* the array for the state vector  */
 /********************************/
 
 /* For normal distribution */
-static double normal_x;
-static double normal_y;
-static double normal_rho;
-static int normal_is_valid = 0;
+static __thread double normal_x;
+static __thread double normal_y;
+static __thread double normal_rho;
+static __thread int normal_is_valid = 0;
 
 unsigned long THRandom_seed()
 {

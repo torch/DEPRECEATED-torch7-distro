@@ -924,7 +924,7 @@ static void torch_Tensor_(c_readSizeStride)(lua_State *L, int index, int allowSt
 static void torch_Tensor_(c_readTensorStorageSizeStride)(lua_State *L, int index, int allowNone, int allowTensor, int allowStorage, int allowStride,
                                                          THStorage **storage_, long *storageOffset_, THLongStorage **size_, THLongStorage **stride_)
 {
-  static char errMsg[64];
+  static __thread char errMsg[64];
   THTensor *src = NULL;
   THStorage *storage = NULL;
 
