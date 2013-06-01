@@ -43,7 +43,7 @@ end
 configfile = paths.concat(os.getenv('HOME'), '.torch', 'config.th7')
 if not paths.filep(configfile) then
    defurls = {
-      'http://www.torch.ch/resources/packages.th7'
+      'https://raw.github.com/andresy/torch/master/exe/torch-pkg/packages.th7'
    }
    os.execute(mkdir .. paths.dirname(configfile))
    os.execute('echo "pkgconfig = {urls={}}" > ' .. configfile)
