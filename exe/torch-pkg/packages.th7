@@ -236,3 +236,10 @@ pkg.md5 = {
    dependencies = {},
    commit = 'master',
 }
+
+pkg.graphicsmagick = {
+   git = 'https://github.com/clementfarabet/graphicsmagick',
+   description = 'Interface to libGraphicsMagick',
+   dependencies = {'image','torchffi'},
+   commit = 'master'
+}
