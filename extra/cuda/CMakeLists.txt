@@ -8,7 +8,8 @@ FIND_PACKAGE(CUDA 4.0)
 
 IF (CUDA_FOUND)
 
-  LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_20;--use_fast_math")
+  LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_20")
+  #LIST(APPEND CUDA_NVCC_FLAGS "-arch=sm_20;--use_fast_math")
 
   # bug on Apple
   IF(APPLE)
