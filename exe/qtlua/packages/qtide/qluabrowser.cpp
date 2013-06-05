@@ -934,7 +934,7 @@ QLuaBrowser::doZoomIn()
 {
 #if HAVE_QTWEBKIT
   qreal z = d->w->zoomFactor() * 1.2;
-  d->w->setZoomFactor(qMin(z, 4.0));
+  d->w->setZoomFactor(qMin(z, (qreal) 4.0));
 #endif
 }
 
@@ -943,7 +943,7 @@ QLuaBrowser::doZoomOut()
 {
 #if HAVE_QTWEBKIT
   qreal z = d->w->zoomFactor() / 1.2;
-  d->w->setZoomFactor(qMax(z, 0.25));
+  d->w->setZoomFactor(qMax(z, (qreal) 0.25));
 #endif
 }
 
