@@ -34,6 +34,9 @@ ADD_SUBDIRECTORY(pkg)
 # Torch extra packages
 ADD_SUBDIRECTORY(extra)
 
+# Torch extra packages
+ADD_SUBDIRECTORY(dev)
+
 # External packages support
 INCLUDE(TorchExports)
 
