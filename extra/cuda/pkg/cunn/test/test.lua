@@ -44,7 +44,7 @@ function cunntest.Tanh_forward()
    local size = math.random(1,100)
 
    local tm = {}
-   local title = string.format('Sigmoid forward %d -> %d', size, size)
+   local title = string.format('Tanh forward %d -> %d', size, size)
    times[title] = tm
 
    local input = torch.randn(size)
@@ -145,6 +145,73 @@ function cunntest.Sigmoid_backward()
    local input = torch.randn(size)
    local gradOutput = torch.randn(size)
    local sconv = nn.Sigmoid()
+   sconv:forward(input)
+   local groundgrad = sconv:backward(input, gradOutput)
+   local a = torch.Timer()
+   for i = 1,nloop do
+      groundgrad = sconv:backward(input, gradOutput)
+   end
+   tm.cpu = a:time().real
+
+   input = input:cuda()
+   gradOutput = gradOutput:cuda()
+   local gconv = sconv:clone():cuda()
+   gconv:forward(input)
+   local rescuda = gconv:backward(input, gradOutput)
+   a:reset()
+   for i = 1,nloop do
+      rescuda = gconv:backward(input, gradOutput)
+   end
+   cutorch.synchronize()
+   tm.gpu = a:time().real
+
+   local error = rescuda:float() - groundgrad
+
+   mytester:assertlt(error:abs():max(), precision_backward, 'error on state (backward) ')
+end
+
+function cunntest.Threshold_forward()
+   local size = math.random(1,100)
+   local thres = torch.uniform(-1,1)
+   local val = torch.uniform(-1,1)
+
+   local tm = {}
+   local title = string.format('Threshold forward %d -> %d', size, size)
+   times[title] = tm
+
+   local input = torch.randn(size)
+   local sconv = nn.Threshold(thres,val)
+   local groundtruth = sconv:forward(input)
+   local a = torch.Timer()
+   for i = 1,nloop do
+      groundtruth = sconv:forward(input)
+   end
+   tm.cpu = a:time().real
+
+   input = input:cuda()
+   local gconv = sconv:cuda()
+   local rescuda = gconv:forward(input)
+   a:reset()
+   for i = 1,nloop do
+      rescuda = gconv:forward(input)
+   end
+   cutorch.synchronize()
+   tm.gpu = a:time().real
+
+   local error = rescuda:float() - groundtruth
+   mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
+end
+
+function cunntest.Threshold_backward()
+   local size = math.random(1,100)
+
+   local tm = {}
+   local title = string.format('Threshold.backward %d -> %d', size, size)
+   times[title] = tm
+
+   local input = torch.randn(size)
+   local gradOutput = torch.randn(size)
+   local sconv = nn.Threshold()
    sconv:forward(input)
    local groundgrad = sconv:backward(input, gradOutput)
    local a = torch.Timer()
