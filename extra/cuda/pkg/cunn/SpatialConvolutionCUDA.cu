@@ -22,6 +22,7 @@ static int cunn_SpatialConvolutionCUDA_updateOutput(lua_State *L)
   THCudaTensor *input = (THCudaTensor*)luaT_checkudata(L, 2, "torch.CudaTensor");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
+  int padding = luaT_getfieldcheckint(L, 1, "padding");
 
   THCudaTensor *weight = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "weight", "torch.CudaTensor");
   THCudaTensor *output = (THCudaTensor*)luaT_getfieldcheckudata(L, 1, "output", "torch.CudaTensor");
@@ -35,8 +36,8 @@ static int cunn_SpatialConvolutionCUDA_updateOutput(lua_State *L)
   long inputHeight  = input->size[1];
   long inputWidth   = input->size[2];
   long batchSize    = input->size[3];
-  long outputHeight = (inputHeight - kH) / dH + 1;
-  long outputWidth  = (inputWidth - kW) / dW + 1;
+  long outputHeight = (padding + inputHeight - kH) / dH + 1;
+  long outputWidth  = (padding + inputWidth - kW) / dW + 1;
 
   // resize output
   THCudaTensor_resize4d(output, nOutputPlane, outputHeight, outputWidth, batchSize);
@@ -62,7 +63,7 @@ static int cunn_SpatialConvolutionCUDA_updateOutput(lua_State *L)
     nInputPlane, inputHeight, inputWidth, batchSize,
     nOutputPlane, outputHeight, outputWidth,
     kH, kW,
-    0, dW,
+    -padding, dW,
     0, 1, true
   );
   
@@ -75,6 +76,7 @@ static int cunn_SpatialConvolutionCUDA_updateGradInput(lua_State *L)
   THCudaTensor *gradOutput = (THCudaTensor *)luaT_checkudata(L, 3, "torch.CudaTensor");
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
+  int padding = luaT_getfieldcheckint(L, 1, "padding");
 
   THCudaTensor *weight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "weight", "torch.CudaTensor");
   THCudaTensor *gradInput = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradInput", "torch.CudaTensor");
@@ -86,8 +88,8 @@ static int cunn_SpatialConvolutionCUDA_updateGradInput(lua_State *L)
   long inputHeight  = input->size[1];
   long inputWidth   = input->size[2];
   long batchSize    = input->size[3];
-  long outputHeight = (inputHeight - kH) / dH + 1;
-  long outputWidth  = (inputWidth - kW) / dW + 1;
+  long outputHeight = (padding + inputHeight - kH) / dH + 1;
+  long outputWidth  = (padding + inputWidth - kW) / dW + 1;
 
   // resize gradInput
   THCudaTensor_resize4d(gradInput, nInputPlane, inputHeight, inputWidth, batchSize);
@@ -113,7 +115,7 @@ static int cunn_SpatialConvolutionCUDA_updateGradInput(lua_State *L)
     nInputPlane, inputHeight, inputWidth, batchSize,
     nOutputPlane, outputHeight, outputWidth,
     kH, kW,
-    0, dW,
+    -padding, dW,
     0, 1, true
   );
 
@@ -128,6 +130,7 @@ static int cunn_SpatialConvolutionCUDA_accGradParameters(lua_State *L)
   
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
+  int padding = luaT_getfieldcheckint(L, 1, "padding");
   float scale = luaL_optnumber(L, 4, 1);
 
   long nOutputPlane = gradWeight->size[3];
@@ -137,8 +140,8 @@ static int cunn_SpatialConvolutionCUDA_accGradParameters(lua_State *L)
   long inputHeight  = input->size[1];
   long inputWidth   = input->size[2];
   long batchSize    = input->size[3];
-  long outputHeight = (inputHeight - kH) / dH + 1;
-  long outputWidth  = (inputWidth - kW) / dW + 1;
+  long outputHeight = (padding + inputHeight - kH) / dH + 1;
+  long outputWidth  = (padding + inputWidth - kW) / dW + 1;
   
   // asserts
   luaL_argcheck(L, inputWidth == inputHeight, 1, "input must be square");
@@ -161,7 +164,7 @@ static int cunn_SpatialConvolutionCUDA_accGradParameters(lua_State *L)
     nInputPlane, inputHeight, inputWidth, batchSize,
     nOutputPlane, outputHeight, outputWidth,
     kH, kW,
-    0, dW,
+    -padding, dW,
     0, scale
   );
 
