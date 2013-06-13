@@ -279,7 +279,7 @@ local function getvars(t)
       if x:dim() == 2 and x:size(2) == 2 then
          y = x:select(2,2)
          x = x:select(2,1)
-      elseif x:dim() == 2 and x:size(2) == 4 then
+      elseif x:dim() == 2 and x:size(2) == 4 and format == 'v' then
          y = torch.Tensor(x:size(1),2)
          xx= torch.Tensor(x:size(1),2)
          y:select(2,1):copy(x:select(2,2))
@@ -287,15 +287,24 @@ local function getvars(t)
          xx:select(2,1):copy(x:select(2,1))
          xx:select(2,2):copy(x:select(2,3))
          x = xx
+      elseif x:dim() == 2 and x:size(2) > 1 then
+         y = x[{ {}, {2,-1} }]
+         x = x:select(2,1)
       else
          y = x
          x = torch.range(1,y:size(1))
       end
    end
-   if x:dim() ~= y:dim() or x:nDimension() > 2 or y:nDimension() > 2 then
+   if x:dim() ~= 1 and x:dim() ~= 2 then
       error('x and y dims are wrong :  x = ' .. x:nDimension() .. 'D y = ' .. y:nDimension() .. 'D')
    end
-   --print(x:size(),y:size())
+   if y:size(1) ~= x:size(1) then
+      error('x and y dims are wrong :  x = ' .. x:nDimension() .. 'D y = ' .. y:nDimension() .. 'D')
+   end
+   -- if x:dim() ~= y:dim() or x:nDimension() > 2 or y:nDimension() > 2 then
+   --    error('x and y dims are wrong :  x = ' .. x:nDimension() .. 'D y = ' .. y:nDimension() .. 'D')
+   -- end
+   -- print(x:size(),y:size())
    return legend,x,y,format
 end
 
@@ -425,6 +434,7 @@ local function gnuplot_string(legend,x,y,format)
       elseif f == '~' or f == 'csplines' then return 'smooth csplines'
       elseif f == 'acsplines' then return 'smooth acsplines'
       elseif f == 'V' or f == 'v' or f == 'vectors' then vecplot[i]=true;return 'with vectors'
+      else return 'with ' .. f
       end
       error("format string accepted: '.' or '-' or '+' or '+-' or '~' or '~ COEF'")
    end
@@ -443,10 +453,13 @@ local function gnuplot_string(legend,x,y,format)
          elseif vecplot[i] then
             --print(xi,yi)
             table.insert(dstr,string.format('%g %g %g %g\n',xi[j][1],yi[j][1],xi[j][2],yi[j][2]))
-         else
+         elseif yi:dim() == 1 then
             table.insert(dstr,string.format('%g %g\n',xi[j],yi[j]))
+         else
+            table.insert(dstr,string.format(string.rep('%g ',1+yi:size(2)) .. '\n',xi[j],unpack(yi[j]:clone():storage():totable())))
          end
       end
+      collectgarbage()
       table.insert(dstr,'e\n')
    end
    return hstr,table.concat(dstr)
@@ -564,7 +577,7 @@ function gnuplot.figprint(fname)
    if suffix == 'eps' then
       term = 'postscript eps enhanced color'
    elseif suffix == 'png' then
-      term = 'png'
+      term = 'png size "1024,768"'
    else
       error('only eps and png for figprint')
    end
