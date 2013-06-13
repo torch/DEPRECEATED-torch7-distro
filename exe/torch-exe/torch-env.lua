@@ -177,7 +177,6 @@ end
 local ndepth = 4
 local print_old=print
 local function print_new(...)
-   local objs = {...}
    local function printrecursive(obj,depth)
       local depth = depth or 0
       local tab = depth*4
@@ -220,6 +219,9 @@ local function print_new(...)
       else 
          printrecursive(obj) 
       end
+   end
+   if select('#',...) == 0 then
+      print_old()
    end
 end
 
