@@ -373,7 +373,7 @@ Sets the properties of axis for the current plot.
   * ''image'' : scales the axis aspect ratio so that a circle is drawn as circle.
   * ''equal'' : same as ''image''.
   * ''fill'' : resets the aspect ratio of the plot to original values so that it fills up the canvas as good as possible.
-  * {xmin,xmax,ymin,ymax} : Sets the limits of x and y axes.
+  * {xmin,xmax,ymin,ymax} : Sets the limits of x and y axes. Use an empty string (2 apostophes in a row) if you want to keep the current value.
 
 ====  gnuplot.raw(command) ====
 {{anchor:gnuplot.raw}}
