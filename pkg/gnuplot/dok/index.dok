@@ -17,7 +17,7 @@ or above is suggested for full support of all functionality.
 By default, plot package will search for terminal in following order
   * '' windows '' terminal if operating system is windows
   * '' wxt '', '' x11 ''  terminal if operating system is linux
-  * '' aqua '', '' x11 '' terminal if operating system is mac
+  * '' aqua '', ''wxt'', '' x11 '' terminal if operating system is mac
 
 It is also possible to manually set any terminal type using
 [[#gnuplot.setterm|gnuplot.setterm]]. Interactivity is

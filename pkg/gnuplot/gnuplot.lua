@@ -134,6 +134,8 @@ local function getgnuplotdefaultterm(os)
       return  'x11'
    elseif os == 'mac' and gnuplothasterm('aqua') then
       return  'aqua'
+   elseif os == 'mac' and gnuplothasterm('wxt') then
+      return  'wxt'
    elseif os == 'mac' and gnuplothasterm('x11') then
       return  'x11'
    else
