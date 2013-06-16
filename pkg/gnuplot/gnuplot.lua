@@ -80,7 +80,7 @@ set style increment user
 set style arrow 1 filled
 
 ## used for bar chart borders
-set style fill solid 0.5
+## set style fill solid 0.5
 
 set size noratio
 set samples 300
