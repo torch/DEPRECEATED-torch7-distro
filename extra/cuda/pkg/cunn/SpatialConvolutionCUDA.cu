@@ -63,7 +63,7 @@ static int cunn_SpatialConvolutionCUDA_updateOutput(lua_State *L)
     nInputPlane, inputHeight, inputWidth, batchSize,
     nOutputPlane, outputHeight, outputWidth,
     kH, kW,
-    -padding, dW,
+    -floor(padding/2), dW,
     0, 1, true
   );
   
@@ -115,7 +115,7 @@ static int cunn_SpatialConvolutionCUDA_updateGradInput(lua_State *L)
     nInputPlane, inputHeight, inputWidth, batchSize,
     nOutputPlane, outputHeight, outputWidth,
     kH, kW,
-    -padding, dW,
+    -floor(padding/2), dW,
     0, 1, true
   );
 
@@ -164,7 +164,7 @@ static int cunn_SpatialConvolutionCUDA_accGradParameters(lua_State *L)
     nInputPlane, inputHeight, inputWidth, batchSize,
     nOutputPlane, outputHeight, outputWidth,
     kH, kW,
-    -padding, dW,
+    -floor(padding/2), dW,
     0, scale
   );
 
