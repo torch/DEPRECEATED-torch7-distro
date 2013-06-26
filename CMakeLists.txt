@@ -40,5 +40,10 @@ ADD_SUBDIRECTORY(dev)
 # External packages support
 INCLUDE(TorchExports)
 
+# User defined cmake stuff
+IF (EXISTS "${CMAKE_SOURCE_DIR}/CMakeExtra.txt")
+  INCLUDE("${CMAKE_SOURCE_DIR}/CMakeExtra.txt")
+ENDIF()
+
 # Packaging support
 INCLUDE(TorchCPack)
