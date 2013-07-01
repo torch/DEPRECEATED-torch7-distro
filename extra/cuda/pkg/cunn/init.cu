@@ -9,6 +9,7 @@
 
 #include "HardTanh.cu"
 #include "Tanh.cu"
+#include "Max.cu"
 #include "LogSoftMax.cu"
 #include "TemporalConvolution.cu"
 #include "SpatialConvolution.cu"
@@ -30,6 +31,7 @@ DLL_EXPORT TH_API int luaopen_libcunn(lua_State *L)
 
   cunn_Tanh_init(L);
   cunn_Sigmoid_init(L);
+  cunn_Max_init(L);
   cunn_HardTanh_init(L);
   cunn_LogSoftMax_init(L);
   cunn_TemporalConvolution_init(L);

@@ -366,6 +366,73 @@ function cunntest.Square_backward()
 
    mytester:assertlt(error:abs():max(), precision_backward, 'error on state (backward) ')
 end
+
+function cunntest.Max_forward()
+   local size1 = math.random(1,1000)
+   local size2 = math.random(2,100)
+
+   local tm = {}
+   local title = string.format('Max forward %dx%d', size1, size2)
+   times[title] = tm
+
+   local input = torch.randn(size1,size2)
+   local sconv = nn.Max(2)
+   local groundtruth = sconv:forward(input)
+   local a = torch.Timer()
+   for i = 1,nloop do
+      groundtruth = sconv:forward(input)
+   end
+   tm.cpu = a:time().real
+
+   input = input:cuda()
+   local gconv = nn.Max(2):cuda()
+   local rescuda = gconv:forward(input)
+   a:reset()
+   for i = 1,nloop do
+      rescuda = gconv:forward(input)
+   end
+   cutorch.synchronize()
+   tm.gpu = a:time().real
+
+   local error = rescuda:float() - groundtruth
+   mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
+end
+
+function cunntest.Max_backward()
+   local size1 = math.random(1,1000)
+   local size2 = math.random(2,100)
+
+   local tm = {}
+   local title = string.format('Max.backward %dx%d', size1, size2)
+   times[title] = tm
+
+   local input = torch.randn(size1,size2)
+   local gradOutput = torch.randn(size1)
+   local sconv = nn.Max(2)
+   sconv:forward(input)
+   local groundgrad = sconv:backward(input, gradOutput)
+   local a = torch.Timer()
+   for i = 1,nloop do
+      groundgrad = sconv:backward(input, gradOutput)
+   end
+   tm.cpu = a:time().real
+
+   input = input:cuda()
+   gradOutput = gradOutput:cuda()
+   local gconv = sconv:clone():cuda()
+   gconv:forward(input)
+   local rescuda = gconv:backward(input, gradOutput)
+   a:reset()
+   for i = 1,nloop do
+      rescuda = gconv:backward(input, gradOutput)
+   end
+   cutorch.synchronize()
+   tm.gpu = a:time().real
+
+   local error = rescuda:float() - groundgrad
+
+   mytester:assertlt(error:abs():max(), precision_backward, 'error on state (backward) ')
+end
 function cunntest.SpatialConvolution_forward()
    local from = math.random(1,64)
    local to = math.random(1,64)
