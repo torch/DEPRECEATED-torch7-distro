@@ -396,6 +396,9 @@ function cunntest.Max_forward()
 
    local error = rescuda:float() - groundtruth
    mytester:assertlt(error:abs():max(), precision_forward, 'error on state (forward) ')
+   
+   local error = gconv.indices:float() - sconv.indices
+   mytester:assertlt(error:abs():max(), 1e-8, 'error on indices ')
 end
 
 function cunntest.Max_backward()

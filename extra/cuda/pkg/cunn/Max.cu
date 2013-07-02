@@ -18,10 +18,10 @@ __global__ void max_output(float *input, float *output, float *indices,
   input = input + i;
 
   // compute max:
-  float max = FLT_MIN;
-  long argmax;
+  float max = input[0];
+  long argmax = 0;
   long ii;
-  for (ii=0; ii<ncols; ii++) {
+  for (ii=1; ii<ncols; ii++) {
       float val = input[ii];
       if (val > max) {
           max = val;
