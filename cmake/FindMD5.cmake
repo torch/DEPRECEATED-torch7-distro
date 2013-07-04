@@ -18,7 +18,7 @@
 #  License text for the above reference.)
 
 FIND_PROGRAM(MD5_EXECUTABLE
-  md5 md5sum
+  NAMES md5 md5sum
 )
 
 # handle the QUIETLY and REQUIRED arguments and set MD5_FOUND to TRUE if 
