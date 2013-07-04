@@ -2,3 +2,8 @@ rocks_trees = {
    home..[[/.luarocks]],
    {root="@Torch_INSTALL_PREFIX@", bin_dir="@Torch_INSTALL_BIN@", lib_dir="@Torch_INSTALL_LUA_CPATH@", lua_dir="@Torch_INSTALL_LUA_PATH@"}
 }
+
+rocks_servers = {
+   [[http://luarocks.org/repositories/rocks]],
+   [[https://raw.github.com/andresy/torch-rocks/master]],
+}
