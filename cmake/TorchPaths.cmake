@@ -27,6 +27,12 @@ SET(Torch_INSTALL_HTML_SUBDIR "share/torch/html" CACHE PATH
 SET(Torch_INSTALL_CMAKE_SUBDIR "share/cmake/torch" CACHE PATH
   "Install dir for .cmake files (relative to Torch_INSTALL_PREFIX)")
 
+SET(Torch_INSTALL_LUAROCKS_SYSCONF_SUBDIR "etc/luarocks" CACHE PATH
+  "Install sysconf path for Luarocks (if -DWITH_LUAROCKS=ON)")
+
+SET(Torch_INSTALL_LUAROCKS_ROCKS_SUBDIR "lib/luarocks/rocks" CACHE PATH
+  "Install rock path for Luarocks (if -DWITH_LUAROCKS=ON)")
+
 OPTION(WITH_LUA_PACKAGE_PATH "Use the package path from lua instead of the one from Torch" OFF)
 
 IF(WITH_LUA_PACKAGE_PATH)
