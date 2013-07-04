@@ -14,8 +14,8 @@ local socket_ok, zip_ok, unzip_ok, lfs_ok, md5_ok, posix_ok, _
 local http, ftp, lrzip, luazip, lfs, md5, posix
 
 if cfg.fs_use_modules then
-   socket_ok, http = pcall(require, "socket.http")
-   _, ftp = pcall(require, "socket.ftp")
+   -- socket_ok, http = pcall(require, "socket.http")
+   -- _, ftp = pcall(require, "socket.ftp")
    zip_ok, lrzip = pcall(require, "luarocks.tools.zip")
    unzip_ok, luazip = pcall(require, "zip"); _G.zip = nil
    lfs_ok, lfs = pcall(require, "lfs")
