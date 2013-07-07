@@ -46,3 +46,5 @@ SET(Torch_INSTALL_LUA_PATH_SUBDIR "share/${Torch_PACKAGE_PATH}" CACHE PATH
 
 SET(Torch_INSTALL_LUA_CPATH_SUBDIR "lib/${Torch_PACKAGE_PATH}" CACHE PATH
   "Install dir for Lua C packages files (relative to Torch_INSTALL_PREFIX)")
+
+SET(Torch_INSTALL_LUA_PKG_PATH_SUBDIR "${Torch_INSTALL_LUA_PATH_SUBDIR}")

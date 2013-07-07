@@ -67,9 +67,9 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
     # such that dokuwiki understands it.
     IF(_ext_ STREQUAL ".dok")
       ADD_CUSTOM_COMMAND(OUTPUT "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
-        COMMAND  ${Torch_SOURCE_LUA} ARGS "${Torch_SOURCE_CMAKE}/dok/dokparse.lua" "${Torch_SOURCE_PKG}/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${title}" "${CMAKE_BINARY_DIR}/html" "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
+        COMMAND  ${Torch_SOURCE_LUA} ARGS "${Torch_SOURCE_CMAKE}/dok/dokparse.lua" "${Torch_SOURCE_PKG_PATH}/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${dokfile}" "${title}" "${CMAKE_BINARY_DIR}/html" "${dokdstdir}/${_file_}.txt" "${htmldstdir}/${_file_}.html"
         DEPENDS ${Torch_SOURCE_LUA}
-        "${Torch_SOURCE_PKG}/dok/init.lua"
+        "${Torch_SOURCE_PKG_PATH}/dok/init.lua"
         "${Torch_SOURCE_CMAKE}/dok/dokparse.lua"
         "${dokfile}"
         "${TORCH_DOK_HTML_TEMPLATE}")
@@ -105,11 +105,11 @@ MACRO(ADD_TORCH_DOK srcdir dstdir section title rank)
     # this target is always built
     # so the index is always up-to-date (even if the installed index changed)
     ADD_CUSTOM_TARGET(${dstdir}-dok-index
-      ${Torch_SOURCE_LUA} "${Torch_SOURCE_CMAKE}/dok/dokindex.lua" "${Torch_SOURCE_PKG}/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${CMAKE_BINARY_DIR}/dokindex.lua" "${Torch_INSTALL_SHARE}/torch/dokindex.lua" "${CMAKE_BINARY_DIR}/dok/index.txt" "${CMAKE_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
+      ${Torch_SOURCE_LUA} "${Torch_SOURCE_CMAKE}/dok/dokindex.lua" "${Torch_SOURCE_PKG_PATH}/dok/init.lua" "${TORCH_DOK_HTML_TEMPLATE}" "${CMAKE_BINARY_DIR}/dokindex.lua" "${Torch_INSTALL_SHARE}/torch/dokindex.lua" "${CMAKE_BINARY_DIR}/dok/index.txt" "${CMAKE_BINARY_DIR}/html/index.html" "${dstdir}" "${section}" "${title}" "${rank}"
       DEPENDS ${Torch_SOURCE_LUA}
       "${Torch_SOURCE_CMAKE}/dok/dokindex.lua"
       "${CMAKE_CURRENT_SOURCE_DIR}/${srcdir}/index.dok"
-      "${Torch_SOURCE_PKG}/dok/init.lua")
+      "${Torch_SOURCE_PKG_PATH}/dok/init.lua")
     
     # the main dok depends on this
     ADD_DEPENDENCIES(documentation-dok ${dstdir}-dok-index)
