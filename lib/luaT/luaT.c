@@ -370,7 +370,7 @@ const char *luaT_classrootname(const char *tname)
 
 const char *luaT_classmodulename(const char *tname)
 {
-  static char luaT_class_module_name[256];
+  static __thread char luaT_class_module_name[256];
   int i;
 
   strncpy(luaT_class_module_name, tname, 256);

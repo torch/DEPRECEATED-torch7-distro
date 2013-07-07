@@ -1,23 +1,32 @@
 #include "THGeneral.h"
 #include "THRandom.h"
 
-/* The initial seed. */
-static unsigned long the_initial_seed;
+struct THRandomState {
+  /* The initial seed. */
+  unsigned long the_initial_seed;
 
-/* Code for the Mersenne Twister random generator.... */
-#define n 624
-#define m 397
-static int left = 1;
-static int initf = 0;
-static unsigned long *next;
-static unsigned long state[n]; /* the array for the state vector  */
-/********************************/
+  /* Code for the Mersenne Twister random generator.... */
+  #define n 624
+  #define m 397
+  int left;
+  int initf;
+  unsigned long *next;
+  unsigned long state[n]; /* the array for the state vector  */
+  /********************************/
 
-/* For normal distribution */
-static double normal_x;
-static double normal_y;
-static double normal_rho;
-static int normal_is_valid = 0;
+  /* For normal distribution */
+  double normal_x;
+  double normal_y;
+  double normal_rho;
+  int normal_is_valid;
+};
+
+/* The default state. */
+static __thread struct THRandomState state = {
+  .left = 1,
+  .initf = 0,
+  .normal_is_valid = 0
+};
 
 unsigned long THRandom_seed()
 {
@@ -89,43 +98,43 @@ unsigned long THRandom_seed()
 void THRandom_manualSeed(unsigned long the_seed_)
 {
   int j;
-  the_initial_seed = the_seed_;
-  state[0]= the_initial_seed & 0xffffffffUL;
+  state.the_initial_seed = the_seed_;
+  state.state[0]= state.the_initial_seed & 0xffffffffUL;
   for(j = 1; j < n; j++)
   {
-    state[j] = (1812433253UL * (state[j-1] ^ (state[j-1] >> 30)) + j); 
+    state.state[j] = (1812433253UL * (state.state[j-1] ^ (state.state[j-1] >> 30)) + j); 
     /* See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. */
     /* In the previous versions, mSBs of the seed affect   */
     /* only mSBs of the array state[].                        */
     /* 2002/01/09 modified by makoto matsumoto             */
-    state[j] &= 0xffffffffUL;  /* for >32 bit machines */
+    state.state[j] &= 0xffffffffUL;  /* for >32 bit machines */
   }
-  left = 1;
-  initf = 1;
+  state.left = 1;
+  state.initf = 1;
 }
 
 unsigned long THRandom_initialSeed()
 {
-  if(initf == 0)
+  if(state.initf == 0)
   {
     THRandom_seed();
   }
 
-  return the_initial_seed;
+  return state.the_initial_seed;
 }
 
 void THRandom_nextState()
 {
-  unsigned long *p=state;
+  unsigned long *p=state.state;
   int j;
 
   /* if init_genrand() has not been called, */
   /* a default initial seed is used         */
-  if(initf == 0)
+  if(state.initf == 0)
     THRandom_seed();
 
-  left = n;
-  next = state;
+  state.left = n;
+  state.next = state.state;
     
   for(j = n-m+1; --j; p++) 
     *p = p[m] ^ TWIST(p[0], p[1]);
@@ -133,16 +142,16 @@ void THRandom_nextState()
   for(j = m; --j; p++) 
     *p = p[m-n] ^ TWIST(p[0], p[1]);
 
-  *p = p[m-n] ^ TWIST(p[0], state[0]);
+  *p = p[m-n] ^ TWIST(p[0], state.state[0]);
 }
 
 unsigned long THRandom_random()
 {
   unsigned long y;
 
-  if (--left == 0)
+  if (--state.left == 0)
     THRandom_nextState();
-  y = *next++;
+  y = *state.next++;
   
   /* Tempering */
   y ^= (y >> 11);
@@ -158,9 +167,9 @@ static double __uniform__()
 {
   unsigned long y;
 
-  if(--left == 0)
+  if(--state.left == 0)
     THRandom_nextState();
-  y = *next++;
+  y = *state.next++;
 
   /* Tempering */
   y ^= (y >> 11);
@@ -189,20 +198,20 @@ double THRandom_normal(double mean, double stdv)
 {
   THArgCheck(stdv > 0, 2, "standard deviation must be strictly positive");
 
-  if(!normal_is_valid)
+  if(!state.normal_is_valid)
   {
-    normal_x = __uniform__();
-    normal_y = __uniform__();
-    normal_rho = sqrt(-2. * log(1.0-normal_y));
-    normal_is_valid = 1;
+    state.normal_x = __uniform__();
+    state.normal_y = __uniform__();
+    state.normal_rho = sqrt(-2. * log(1.0-state.normal_y));
+    state.normal_is_valid = 1;
   }
   else
-    normal_is_valid = 0;
+    state.normal_is_valid = 0;
   
-  if(normal_is_valid)
-    return normal_rho*cos(2.*M_PI*normal_x)*stdv+mean;
+  if(state.normal_is_valid)
+    return state.normal_rho*cos(2.*M_PI*state.normal_x)*stdv+mean;
   else
-    return normal_rho*sin(2.*M_PI*normal_x)*stdv+mean;
+    return state.normal_rho*sin(2.*M_PI*state.normal_x)*stdv+mean;
 }
 
 double THRandom_exponential(double lambda)

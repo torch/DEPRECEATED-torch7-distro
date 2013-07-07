@@ -1,5 +1,6 @@
 INCLUDE(CheckCCompilerFlag)
 INCLUDE(CheckCXXCompilerFlag)
+INCLUDE(CheckCSourceCompiles)
 
 # We want release compilation by default
 IF(NOT CMAKE_BUILD_TYPE)
@@ -86,3 +87,10 @@ IF (CORTEXA9_FOUND)
   MESSAGE(STATUS "Cortex-A9 Found with compiler flag : -mcpu=cortex-a9")
   SET(CMAKE_C_FLAGS "-mcpu=cortex-a9 ${CMAKE_C_FLAGS}")
 ENDIF (CORTEXA9_FOUND)
+
+# Is __thread supported?
+CHECK_C_SOURCE_COMPILES("static __thread int x = 1; int main() { return x; }" C_HAS_THREAD)
+IF(NOT C_HAS_THREAD)
+  MESSAGE(STATUS "Warning: __thread is not supported, generating thread-unsafe code")
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__thread=")
+ENDIF(NOT C_HAS_THREAD)
