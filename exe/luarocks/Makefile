@@ -152,7 +152,7 @@ write_sysconfig: built
 	   echo 'rocks_trees = {' >> "$(DESTDIR)$(CONFIG_FILE)" ;\
 	   if  [ ! -n "$(FORCE_CONFIG)" ] ;\
 	   then \
-	      echo '   home..[[/.luarocks]],' >> "$(DESTDIR)$(CONFIG_FILE)" ;\
+	      echo '   home..[[/.torchrocks]],' >> "$(DESTDIR)$(CONFIG_FILE)" ;\
 	   fi ;\
 	   echo '   [[$(ROCKS_TREE)]]' >> "$(DESTDIR)$(CONFIG_FILE)" ;\
 	   echo '}' >> "$(DESTDIR)$(CONFIG_FILE)" ;\

@@ -114,8 +114,8 @@ if detected.windows then
 else
    home = os.getenv("HOME") or ""
    sys_config_dir = sys_config_dir or "/etc/luarocks"
-   home_config_dir = home.."/.luarocks"
-   home_tree = home.."/.luarocks/"
+   home_config_dir = home.."/.torchrocks"
+   home_tree = home.."/.torchrocks/"
 end
 
 variables = {}

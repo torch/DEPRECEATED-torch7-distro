@@ -1,5 +1,5 @@
 rocks_trees = {
-   home..[[/.luarocks]],
+   home..[[/.torchrocks]],
    {root="@Torch_INSTALL_PREFIX@", bin_dir="@Torch_INSTALL_BIN@", lib_dir="@Torch_INSTALL_LUA_CPATH@", lua_dir="@Torch_INSTALL_LUA_PATH@"}
 }
 

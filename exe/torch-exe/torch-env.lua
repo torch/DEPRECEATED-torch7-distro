@@ -313,7 +313,7 @@ if paths.dirp(localinstalldir) then
    package.cpath = paths.concat(localinstalldir,'lib','torch','?.so') .. ';' .. package.cpath
    package.cpath = paths.concat(localinstalldir,'lib','torch','?.dylib') .. ';' .. package.cpath
 end
-local localinstalldir = paths.concat(os.getenv('HOME'),'.luarocks')
+local localinstalldir = paths.concat(os.getenv('HOME'),'.torchrocks')
 if paths.dirp(localinstalldir) then
    package.path = paths.concat(localinstalldir,'share','lua','5.1','?','init.lua') .. ';' .. package.path
    package.path = paths.concat(localinstalldir,'share','lua','5.1','?.lua') .. ';' ..  package.path
