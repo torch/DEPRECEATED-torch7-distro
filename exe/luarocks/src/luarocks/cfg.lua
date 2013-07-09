@@ -203,7 +203,7 @@ local defaults = {
    },
 
    lua_extension = "lua",
-   lua_interpreter = site_config.LUA_INTERPRETER or "lua",
+   lua_interpreter = site_config.LUA_INTERPRETER or "torch-lua",
    downloader = site_config.LUAROCKS_DOWNLOADER or "wget",
    md5checker = site_config.LUAROCKS_MD5CHECKER or "md5sum",
 
