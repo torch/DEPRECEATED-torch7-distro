@@ -36,8 +36,6 @@ Installation
     $ cmake .. 
     OR
     $ cmake .. -DCMAKE_INSTALL_PREFIX=/my/install/path
-    OR, with experimental built-in Luarocks support (for easier distribution)
-    $ cmake .. -DWITH_ROCKS=1
 
     $make install
 
@@ -49,6 +47,16 @@ Running
     Torch 7.0  Copyright (C) 2001-2011 Idiap, NEC Labs, NYU
     Lua 5.1  Copyright (C) 1994-2008 Lua.org, PUC-Rio
     t7> 
+
+3rd Party Packages
+------------------
+
+Torch7 comes with a package manager based on Luarocks. With it it's easy to 
+install new packages:
+
+    $ torch-rocks install image
+    $ torch-rocks list
+    $ torch-rocks search --all
 
 Documentation
 -------------

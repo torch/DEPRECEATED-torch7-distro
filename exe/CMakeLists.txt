@@ -49,7 +49,7 @@ IF(WITH_QTLUA)
   ENDIF(MACQLUA_EXISTS)
 ENDIF(WITH_QTLUA)
 
-SET(WITH_ROCKS OFF CACHE BOOL "Use rocks instead of torch-pkg")
+SET(WITH_ROCKS ON CACHE BOOL "Use rocks instead of torch-pkg")
 
 IF(WITH_ROCKS)
   ADD_SUBDIRECTORY(luarocks)
