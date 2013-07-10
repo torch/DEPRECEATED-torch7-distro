@@ -12,18 +12,18 @@ we suggest reading the detailed manual at http://www.torch.ch/manual/install/ind
 Requirements
 ------------
 
-C/C++ compiler
-cmake
-gnuplot
-git
+* C/C++ compiler
+* cmake
+* gnuplot
+* git
 
 Optional
 --------
 
-readline
-QT (QT4.8 is now supported)
-CBLAS
-LAPACK
+* Readline
+* QT (QT4.8 is now supported)
+* CBLAS
+* LAPACK
 
 Installation
 ------------
