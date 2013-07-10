@@ -36,6 +36,8 @@ Installation
     $ cmake .. 
     OR
     $ cmake .. -DCMAKE_INSTALL_PREFIX=/my/install/path
+    OR, with experimental built-in Luarocks support (for easier distribution)
+    $ cmake .. -DWITH_ROCKS=1
 
     $make install
 
