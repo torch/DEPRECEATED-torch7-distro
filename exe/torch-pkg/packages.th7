@@ -13,7 +13,7 @@
 pkg = pkg or {}
 
 pkg.image = {
-   git = 'https://github.com/clementfarabet/lua---image',
+   git = 'https://github.com/torch/image',
    description = 'An image-processing toolbox for Torch7',
    dependencies = {'sys', 'xlua'},
    commit = 'master'
@@ -34,7 +34,7 @@ pkg.parallel = {
 }
 
 pkg.sys = {
-   git = 'https://github.com/clementfarabet/lua---sys',
+   git = 'https://github.com/torch/sys',
    description = 'A system toolbox for Torch7',
    dependencies = {},
    commit = 'master'
@@ -48,7 +48,7 @@ pkg.inline = {
 }
 
 pkg.xlua = {
-   git = 'https://github.com/clementfarabet/lua---xlua',
+   git = 'https://github.com/torch/xlua',
    description = 'A toolbox of conveniency functions (mostly for argument parsing)',
    dependencies = {'sys'},
    commit = 'master'
