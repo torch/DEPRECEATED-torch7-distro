@@ -131,8 +131,12 @@ local function getfigure(n)
       if _gptable.defaultterm == nil then
          error('Gnuplot terminal is not set')
       end
+      local silent = '> /dev/null 2>&1'
+      if paths.dirp('C:\\') then -- quick test for windows
+         silent = '> nul 2>&1'
+      end
       _gptable[n].term = _gptable.defaultterm
-      _gptable[n].pipe = torch.PipeFile(getexec() .. ' -persist > /dev/null 2>&1 ','w')
+      _gptable[n].pipe = torch.PipeFile(getexec() .. ' -persist ' .. silent,'w')
    end
    _gptable.current = n
    if not paths.filep(paths.concat(paths.home,'.gnuplot')) then
@@ -157,8 +161,8 @@ local function gnuplothasterm(term)
    local s = tf:read('*l')
    while s do
       if s:match('^.*%s+  '.. term .. ' ') then
-	 tf:close()
-	 os.remove(tfno)
+         tf:close()
+         os.remove(tfno)
          return true
       end
       s = tf:read('*l')
@@ -179,14 +183,20 @@ local function findgnuplotversion(exe)
 end
 
 local function findgnuplotexe()
-   local os = findos()
-   if os == 'windows' then
-      return 'gnuplot.exe' -- I don't know how to find executables in Windows
+   local o = findos()
+   local s
+   if o == 'windows' then
+      _gptable.hasrefresh = true
+      if os.execute('where /q gnuplot') == 0 then
+         s = 'gnuplot' -- full path may contain spaces
+      end
    else
       _gptable.hasrefresh = true
       local ff = io.popen('which gnuplot','r')
       local s=ff:read('*l')
       ff:close()
+   end
+   do -- preserve indentation to minimize merging issues
       if s and s:len() > 0 and s:match('gnuplot') then
          local v,vv = findgnuplotversion(s)
          if  v < 4 then
@@ -194,7 +204,7 @@ local function findgnuplotexe()
          end
          if vv < 4 then
             -- try to find gnuplot44
-            if os == 'linux' and paths.filep('/usr/bin/gnuplot44') then
+            if o == 'linux' and paths.filep('/usr/bin/gnuplot44') then
                local ss = '/usr/bin/gnuplot44'
                v,vv = findgnuplotversion(ss)
                if v == 4 and vv == 4 then
@@ -213,7 +223,7 @@ local function findgnuplotexe()
 end
 
 local function getgnuplotdefaultterm(os)
-   if os == 'windows' and gnuplothasterm('windows') then
+   if os == 'windows' then
       return  'windows'
    elseif os == 'linux' and gnuplothasterm('wxt') then
       return  'wxt'
