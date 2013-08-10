@@ -135,7 +135,7 @@ local function getfigure(n)
       _gptable[n].pipe = torch.PipeFile(getexec() .. ' -persist > /dev/null 2>&1 ','w')
    end
    _gptable.current = n
-   if not paths.filep(paths.concat(os.getenv('HOME'),'.gnuplot')) then
+   if not paths.filep(paths.concat(paths.home,'.gnuplot')) then
       _gptable[n].pipe:writeString(torchstyle .. '\n\n\n')
       _gptable[n].pipe:synchronize()
    end
