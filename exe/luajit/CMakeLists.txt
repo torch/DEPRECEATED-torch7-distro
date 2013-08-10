@@ -121,6 +121,8 @@ ENDFOREACH()
 
 IF(NOT TARGET_LJARCH)
   MESSAGE(FATAL_ERROR "architecture not supported")
+ELSE()
+  MESSAGE(STATUS "LuaJIT target ${TARGET_LJARCH}")
 ENDIF()
 
 SET(DASM_ARCH ${TARGET_LJARCH})
@@ -158,7 +160,7 @@ ELSE()
   LIST(APPEND TARGET_ARCH "LJ_ABI_SOFTFP=1")
 ENDIF()
 IF(WIN32)
-  SET(DASM_FLAGS ${DASM_FLAGS} -D WIN)
+  SET(DASM_FLAGS ${DASM_FLAGS} -LN -D WIN)
 ENDIF()
 IF(TARGET_LJARCH STREQUAL "x86")
   LJ_TEST_ARCH_VALUE(__SSE2__ 1)
@@ -267,6 +269,9 @@ target_link_libraries ( lua liblua-shared )
 
 add_executable ( lua-static src/luajit.c)
 target_link_libraries ( lua-static liblua-static )
+SET_TARGET_PROPERTIES(lua-static PROPERTIES
+  COMPILE_DEFINITIONS "liblua_STATIC")
+
 
 INSTALL(TARGETS liblua-shared lua
   EXPORT torch-exports
