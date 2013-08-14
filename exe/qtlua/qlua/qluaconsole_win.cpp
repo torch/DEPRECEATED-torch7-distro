@@ -307,16 +307,20 @@ message_handler(QtMsgType type, const char *msg)
   switch (type) 
     {
     case QtDebugMsg:
-      fprintf(ferr, "# Debug: %s\n", msg);
+	  if (ferr)
+        fprintf(ferr, "# Debug: %s\n", msg);
       break;
     case QtWarningMsg:
-      fprintf(ferr, "# Warning: %s\n", msg);
+	  if (ferr)
+        fprintf(ferr, "# Warning: %s\n", msg);
       break;
     case QtCriticalMsg:
-      fprintf(ferr, "# Critical: %s\n", msg);
+	  if (ferr)
+        fprintf(ferr, "# Critical: %s\n", msg);
       break;
     case QtFatalMsg:
-      fprintf(ferr, "# Fatal: %s\n", msg);
+	  if (ferr)
+        fprintf(ferr, "# Fatal: %s\n", msg);
       abort();
     }
 }

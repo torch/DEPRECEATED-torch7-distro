@@ -223,7 +223,7 @@ static int cunn_SpatialSubSampling_updateOutput(lua_State *L)
     output_data = THCudaTensor_data(output);
 
     // cuda blocks & threads:
-    int yblocks = floor(16 / nInputPlane);
+    int yblocks = (int)(16L / nInputPlane);
     yblocks = yblocks < 1 ? 1 : yblocks;
     dim3 blocks(nInputPlane,yblocks);
     dim3 threads(32,8);
@@ -248,7 +248,7 @@ static int cunn_SpatialSubSampling_updateOutput(lua_State *L)
     output_data = THCudaTensor_data(output);
 
     // cuda blocks & threads:
-    int yblocks = floor(16 / nInputPlane);
+    int yblocks = (int)(16L / nInputPlane);
     yblocks = yblocks < 1 ? 1 : yblocks;
     dim3 blocks(nInputPlane*nbatch,yblocks);
     dim3 threads(32,8);
@@ -299,7 +299,7 @@ static int cunn_SpatialSubSampling_updateGradInput(lua_State *L)
     gradInput_data = THCudaTensor_data(gradInput);
 
     // cuda blocks & threads:
-    int yblocks = floor(16 / nInputPlane);
+    int yblocks = (int)(16L / nInputPlane);
     yblocks = yblocks < 1 ? 1 : yblocks;
     dim3 blocks(nInputPlane,yblocks);
     dim3 threads(32,8);
@@ -321,7 +321,7 @@ static int cunn_SpatialSubSampling_updateGradInput(lua_State *L)
     gradInput_data = THCudaTensor_data(gradInput);
 
     // cuda blocks & threads:
-    int yblocks = floor(16 / nInputPlane);
+    int yblocks = (int)(16L / nInputPlane);
     yblocks = yblocks < 1 ? 1 : yblocks;
     dim3 blocks(nInputPlane*nbatch,yblocks);
     dim3 threads(32,8);

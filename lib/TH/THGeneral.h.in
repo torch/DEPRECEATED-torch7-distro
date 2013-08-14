@@ -13,6 +13,7 @@
 #cmakedefine USE_BLAS
 #cmakedefine USE_LAPACK
 #cmakedefine BLAS_IS_ACCELERATE
+#cmakedefine BLAS_F2C
 
 #ifdef __cplusplus
 # define TH_EXTERNC extern "C"
@@ -40,10 +41,7 @@
 # define M_PI 3.14159265358979323846
 #endif
 
-#ifdef _MSC_VER
-TH_API double log1p(const double x);
-#endif
-
+TH_API double THLog1p(const double x);
 TH_API void THError(const char *fmt, ...);
 TH_API void THSetErrorHandler( void (*torchErrorHandlerFunction)(const char *msg) );
 TH_API void THArgCheck(int condition, int argNumber, const char *msg);
@@ -72,5 +70,9 @@ TH_API void THFree(void *ptr);
 
 #define THMin(X, Y)  ((X) < (Y) ? (X) : (Y))
 #define THMax(X, Y)  ((X) > (Y) ? (X) : (Y))
+
+#ifdef _MSC_VER
+# define log1p(x) THLog1p(x)
+#endif
 
 #endif

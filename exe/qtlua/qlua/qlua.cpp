@@ -132,6 +132,9 @@ main(int argc, char **argv)
       args_for_lua += const_cast<char*>("-lqtide");
       args_for_lua += const_cast<char*>(ideStyle.constData());
     }
+#if defined(TORCH7)
+  args_for_lua += "-ltorch-env";
+#endif
   while(i < argc_for_both)
     args_for_lua += argv_for_both[i++];
   while(argn < argc)

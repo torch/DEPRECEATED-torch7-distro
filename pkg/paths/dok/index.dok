@@ -74,7 +74,22 @@ the variables indicating
 the location of the various Torch components.
 
 
-=====  Accessing directories =====
+==== paths.tmpname() ====
+{{anchor:paths.tmpname}}
+
+Return the name of a temporary file.
+All the temporaty files whose name was obtained in this way
+are removed when Lua exits.
+
+This function should be preferred over ''os.tmpname()''
+because it makes sure that the files are removed on exit.
+In addition, ''os.tmpname()'' under windows often returns filenames
+for which the user has no permission to write.
+
+
+
+
+=====  Directory functions =====
 {{anchor:paths.dirs.dok}}
 
 The following functions can be used
@@ -98,6 +113,25 @@ This can be used in ***for*** expression as shown below:
      print(f)
    end
 </file>
+
+==== paths.mkdir(s) ====
+{{anchor:paths.mkdir}}
+
+Create a directory.
+Returns ''true'' on success.
+
+==== paths.rmdir(s) ====
+{{anchor:paths.rmdir}}
+
+Delete an empty directory.
+Returns ''true'' on success.
+
+==== paths.rmall(s, y) ====
+{{anchor:paths.rmall}}
+
+Recursively delete file or directory ''s'' and its contents.
+Argument ''y'' must be string ''"yes"''
+Returns ''true'' on success.
 
 
 =====  Finding files relative to a Lua script =====
@@ -202,3 +236,7 @@ This directory is used to build variable ''package.path''.
 The name of the directory containing the Lua loadable binary modules.
 This directory is used to build variable ''package.cpath''.
 
+==== paths.home ====
+{{anchor:paths.home}}
+
+The home directory of the current user.

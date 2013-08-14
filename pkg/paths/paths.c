@@ -4,8 +4,6 @@
 #include "paths.h"
 
 
-
-
 /* ------------------------------------------------------ */
 /* Utils to manipulate strings */
 
@@ -111,9 +109,9 @@ sbsetpush(lua_State *L,  SB *sb, const char *s)
 
 
 static int 
-filep(lua_State *L)
+filep(lua_State *L, int i)
 {
-  const char *s = luaL_checkstring(L, 1);
+  const char *s = luaL_checkstring(L, i);
 #ifdef LUA_WIN
   struct _stat buf;
   if (_stat(s,&buf) < 0)
@@ -132,24 +130,22 @@ filep(lua_State *L)
 
 
 static int 
-dirp(lua_State *L)
+concat_fname(lua_State *L, const char *fname);
+
+static int 
+dirp(lua_State *L, int i)
 {
-  const char *s = luaL_checkstring(L, 1);
+  const char *s = luaL_checkstring(L, i);
 #ifdef LUA_WIN
+  char buffer[8];
   struct _stat buf;
   const char *last;
   if ((s[0]=='/' || s[0]=='\\') && 
       (s[1]=='/' || s[1]=='\\') && !s[2]) 
     return 1;
-  last = s + strlen(s);
-  if (*last=='/' || *last=='\\' || *last==':')
-    {
-      lua_settop(L, 1);
-      lua_pushliteral(L, ".");
-      lua_concat(L, 2);
-      s = lua_tostring(L, -1);
-    }
-  if (_stat(s,&buf)==0)
+  if (s[0] && isalpha((unsigned char)(s[0])) && s[1] == ':' && s[2] == 0)
+    { buffer[0]=s[0]; buffer[1]=':'; buffer[2]='.'; buffer[3]=0; s = buffer; }
+  if (_stat(s, &buf) >= 0)
     if (buf.st_mode & S_IFDIR)
       return 1;
 #else
@@ -165,7 +161,7 @@ dirp(lua_State *L)
 static int
 lua_filep(lua_State *L)
 {
-  lua_pushboolean(L, filep(L));
+  lua_pushboolean(L, filep(L, 1));
   return 1;
 }
 
@@ -173,7 +169,7 @@ lua_filep(lua_State *L)
 static int
 lua_dirp(lua_State *L)
 {
-  lua_pushboolean(L, dirp(L));
+  lua_pushboolean(L, dirp(L, 1));
   return 1;
 }
 
@@ -606,7 +602,7 @@ lua_dir(lua_State *L)
           lua_rawseti(L, -2, ++k);
         }
     } 
-  else if (dirp(L)) {
+  else if (dirp(L, 1)) {
     lua_pushliteral(L, "..");
     lua_rawseti(L, -2, ++k);
   } else {
@@ -651,6 +647,143 @@ lua_dir(lua_State *L)
 #endif
   
   return 1;
+}
+
+
+/* ------------------------------------------------------ */
+/* tmpname */
+
+
+static const char *tmpnames_key = "tmpname_sentinel";
+
+struct tmpname_s {
+    struct tmpname_s *next;
+    char tmp[4];
+};
+
+static int gc_tmpname(lua_State *L)
+{
+  if (lua_isuserdata(L, -1))
+  {
+    struct tmpname_s **pp = (struct tmpname_s **)lua_touserdata(L, -1);
+    while (pp && *pp)
+    {
+      struct tmpname_s *p = *pp;
+      *pp = p->next;
+      remove(p->tmp);
+      free(p);
+    }
+  }
+  return 0;
+
+}
+
+static void add_tmpname(lua_State *L, const char *tmp)
+{
+  struct tmpname_s **pp = 0;
+  lua_pushlightuserdata(L, (void*)tmpnames_key);
+  lua_rawget(L, LUA_REGISTRYINDEX);
+  if (lua_isuserdata(L, -1))
+  {
+    pp = (struct tmpname_s **)lua_touserdata(L, -1);
+    lua_pop(L, 1);
+  }
+  else
+  {
+    lua_pop(L, 1);
+    // create sentinel
+    lua_pushlightuserdata(L, (void*)tmpnames_key);
+    pp = (struct tmpname_s **)lua_newuserdata(L, sizeof(void*));
+    pp[0] = 0;
+    lua_createtable(L, 0, 1);
+    lua_pushcfunction(L, gc_tmpname);
+    lua_setfield(L,-2,"__gc");
+    lua_setmetatable(L, -2);
+    lua_rawset(L, LUA_REGISTRYINDEX);
+  }
+  while (pp && *pp)
+  {
+      struct tmpname_s *p = *pp;
+      if (!strcmp(p->tmp, tmp)) return;
+      pp = &(p->next);
+  }
+  if (pp)
+  {
+        int len = strlen(tmp);
+        struct tmpname_s *t = (struct tmpname_s*)malloc(len + sizeof(struct tmpname_s));
+        if (t)
+        {
+            t->next = 0;
+            memcpy(t->tmp, tmp, len);
+            t->tmp[len] = 0;
+            *pp = t;
+        }
+    }
+}
+
+
+static int lua_tmpname(lua_State *L)
+{
+#ifdef LUA_WIN
+  char *tmp = _tempnam("c:/temp", "luatmp");
+#else
+  char *tmp = tempnam(NULL, "luatmp");
+#endif
+  if (tmp)
+  {
+    lua_pushstring(L, tmp);
+    add_tmpname(L, tmp);
+    free(tmp);
+    return 1;
+  }
+  else
+  {
+    lua_pushnil(L);
+    return 1;
+  }
+}
+
+static int pushresult (lua_State *L, int i, const char *filename) {
+  int en = errno;
+  if (i) {
+    lua_pushboolean(L, 1);
+    return 1;
+  }
+  else {
+    lua_pushnil(L);
+    lua_pushfstring(L, "%s: %s", filename, strerror(en));
+    lua_pushinteger(L, en);
+    return 3;
+  }
+}
+
+static int lua_mkdir(lua_State *L)
+{
+   int status = 0;
+   const char *s = luaL_checkstring(L, 1);
+   lua_pushcfunction(L, lua_mkdir);
+   lua_pushcfunction(L, lua_dirname);
+   lua_pushvalue(L, 1);
+   lua_call(L, 1, 1);
+   if (! dirp(L, -1))
+      lua_call(L, 1, 3);
+#ifdef LUA_WIN
+   status = _mkdir(s);
+#else
+   status = mkdir(s, 0777);
+#endif
+   return pushresult(L, status == 0, s);
+}
+
+static int lua_rmdir(lua_State *L)
+{
+  const char *s = luaL_checkstring(L, 1);
+#ifdef LUA_WIN
+  int status = _rmdir(s);
+#else
+  int status = rmdir(s);
+#endif
+  return pushresult(L, status == 0, s);
 }
 
 
@@ -795,6 +928,9 @@ static const struct luaL_Reg paths__ [] = {
   {"concat", lua_concatfname},
   {"execdir", lua_execdir},
   {"dir", lua_dir},
+  {"tmpname", lua_tmpname},
+  {"mkdir", lua_mkdir},
+  {"rmdir", lua_rmdir},
   {"require", path_require},
   {NULL, NULL}
 };

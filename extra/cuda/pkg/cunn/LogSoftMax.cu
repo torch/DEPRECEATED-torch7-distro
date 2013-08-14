@@ -25,7 +25,7 @@ __global__ void cunn_LogSoftMax_updateOutput_kernel(float *output, float *input,
   int i_step = blockDim.x;
 
   // max?
-  buffer[threadIdx.x] = -THInf;
+  buffer[threadIdx.x] = -FLT_MAX;
   for (int i=i_start; i<i_end; i+=i_step)
   {
     float z = input_k[i];
@@ -38,7 +38,7 @@ __global__ void cunn_LogSoftMax_updateOutput_kernel(float *output, float *input,
   // reduce
   if (threadIdx.x == 0)
   {
-    float max_k = -THInf;
+    float max_k = -FLT_MAX;
     for (int i=0; i<blockDim.x; i++)
     {
       if(max_k < buffer[i])
