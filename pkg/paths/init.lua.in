@@ -6,6 +6,7 @@ local assert = assert
 local debug = debug
 local pcall = pcall
 local type = type
+local os = os
 local g = _G
 
 module('paths')
@@ -43,6 +44,11 @@ install_lua_cpath = concat(install_prefix, install_lua_cpath_subdir)
 assert(concat(install_bin,install_bin_ridbus) == install_prefix:gsub('/$',''))
 assert(concat(install_cmake,install_cmake_ridbus) == install_prefix:gsub('/$',''))
 
+if dirp("C:\\") == false then
+  home = os.getenv('HOME') or '.'
+else
+  home = ( os.getenv('HOMEDRIVE') or 'C:' ) .. ( os.getenv('HOMEPATH') or '\\' )
+end
 
 function files(s)
    local d = dir(s)
@@ -80,4 +86,25 @@ function dofile(f, depth)
       f = concat(dirname(s),f)
    end
    return g.dofile(f)
+end
+
+function rmall(d, more)
+   if more ~= 'yes' then
+      return nil, "missing second argument ('yes')"
+   elseif filep(d) then
+      return os.remove(d)
+   elseif dirp(d) then
+      for f in files(d) do
+         if f ~= '.' and f ~= '..' then
+            local ff = concat(d, f)
+            local r0,r1,r2 = rmall(ff, more)
+            if not r0 then
+               return r0,r1,ff
+            end
+        end
+     end
+     return rmdir(d)
+   else
+     return nil, "not a file or directory", d
+   end
 end

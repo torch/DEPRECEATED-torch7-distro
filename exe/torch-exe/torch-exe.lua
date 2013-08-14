@@ -74,15 +74,41 @@ for i,a in ipairs(arg) do
 end
 args = table.concat(arg, ' ')
 
+-- find os
+local function findos()
+   if paths.dirp('C:\\') then
+      return 'windows'
+   else
+      local ff = io.popen('uname -a','r')
+      local s = ff:read('*all')
+      ff:close()
+      if s and s:match('Darwin') then
+         return 'mac'
+      elseif s and s:match('Linux') then
+         return 'linux'
+      elseif s and s:match('FreeBSD') then
+         return 'freebsd'
+      else
+         --error('I don\'t know your operating system')
+         return '?'
+      end
+   end
+end
+
 -- test qlua existence
-if lua == 'torch-qlua' and not paths.filep(paths.concat(paths.install_bin,lua))
+if lua == 'torch-qlua' 
+   and not paths.filep(paths.concat(paths.install_bin,lua))
+   and not paths.filep(paths.concat(paths.install_bin,lua .. ".exe"))
 then
    print('Unable to find torch-qlua (disabling graphics)')
    print('Fix this by installing Qt4 and rebuilding Torch7')
    lua = 'torch-lua'
 elseif os.getenv('DISPLAY') == '' or os.getenv('DISPLAY') == nil then
-   print('Unable to connect X11 server (disabling graphics)')
-   lua = 'torch-lua'
+   o = findos()
+   if o ~= 'mac' and o ~= 'windows' then
+     print('Unable to connect X11 server (disabling graphics)')
+     lua = 'torch-lua'
+   end
 end
 
 -- messages

@@ -29,13 +29,10 @@ module('qtide')
 
 local qluaide = qt.QLuaIde()
 
-local function realmode(mode)
-   mode = mode or qt.qApp:readSettings("ide/mode")
-   if qluaide.mdiDefault then
-      return mode or 'mdi'
-   else
-      return mode or 'sdi'
-   end
+local function realmode(mode)  
+   local defaultmode = 'sdi'
+   -- if qluaide.mdiDefault then defaultmode = 'mdi' end
+   return mode or qt.qApp:readSettings("ide/mode") or defaultmode
 end
 
 function setup(mode)
@@ -149,9 +146,9 @@ local function locate_help_files()
    local index1 = paths.concat(paths.install_html, appname:lower(), "index.html")
    local index2 = paths.concat(paths.install_html,"index.html")
    if index1 and paths.filep(index1) then
-      return qt.QUrl(index1)
+      return qt.QUrl.fromlocalfile(index1)
    elseif index2 and paths.filep(index2) then
-      return qt.QUrl(index2)
+      return qt.QUrl.fromlocalfile(index2)
    else
       return qt.QUrl("http://torch5.sourceforge.net/manual/index.html")
    end

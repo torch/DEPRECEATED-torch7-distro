@@ -142,7 +142,7 @@ void spatialMaxPooling_updateGradInput
  float scaleTargets = 0, float scaleOutput = 1
 ) { 
   int imgPixels = imgSizeY * imgSizeX;
-  int imgSize = int(sqrt(imgPixels)); 
+  int imgSize = int(sqrt((float)imgPixels)); 
   assert(imgSize * imgSize == imgPixels); /// TODO SQUARE !
 
   int subsX = filterSizeX;

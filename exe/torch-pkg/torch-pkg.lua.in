@@ -3,7 +3,7 @@ require 'paths'
 require 'torch'
 
 -- some paths
-tmp = paths.concat(os.getenv('HOME'),'.torch','torch-pkg')
+tmp = paths.concat(paths.home,'.torch','torch-pkg')
 
 -- torch cmake config
 cmake_conf = {
@@ -40,7 +40,7 @@ if not wget and not curl or not git then
 end
 
 -- config
-configfile = paths.concat(os.getenv('HOME'), '.torch', 'config.th7')
+configfile = paths.concat(paths.home, '.torch', 'config.th7')
 if not paths.filep(configfile) then
    defurls = {
       'https://raw.github.com/andresy/torch/master/exe/torch-pkg/packages.th7'
@@ -142,7 +142,7 @@ for i,opt in ipairs(options) do
    end
    if opt == '-l' or opt == '-local' then
       localinstall = true
-      installdir = paths.concat(os.getenv('HOME'),'.torch','usr')
+      installdir = paths.concat(paths.home,'.torch','usr')
       configure=configure:gsub('(.*)(CMAKE_INSTALL_PREFIX=)([%w%p]+)(%s*)','mkdir -p '..installdir..'; %1%2'..installdir..'%4')
    end
    if opt == '-n' or opt == '-nodeps' then

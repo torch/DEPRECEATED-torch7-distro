@@ -543,10 +543,31 @@ qurl_new(lua_State *L)
   return 1;
 }
 
+static int
+qurl_tolocalfile(lua_State *L)
+{
+  QUrl url = luaQ_checkqvariant<QUrl>(L, 1);
+  if (url.isLocalFile())
+      lua_pushstring(L, url.toLocalFile().toLocal8Bit().constData());
+  else
+    lua_pushnil(L);
+  return 1;
+}
+
+static int
+qurl_fromlocalfile(lua_State *L)
+{
+  QString s = luaQ_checkqvariant<QString>(L, 1);
+  luaQ_pushqt(L, QUrl::fromLocalFile(s));
+  return 1;
+}
+
 
 static const luaL_Reg qurl_lib[] = {
   {"tostring", qurl_tostring},
   {"new", qurl_new},
+  {"tolocalfile", qurl_tolocalfile},
+  {"fromlocalfile", qurl_fromlocalfile},
   {0, 0}
 };
 
