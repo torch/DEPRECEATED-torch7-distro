@@ -193,7 +193,7 @@ local function findgnuplotexe()
    else
       _gptable.hasrefresh = true
       local ff = io.popen('which gnuplot','r')
-      local s=ff:read('*l')
+      s = ff:read('*l')
       ff:close()
    end
    do -- preserve indentation to minimize merging issues
