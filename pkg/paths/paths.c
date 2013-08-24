@@ -661,7 +661,8 @@ struct tmpname_s {
     char tmp[4];
 };
 
-static int gc_tmpname(lua_State *L)
+static int 
+gc_tmpname(lua_State *L)
 {
   if (lua_isuserdata(L, -1))
   {
@@ -678,7 +679,8 @@ static int gc_tmpname(lua_State *L)
 
 }
 
-static void add_tmpname(lua_State *L, const char *tmp)
+static void 
+add_tmpname(lua_State *L, const char *tmp)
 {
   struct tmpname_s **pp = 0;
   lua_pushlightuserdata(L, (void*)tmpnames_key);
@@ -722,7 +724,8 @@ static void add_tmpname(lua_State *L, const char *tmp)
 }
 
 
-static int lua_tmpname(lua_State *L)
+static int 
+lua_tmpname(lua_State *L)
 {
 #ifdef LUA_WIN
   char *tmp = _tempnam("c:/temp", "luatmp");
@@ -743,7 +746,13 @@ static int lua_tmpname(lua_State *L)
   }
 }
 
-static int pushresult (lua_State *L, int i, const char *filename) {
+
+
+/* ------------------------------------------------------ */
+/* mkdir, rmdir */
+
+static int 
+pushresult (lua_State *L, int i, const char *filename) {
   int en = errno;
   if (i) {
     lua_pushboolean(L, 1);
@@ -757,7 +766,8 @@ static int pushresult (lua_State *L, int i, const char *filename) {
   }
 }
 
-static int lua_mkdir(lua_State *L)
+static int 
+lua_mkdir(lua_State *L)
 {
    int status = 0;
    const char *s = luaL_checkstring(L, 1);
@@ -775,7 +785,8 @@ static int lua_mkdir(lua_State *L)
    return pushresult(L, status == 0, s);
 }
 
-static int lua_rmdir(lua_State *L)
+static int 
+lua_rmdir(lua_State *L)
 {
   const char *s = luaL_checkstring(L, 1);
 #ifdef LUA_WIN
@@ -784,6 +795,48 @@ static int lua_rmdir(lua_State *L)
   int status = rmdir(s);
 #endif
   return pushresult(L, status == 0, s);
+}
+
+
+/* ------------------------------------------------------ */
+/* uname */
+
+
+static int lua_uname(lua_State *L)
+{
+#if defined(LUA_WIN)
+  const char *name;
+  SYSTEM_INFO info;
+  lua_pushliteral(L, "Windows");
+  name = getenv("COMPUTERNAME");
+  lua_pushstring(L, name ? name : "");
+  if (!GetSystemInfo(&info))
+    lua_pushliteral(L, "");
+  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
+    lua_pushliteral(L, "AMD64");
+  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
+    lua_pushliteral(L, "X86");
+  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM)
+    lua_pushliteral(L, "ARM");
+  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64)
+    lua_pushliteral(L, "IA64");
+  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64)
+    lua_pushstring(L, "");
+  return 3;
+#else
+# if defined(HAVE_SYS_UTSNAME_H)
+  struct utsname info;
+  if (uname(&info) >= 0)
+    {
+      lua_pushstring(L, info.sysname);
+      lua_pushstring(L, info.nodename);
+      lua_pushstring(L, info.machine);
+      return 3;
+    }
+# endif
+  lua_pushstring(L, "Unknown");
+  return 1;
+#endif
 }
 
 
@@ -915,6 +968,12 @@ path_require(lua_State *L)
 #endif
 
 
+
+/* ------------------------------------------------------ */
+/* uname */
+
+
+
 /* ------------------------------------------------------ */
 /* register */
 
@@ -931,6 +990,7 @@ static const struct luaL_Reg paths__ [] = {
   {"tmpname", lua_tmpname},
   {"mkdir", lua_mkdir},
   {"rmdir", lua_rmdir},
+  {"uname", lua_uname},
   {"require", path_require},
   {NULL, NULL}
 };

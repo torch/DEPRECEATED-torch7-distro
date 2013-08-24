@@ -44,10 +44,19 @@ install_lua_cpath = concat(install_prefix, install_lua_cpath_subdir)
 assert(concat(install_bin,install_bin_ridbus) == install_prefix:gsub('/$',''))
 assert(concat(install_cmake,install_cmake_ridbus) == install_prefix:gsub('/$',''))
 
-if dirp("C:\\") == false then
-  home = os.getenv('HOME') or '.'
+function is_win()
+   return uname():match('Windows')
+end
+
+function is_mac()
+   return uname():match('Darwin')
+end
+
+if is_win() then
+   home = os.getenv('HOMEDRIVE') or 'C:'
+   home = home .. ( os.getenv('HOMEPATH') or '\\' )
 else
-  home = ( os.getenv('HOMEDRIVE') or 'C:' ) .. ( os.getenv('HOMEPATH') or '\\' )
+   home = os.getenv('HOME') or '.'
 end
 
 function files(s)
