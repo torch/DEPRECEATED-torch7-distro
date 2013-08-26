@@ -862,7 +862,7 @@ lua_getregistryvalue(lua_State *L)
     HKEY skey;
     DWORD type;
     DWORD len = 0;
-    char *data = "";
+    char *data = NULL;
     LONG res;
     res = RegOpenKeyExA(rkey, subkey, 0, KEY_READ, &skey);
     if (res != ERROR_SUCCESS)
@@ -878,15 +878,19 @@ lua_getregistryvalue(lua_State *L)
         return 3;
     }
     res = RegQueryValueExA(skey, value, NULL, &type, (LPBYTE)data, &len);
-    if (res == ERROR_MORE_DATA)
+    if (len > 0)
     {
         len += 8;
-        if ((data = (char*)malloc(len)))
-            res = RegQueryValueExA(skey, value, NULL, &type, (LPBYTE)data, &len);
+        data = (char*)malloc(len);
+        if (! data) 
+            luaL_error(L, "out of memory");
+        res = RegQueryValueExA(skey, value, NULL, &type, (LPBYTE)data, &len);
     }
+    RegCloseKey(skey);
     if (res != ERROR_SUCCESS)
     {
-        RegCloseKey(skey);
+        if (data) 
+            free(data);
         lua_pushnil(L);
         lua_pushinteger(L, res);
         if (res == ERROR_FILE_NOT_FOUND)
@@ -899,14 +903,41 @@ lua_getregistryvalue(lua_State *L)
     }
     switch(type)
     {
-    case REG_SZ:
-      if (((const char*)data)[len-1] == 0)  len -= 1;
-    case REG_BINARY:
-      lua_pushlstring(L, (const char*)data, (int)len);
-      return 1;
     case REG_DWORD:
       lua_pushinteger(L, (lua_Integer)*(const DWORD*)data);
+      if (data) 
+          free(data);
       return 1;
+    case REG_EXPAND_SZ:
+      if (data && len > 0)
+      {
+          if ((len = ExpandEnvironmentStrings(data, NULL, 0)) > 0)
+          {
+            char *buf = (char*)malloc(len + 8);
+            if (!buf) 
+                luaL_error(L, "out of memory");
+            len = ExpandEnvironmentStrings(data, buf, len+8);
+            free(data);
+            data = buf;
+          }
+      }
+      // fall thru
+    case REG_SZ:
+      if (data && len > 0)
+        if (((const char*)data)[len-1] == 0)  
+          len -= 1;
+      // fall thru
+    case REG_BINARY:
+      if (data && len > 0)
+        lua_pushlstring(L, (const char*)data, (int)len);
+      else
+        lua_pushliteral(L, "");
+      if (data) 
+          free(data);
+      return 1;
+      // unimplemented
+    case REG_QWORD:
+    case REG_MULTI_SZ:
     default:
       lua_pushnil(L);
       lua_pushinteger(L, res);
