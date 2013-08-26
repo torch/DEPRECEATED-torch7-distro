@@ -810,9 +810,9 @@ static int lua_uname(lua_State *L)
   lua_pushliteral(L, "Windows");
   name = getenv("COMPUTERNAME");
   lua_pushstring(L, name ? name : "");
-  if (!GetSystemInfo(&info))
-    lua_pushliteral(L, "");
-  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
+  memset(&info, 0, sizeof(info));
+  GetSystemInfo(&info);
+  if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
     lua_pushliteral(L, "AMD64");
   else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
     lua_pushliteral(L, "X86");
