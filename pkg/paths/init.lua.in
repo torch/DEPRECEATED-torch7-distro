@@ -135,7 +135,7 @@ function findprogram(exe)
       if type(x) == 'string' then return x end
       k = 'Applications\\' .. exe .. '\\shell\\open\\command'
       x = getregistryvalue('HKEY_CLASSES_ROOT', k, '')
-      if type(x) == 'string' and x:match('"') then x = x:match('"[^"]+"') end
+      if type(x) == 'string' and x:match('^"') then x = x:match('[^"]+') end
       if type(x) == 'string' then return x end
    else
       local path = os.getenv("PATH") or "."
