@@ -117,3 +117,27 @@ function rmall(d, more)
      return nil, "not a file or directory", d
    end
 end
+
+function findprogram(exe)
+   if is_win() then
+      local k = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\' .. exe;
+      local x = getregistryvalue('HKEY_LOCAL_MACHINE', k, '')
+      if type(x) == 'string' then return x end
+      x = getregistryvalue('HKEY_LOCAL_MACHINE', k .. '.exe', '')
+      if type(x) == 'string' then return x end
+      local path = os.getenv("PATH") or "."
+      for dir in path:gmatch('[^;]+') do
+         x = concat(dir, exe)
+         if filep(x) then return x end
+         x = x .. '.exe'
+         if filep(x) then return x end
+      end        
+   else
+      local path = os.getenv("PATH") or "."
+      for dir in path:gmatch('[^:]+') do
+         local x = concat(dir, exe)
+         if filep(x) then return x end
+      end
+   end
+   return nil
+end

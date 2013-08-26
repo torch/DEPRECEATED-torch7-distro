@@ -179,18 +179,11 @@ end
 
 local function findgnuplotexe()
    local o = findos()
-   local s
-   if o == 'windows' then
-      _gptable.hasrefresh = true
-      if os.execute('where /q gnuplot') == 0 then
-         s = 'gnuplot' -- full path may contain spaces
-      end
-   else
-      _gptable.hasrefresh = true
-      local ff = io.popen('which gnuplot','r')
-      s = ff:read('*l')
-      ff:close()
+   local s = paths.findprogram('gnuplot')
+   if s:match(' ') then
+      s = '"' .. s .. '"'
    end
+   _gptable.hasrefresh = true
    do -- preserve indentation to minimize merging issues
       if s and s:len() > 0 and s:match('gnuplot') then
          local v,vv = findgnuplotversion(s)

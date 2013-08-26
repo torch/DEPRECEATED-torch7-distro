@@ -130,9 +130,6 @@ filep(lua_State *L, int i)
 
 
 static int 
-concat_fname(lua_State *L, const char *fname);
-
-static int 
 dirp(lua_State *L, int i)
 {
   const char *s = luaL_checkstring(L, i);
@@ -802,7 +799,8 @@ lua_rmdir(lua_State *L)
 /* uname */
 
 
-static int lua_uname(lua_State *L)
+static int 
+lua_uname(lua_State *L)
 {
 #if defined(LUA_WIN)
   const char *name;
@@ -839,7 +837,87 @@ static int lua_uname(lua_State *L)
 #endif
 }
 
+static int 
+lua_getregistryvalue(lua_State *L)
+{
+#ifdef LUA_WIN
+    static char *keynames[] = {
+        "HKEY_CLASSES_ROOT",
+        "HKEY_CURRENT_CONFIG",
+        "HKEY_CURRENT_USER",
+        "HKEY_LOCAL_MACHINE",
+        "HKEY_USERS",
+        NULL };
+    static HKEY keys[] = { 
+        HKEY_CLASSES_ROOT, 
+        HKEY_CURRENT_CONFIG, 
+        HKEY_CURRENT_USER, 
+        HKEY_LOCAL_MACHINE, 
+        HKEY_USERS 
+    };
 
+    HKEY rkey = keys[ luaL_checkoption(L, 1, NULL, keynames) ];
+    const char *subkey = luaL_checkstring(L, 2);
+    const char *value = luaL_checkstring(L, 3);
+    HKEY skey;
+    DWORD type;
+    DWORD len = 0;
+    char *data = "";
+    LONG res;
+    res = RegOpenKeyExA(rkey, subkey, 0, KEY_READ, &skey);
+    if (res != ERROR_SUCCESS)
+    {
+        lua_pushnil(L);
+        lua_pushinteger(L, res);
+        if (res == ERROR_FILE_NOT_FOUND)
+            lua_pushstring(L, "subkey not found");
+        if (res == ERROR_ACCESS_DENIED)
+            lua_pushstring(L, "subkey access denied");
+        else
+            return 2;
+        return 3;
+    }
+    res = RegQueryValueExA(skey, value, NULL, &type, (LPBYTE)data, &len);
+    if (res == ERROR_MORE_DATA)
+    {
+        len += 8;
+        if ((data = (char*)malloc(len)))
+            res = RegQueryValueExA(skey, value, NULL, &type, (LPBYTE)data, &len);
+    }
+    if (res != ERROR_SUCCESS)
+    {
+        RegCloseKey(skey);
+        lua_pushnil(L);
+        lua_pushinteger(L, res);
+        if (res == ERROR_FILE_NOT_FOUND)
+            lua_pushstring(L, "value not found");
+        if (res == ERROR_ACCESS_DENIED)
+            lua_pushstring(L, "value access denied");
+        else
+            return 2;
+        return 3;
+    }
+    switch(type)
+    {
+    case REG_SZ:
+      if (((const char*)data)[len-1] == 0)  len -= 1;
+    case REG_BINARY:
+      lua_pushlstring(L, (const char*)data, (int)len);
+      return 1;
+    case REG_DWORD:
+      lua_pushinteger(L, (lua_Integer)*(const DWORD*)data);
+      return 1;
+    default:
+      lua_pushnil(L);
+      lua_pushinteger(L, res);
+      lua_pushfstring(L, "getting registry type %d not implemented", type);
+      return 3;
+    }
+#else
+    luaL_error(L, "This function exists only on windows");
+    return 0;
+#endif
+}
 
 /* ------------------------------------------------------ */
 /* require (with global flag) */
@@ -969,10 +1047,6 @@ path_require(lua_State *L)
 
 
 
-/* ------------------------------------------------------ */
-/* uname */
-
-
 
 /* ------------------------------------------------------ */
 /* register */
@@ -991,6 +1065,7 @@ static const struct luaL_Reg paths__ [] = {
   {"mkdir", lua_mkdir},
   {"rmdir", lua_rmdir},
   {"uname", lua_uname},
+  {"getregistryvalue", lua_getregistryvalue},
   {"require", path_require},
   {NULL, NULL}
 };
