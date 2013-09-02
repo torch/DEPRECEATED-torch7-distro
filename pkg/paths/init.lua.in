@@ -6,6 +6,7 @@ local assert = assert
 local debug = debug
 local pcall = pcall
 local type = type
+local ipairs = ipairs
 local os = os
 local g = _G
 
@@ -118,32 +119,34 @@ function rmall(d, more)
    end
 end
 
-function findprogram(exe)
-   if is_win() then
-      if not exe:match('[.]exe$') then
-         exe = exe .. '.exe'
-      end
-      local path, k, x = os.getenv("PATH") or "."
-      for dir in path:gmatch('[^;]+') do
-         x = concat(dir, exe)
-         if filep(x) then return x end
-      end
-      local function clean(s)
-         if s:match('^"') then return s:match('[^"]+') else return s end 
-      end
-      k = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\' .. exe
-      x = getregistryvalue('HKEY_CURRENT_USER', k, '')
-      if type(x) == 'string' then return clean(x) end
-      x = getregistryvalue('HKEY_LOCAL_MACHINE', k, '')
-      if type(x) == 'string' then return clean(x) end
-      k = 'Applications\\' .. exe .. '\\shell\\open\\command'
-      x = getregistryvalue('HKEY_CLASSES_ROOT', k, '')
-      if type(x) == 'string' then return clean(x) end
-   else
-      local path = os.getenv("PATH") or "."
-      for dir in path:gmatch('[^:]+') do
-         local x = concat(dir, exe)
-         if filep(x) then return x end
+function findprogram(...)
+   for _,exe in ipairs{...} do
+      if is_win() then
+         if not exe:match('[.]exe$') then
+            exe = exe .. '.exe'
+         end
+         local path, k, x = os.getenv("PATH") or "."
+         for dir in path:gmatch('[^;]+') do
+            x = concat(dir, exe)
+            if filep(x) then return x end
+         end
+         local function clean(s)
+            if s:match('^"') then return s:match('[^"]+') else return s end 
+         end
+         k = 'SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\' .. exe
+         x = getregistryvalue('HKEY_CURRENT_USER', k, '')
+         if type(x) == 'string' then return clean(x) end
+         x = getregistryvalue('HKEY_LOCAL_MACHINE', k, '')
+         if type(x) == 'string' then return clean(x) end
+         k = 'Applications\\' .. exe .. '\\shell\\open\\command'
+         x = getregistryvalue('HKEY_CLASSES_ROOT', k, '')
+         if type(x) == 'string' then return clean(x) end
+      else
+         local path = os.getenv("PATH") or "."
+         for dir in path:gmatch('[^:]+') do
+            local x = concat(dir, exe)
+            if filep(x) then return x end
+         end
       end
    end
    return nil

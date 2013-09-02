@@ -269,8 +269,10 @@ Returns true if the operating system is Mac OS X.
 Query a value in the Windows registry value. 
 Causes an error on other systems.
 
-==== paths.findprogram(progname) ====
+==== paths.findprogram(progname,...) ====
 
-Finds an executable program and returns its full path.
+Finds an executable program named "progname" and returns its full path.
+If none is found, continue searching programs named after the following arguments
+and return the full path of the first match.
 All the directories specified by the PATH variable are searched.
 Under windows, this also searches the "App Path" registry entries.
