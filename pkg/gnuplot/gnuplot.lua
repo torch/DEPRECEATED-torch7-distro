@@ -102,22 +102,17 @@ local function getexec()
 end
 
 local function findos()
-   if paths.dirp('C:\\') then
+   local s = paths.uname()
+   if s and s:match("Windows") then
       return 'windows'
+   elseif s and s:match('Darwin') then
+      return 'mac'
+   elseif s and s:match('Linux') then
+      return 'linux'
+   elseif s and s:match('FreeBSD') then
+      return 'freebsd'
    else
-      local ff = io.popen('uname -a','r')
-      local s = ff:read('*all')
-      ff:close()
-      if s and s:match('Darwin') then
-         return 'mac'
-      elseif s and s:match('Linux') then
-         return 'linux'
-      elseif s and s:match('FreeBSD') then
-         return 'freebsd'
-      else
-         --error('I don\'t know your operating system')
-         return '?'
-      end
+      return '?'
    end
 end
 
@@ -132,7 +127,7 @@ local function getfigure(n)
          error('Gnuplot terminal is not set')
       end
       local silent = '> /dev/null 2>&1'
-      if paths.dirp('C:\\') then -- quick test for windows
+      if paths.is_win() then
          silent = '> nul 2>&1'
       end
       _gptable[n].term = _gptable.defaultterm
@@ -184,18 +179,11 @@ end
 
 local function findgnuplotexe()
    local o = findos()
-   local s
-   if o == 'windows' then
-      _gptable.hasrefresh = true
-      if os.execute('where /q gnuplot') == 0 then
-         s = 'gnuplot' -- full path may contain spaces
-      end
-   else
-      _gptable.hasrefresh = true
-      local ff = io.popen('which gnuplot','r')
-      s = ff:read('*l')
-      ff:close()
+   local s = paths.findprogram('gnuplot')
+   if s:match(' ') then
+      s = '"' .. s .. '"'
    end
+   _gptable.hasrefresh = true
    do -- preserve indentation to minimize merging issues
       if s and s:len() > 0 and s:match('gnuplot') then
          local v,vv = findgnuplotversion(s)
@@ -240,7 +228,8 @@ local function getgnuplotdefaultterm(os)
    elseif os == 'mac' and gnuplothasterm('x11') then
       return  'x11'
    else
-      print('Can not find any of the default terminals for ' .. os .. ' you can manually set terminal by gnuplot.setterm("terminal-name")')
+      print('Can not find any of the default terminals for ' .. os .. '. ' ..
+            'You can manually set terminal by gnuplot.setterm("terminal-name")')
       return nil
    end
 end
@@ -249,7 +238,7 @@ local function findgnuplot()
    local exe = findgnuplotexe()
    local os = findos()
    if not exe then
-      return nil--error('I could not find gnuplot exe')
+      return nil
    end
    _gptable.exe = exe
    _gptable.defaultterm = getgnuplotdefaultterm(os)

@@ -130,9 +130,6 @@ filep(lua_State *L, int i)
 
 
 static int 
-concat_fname(lua_State *L, const char *fname);
-
-static int 
 dirp(lua_State *L, int i)
 {
   const char *s = luaL_checkstring(L, i);
@@ -661,7 +658,8 @@ struct tmpname_s {
     char tmp[4];
 };
 
-static int gc_tmpname(lua_State *L)
+static int 
+gc_tmpname(lua_State *L)
 {
   if (lua_isuserdata(L, -1))
   {
@@ -678,7 +676,8 @@ static int gc_tmpname(lua_State *L)
 
 }
 
-static void add_tmpname(lua_State *L, const char *tmp)
+static void 
+add_tmpname(lua_State *L, const char *tmp)
 {
   struct tmpname_s **pp = 0;
   lua_pushlightuserdata(L, (void*)tmpnames_key);
@@ -722,7 +721,8 @@ static void add_tmpname(lua_State *L, const char *tmp)
 }
 
 
-static int lua_tmpname(lua_State *L)
+static int 
+lua_tmpname(lua_State *L)
 {
 #ifdef LUA_WIN
   char *tmp = _tempnam("c:/temp", "luatmp");
@@ -743,7 +743,13 @@ static int lua_tmpname(lua_State *L)
   }
 }
 
-static int pushresult (lua_State *L, int i, const char *filename) {
+
+
+/* ------------------------------------------------------ */
+/* mkdir, rmdir */
+
+static int 
+pushresult (lua_State *L, int i, const char *filename) {
   int en = errno;
   if (i) {
     lua_pushboolean(L, 1);
@@ -757,7 +763,8 @@ static int pushresult (lua_State *L, int i, const char *filename) {
   }
 }
 
-static int lua_mkdir(lua_State *L)
+static int 
+lua_mkdir(lua_State *L)
 {
    int status = 0;
    const char *s = luaL_checkstring(L, 1);
@@ -775,7 +782,8 @@ static int lua_mkdir(lua_State *L)
    return pushresult(L, status == 0, s);
 }
 
-static int lua_rmdir(lua_State *L)
+static int 
+lua_rmdir(lua_State *L)
 {
   const char *s = luaL_checkstring(L, 1);
 #ifdef LUA_WIN
@@ -787,6 +795,160 @@ static int lua_rmdir(lua_State *L)
 }
 
 
+/* ------------------------------------------------------ */
+/* uname */
+
+
+static int 
+lua_uname(lua_State *L)
+{
+#if defined(LUA_WIN)
+  const char *name;
+  SYSTEM_INFO info;
+  lua_pushliteral(L, "Windows");
+  name = getenv("COMPUTERNAME");
+  lua_pushstring(L, name ? name : "");
+  memset(&info, 0, sizeof(info));
+  GetSystemInfo(&info);
+  if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_AMD64)
+    lua_pushliteral(L, "AMD64");
+  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_INTEL)
+    lua_pushliteral(L, "X86");
+  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_ARM)
+    lua_pushliteral(L, "ARM");
+  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64)
+    lua_pushliteral(L, "IA64");
+  else if (info.wProcessorArchitecture == PROCESSOR_ARCHITECTURE_IA64)
+    lua_pushstring(L, "");
+  return 3;
+#else
+# if defined(HAVE_SYS_UTSNAME_H)
+  struct utsname info;
+  if (uname(&info) >= 0)
+    {
+      lua_pushstring(L, info.sysname);
+      lua_pushstring(L, info.nodename);
+      lua_pushstring(L, info.machine);
+      return 3;
+    }
+# endif
+  lua_pushstring(L, "Unknown");
+  return 1;
+#endif
+}
+
+static int 
+lua_getregistryvalue(lua_State *L)
+{
+#ifdef LUA_WIN
+    static char *keynames[] = {
+        "HKEY_CLASSES_ROOT",
+        "HKEY_CURRENT_CONFIG",
+        "HKEY_CURRENT_USER",
+        "HKEY_LOCAL_MACHINE",
+        "HKEY_USERS",
+        NULL };
+    static HKEY keys[] = { 
+        HKEY_CLASSES_ROOT, 
+        HKEY_CURRENT_CONFIG, 
+        HKEY_CURRENT_USER, 
+        HKEY_LOCAL_MACHINE, 
+        HKEY_USERS 
+    };
+
+    HKEY rkey = keys[ luaL_checkoption(L, 1, NULL, keynames) ];
+    const char *subkey = luaL_checkstring(L, 2);
+    const char *value = luaL_checkstring(L, 3);
+    HKEY skey;
+    DWORD type;
+    DWORD len = 0;
+    char *data = NULL;
+    LONG res;
+    res = RegOpenKeyExA(rkey, subkey, 0, KEY_READ, &skey);
+    if (res != ERROR_SUCCESS)
+    {
+        lua_pushnil(L);
+        lua_pushinteger(L, res);
+        if (res == ERROR_FILE_NOT_FOUND)
+            lua_pushstring(L, "subkey not found");
+        if (res == ERROR_ACCESS_DENIED)
+            lua_pushstring(L, "subkey access denied");
+        else
+            return 2;
+        return 3;
+    }
+    res = RegQueryValueExA(skey, value, NULL, &type, (LPBYTE)data, &len);
+    if (len > 0)
+    {
+        len += 8;
+        data = (char*)malloc(len);
+        if (! data) 
+            luaL_error(L, "out of memory");
+        res = RegQueryValueExA(skey, value, NULL, &type, (LPBYTE)data, &len);
+    }
+    RegCloseKey(skey);
+    if (res != ERROR_SUCCESS)
+    {
+        if (data) 
+            free(data);
+        lua_pushnil(L);
+        lua_pushinteger(L, res);
+        if (res == ERROR_FILE_NOT_FOUND)
+            lua_pushstring(L, "value not found");
+        if (res == ERROR_ACCESS_DENIED)
+            lua_pushstring(L, "value access denied");
+        else
+            return 2;
+        return 3;
+    }
+    switch(type)
+    {
+    case REG_DWORD:
+      lua_pushinteger(L, (lua_Integer)*(const DWORD*)data);
+      if (data) 
+          free(data);
+      return 1;
+    case REG_EXPAND_SZ:
+      if (data && len > 0)
+      {
+          if ((len = ExpandEnvironmentStrings(data, NULL, 0)) > 0)
+          {
+            char *buf = (char*)malloc(len + 8);
+            if (!buf) 
+                luaL_error(L, "out of memory");
+            len = ExpandEnvironmentStrings(data, buf, len+8);
+            free(data);
+            data = buf;
+          }
+      }
+      // fall thru
+    case REG_SZ:
+      if (data && len > 0)
+        if (((const char*)data)[len-1] == 0)  
+          len -= 1;
+      // fall thru
+    case REG_BINARY:
+      if (data && len > 0)
+        lua_pushlstring(L, (const char*)data, (int)len);
+      else
+        lua_pushliteral(L, "");
+      if (data) 
+          free(data);
+      return 1;
+      // unimplemented
+    case REG_QWORD:
+    case REG_MULTI_SZ:
+    default:
+      lua_pushnil(L);
+      lua_pushinteger(L, res);
+      lua_pushfstring(L, "getting registry type %d not implemented", type);
+      return 3;
+    }
+#else
+    luaL_error(L, "This function exists only on windows");
+    return 0;
+#endif
+}
 
 /* ------------------------------------------------------ */
 /* require (with global flag) */
@@ -915,6 +1077,8 @@ path_require(lua_State *L)
 #endif
 
 
+
+
 /* ------------------------------------------------------ */
 /* register */
 
@@ -931,6 +1095,8 @@ static const struct luaL_Reg paths__ [] = {
   {"tmpname", lua_tmpname},
   {"mkdir", lua_mkdir},
   {"rmdir", lua_rmdir},
+  {"uname", lua_uname},
+  {"getregistryvalue", lua_getregistryvalue},
   {"require", path_require},
   {NULL, NULL}
 };
