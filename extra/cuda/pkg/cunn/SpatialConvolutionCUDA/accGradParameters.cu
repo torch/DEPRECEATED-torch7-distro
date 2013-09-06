@@ -383,7 +383,8 @@ void spatialConv_accGradParameters(
     // input params:
     int paddingStart, int moduleStride,
     // output params:
-    float scaleTargets, float scaleOutput
+    float scaleTargets, float scaleOutput,
+    int partialSum
 )
 {
     int numGroups = 1;
@@ -393,7 +394,6 @@ void spatialConv_accGradParameters(
     int numFiltersPerGroup = numFilters / numGroups;
     int filterSize = filterSizeX;
     int filterPixels = filterSize * filterSize;
-    int partialSum = numModules;
     
     assert(filterSizeX == filterSizeY);
     assert(imgSizeY == imgSizeX);
