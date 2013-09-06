@@ -131,6 +131,7 @@ static int cunn_SpatialConvolutionCUDA_accGradParameters(lua_State *L)
   int dW = luaT_getfieldcheckint(L, 1, "dW");
   int dH = luaT_getfieldcheckint(L, 1, "dH");
   int padding = luaT_getfieldcheckint(L, 1, "padding");
+  int partialSum = luaT_getfieldcheckint(L, 1, "partialSum");
   float scale = luaL_optnumber(L, 4, 1);
 
   long nOutputPlane = gradWeight->size[3];
@@ -147,6 +148,13 @@ static int cunn_SpatialConvolutionCUDA_accGradParameters(lua_State *L)
   luaL_argcheck(L, inputWidth == inputHeight, 1, "input must be square");
   luaL_argcheck(L, kW == kW, 1, "kH must be equal to kW");
   luaL_argcheck(L, dH == dW, 1, "dH must be equal to dW");
+
+  if (partialSum) {
+    // compute partial gradients for outputHeight*outputWidth/partialSum groups of filters separately
+    gradWeight = (THCudaTensor *)luaT_getfieldcheckudata(L, 1, "gradWeightPartial", "torch.CudaTensor");
+    THCudaTensor_resize4d(gradWeight, outputHeight*outputWidth/partialSum, nInputPlane, kH*kW, nOutputPlane);
+    // numModuleY*numModulesX/partialSum, numFilterColors, filterPixels, numFilters
+  }
 
   // all the data must be contiguous: 
   luaL_argcheck(L, THCudaTensor_isContiguous(input), 2, "input must be contiguous");
@@ -165,7 +173,7 @@ static int cunn_SpatialConvolutionCUDA_accGradParameters(lua_State *L)
     nOutputPlane, outputHeight, outputWidth,
     kH, kW,
     -floor((double)padding/2), dW,
-    0, scale
+    0, scale, partialSum
   );
 
   return 0;
