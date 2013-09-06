@@ -93,7 +93,7 @@ for which the user has no permission to write.
 {{anchor:paths.dirs.dok}}
 
 The following functions can be used
-to examine directory contents.
+to examine directory contents or manipulate directories.
 
 
 ====  paths.dir(dname) ====
@@ -240,3 +240,39 @@ This directory is used to build variable ''package.cpath''.
 {{anchor:paths.home}}
 
 The home directory of the current user.
+
+
+===== Miscellaneous =====
+{{anchor:paths.misc.dok}}
+
+
+==== paths.uname() ====
+{{anchor:paths.uname}}
+
+Returns up to three strings describing the operating system.
+The first string is a system name, e.g., "Windows", "Linux", "Darwin", "FreeBSD", etc.
+The second string is the network name of this computer.
+The third string indicates the processor type.
+
+==== paths.is_win() ====
+{{anchor:paths.is_win}}
+
+Returns true if the operating system is Microsoft Windows.
+
+==== paths.is_mac() ====
+{{anchor:paths.is_mac}}
+
+Returns true if the operating system is Mac OS X.
+
+==== paths.getregistryvalue(key,subkey,value) ====
+
+Query a value in the Windows registry value. 
+Causes an error on other systems.
+
+==== paths.findprogram(progname,...) ====
+
+Finds an executable program named "progname" and returns its full path.
+If none is found, continue searching programs named after the following arguments
+and return the full path of the first match.
+All the directories specified by the PATH variable are searched.
+Under windows, this also searches the "App Path" registry entries.

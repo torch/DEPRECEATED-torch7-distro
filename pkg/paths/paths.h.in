@@ -40,6 +40,7 @@
 #cmakedefine HAVE_SYS_TIME_H 1
 #cmakedefine HAVE_SYS_NDIR_H 1
 #cmakedefine HAVE_SYS_DIR_H 1
+#cmakedefine HAVE_SYS_UTSNAME_H 1
 #cmakedefine HAVE_NDIR_H 1
 #cmakedefine HAVE_GETCWD 1
 
@@ -54,6 +55,9 @@
 # endif
 # if HAVE_SYS_TIME_H
 #  include <sys/time.h>
+# endif
+# if HAVE_SYS_UTSNAME_H
+#  include <sys/utsname.h>
 # endif
 # if HAVE_TIME_H
 #  include <time.h>
