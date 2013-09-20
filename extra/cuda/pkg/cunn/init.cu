@@ -6,6 +6,7 @@
 #include <thrust/reduce.h>
 #include <thrust/transform_reduce.h>
 #include <thrust/functional.h>
+#include <thrust/device_ptr.h>
 
 #include "HardTanh.cu"
 #include "Tanh.cu"
