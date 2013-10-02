@@ -180,7 +180,7 @@ end
 local function findgnuplotexe()
    local o = findos()
    local s = paths.findprogram('gnuplot')
-   if s:match(' ') then
+   if type(s) == 'string' and s:match(' ') then
       s = '"' .. s .. '"'
    end
    _gptable.hasrefresh = true
