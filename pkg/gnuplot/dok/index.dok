@@ -275,7 +275,7 @@ gnuplot.plotflush()
 {{anchor:gnuplot.commons.dok}}
 
 It is possible to manage multiple plots at a time, printing plots to
-png, or eps files or creating plots directly on png or eps files.
+png, eps or pdf files or creating plots directly on png or eps or pdf files.
 
 There are also several handy operations for decorating plots which are
 common to many of the plotting functions.
