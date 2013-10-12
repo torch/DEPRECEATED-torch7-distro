@@ -665,7 +665,11 @@ function gnuplot.svgfigure(fname,n)
 end
 
 function gnuplot.pngfigure(fname,n)
-   filefigure(fname,'png',n)
+    local term = 'png'
+    if gnuplothasterm('pngcairo') then
+        term = 'pngcairo'
+    end
+   filefigure(fname,term,n)
    return _gptable.current
 end
 
