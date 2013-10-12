@@ -308,7 +308,7 @@ skipped, a new figure is created with the next consecutive id.
 {{anchor:gnuplot.epsfigure}}
 
 Creates a figure directly on the ''eps'' file given with
-''fname''. This uses ''Gnuplot'' terminal ''postscricpt eps enhanced color''.
+''fname''. This uses ''Gnuplot'' terminal ''postscript eps enhanced color''.
 
 ====  gnuplot.pdffigure(fname) ====
 {{anchor:gnuplot.pdffigure}}
