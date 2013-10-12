@@ -325,7 +325,8 @@ flushing file based terminals.
 {{anchor:gnuplot.figprint}}
 
 Prints the current figure to the given file with name ''fname''. Only
-''png'' or ''eps'' files are supported.
+''png'' or ''eps'' files are supported by default. If your gnuplot installation
+allows, ''pdf'' files are also supported.
 
 ====  gnuplot.xlabel(label) ====
 {{anchor:gnuplot.xlabel}}
