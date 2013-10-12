@@ -215,16 +215,22 @@ local function getgnuplotdefaultterm(os)
       return  'windows'
    elseif os == 'linux' and gnuplothasterm('wxt') then
       return  'wxt'
+   elseif os == 'linux' and gnuplothasterm('qt') then
+      return  'qt'
    elseif os == 'linux' and gnuplothasterm('x11') then
       return  'x11'
    elseif os == 'freebsd' and gnuplothasterm('wxt') then
       return  'wxt'
+   elseif os == 'freebsd' and gnuplothasterm('qt') then
+      return  'qt'
    elseif os == 'freebsd' and gnuplothasterm('x11') then
       return  'x11'
    elseif os == 'mac' and gnuplothasterm('aqua') then
       return  'aqua'
    elseif os == 'mac' and gnuplothasterm('wxt') then
       return  'wxt'
+   elseif os == 'mac' and gnuplothasterm('qt') then
+      return  'qt'
    elseif os == 'mac' and gnuplothasterm('x11') then
       return  'x11'
    else
