@@ -669,6 +669,21 @@ function gnuplot.pngfigure(fname,n)
    return _gptable.current
 end
 
+function gnuplot.pdffigure(fname,n)
+   local haspdf = gnuplothasterm('pdf') or gnuplothasterm('pdfcairo')
+   if not haspdf then
+     error('your installation of gnuplot does not have pdf support enabled')
+   end
+   local term = nil
+   if gnuplothasterm('pdfcairo') then
+      term = 'pdfcairo enhanced color'
+   else
+      term = 'pdf enhanced color'
+   end
+   filefigure(fname,term,n)
+   return _gptable.current
+end
+
 function gnuplot.figprint(fname)
    local suffix = fname:match('.+%.(.+)')
    local term = nil
