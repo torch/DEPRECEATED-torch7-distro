@@ -691,7 +691,8 @@ function gnuplot.figprint(fname)
    if suffix == 'eps' then
       term = 'postscript eps enhanced color'
    elseif suffix == 'png' then
-      term = 'png size "1024,768"'
+      term = gnuplothasterm('pngcairo') and 'pngcairo' or 'png'
+      term = term .. ' size "1024,768"'
    elseif suffix == 'pdf' and haspdf then
       if not haspdf then
           error('your installation of gnuplot does not have pdf support enabled')
