@@ -259,7 +259,8 @@ gnuplot.hist(torch.randn(100000),100)
 {{anchor:gnuplot.files.dok}}
 
 Any of the above plotting utilities can also be used for directly
-plotting into ''eps'' or ''png'' files. A final gnuplot.plotflush()
+plotting into ''eps'' or ''png'' files, or ''pdf'' files if your gnuplot
+installation allows. A final gnuplot.plotflush()
 command ensures that all output is written to the file properly.
 
 <file lua>
@@ -308,6 +309,16 @@ skipped, a new figure is created with the next consecutive id.
 
 Creates a figure directly on the ''eps'' file given with
 ''fname''. This uses ''Gnuplot'' terminal ''postscricpt eps enhanced color''.
+
+====  gnuplot.pdffigure(fname) ====
+{{anchor:gnuplot.pdffigure}}
+
+Only available if your installation of gnuplot has been compiled
+with ''pdf'' support enabled.
+
+Creates a figure directly on the ''pdf'' file given with
+''fname''. This uses ''Gnuplot'' terminal ''pdf enhanced color'',
+or ''pdfcairo enhanced color'' if available.
 
 ====  gnuplot.pngfigure(fname) ====
 {{anchor:gnuplot.pngfigure}}
