@@ -16,8 +16,8 @@ or above is suggested for full support of all functionality.
 
 By default, plot package will search for terminal in following order
   * '' windows '' terminal if operating system is windows
-  * '' wxt '', '' x11 ''  terminal if operating system is linux
-  * '' aqua '', ''wxt'', '' x11 '' terminal if operating system is mac
+  * '' wxt '', '' qt '', '' x11 ''  terminal if operating system is linux
+  * '' aqua '', ''wxt'', '' qt '', '' x11 '' terminal if operating system is mac
 
 It is also possible to manually set any terminal type using
 [[#gnuplot.setterm|gnuplot.setterm]]. Interactivity is
@@ -188,7 +188,7 @@ Surface plotting creates a 3D surface plot of a given matrix '' z
 ''. Entries of '' z '' are used as height values. It is also possible
 to specify '' x '' and '' y '' locations corresponding to each point
 in '' z ''. If a terminal with interactive capabilities is being used
-by ''Gnuplot'' backend (like ''x11'' or ''wxt''), then rotating,
+by ''Gnuplot'' backend (like ''x11'' or ''wxt'' or ''qt''), then rotating,
 zooming is also possible.
 
 ====  gnuplot.splot(z) ====
