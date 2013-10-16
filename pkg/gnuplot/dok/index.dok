@@ -259,7 +259,8 @@ gnuplot.hist(torch.randn(100000),100)
 {{anchor:gnuplot.files.dok}}
 
 Any of the above plotting utilities can also be used for directly
-plotting into ''eps'' or ''png'' files. A final gnuplot.plotflush()
+plotting into ''eps'' or ''png'' files, or ''pdf'' files if your gnuplot
+installation allows. A final gnuplot.plotflush()
 command ensures that all output is written to the file properly.
 
 <file lua>
@@ -274,7 +275,7 @@ gnuplot.plotflush()
 {{anchor:gnuplot.commons.dok}}
 
 It is possible to manage multiple plots at a time, printing plots to
-png, or eps files or creating plots directly on png or eps files.
+png, eps or pdf files or creating plots directly on png or eps or pdf files.
 
 There are also several handy operations for decorating plots which are
 common to many of the plotting functions.
@@ -307,7 +308,17 @@ skipped, a new figure is created with the next consecutive id.
 {{anchor:gnuplot.epsfigure}}
 
 Creates a figure directly on the ''eps'' file given with
-''fname''. This uses ''Gnuplot'' terminal ''postscricpt eps enhanced color''.
+''fname''. This uses ''Gnuplot'' terminal ''postscript eps enhanced color''.
+
+====  gnuplot.pdffigure(fname) ====
+{{anchor:gnuplot.pdffigure}}
+
+Only available if your installation of gnuplot has been compiled
+with ''pdf'' support enabled.
+
+Creates a figure directly on the ''pdf'' file given with
+''fname''. This uses ''Gnuplot'' terminal ''pdf enhanced color'',
+or ''pdfcairo enhanced color'' if available.
 
 ====  gnuplot.pngfigure(fname) ====
 {{anchor:gnuplot.pngfigure}}
@@ -325,7 +336,8 @@ flushing file based terminals.
 {{anchor:gnuplot.figprint}}
 
 Prints the current figure to the given file with name ''fname''. Only
-''png'' or ''eps'' files are supported.
+''png'' or ''eps'' files are supported by default. If your gnuplot installation
+allows, ''pdf'' files are also supported.
 
 ====  gnuplot.xlabel(label) ====
 {{anchor:gnuplot.xlabel}}
