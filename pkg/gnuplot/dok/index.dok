@@ -324,7 +324,7 @@ or ''pdfcairo enhanced color'' if available.
 {{anchor:gnuplot.pngfigure}}
 
 Creates a figure directly on the ''png'' file given with
-''fname''. This uses ''Gnuplot'' terminal ''png''.
+''fname''. This uses ''Gnuplot'' terminal ''png'', or ''pngcairo'' if available.
 
 ====  gnuplot.svgfigure(fname) ====
 {{anchor:gnuplot.svgfigure}}
