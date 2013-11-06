@@ -215,16 +215,22 @@ local function getgnuplotdefaultterm(os)
       return  'windows'
    elseif os == 'linux' and gnuplothasterm('wxt') then
       return  'wxt'
+   elseif os == 'linux' and gnuplothasterm('qt') then
+      return  'qt'
    elseif os == 'linux' and gnuplothasterm('x11') then
       return  'x11'
    elseif os == 'freebsd' and gnuplothasterm('wxt') then
       return  'wxt'
+   elseif os == 'freebsd' and gnuplothasterm('qt') then
+      return  'qt'
    elseif os == 'freebsd' and gnuplothasterm('x11') then
       return  'x11'
    elseif os == 'mac' and gnuplothasterm('aqua') then
       return  'aqua'
    elseif os == 'mac' and gnuplothasterm('wxt') then
       return  'wxt'
+   elseif os == 'mac' and gnuplothasterm('qt') then
+      return  'qt'
    elseif os == 'mac' and gnuplothasterm('x11') then
       return  'x11'
    else
@@ -659,19 +665,51 @@ function gnuplot.svgfigure(fname,n)
 end
 
 function gnuplot.pngfigure(fname,n)
-   filefigure(fname,'png',n)
+   local term = gnuplothasterm('pngcairo') and 'pngcairo' or 'png'
+   filefigure(fname,term,n)
+   return _gptable.current
+end
+
+function gnuplot.pdffigure(fname,n)
+   local haspdf = gnuplothasterm('pdf') or gnuplothasterm('pdfcairo')
+   if not haspdf then
+     error('your installation of gnuplot does not have pdf support enabled')
+   end
+   local term = nil
+   if gnuplothasterm('pdfcairo') then
+      term = 'pdfcairo enhanced color'
+   else
+      term = 'pdf enhanced color'
+   end
+   filefigure(fname,term,n)
    return _gptable.current
 end
 
 function gnuplot.figprint(fname)
    local suffix = fname:match('.+%.(.+)')
    local term = nil
+   local haspdf = gnuplothasterm('pdf') or gnuplothasterm('pdfcairo')
    if suffix == 'eps' then
       term = 'postscript eps enhanced color'
    elseif suffix == 'png' then
-      term = 'png size "1024,768"'
+      term = gnuplothasterm('pngcairo') and 'pngcairo' or 'png'
+      term = term .. ' size "1024,768"'
+   elseif suffix == 'pdf' and haspdf then
+      if not haspdf then
+          error('your installation of gnuplot does not have pdf support enabled')
+      end
+      if gnuplothasterm('pdfcairo') then
+          term = 'pdfcairo'
+      else
+          term = 'pdf'
+      end
+      term = term .. ' enhanced color'
    else
-      error('only eps and png for figprint')
+      local errmsg = 'only eps and png'
+      if haspdf then
+          errmsg = errmsg .. ' and pdf'
+      end
+      error(errmsg ' for figprint')
    end
    writeToCurrent('set term ' .. term)
    writeToCurrent('set output \''.. fname .. '\'')

@@ -690,7 +690,7 @@ add_tmpname(lua_State *L, const char *tmp)
   else
   {
     lua_pop(L, 1);
-    // create sentinel
+    /* create sentinel */
     lua_pushlightuserdata(L, (void*)tmpnames_key);
     pp = (struct tmpname_s **)lua_newuserdata(L, sizeof(void*));
     pp[0] = 0;
@@ -921,12 +921,12 @@ lua_getregistryvalue(lua_State *L)
             data = buf;
           }
       }
-      // fall thru
+      /* fall thru */
     case REG_SZ:
       if (data && len > 0)
         if (((const char*)data)[len-1] == 0)  
           len -= 1;
-      // fall thru
+      /* fall thru */
     case REG_BINARY:
       if (data && len > 0)
         lua_pushlstring(L, (const char*)data, (int)len);
@@ -935,7 +935,7 @@ lua_getregistryvalue(lua_State *L)
       if (data) 
           free(data);
       return 1;
-      // unimplemented
+      /* unimplemented */
     case REG_QWORD:
     case REG_MULTI_SZ:
     default:
@@ -975,7 +975,7 @@ lua_getregistryvalue(lua_State *L)
 
 #if NEED_PATH_REQUIRE
 
-// {{{ functions copied or derived from loadlib.c
+/* {{{ functions copied or derived from loadlib.c */
 
 static int readable (const char *filename) 
 {  
@@ -1010,7 +1010,7 @@ static const char *pushfilename (lua_State *L, const char *name)
     filename = luaL_gsub(L, lua_tostring(L, -1), "?", name);
     lua_remove(L, -2);
     if (readable(filename))
-      { // stack:  cpath errmsg filename
+    { /* stack:  cpath errmsg filename */
         lua_remove(L, -3);
         lua_remove(L, -2);
         return lua_tostring(L, -1);
@@ -1026,7 +1026,7 @@ static const char *pushfilename (lua_State *L, const char *name)
   return 0;
 }
 
-// functions copied or derived from loadlib.c }}}
+/* functions copied or derived from loadlib.c }}} */
 
 static int
 path_require(lua_State *L)
@@ -1036,15 +1036,15 @@ path_require(lua_State *L)
   void *handle;
   const char *name = luaL_checkstring(L, 1);
   lua_settop(L, 1);
-  lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");  // index 2
+  lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");  /* index 2 */
   lua_getfield(L, 2, name);
   if (lua_toboolean(L, -1))
     return 1;
-  filename = pushfilename(L, name);  // index 3
+  filename = pushfilename(L, name);  /* index 3 */
   LL_LOAD(handle, filename);
   if (! handle)
     luaL_error(L, "cannot load " LUA_QS, filename);
-  lua_pushfstring(L, "luaopen_%s", name);  // index 4
+  lua_pushfstring(L, "luaopen_%s", name);  /* index 4 */
   func = (lua_CFunction)LL_SYM(handle, lua_tostring(L, -1));
   if (! func)
     luaL_error(L, "no symbol " LUA_QS " in module " LUA_QS, 
@@ -1062,7 +1062,7 @@ path_require(lua_State *L)
 
 #else
 
-// fallback to calling require
+/* fallback to calling require */
 
 static int
 path_require(lua_State *L)

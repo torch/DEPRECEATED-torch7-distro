@@ -6,6 +6,7 @@
 #include <thrust/reduce.h>
 #include <thrust/transform_reduce.h>
 #include <thrust/functional.h>
+#include <thrust/device_ptr.h>
 
 #include "HardTanh.cu"
 #include "Tanh.cu"
@@ -24,6 +25,7 @@
 #include "MSECriterion.cu"
 #include "Threshold.cu"
 #include "Sigmoid.cu"
+#include "AbsCriterion.cu"
 
 LUA_EXTERNC DLL_EXPORT int luaopen_libcunn(lua_State *L);
 
@@ -48,6 +50,7 @@ int luaopen_libcunn(lua_State *L)
   cunn_Sqrt_init(L);
   cunn_Threshold_init(L);
   cunn_MSECriterion_init(L);
+  cunn_AbsCriterion_init(L);
 
   return 1;
 }

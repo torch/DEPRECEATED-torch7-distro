@@ -11,10 +11,20 @@ ENDIF(NOT CMAKE_BUILD_TYPE)
 # we want exceptions support even when compiling c code
 
 # C
-CHECK_C_COMPILER_FLAG(-Wall C_HAS_WALL)
-IF(C_HAS_WALL)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-ENDIF(C_HAS_WALL)
+IF(NOT MSVC)
+  CHECK_C_COMPILER_FLAG(-Wall C_HAS_WALL)
+  IF(C_HAS_WALL)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
+
+# Unfortunately there is a clash with various gcc versions when using cuda
+# This is really tricky to solve in the current situation, but will be straightforward
+# in the upcoming torch7-split
+#    CHECK_C_COMPILER_FLAG(-Wno-unused-but-set-variable C_HAS_WNOUNUSEDBUTSET)
+#    IF (C_HAS_WNOUNUSEDBUTSET)
+#      SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-but-set-variable")
+#    ENDIF ()
+  ENDIF()
+ENDIF()
 
 CHECK_C_COMPILER_FLAG(-Wno-unused-function C_HAS_NO_UNUSED_FUNCTION)
 IF(C_HAS_NO_UNUSED_FUNCTION)
@@ -26,11 +36,18 @@ IF(C_HAS_FEXCEPTIONS)
   SET(CMAKE_C_FLAGS "-fexceptions ${CMAKE_C_FLAGS}")
 ENDIF(C_HAS_FEXCEPTIONS)
 
+CHECK_C_COMPILER_FLAG(-Wno-unknown-pragmas C_HAS_NO_UNKNOWN_PRAGMAS)
+IF(C_HAS_NO_UNKNOWN_PRAGMAS)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unknown-pragmas")
+ENDIF(C_HAS_NO_UNKNOWN_PRAGMAS)
+
 # C++
-CHECK_CXX_COMPILER_FLAG(-Wall CXX_HAS_WALL)
-IF(CXX_HAS_WALL)
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
-ENDIF(CXX_HAS_WALL)
+IF(NOT MSVC)
+  CHECK_CXX_COMPILER_FLAG(-Wall CXX_HAS_WALL)
+  IF(CXX_HAS_WALL)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+  ENDIF(CXX_HAS_WALL)
+ENDIF()
 
 CHECK_CXX_COMPILER_FLAG(-Wno-unused-function CXX_HAS_NO_UNUSED_FUNCTION)
 IF(CXX_HAS_NO_UNUSED_FUNCTION)

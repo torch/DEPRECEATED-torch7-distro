@@ -46,4 +46,4 @@ INSTALL(FILES "${CMAKE_CURRENT_BINARY_DIR}/src/luarocks/config.lua" DESTINATION 
 INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/src/bin/torch-rocks" DESTINATION "${Torch_INSTALL_BIN_SUBDIR}")
 INSTALL(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/src/bin/torch-rocks-admin" DESTINATION "${Torch_INSTALL_BIN_SUBDIR}")
 
-INSTALL(CODE "EXEC_PROGRAM(${Torch_INSTALL_BIN}/torch-rocks ARGS install https://raw.github.com/andresy/torch7-fakerock/master/torch-7.scm-0.rockspec)")
+INSTALL(CODE "EXEC_PROGRAM(${Torch_INSTALL_BIN}/torch-rocks ARGS install https://raw.github.com/torch/rocks/master/torch-7.scm-0.rockspec)")

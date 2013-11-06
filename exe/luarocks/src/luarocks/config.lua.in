@@ -5,5 +5,5 @@ rocks_trees = {
 
 rocks_servers = {
    [[http://luarocks.org/repositories/rocks]],
-   [[https://raw.github.com/andresy/torch-rocks/master]],
+   [[https://raw.github.com/torch/rocks/master]],
 }
