@@ -74,9 +74,13 @@ if (${depend_text} MATCHES ".+")
       SET(filenotfound ON)
       FOREACH(incdir ${CUDA_NVCC_INCLUDES})
         IF(filenotfound)
-          if (EXISTS "${incdir}/${file}")
-            set(file "${incdir}/${file}")
-            SET(filenotfound OFF)
+		  if (WIN32 AND ("${incdir}" STREQUAL "/"))
+		    # Win32 UNC access can block indefinitely!
+		  else()
+            if (EXISTS "${incdir}/${file}")  
+              set(file "${incdir}/${file}")
+              SET(filenotfound OFF)
+			endif()
           endif()
         ENDIF()
       ENDFOREACH(incdir ${CUDA_NVCC_INCLUDES})
@@ -88,9 +92,7 @@ if (${depend_text} MATCHES ".+")
 
     endif()
 
-    
-
-    if(NOT IS_DIRECTORY "${file}")
+   if(NOT IS_DIRECTORY "${file}")
       # If softlinks start to matter, we should change this to REALPATH.  For now we need
       # to flatten paths, because nvcc can generate stuff like /bin/../include instead of
       # just /include.
