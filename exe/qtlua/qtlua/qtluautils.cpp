@@ -206,7 +206,7 @@ luaQ_complete(struct lua_State *L)
           if (key && keylen > 0 && keylen >= stemlen)
             if (!strncmp(key, stem, stemlen))
               ok = true;
-          if (ok && !isalpha(key[0]))
+          if (ok && stemlen==0 && !isalpha(key[0]))
             ok = false;
           if (ok)
             for (int i=0; ok && i<(int)keylen; i++)
@@ -255,6 +255,12 @@ luaQ_complete(struct lua_State *L)
       lua_replace(L, -2);
       lua_pushliteral(L, "__index");
       lua_rawget(L, -2);
+      if (lua_isfunction(L, -1))
+        {
+          lua_pop(L, 1);
+          lua_pushliteral(L, "__metatable");
+          lua_rawget(L, -2);
+        }
       lua_replace(L, -2);
       if (! lua_istable(L, -1))
         break;
