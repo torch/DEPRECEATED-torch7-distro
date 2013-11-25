@@ -182,27 +182,28 @@ local function print_new(...)
       local depth = depth or 0
       local tabs = string.rep(' ', depth * 4)
       local tab2 = tabs .. '  '
-      local line = function(s) tabs(); print_old(s) end
       local mt = getmetatable(obj)
+      local head
       if mt and mt.__tostring then
-         print_old(tostring(obj):gsub('\n','\n' .. tabs))
+         head = tostring(obj):gsub('\n','\n' .. tabs)
       else
-         already[obj] = true
-         print_old(colorize(obj) .. ' {')
-         for k,v in pairs(obj) do
-            if type(v) == 'table' then
-               if depth >= (ndepth-1) or already[v] or next(v) == nil then
-                  print_old(tab2 .. tostring(k) .. ' : ' .. colorize(v))
-               else
-                  io.write(tab2 .. tostring(k) .. ' : ') 
-                  printrecursive(v,depth+1)
-               end
-            else
-               print_old(tab2 .. tostring(k) .. ' : ' .. colorize(v))
-            end
-         end
-         print_old(tabs .. '}')
+         head=colorize(obj)
       end
+      already[obj] = true
+      print_old(head .. ' {')
+      for k,v in pairs(obj) do
+         if type(v) == 'table' then
+            if depth >= (ndepth-1) or already[v] or next(v) == nil then
+               print_old(tab2 .. tostring(k) .. ' : ' .. colorize(v))
+            else
+               io.write(tab2 .. tostring(k) .. ' : ') 
+                  printrecursive(v,depth+1)
+            end
+         else
+            print_old(tab2 .. tostring(k) .. ' : ' .. colorize(v))
+         end
+      end
+      print_old(tabs .. '}')
    end
    for i = 1,select('#',...) do
       already = {}
