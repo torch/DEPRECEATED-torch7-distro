@@ -15,15 +15,18 @@ IF(NOT MSVC)
   CHECK_C_COMPILER_FLAG(-Wall C_HAS_WALL)
   IF(C_HAS_WALL)
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall")
-
-# Unfortunately there is a clash with various gcc versions when using cuda
-# This is really tricky to solve in the current situation, but will be straightforward
-# in the upcoming torch7-split
-#    CHECK_C_COMPILER_FLAG(-Wno-unused-but-set-variable C_HAS_WNOUNUSEDBUTSET)
-#    IF (C_HAS_WNOUNUSEDBUTSET)
-#      SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-but-set-variable")
-#    ENDIF ()
   ENDIF()
+  CHECK_C_COMPILER_FLAG(-Wno-unused-but-set-variable C_HAS_WNOUNUSEDBUTSET)
+  IF (C_HAS_WNOUNUSEDBUTSET)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-but-set-variable")
+  ENDIF ()
+ENDIF()
+
+IF (UNIX)
+  CHECK_C_COMPILER_FLAG(-fstd=c89 C_HAS_STDC89)
+  IF (C_HAS_STDC89)
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fstd=c89 -D_SVID_SOURCE -D_GNU_SOURCE")
+  ENDIF ()
 ENDIF()
 
 CHECK_C_COMPILER_FLAG(-Wno-unused-function C_HAS_NO_UNUSED_FUNCTION)

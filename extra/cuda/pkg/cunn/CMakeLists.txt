@@ -1,8 +1,6 @@
 SET(src-cuda init.cu)
 SET(luasrc init.lua)
 
-SET(CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE OFF)
-
 CUDA_ADD_LIBRARY(cunn SHARED ${src-cuda})
 
 TARGET_LINK_LIBRARIES(cunn luaT THC)
