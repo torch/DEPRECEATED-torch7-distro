@@ -2,6 +2,7 @@ SET(src-cuda init.cu)
 SET(luasrc init.lua)
 
 CUDA_ADD_LIBRARY(cunn SHARED ${src-cuda})
+
 TARGET_LINK_LIBRARIES(cunn luaT THC)
 
 ### Torch packages supposes libraries prefix is "lib"

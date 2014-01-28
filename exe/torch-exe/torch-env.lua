@@ -177,35 +177,36 @@ end
 local ndepth = 4
 local print_old=print
 local function print_new(...)
+   local already = {}
    local function printrecursive(obj,depth)
       local depth = depth or 0
-      local tab = depth*4
-      local line = function(s) for i=1,tab do io.write(' ') end print_old(s) end
+      local tabs = string.rep(' ', depth * 4)
+      local tab2 = tabs .. '  '
       local mt = getmetatable(obj)
-      if mt and mt.__tostring and torch.typename(obj) == nil then
-         print_old(tostring(obj))
+      local head
+      if mt and mt.__tostring then
+         head = tostring(obj):gsub('\n','\n' .. tabs)
       else
-         if torch.typename(obj) then
-            line(tostring(obj):gsub('\n','\n' .. string.rep(' ',tab)))
-         end
-         line('{')
-         tab = tab+2
-         for k,v in pairs(obj) do
-            if type(v) == 'table' then
-               if depth >= (ndepth-1) or next(v) == nil then
-                  line(tostring(k) .. ' : ' .. colorize(v))
-               else
-                  line(tostring(k) .. ' : ') printrecursive(v,depth+1)
-               end
-            else
-               line(tostring(k) .. ' : ' .. colorize(v))
-            end
-         end
-         tab = tab-2
-         line('}')
+         head=colorize(obj)
       end
+      already[obj] = true
+      print_old(head .. ' {')
+      for k,v in pairs(obj) do
+         if type(v) == 'table' then
+            if depth >= (ndepth-1) or already[v] or next(v) == nil then
+               print_old(tab2 .. tostring(k) .. ' : ' .. colorize(v))
+            else
+               io.write(tab2 .. tostring(k) .. ' : ') 
+                  printrecursive(v,depth+1)
+            end
+         else
+            print_old(tab2 .. tostring(k) .. ' : ' .. colorize(v))
+         end
+      end
+      print_old(tabs .. '}')
    end
    for i = 1,select('#',...) do
+      already = {}
       local obj = select(i,...)
       if type(obj) ~= 'table' then
          if type(obj) == 'userdata' or type(obj) == 'cdata' then
