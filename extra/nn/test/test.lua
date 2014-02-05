@@ -2,6 +2,7 @@ require 'torch'
 
 local mytester = torch.Tester()
 local jac
+local sjac
 
 local precision = 1e-5
 local expprecision = 1e-4
@@ -237,8 +238,8 @@ function nntest.Sqrt()
 end
 
 function nntest.Linear()
-   local ini = math.random(50,70)
-   local inj = math.random(50,70)
+   local ini = math.random(5,7)
+   local inj = math.random(5,7)
    local input = torch.Tensor(ini):zero()
    local module = nn.Linear(ini,inj)
 
@@ -303,6 +304,68 @@ function nntest.Linear()
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
 end
 
+function nntest.SparseLinear()
+   local ini = math.random(5000,10000)
+   local inj = math.random(50,100)
+   local numNonzero = math.random(5,20)
+   
+   local module = nn.SparseLinear(ini,inj)
+
+   -- Create a random sparse vector
+   N = {}
+   for i = 1, ini do N[i] = i end
+   for i = 1, numNonzero do 
+      local j = math.random(i,ini)
+      N[i], N[j] = N[j], N[i]
+   end   
+   local input = torch.Tensor(numNonzero, 2):zero()
+   for i = 1, numNonzero do input[{i,1}] = N[i] end
+   local values = input:select(2,2)
+   values:copy(torch.rand(values:nElement())):mul(2):add(-1)
+      
+   -- Check output
+   local actual = module:forward(input)
+   local expected = torch.Tensor(inj)
+   for j = 1, inj do 
+      expected[j] = 0
+      for i = 1,numNonzero do
+         expected[j] = expected[j] + values[i] * module.weight[{j, N[i]}]
+      end
+   end
+   local err = (expected - actual):abs():max()
+   mytester:assertle(err, precision, 'error on result')
+
+   -- Jacobian 1D
+   local err = sjac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local err = sjac.testJacobianParameters(module, input, module.weight, module.gradWeight)
+   mytester:assertlt(err,precision, 'error on weight ')
+
+   local err = sjac.testJacobianParameters(module, input, module.bias, module.gradBias)
+   mytester:assertlt(err,precision, 'error on bias ')
+   
+   local err = sjac.testJacobianUpdateParameters(module, input, module.weight)
+   mytester:assertlt(err,precision, 'error on weight [direct update] ')
+
+   local err = sjac.testJacobianUpdateParameters(module, input, module.bias)
+   mytester:assertlt(err,precision, 'error on bias [direct update] ')
+   
+   for t,err in pairs(sjac.testAllUpdate(module, input, 'weight', 'gradWeight')) do
+      mytester:assertlt(err, precision, string.format(
+                         'error on weight [%s]', t))
+   end
+
+   for t,err in pairs(sjac.testAllUpdate(module, input, 'bias', 'gradBias')) do
+      mytester:assertlt(err, precision, string.format(
+                         'error on bias [%s]', t))
+   end
+
+   local ferr, berr = sjac.testIO(module, input)
+   mytester:asserteq(0, ferr, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(0, berr, torch.typename(module) .. ' - i/o backward err ')
+end
+
 function nntest.Euclidean()
    local ini = math.random(50,70)
    local inj = math.random(50,70)
@@ -347,7 +410,6 @@ end
 --   local weight = torch.randn(from)
 --   local cri = nn.WeightedMSECriterion(weight)
 --   local module = nn.CriterionModule(cri,target)
-
 -- local err = jac.testJacobian(module, input)
 --   mytester:assertlt(err, precision, 'error on state ')
    
@@ -1589,9 +1651,11 @@ mytester:add(nntest)
 if not nn then
    require 'nn'
    jac = nn.Jacobian
+   sjac = nn.SparseJacobian
    mytester:run()
 else
    jac = nn.Jacobian
+   sjac = nn.SparseJacobian
    function nn.test(tests)
       -- randomize stuff
       math.randomseed(os.time())
