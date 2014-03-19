@@ -1,3 +1,11 @@
+THIS REPOSITORY IS DEPRECEATED.
+===============
+Please use https://github.com/torch/torch7
+
+For install scripts, please look at:
+https://github.com/torch/ezinstall
+
+
 Torch7 Library.
 ===============
 
